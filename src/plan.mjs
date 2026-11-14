@@ -44,10 +44,8 @@ function planSource(root, source) {
     const local = readFileSync(localPath, 'utf8');
     const result = compareRevision(local, upstream);
     const adr = { name: file, category: CATEGORY[result] ?? result, title };
-    if (adr.category === 'revised') {
-      adr.from = readRevision(local);
-      adr.to = readRevision(upstream);
-    }
+    if (adr.category === 'revised') adr.from = readRevision(local);
+    if (adr.category === 'revised' || adr.category === 'undetermined') adr.to = readRevision(upstream);
     adrs.push(adr);
   }
 
@@ -57,7 +55,7 @@ function planSource(root, source) {
     adrs.push({ name: file, category: 'removed', title });
   }
   adrs.sort((a, b) => a.name.localeCompare(b.name));
-  return { namespace: source.namespace, adrs, migration };
+  return { namespace: source.namespace, adrDir: source.adrDir, adrs, migration };
 }
 
 /** What importing each source would change, as data. Reads only. */
@@ -72,8 +70,10 @@ export function hasPendingChanges(plan) {
   );
 }
 
-const stem = (file) => file.replace(/\.md$/, '');
-const row = (category, text) => `  ${category.padEnd(12)}  ${text}`;
+export const stem = (file) => file.replace(/\.md$/, '');
+export const row = (category, text) => `  ${category.padEnd(12)}  ${text}`;
+/** An ADR's name, followed by its title when it has one. */
+export const label = (adr) => stem(adr.name) + (adr.title ? `  ${adr.title}` : '');
 
 /** The contract output (see README). */
 export function formatPlan(plan) {
@@ -88,9 +88,8 @@ export function formatPlan(plan) {
 
     for (const adr of source.adrs) {
       if (adr.category === 'unchanged') continue;
-      const title = adr.title ? `  ${adr.title}` : '';
       const revision = adr.category === 'revised' ? ` (revision ${adr.from} → ${adr.to})` : '';
-      lines.push(row(adr.category, stem(adr.name) + title + revision));
+      lines.push(row(adr.category, label(adr) + revision));
     }
 
     if (source.migration.length > 0) {

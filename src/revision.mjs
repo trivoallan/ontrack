@@ -54,6 +54,24 @@ export function readTitle(text, name) {
   return (title.startsWith(prefix) ? title.slice(prefix.length).trim() : title) || null;
 }
 
+/**
+ * `text` with its frontmatter `revision:` set to `revision`: the column-zero
+ * line is replaced, or inserted after `status:` (first line otherwise).
+ * Nothing else changes. Throws when the frontmatter is unreadable.
+ */
+export function setRevision(text, revision) {
+  const fm = frontmatter(text);
+  if (fm === null) throw new Error('cannot set revision: no recognizable frontmatter');
+  const lines = text.split('\n');
+  const eol = lines[0].endsWith('\r') ? '\r' : '';
+  const line = `revision: ${revision}${eol}`;
+  const at = (re) => fm.findIndex((l) => re.test(l)) + 1; // index in `lines`, 0 if absent
+  const existing = at(/^revision:/);
+  if (existing) lines[existing] = line;
+  else lines.splice((at(/^status:/) || 0) + 1, 0, line);
+  return lines.join('\n');
+}
+
 /** The ADR's revision, or null when unreadable, absent or not an integer. */
 export function readRevision(text) {
   const lines = frontmatter(text);

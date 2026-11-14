@@ -22,7 +22,8 @@ npm i -D <alias>@git+<source-repository-url>
 
 [trivoallan/governance](https://github.com/trivoallan/governance) is a
 minimal source: a `package.json` whose `ontrack` key points to its `adr/`
-directory, and the ADRs in it.
+directory, and the ADRs in it. Its catalogue grows over time, so the output
+below is a snapshot.
 
 ```json
 {
@@ -40,8 +41,11 @@ npx ontrack plan
 ```
 
 ```
-trivoallan: 1 new, 0 unchanged
-  new           ADR-0001  Record significant decisions as ADRs
+trivoallan: 4 new, 0 unchanged
+  new           ADR-0001-record-architecture-decisions  Record architecture decisions
+  new           ADR-0002-localization  Localization
+  new           ADR-0006-commits  Commits
+  new           ADR-0009-branching  Branching
 ```
 
 ## Usage
@@ -50,6 +54,7 @@ trivoallan: 1 new, 0 unchanged
 npx ontrack --help      # list commands
 npx ontrack --version
 npx ontrack plan        # what importing the sources would change
+npx ontrack apply       # do it (see below)
 ```
 
 ### Exit codes
@@ -91,6 +96,54 @@ migration: 5 files docs/adr/ → docs/adr/platform/
 - With no source at all, `plan` prints `no ontrack source found` and exits with `0`.
 
 Any change to this format goes through this README first.
+
+## `ontrack apply`
+
+`apply` brings the repository in line with what `plan` reports, in one
+command. It is the only command that writes, it never commits, and it never
+touches an ADR you already decided on.
+
+```bash
+npx ontrack apply --dry-run          # print what apply would do, write nothing
+npx ontrack apply                    # import new ADRs, move flat files
+npx ontrack apply --prune            # also delete ADRs the source no longer ships
+npx ontrack apply --confirm SDR-0003 # declare an undetermined verdict still holds
+npx ontrack apply --confirm all      # same, for every undetermined ADR
+```
+
+What it does, per source:
+
+- `imported`: a `new` ADR is copied, byte for byte, into `docs/adr/<alias>/`.
+- `moved`: a flat-layout file moves from `docs/adr/` to `docs/adr/<alias>/` (`git mv` in a git repository, a plain rename otherwise).
+- `pruned`, only with `--prune`: a `removed` ADR is deleted.
+- `confirmed`, only with `--confirm`: an `undetermined` ADR gets the upstream `revision:`; nothing else in the file changes.
+
+A `revised` or `unreadable` ADR is never written to or deleted (only moved by
+a migration): its verdict must be taken again by a person.
+
+Its output lists the actions, then every Markdown link the migration breaks
+(links to a moved file, and links held by a moved file to a file left in
+place; it lists them, it does not rewrite them), then what still needs a
+human, in the `plan` format:
+
+```
+dry run: nothing written
+platform: 1 imported, 2 moved
+  imported      SDR-0015  Observability
+  moved         SDR-0006.md
+  moved         SDR-0010.md
+links to update:
+  docs/arc42.md:12  adr/SDR-0006.md → adr/platform/SDR-0006.md
+remaining:
+platform: 1 revised, 2 unchanged
+  revised       SDR-0010  Forge and CI (revision 3 → 4)
+```
+
+The first line only appears with `--dry-run`. With nothing to do, `apply`
+prints the same output as `plan`. Exit codes are those of `plan`, computed on
+what remains after the run: `0` nothing left, `2` something still needs a
+human, `1` error. Every check runs before the first write, so an error never
+leaves a half-applied repository.
 
 ## Development
 
