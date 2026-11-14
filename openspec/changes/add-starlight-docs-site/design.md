@@ -64,6 +64,12 @@ It needs `@astrojs/markdown-remark` (already a peer dependency of Starlight).
 
 *Why not a published plugin for links:* the rule is three lines for this layout, and a dependency would have to be checked against Astro 7's loader ids. *Why not hide the frontmatter title instead:* Starlight builds the page header and the table of contents from it.
 
+### ADR pages open with their ruling, read by the CLI's own code
+
+Starlight does not render frontmatter, so a page showed neither the status nor the decided traits, which GitHub shows as a table. The remark plugin prepends a "Status" line and, when there are decided traits, a YAML block. It gets both from `readAdrs` in `../src/instructions.mjs`, the function behind `ontrack instructions`, which only imports Node built-ins and sibling modules.
+
+*Why not `file.data.astro.frontmatter`:* it is parsed YAML, and printing it back would reformat the block. ontrack copies traits verbatim, and a second reader could disagree with `AGENTS.md` on what counts as decided. *Trade-off:* the site now depends on an internal function of the CLI; a change to it shows up as a failed site build.
+
 ### Internal links are checked by a script, after the build
 
 `site/check-links.mjs` walks `dist/`, reads every `href` and `src` that is relative or starts with the base path, and fails when the target is neither a file nor a directory with an `index.html`. `npm run build` is `astro build && node check-links.mjs`, so CI and a local build run the same check.
