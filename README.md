@@ -463,6 +463,7 @@ check it as CI does:
 cd site
 npx likec4 serve ../docs/architecture/model      # local preview, reloads on change
 npx likec4 validate ../docs/architecture/model   # fails on an unknown element or a dangling relationship
+```
 
 ### Releases
 
