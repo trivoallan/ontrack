@@ -18,6 +18,32 @@ Add a source with npm, under the alias of your choice:
 npm i -D <alias>@git+<source-repository-url>
 ```
 
+### Example source
+
+[trivoallan/governance](https://github.com/trivoallan/governance) is a
+minimal source: a `package.json` whose `ontrack` key points to its `adr/`
+directory, and the ADRs in it.
+
+```json
+{
+  "name": "governance",
+  "ontrack": { "adr": "adr", "namespace": "trivoallan" }
+}
+```
+
+Install it under the namespace it proposes, then see what importing it would
+change:
+
+```bash
+npm i -D trivoallan@git+https://github.com/trivoallan/governance.git
+npx ontrack plan
+```
+
+```
+trivoallan: 1 new, 0 unchanged
+  new           ADR-0001
+```
+
 ## Usage
 
 ```bash
