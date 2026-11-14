@@ -18,5 +18,8 @@
   },
   "dependencies": {
     "yargs": "^18.2.0"
+  },
+  "devDependencies": {
+    "trivoallan": "github:trivoallan/governance"
   }
 }
