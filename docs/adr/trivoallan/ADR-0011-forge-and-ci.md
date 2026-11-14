@@ -2,21 +2,21 @@
 adr: ADR-0011
 slug: forge-and-ci
 title: Forge and continuous integration
-status: proposed
+status: accepted
 revision: 1
-date:
-authors: []
+date: 2026-11-14
+authors: [Tristan Rivoallan]
 supersedes: []
 traits:
   forge:
-    gate:
+    gate: blocking
 ---
 
 # Forge and continuous integration
 
 ## Status
 
-Proposed
+Accepted
 
 > **What is this file?** A question governance asks your repository, with
 > the answer it recommends. While it says `status: proposed`, you may edit
@@ -118,70 +118,24 @@ to the job log, with three known causes: a policy refused the manifest (fix
 the manifest, not the policy), a secret is missing (set it, named as
 listed), an image is not found (check it was pushed and matches the pin).
 
-Everything below disappears when you rule, from this sentence up to the
-Consequences heading, which stays.
-
-**How to rule: five steps, all in this file.** Read all of them before
-doing any, because the last one deletes the other four, and do them in one
-commit.
-
-1. **Write the value of each key** under `traits:` in the frontmatter, or,
-   if you rule `rejected`, **remove the whole `traits:` block**.
-2. **Change `status:`** from `proposed` to `accepted` or `rejected`.
-3. **Fill `date:` and `authors:`**: `date:` as `YYYY-MM-DD`, the day you
-   rule; `authors:`, the names of the people who decided, without email
-   addresses.
-4. **Rewrite the Positive, Negative and Neutral lists under Consequences**
-   for your verdict: what it makes easier, and what it costs.
-5. **Last, delete this block**, from its first sentence up to the
-   Consequences heading, which stays. In its place, write the reason for
-   your decision wherever you depart from the recommendation, or, if you
-   adopt it as is, one line that says so.
-
-The first step is the one people forget: a decision written only in prose
-leaves an agent guessing. This is what the frontmatter looks like once
-filled, and it is the one part of the file an agent reads without
-interpreting it:
-
-```yaml
----
-adr: ADR-0011
-slug: forge-and-ci
-title: Forge and continuous integration
-status: accepted
-revision: 1
-date: 2026-11-14
-authors: [Your Name]
-supersedes: []
-traits:
-  forge:
-    gate: blocking
----
-```
-
-The Alternatives Considered below were weighed by governance without
-knowing your context. Weighing them against yours is still to do, and it is
-what makes a decision different from an accepted default.
+Adopted as recommended: `blocking`. The ruleset "main requires test" is active on the default branch and requires the `test` check.
 
 ## Consequences
 
 ### Positive
 
-- A red pipeline means the same thing to every agent and reviewer: with a
-  required check, nothing merges on red.
-- The five rules close the common leaks: moved action tags, secrets in logs,
-  deploys from feature branches, secrets handed to forks.
+- Nothing merges into `main` while the `test` job is red.
 - Which jobs exist is derived from the other ADRs, so two agents write the
   same workflow.
 
 ### Negative
 
-- A flaky pipeline blocks everyone, and the pressure to bypass the check
-  grows with it.
-- Pinning actions by SHA makes updates a deliberate chore, unless a tool
-  such as Dependabot proposes them.
-- No tool enforces rules 3 to 5 (see References): review reads every
-  `uses:`, `image:` and `run:`.
+- At the time of ruling the ruleset requires `test` only: the `node-20` job
+  of `.github/workflows/test.yml` reports but does not block.
+- At the time of ruling `test.yml` pins `actions/checkout@v7` and
+  `actions/setup-node@v7` by tag, against rule 3; pinning by SHA makes
+  updates a deliberate chore unless Dependabot proposes them.
+- A flaky pipeline blocks everyone.
 
 ### Neutral
 

@@ -2,22 +2,22 @@
 adr: ADR-0006
 slug: commits
 title: Commits
-status: proposed
+status: accepted
 revision: 1
-date:
-authors: []
+date: 2026-11-14
+authors: [Tristan Rivoallan]
 supersedes: []
 traits:
   commits:
-    scopes:
-    tool:
+    scopes: [apply, cli, governance, instructions, openspec, plan, review, revision, sources]
+    tool: commitlint
 ---
 
 # Commits
 
 ## Status
 
-Proposed
+Accepted
 
 > **What is this file?** A question governance asks your repository, with
 > the answer it recommends. While it says `status: proposed`, you may edit
@@ -70,51 +70,7 @@ per area you want to be able to filter on, and not one more. **`[]` is a
 full answer**: a single-area repository has nothing to name, and a list
 invented on adoption ages worse than no list.
 
-Everything below disappears when you rule, from this sentence up to the
-Consequences heading, which stays.
-
-**How to rule: five steps, all in this file.** Read all of them before
-doing any, because the last one deletes the other four, and do them in one
-commit.
-
-1. **Write the value of each key** under `traits:` in the frontmatter, or,
-   if you rule `rejected`, **remove the whole `traits:` block**.
-2. **Change `status:`** from `proposed` to `accepted` or `rejected`.
-3. **Fill `date:` and `authors:`**: `date:` as `YYYY-MM-DD`, the day you
-   rule; `authors:`, the names of the people who decided, without email
-   addresses.
-4. **Rewrite the Positive, Negative and Neutral lists under Consequences**
-   for your verdict: what it makes easier, and what it costs.
-5. **Last, delete this block**, from its first sentence up to the
-   Consequences heading, which stays. In its place, write the reason for
-   your decision wherever you depart from the recommendation, or, if you
-   adopt it as is, one line that says so.
-
-The first step is the one people forget: a decision written only in prose
-leaves an agent guessing. This is what the frontmatter looks like once
-filled, and it is the one part of the file an agent reads without
-interpreting it:
-
-```yaml
----
-adr: ADR-0006
-slug: commits
-title: Commits
-status: accepted
-revision: 1
-date: 2026-11-14
-authors: [Your Name]
-supersedes: []
-traits:
-  commits:
-    scopes: [api, cli, docs]
-    tool: commitlint
----
-```
-
-The Alternatives Considered below were weighed by governance without
-knowing your context. Weighing them against yours is still to do, and it is
-what makes a decision different from an accepted default.
+Adopted as recommended: `commitlint` in CI. Its premise does not hold yet (versions are set by hand: no tags, `package.json` at `0.1.0`), and it is kept anyway so that the scope list is enforced rather than remembered. The scopes are the ones the history already uses, matching the subcommands and modules in `src/`, plus `openspec` and `governance` for their chores.
 
 ## Consequences
 
@@ -122,18 +78,18 @@ what makes a decision different from an accepted default.
 
 - An agent picks a scope from a closed list instead of inventing one, so
   the history can be filtered by area.
-- With `commitlint` in CI, an off-format message is refused before it can
-  produce a wrong version.
+- An off-format message or unknown scope is refused in CI, and the history
+  is ready if versions are later generated from it.
 
 ### Negative
 
-- `commitlint` is one more dependency and one more CI job to keep working.
-- A closed scope list has to be updated when the repository grows a new
-  area; until then, the new area has no scope.
+- `commitlint` is one more dev dependency and one more CI job, not yet in
+  `.github/workflows/` at the time of ruling.
+- A new subcommand or module needs its scope added here first.
 
 ### Neutral
 
-- The eleven types and the breaking-change syntax apply whatever you rule
+- The eleven types and the breaking-change syntax apply whatever is ruled
   here.
 
 ## Alternatives Considered
