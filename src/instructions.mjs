@@ -78,6 +78,7 @@ function readAdr(root, { dir, ns, file }) {
     title: readTitle(text, stem(file)),
     supersedes: status === 'accepted' ? readSupersedes(lines) : [],
     traits,
+    check: status === 'accepted' ? topValue(lines, 'check') || null : null,
   };
 }
 
@@ -86,12 +87,8 @@ export function readAdrs(root) {
   return adrFiles(root).map((f) => readAdr(root, f)).filter(Boolean);
 }
 
-/**
- * { decided, pending }: the ADRs whose traits are in force, and those still
- * `proposed`, each sorted by reference. Throws when two decided ADRs share a
- * top-level trait key. Reads docs/adr/ only.
- */
-export function buildInstructions(root) {
+// Resolves supersession and trait conflicts once for instructions and check.
+function resolve(root) {
   const adrs = readAdrs(root);
 
   const superseded = new Set();
@@ -103,7 +100,8 @@ export function buildInstructions(root) {
     }
   }
 
-  const decided = adrs.filter((a) => a.traits && !superseded.has(a)).sort(byRef);
+  const inForce = adrs.filter((a) => a.status === 'accepted' && !superseded.has(a)).sort(byRef);
+  const decided = inForce.filter((a) => a.traits);
   const owner = new Map();
   for (const adr of decided) {
     for (const line of adr.traits) {
@@ -119,10 +117,23 @@ export function buildInstructions(root) {
     }
   }
   const pending = adrs.filter((a) => a.status === 'proposed').sort(byRef);
+  return { decided, pending, inForce };
+}
+
+/**
+ * { decided, pending }: the ADRs whose traits are in force, and those still
+ * `proposed`, each sorted by reference. Throws when two decided ADRs share a
+ * top-level trait key. Reads docs/adr/ only.
+ */
+export function buildInstructions(root) {
+  const { decided, pending } = resolve(root);
   return { decided, pending };
 }
 
-const heading = (adr) => (adr.title ? `${adr.title} (${adr.ref})` : adr.ref);
+/** Every `accepted` ADR not superseded, sorted by reference. Throws like buildInstructions. */
+export const adrsInForce = (root) => resolve(root).inForce;
+
+export const heading = (adr) => (adr.title ? `${adr.title} (${adr.ref})` : adr.ref);
 
 /** The contract output (see README). */
 export function formatInstructions({ decided, pending }) {

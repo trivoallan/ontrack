@@ -227,3 +227,10 @@ test('tree unchanged', async () => {
   assert.equal((await instructions(root)).code, 0);
   assert.deepEqual(snapshot(root), before);
 });
+
+test('a check: line leaves the instructions output unchanged', async () => {
+  const without = await instructions(makeTree({ 'docs/adr/trivoallan/ADR-0006-commits.md': commits() }));
+  const withCheck = await instructions(makeTree({ 'docs/adr/trivoallan/ADR-0006-commits.md': commits('check: exit 1') }));
+  assert.equal(withCheck.stdout, without.stdout);
+  assert.equal(withCheck.code, 0);
+});
