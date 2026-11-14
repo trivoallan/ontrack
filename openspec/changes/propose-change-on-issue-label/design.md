@@ -196,6 +196,12 @@ In `draft`, so that compromise is hard:
 - `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` keeps the provider credential out of the
   environment of the commands the agent runs; `DO_NOT_TRACK` turns the
   command line's telemetry off.
+- That setting makes those commands run in a sandbox, which needs
+  `bubblewrap`, `socat` and unprivileged user namespaces on the runner. The
+  action installs them only when it is told that people without write
+  access may trigger it, so the job installs them itself. The first run
+  that reached the model showed it: the agent reported that it could run no
+  command.
 - The agent's own settings refuse reads and writes outside the checkout.
   The documentation of its permission modes leaves reads outside the
   working directory ambiguous in a run with nobody to ask.

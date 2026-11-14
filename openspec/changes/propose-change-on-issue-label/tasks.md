@@ -41,12 +41,16 @@
 - [x] 3d.1 Print the tool's own error when the agent fails on its first turn at no cost, cut short and unable to issue a workflow command; print nothing of a longer run
 - [x] 3d.2 Test both cases in `test/propose-workflow.test.ts`
 
+## 3e. Let the agent run its commands
+
+- [x] 3e.1 Install the sandbox prerequisites (`bubblewrap`, `socat`, unprivileged user namespaces) in `draft` before the agent starts
+
 ## 4. Verify
 
 - [x] 4.1 Check the file against the `issue-proposal` spec: no secret named, no `${{ github.event.issue.title }}` or `.body` anywhere, no `git` or `gh` in the agent's tools, no agent step in the job that writes
 - [x] 4.2 Run `npx ontrack check` and `npm test` locally
 - [ ] 4.3 After merge, add the label to one issue that moves a behaviour of the CLI and confirm a draft pull request with a valid change and `Refs`
-- [ ] 4.4 Add the label to an open issue that only concerns continuous integration and confirm the "no change" comment and the removed label
+- [x] 4.4 Add the label to an open issue that only concerns continuous integration and confirm the "no change" comment and the removed label
 - [ ] 4.5 Add the label again to the issue of 4.3 and confirm the run stops before the agent
 - [ ] 4.6 Confirm that `test`, `node-22` and the commit check start on the first push made by a person to a proposal branch
 
