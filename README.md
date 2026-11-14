@@ -251,6 +251,8 @@ For each ADR, in turn:
 7. Once the user agrees: fill the `traits:` keys, or remove the block when rejected; set the status; write in the ADR the reason for every departure from the recommendation; then run `npx ontrack apply` to update AGENTS.md.
 
 Then take the next ADR in the list. Do not start an ADR before the previous one is ruled.
+
+Once every ADR is ruled, list the rulings this repository does not follow yet: a value its code, configuration or tooling does not match, or a tool the ruling names that is not set up. For each one, propose a tracking item: a title, and the ADR it serves. Create in the tracker named by the decided `tracking` trait in AGENTS.md (`tracking.tool`, in `tracking.project`) only the items the user agrees to, asked with a question tool such as `AskUserQuestion` when you have one. When no `tracking` trait is decided, or `tracking.tool` is `none`, give the list in your reply and create nothing.
 ~~~
 
 With an argument, the prompt names that ADR alone, with the same steps. It is
@@ -268,11 +270,14 @@ It is `proposed`: a question this repository has not answered yet, shipped with 
 5. Propose `rejected` only on evidence that the question does not apply here, and say what stands in for it.
 6. Present the proposed ruling: the status, one line per trait key with its value and evidence, and every departure from the recommendation with its reason. Then stop and ask for the user's agreement, with a question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees.
 7. Once the user agrees: fill the `traits:` keys, or remove the block when rejected; set the status; write in the ADR the reason for every departure from the recommendation; then run `npx ontrack apply` to update AGENTS.md.
+
+Once every ADR is ruled, list the rulings this repository does not follow yet: a value its code, configuration or tooling does not match, or a tool the ruling names that is not set up. For each one, propose a tracking item: a title, and the ADR it serves. Create in the tracker named by the decided `tracking` trait in AGENTS.md (`tracking.tool`, in `tracking.project`) only the items the user agrees to, asked with a question tool such as `AskUserQuestion` when you have one. When no `tracking` trait is decided, or `tracking.tool` is `none`, give the list in your reply and create nothing.
 ~~~
 
 - The ADRs read are those of `instructions`. Without an argument, the prompt lists every `proposed` ADR in reference order, the order of "Not yet decided", even when there is only one.
 - An argument with a `/` is a reference (`trivoallan/ADR-0006-commits`). Any other argument is a file name without `.md` (`ADR-0006-commits`) or an `adr:` identifier (`ADR-0006`), looked up in every directory. It must name exactly one ADR, and that ADR must be `proposed`.
 - An ADR without a title is named by its path alone.
+- Once the review is ruled, the agent proposes a tracking item for every ruling the repository does not follow yet, and creates only those you agree to, in the tracker your `tracking` trait names. Without one, it lists them.
 - `review` never writes a file and makes no network call. Two decided ADRs sharing a trait key do not stop it.
 - It exits with `2` when it prints a prompt, because a ruling is pending. With no `proposed` ADR it exits with `0`, says so on standard error and prints nothing, so that no agent receives that sentence as a prompt. An unknown, ambiguous or already ruled name is an error, with `1`.
 
