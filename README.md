@@ -41,7 +41,7 @@ npx ontrack plan
 
 ```
 trivoallan: 1 new, 0 unchanged
-  new           ADR-0001
+  new           ADR-0001  Record significant decisions as ADRs
 ```
 
 ## Usage
@@ -71,9 +71,9 @@ this format, one block per source, sources sorted by alias:
 
 ```
 platform: 2 revised, 1 new, 3 unchanged
-  revised       SDR-0006  revision 1 → 2
-  revised       SDR-0010  revision 3 → 4
-  new           SDR-0015
+  revised       SDR-0006  Commits (revision 1 → 2)
+  revised       SDR-0010  Forge and CI (revision 3 → 4)
+  new           SDR-0015  Observability
 migration: 5 files docs/adr/ → docs/adr/platform/
   move          SDR-0001.md
   move          SDR-0003.md
@@ -83,7 +83,8 @@ migration: 5 files docs/adr/ → docs/adr/platform/
 ```
 
 - Line 1, per source: `<alias>: <count per category>`, in the order revised, new, removed, undetermined, unreadable, unchanged. Zero counts are omitted, except "unchanged".
-- Then one line per ADR that is not unchanged, sorted by name: two spaces, the category in a 12-character column, two spaces, the file name without `.md`. A `revised` line ends with `revision <local> → <upstream>`.
+- Then one line per ADR that is not unchanged, sorted by name: two spaces, the category in a 12-character column, two spaces, the file name without `.md`, then two spaces and the ADR's title. A `revised` line ends with `(revision <local> → <upstream>)`.
+- The title is the frontmatter `title:` key, or else the first `# ` heading, without a leading `<name>: ` that repeats the file name. It comes from the source's copy (the local copy for a `removed` ADR). An ADR without a title shows its name only.
 - Categories: `new` (not imported yet), `revised` (the question moved upstream), `removed` (no longer shipped by the source), `undetermined` (no usable `revision:` to compare), `unreadable` (no recognizable frontmatter).
 - A flat-layout migration (`docs/adr/<file>` that belongs to the source but is not under `docs/adr/<alias>/`) is always shown: `migration: <n> file(s) docs/adr/ → docs/adr/<alias>/`, then one `move` line per file.
 - When there is nothing to do, one line per source (`platform: 14 unchanged`), and the exit code is `0`. Any other category, or a migration, gives `2`.

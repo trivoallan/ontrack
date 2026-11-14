@@ -36,6 +36,24 @@ function revisionOf(lines) {
   return null;
 }
 
+/**
+ * The ADR's title: frontmatter `title:`, else the first `# ` heading without
+ * a leading `<name>:` repeating the file name. null when there is none.
+ */
+export function readTitle(text, name) {
+  const lines = text.split('\n');
+  const fm = frontmatter(text);
+  for (const line of fm ?? []) {
+    const match = /^title:\s*(.*?)\s*$/.exec(line);
+    if (match) return match[1].replace(/^(["'])(.*)\1$/, '$2').trim() || null;
+  }
+  const heading = lines.slice(fm ? fm.length + 2 : 0).find((line) => line.startsWith('# '));
+  if (!heading) return null;
+  const title = heading.slice(2).trim();
+  const prefix = `${name}:`;
+  return (title.startsWith(prefix) ? title.slice(prefix.length).trim() : title) || null;
+}
+
 /** The ADR's revision, or null when unreadable, absent or not an integer. */
 export function readRevision(text) {
   const lines = frontmatter(text);

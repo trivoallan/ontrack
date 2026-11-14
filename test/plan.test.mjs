@@ -63,7 +63,7 @@ test('new, revised, unchanged, undetermined and unreadable', () => {
   assert.deepEqual(categories(p), {
     'A.md': 'new', 'B.md': 'revised', 'C.md': 'unchanged', 'D.md': 'undetermined', 'E.md': 'unreadable',
   });
-  assert.deepEqual(p[0].adrs.find((a) => a.name === 'B.md'), { name: 'B.md', category: 'revised', from: 1, to: 2 });
+  assert.deepEqual(p[0].adrs.find((a) => a.name === 'B.md'), { name: 'B.md', category: 'revised', title: null, from: 1, to: 2 });
 });
 
 test('an ADR shipped no more is removed', () => {
@@ -131,8 +131,8 @@ test('mixed source: counts in contract order', () => {
   assert.equal(lines[0], 'platform: 2 revised, 1 new, 11 unchanged');
   assert.deepEqual(lines.slice(1, 4), [
     '  new           N',
-    '  revised       R1  revision 1 → 2',
-    '  revised       R2  revision 1 → 2',
+    '  revised       R1 (revision 1 → 2)',
+    '  revised       R2 (revision 1 → 2)',
   ]);
 });
 
@@ -158,14 +158,46 @@ test('the README example is what formatPlan prints', () => {
     adrs: [
       { name: 'SDR-0001.md', category: 'unchanged' },
       { name: 'SDR-0003.md', category: 'unchanged' },
-      { name: 'SDR-0006.md', category: 'revised', from: 1, to: 2 },
+      { name: 'SDR-0006.md', category: 'revised', title: 'Commits', from: 1, to: 2 },
       { name: 'SDR-0008.md', category: 'unchanged' },
-      { name: 'SDR-0010.md', category: 'revised', from: 3, to: 4 },
-      { name: 'SDR-0015.md', category: 'new' },
+      { name: 'SDR-0010.md', category: 'revised', title: 'Forge and CI', from: 3, to: 4 },
+      { name: 'SDR-0015.md', category: 'new', title: 'Observability' },
     ],
     migration: ['SDR-0001.md', 'SDR-0003.md', 'SDR-0006.md', 'SDR-0008.md', 'SDR-0010.md'],
   }];
   assert.equal(formatPlan(p), example);
+});
+
+// Titles
+
+test('new ADR with its title, from a heading repeating the name', () => {
+  const root = makeProject({
+    sources: {
+      trivoallan: { 'ADR-0001.md': '---\nrevision: 1\n---\n\n# ADR-0001: Record significant decisions as ADRs\n' },
+    },
+  });
+  assert.match(formatPlan(buildPlan(root)), /^ {2}new {11}ADR-0001 {2}Record significant decisions as ADRs$/m);
+});
+
+test('revised ADR with its title, read from the source copy', () => {
+  const root = makeProject({
+    sources: { platform: { 'SDR-0006.md': adr(2, 'proposed', 'Commits') } },
+    local: { 'docs/adr/platform/SDR-0006.md': adr(1, 'accepted', 'Old commits title') },
+  });
+  assert.match(formatPlan(buildPlan(root)), /^ {2}revised {7}SDR-0006 {2}Commits \(revision 1 → 2\)$/m);
+});
+
+test('removed ADR keeps its local title', () => {
+  const root = makeProject({
+    sources: { platform: { 'SDR-0006.md': adr(1) } },
+    local: { 'docs/adr/platform/SDR-0006.md': adr(1), 'docs/adr/platform/SDR-0012.md': adr(1, 'accepted', 'Hosting') },
+  });
+  assert.match(formatPlan(buildPlan(root)), /^ {2}removed {7}SDR-0012 {2}Hosting$/m);
+});
+
+test('ADR without a title ends with its name, no trailing spaces', () => {
+  const root = makeProject({ sources: { platform: { 'SDR-0020.md': adr(1) } } });
+  assert.match(formatPlan(buildPlan(root)), /^ {2}new {11}SDR-0020$/m);
 });
 
 // Exit code
