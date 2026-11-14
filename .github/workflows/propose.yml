@@ -137,6 +137,7 @@ jobs:
           # itself, whatever the mode or the rules.
           settings: '{"permissions":{"blockReadsOutsideWorkingDirectories":true,"blockWritesOutsideWorkingDirectories":true}}'
           claude_args: |
+            --model claude-sonnet-5-5
             --permission-mode acceptEdits
             --allowedTools "Glob,Grep,Skill,Bash(openspec list:*),Bash(openspec context:*),Bash(openspec new change:*),Bash(openspec status:*),Bash(openspec instructions:*),Bash(openspec validate:*),Bash(openspec schemas:*)"
             --disallowedTools "Edit(.claude/**)" "Edit(.github/**)" "Edit(.githooks/**)" "Edit(node_modules/**)" "Bash(openspec install:*)" "Bash(openspec feedback:*)" "Bash(openspec config:*)" "Bash(openspec store:*)" "Bash(openspec completion:*)" "WebFetch" "WebSearch"

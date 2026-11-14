@@ -45,6 +45,10 @@
 
 - [x] 3e.1 Install the sandbox prerequisites (`bubblewrap`, `socat`, unprivileged user namespaces) in `draft` before the agent starts
 
+## 3f. Choose the model
+
+- [x] 3f.1 Run the agent on `claude-sonnet-5-5` instead of the action's default
+
 ## 4. Verify
 
 - [x] 4.1 Check the file against the `issue-proposal` spec: no secret named, no `${{ github.event.issue.title }}` or `.body` anywhere, no `git` or `gh` in the agent's tools, no agent step in the job that writes

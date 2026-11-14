@@ -162,6 +162,11 @@ Dependabot entry for GitHub Actions. The action always receives the token of
 its job, so "no token" is not achievable with it; decision 1 makes that
 token read-only on a public repository, which is the same guarantee.
 
+The model is named in the workflow, `claude-sonnet-5-5`, instead of the
+action's default, which was the most capable and most expensive one. A
+proposal is planning prose checked by a person; the run on issue 105 cost a
+quarter of a dollar for a "no change" verdict.
+
 Alternative: the Claude Code command line as a development dependency,
 called from a `run:` step with no token at all. It installs a native binary
 for every contributor and falls under the dependency rules still being
