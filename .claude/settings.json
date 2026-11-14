@@ -1,0 +1,10 @@
+{
+  "extraKnownMarketplaces": {
+    "ontrack-tools": {
+      "source": { "source": "directory", "path": "./marketplace" }
+    }
+  },
+  "enabledPlugins": {
+    "arc42-toolkit@ontrack-tools": true
+  }
+}

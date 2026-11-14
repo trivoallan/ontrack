@@ -440,6 +440,29 @@ git config core.hooksPath .githooks
 Without gitleaks on the `PATH`, the hook refuses the commit rather than skip
 the scan.
 
+### Agent tooling
+
+The repository is set up for Claude Code (ADR-0017). Its plugins are listed
+in [`marketplace/.claude-plugin/marketplace.json`](marketplace/.claude-plugin/marketplace.json),
+each pinned to a commit, and turned on in `.claude/settings.json`. Enabling
+installs nothing, so run this once per clone, after accepting the workspace
+trust dialog:
+
+```bash
+claude plugin install arc42-toolkit@ontrack-tools --scope project
+```
+
+Updating a plugin means changing its `sha` in a pull request.
+
+The OpenSpec skills and commands in `.claude/skills/` and `.claude/commands/`
+are committed as [OpenSpec](https://github.com/Fission-AI/OpenSpec) 1.13.1
+generates them. To update them, regenerate with the new version and commit
+the result:
+
+```bash
+npx @fission-ai/openspec@<version> update
+```
+
 ### Documentation site
 
 The pages under `docs/` are published at

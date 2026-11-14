@@ -2,21 +2,21 @@
 adr: ADR-0017
 slug: agent-tooling
 title: Agent tooling
-status: proposed
+status: accepted
 revision: 1
-date:
-authors: []
+date: 2026-11-14
+authors: [Tristan Rivoallan]
 supersedes: []
 traits:
   agent:
-    host:
+    host: claude-code
 ---
 
 # Agent tooling
 
 ## Status
 
-Proposed
+Accepted
 
 > **What is this file?** A question governance asks your repository, with
 > the answer it recommends. While it says `status: proposed`, you may edit
@@ -151,50 +151,8 @@ commits you reviewed). `marketplace/.claude-plugin/marketplace.json`:
 }
 ```
 
-Everything below disappears when you rule, from this sentence up to the
-Consequences heading, which stays.
-
-**How to rule: five steps, all in this file.** Read all of them before
-doing any, because the last one deletes the other four, and do them in one
-commit.
-
-1. **Write the value of each key** under `traits:` in the frontmatter, or,
-   if you rule `rejected`, **remove the whole `traits:` block**.
-2. **Change `status:`** from `proposed` to `accepted` or `rejected`.
-3. **Fill `date:` and `authors:`**: `date:` as `YYYY-MM-DD`, the day you
-   rule; `authors:`, the names of the people who decided, without email
-   addresses.
-4. **Rewrite the Positive, Negative and Neutral lists under Consequences**
-   for your verdict: what it makes easier, and what it costs.
-5. **Last, delete this block**, from its first sentence up to the
-   Consequences heading, which stays. In its place, write the reason for
-   your decision wherever you depart from the recommendation, or, if you
-   adopt it as is, one line that says so.
-
-The first step is the one people forget: a decision written only in prose
-leaves an agent guessing. This is what the frontmatter looks like once
-filled, and it is the one part of the file an agent reads without
-interpreting it:
-
-```yaml
----
-adr: ADR-0017
-slug: agent-tooling
-title: Agent tooling
-status: accepted
-revision: 1
-date: 2026-11-14
-authors: [Your Name]
-supersedes: []
-traits:
-  agent:
-    host: claude-code
----
-```
-
-The Alternatives Considered below were weighed by governance without
-knowing your context. Weighing them against yours is still to do, and it is
-what makes a decision different from an accepted default.
+Adopted as recommended: `claude-code`, the only agent host this
+repository has files for (`.claude/skills/`, `.claude/commands/`).
 
 ## Consequences
 
@@ -218,6 +176,10 @@ what makes a decision different from an accepted default.
 
 ### Neutral
 
+- At the time of this ruling `.gitignore` ignores all of `.claude/`, and the
+  repository has neither a marketplace nor a committed
+  `.claude/settings.json`: the OpenSpec skills in use are local copies,
+  outside review.
 - Restricting which marketplaces may be used at all
   (`strictKnownMarketplaces`) is a managed setting, set by an administrator,
   outside any repository and outside this ADR.

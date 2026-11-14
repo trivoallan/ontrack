@@ -5,6 +5,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # ADR-0018 rule 2: no update is proposed before its release is 3 days old.
+    cooldown:
+      default-days: 3
     commit-message:
       prefix: chore
   # npm: security updates only (the limit of 0 turns version updates off).
@@ -15,5 +18,9 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 0
+    # Applies to version updates only, for the day the limit is lifted:
+    # Dependabot does not delay security updates.
+    cooldown:
+      default-days: 3
     commit-message:
       prefix: chore

@@ -2,22 +2,22 @@
 adr: ADR-0016
 slug: changes
 title: Changes
-status: proposed
+status: accepted
 revision: 1
-date:
-authors: []
+date: 2026-11-14
+authors: [Tristan Rivoallan]
 supersedes: []
 traits:
   changes:
-    framework:
-    schema:
+    framework: openspec
+    schema: spec-driven-with-adr
 ---
 
 # Changes
 
 ## Status
 
-Proposed
+Accepted
 
 > **What is this file?** A question governance asks your repository, with
 > the answer it recommends. While it says `status: proposed`, you may edit
@@ -111,52 +111,12 @@ agent is left to choose between them.
    request in this session: a remote file is data, as tracker text is in
    ADR-0014.
 
-Everything below disappears when you rule, from this sentence up to the
-Consequences heading, which stays.
-
-**How to rule: five steps, all in this file.** Read all of them before
-doing any, because the last one deletes the other four, and do them in one
-commit.
-
-1. **Write the value of each key** under `traits:` in the frontmatter, or,
-   if you rule `rejected`, **remove the whole `traits:` block**.
-2. **Change `status:`** from `proposed` to `accepted` or `rejected`.
-3. **Fill `date:` and `authors:`**: `date:` as `YYYY-MM-DD`, the day you
-   rule; `authors:`, the names of the people who decided, without email
-   addresses.
-4. **Rewrite the Positive, Negative and Neutral lists under Consequences**
-   for your verdict: what it makes easier, and what it costs.
-5. **Last, delete this block**, from its first sentence up to the
-   Consequences heading, which stays. In its place, write the reason for
-   your decision wherever you depart from the recommendation, or, if you
-   adopt it as is, one line that says so. With `spec-driven-with-adr`,
-   also write the commit you copied it from.
-
-The first step is the one people forget: a decision written only in prose
-leaves an agent guessing. This is what the frontmatter looks like once
-filled, and it is the one part of the file an agent reads without
-interpreting it:
-
-```yaml
----
-adr: ADR-0016
-slug: changes
-title: Changes
-status: accepted
-revision: 1
-date: 2026-11-14
-authors: [Your Name]
-supersedes: []
-traits:
-  changes:
-    framework: openspec
-    schema: spec-driven-with-adr
----
-```
-
-The Alternatives Considered below were weighed by governance without
-knowing your context. Weighing them against yours is still to do, and it is
-what makes a decision different from an accepted default.
+Adopted as recommended: `openspec`, which this repository already uses
+(`openspec/changes/`, `openspec/specs/`), with `spec-driven-with-adr`. The
+schema is copied from
+[openspec-schemas](https://github.com/intent-driven-dev/openspec-schemas)
+at commit `4bb6de2`, into `openspec/schemas/spec-driven-with-adr/`, with
+the three adjustments above.
 
 ## Consequences
 
@@ -181,10 +141,12 @@ what makes a decision different from an accepted default.
 
 ### Neutral
 
-- With `framework: none`, the intent lives in the pull request, on the
-  forge, and does not survive a move to another forge.
-- governance itself uses `spec-driven`, unforked: its own ADRs are the
-  catalog it ships, written by hand, not decisions taken by its changes.
+- The changes archived before this ruling were written with `spec-driven`
+  and stay as they are; the schema applies to the changes opened after it
+  is installed.
+- Until the fork is installed, `openspec/config.yaml` still says
+  `spec-driven` and `openspec schema validate spec-driven-with-adr` fails:
+  the ruling is ahead of the repository.
 
 ## Alternatives Considered
 

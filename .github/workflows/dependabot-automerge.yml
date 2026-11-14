@@ -1,0 +1,39 @@
+name: dependabot-automerge
+
+# ADR-0018 (`dependencies.automerge: patch`): a Dependabot patch update merges
+# without a person once the required checks pass. Minors, majors and every
+# GitHub Actions update wait for a person.
+#
+# `pull_request`, never `pull_request_target` (ADR-0011 rule 5). Nothing is
+# checked out and no secret is read: the job only asks GitHub to merge.
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions: {}
+
+jobs:
+  automerge:
+    # The author, not the actor: a person pushing to the branch must not arm it.
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+      # An allow-list, so that an ecosystem added to dependabot.yml later is not
+      # merged before someone decides it here. `npm_and_yarn` is how Dependabot
+      # names npm in its branches; `github_actions` is never listed (rule 3).
+      # --auto merges only once the checks main requires have passed.
+      # ponytail: the merge is made with GITHUB_TOKEN, so it starts no workflow
+      # on main (release-please, docs); they run on the next push. Use an app
+      # token here if that delay ever matters.
+      - if: >-
+          steps.metadata.outputs.package-ecosystem == 'npm_and_yarn' &&
+          steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: gh pr merge --auto --squash "$PR_URL"

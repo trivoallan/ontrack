@@ -4,8 +4,14 @@ dist/
 # Private context (PM notes, local tooling): never publish
 .nanopm/
 CONTEXT.md
-.claude/
 .serena/
+
+# Claude Code (ADR-0017): only the shared project settings and the vendored
+# OpenSpec skills and commands are tracked; the rest is local.
+.claude/*
+!.claude/settings.json
+!.claude/skills/
+!.claude/commands/
 
 # Documentation site (site/)
 site/dist/
