@@ -69,6 +69,7 @@ export default defineConfig({
       sidebar: [
         { slug: 'tutorial' },
         { slug: 'how-it-works' },
+        { slug: 'write-your-own-source' },
         { slug: 'commands' },
         { slug: 'file-formats' },
         // ponytail: lists the one imported namespace; make it `adr` once the
