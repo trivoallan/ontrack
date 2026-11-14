@@ -55,6 +55,12 @@
 - [x] 3g.2 Tell the agent that the request settles whether a change opens; a change for work that moves no expected behaviour skips its specifications; the agent writes nothing only when nothing is left to propose
 - [x] 3g.3 Import the governance source that carries ADR-0016 revision 2 and rule it again (`ontrack plan`, `ontrack review ADR-0016`, `ontrack apply`)
 
+## 3h. See what stopped the agent
+
+- [x] 3h.1 List the denied tool calls after every agent run, cut short
+- [x] 3h.2 Add a `blocked` status to the agent's answer and fail the run on it
+- [x] 3h.3 Test both in `test/propose-workflow.test.ts`
+
 ## 4. Verify
 
 - [x] 4.1 Check the file against the `issue-proposal` spec: no secret named, no `${{ github.event.issue.title }}` or `.body` anywhere, no `git` or `gh` in the agent's tools, no agent step in the job that writes

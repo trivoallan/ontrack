@@ -286,6 +286,25 @@ tell it that the label is the request.
 Alternatives: a second label that forces a change (two labels for one
 intent), or an agent that never declines (a proposal for finished work).
 
+### 11. A run must say why the agent could not work
+
+The first run after decision 10 was green and useless: the agent wanted to
+draft the change, ten of its tool calls were denied, it wrote nothing, and
+the issue was told that nothing was left to propose. Two things followed.
+
+- The agent's answer gains a `status`: `drafted`, `nothing_to_propose` or
+  `blocked`. A blocked agent fails the run, so the issue gets the comment of
+  a failure.
+- The `diagnose` step runs after every agent run and lists the denied tool
+  calls, name and input cut to 200 characters. This is the agent's own
+  text, which decision 9 kept out of the log: it may echo the issue. It is
+  accepted because the issue is public already, because the agent's
+  commands hold no credential, and because nothing printed can issue a
+  workflow command. The rest of the agent's output stays hidden.
+
+Alternative: `show_full_output: true` on the action. It prints every
+message and every tool result, file contents included.
+
 ## Risks / Trade-offs
 
 - [The experiment's sample opens no change] Issues 103 to 108 all concern
