@@ -219,8 +219,8 @@ maintainer's machine.
 
 ### 9. No stored key: workload identity federation
 
-The agent step gives the action a federation rule, an organization and a
-service account, read from repository variables. The action exchanges the
+The agent step gives the action a federation rule, an organization, a
+service account and a workspace, read from repository variables. The action exchanges the
 job's GitHub OIDC token for a short-lived provider token; `draft` gets
 `id-token: write` for that, and the workflow names no secret.
 
@@ -228,6 +228,14 @@ Why: a static key was the one long-lived credential in reach of an injected
 agent, and the residual risk the security review left open. The identifiers
 are not credentials: what they allow is decided by the rule on the
 provider's side.
+
+The first runs taught two things the action's documentation does not say.
+GitHub sends a subject that carries immutable identifiers,
+`repo:<owner>@<owner id>/<repo>@<repo id>:ref:refs/heads/main`, so a rule
+written for `repo:<owner>/<repo>:` matches nothing. And the workspace is
+required, not optional, when the service account is in several. The
+provider's log of authentication events names the reason of each refusal;
+the run log hides it.
 
 Alternative: a repository secret `ANTHROPIC_API_KEY` with a low spending
 limit. Simpler to set up; it has to be stored, rotated, and it leaks whole.
