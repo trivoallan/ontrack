@@ -54,12 +54,8 @@ jobs:
       # And fails when a decided ADR's check does.
       # On a pull request, the branch check (ADR-0009) reads GITHUB_HEAD_REF;
       # the changes check (ADR-0016) finds openspec in node_modules/.bin.
-      # release-please names its own branch, which no prefix of ADR-0009 fits:
-      # without GITHUB_HEAD_REF the branch check finds a detached checkout and
-      # has nothing to check. Every other check still runs on the release.
-      - run: |
-          case "$GITHUB_HEAD_REF" in release-please--*) unset GITHUB_HEAD_REF ;; esac
-          node dist/bin/ontrack.js check
+      # release-please's own branch passes it: ADR-0012 rules release-please.
+      - run: node dist/bin/ontrack.js check
 
   # The lowest supported Node (engines in package.json).
   node-22:

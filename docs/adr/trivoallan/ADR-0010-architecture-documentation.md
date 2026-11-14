@@ -3,7 +3,7 @@ adr: ADR-0010
 slug: architecture-documentation
 title: Architecture documentation
 status: accepted
-revision: 1
+revision: 2
 check: npx --no-install governance-check ADR-0010
 date: 2026-11-14
 authors: [Tristan Rivoallan]
@@ -59,9 +59,7 @@ answer one without the other.
 **The document is a directory, `docs/architecture/arc42/`, with one file
 per section.** One file per section keeps each change small, lets a pull
 request touch only the section it changes, and gives an agent a precise
-file to open. It lives under the documentation root of
-[ADR-0008](ADR-0008-documentation.md); if `docs.root` is not `docs/`, the
-path moves with it.
+file to open. The path is fixed: it does not move with `docs.root`.
 
 **governance ships no template for now.** Create the twelve files below.
 Fill only those you have something to say in; a section with nothing to say
@@ -98,6 +96,18 @@ Cross-cutting Concepts, section 8) are not structure, so they do not belong
 in the model. They are written as Mermaid code blocks in the section file
 itself. Never redraw in Mermaid an element the model already holds: that is
 the second source the model exists to avoid.
+
+**This document is not the user documentation of
+[ADR-0008](ADR-0008-documentation.md).** It is written for whoever changes
+the product, often an agent, and borrows nothing from ADR-0008 but,
+possibly, the site that serves both. Diátaxis does not classify its
+sections, and `docs.audience` does not apply to it.
+
+**Its audience, and that of the ADRs, is the repository's visibility**:
+whoever can read the repository reads them. It is observed, not asked, so
+it has no key. A private repository whose user documentation is `public`
+keeps its architecture private only if its site does not publish
+`docs/architecture/`; ADR-0008 shows how to exclude it.
 
 **This recommendation does not bind your repository.** If your architecture
 already lives in a mature document elsewhere, say `elsewhere` and name the
@@ -181,6 +191,7 @@ where diagram-by-diagram tools repeat each element in each picture.
 - Split out of surdesrails [SDR-0003](https://github.com/trivoallan/surdesrails/blob/main/resources/docs/adr/SDR-0003-architecture.md), revision 1 (its `architecture.document` key). surdesrails ships an arc42 template; governance does not yet.
 - [arc42](https://arc42.org/overview): the twelve sections.
 - [LikeC4](https://likec4.dev/): architecture as code, one model and generated views.
+- [C4 model](https://c4model.com/): the context, container and component levels LikeC4 views draw.
 - [Mermaid](https://mermaid.js.org/): diagrams as text, rendered by GitHub and in the browser by the documentation site.
 - [ADR-0001](ADR-0001-record-architecture-decisions.md): how governance ADRs are ruled on.
 
