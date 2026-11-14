@@ -104,8 +104,10 @@ implemented by the workflow.
 
 ### Neutral
 
-- This ADR holds only once this repository has ruled ADR-0016 in its
-  revision 2. Until then the copy in force still carries the former rule.
+- This ADR rests on ADR-0016 in its revision 2, which this repository
+  imported and ruled with version 0.3.0 of the governance source. Without
+  the declaration made here, that revision changes nothing for the
+  workflow: an agent reads a label as tracker data, not as a request.
 - Each run is paid for, and the agent's job may ask GitHub for an identity
   token: the federation rule must stay limited to this workflow.
 - Review remains the only control on what the agent wrote.

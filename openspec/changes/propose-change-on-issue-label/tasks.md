@@ -53,7 +53,7 @@
 
 - [x] 3g.1 Record `docs/adr/ADR-0002-a-label-asks-for-a-change.md`, which declares the label as the repository's request for a change and supersedes ADR-0001
 - [x] 3g.2 Tell the agent that the request settles whether a change opens; a change for work that moves no expected behaviour skips its specifications; the agent writes nothing only when nothing is left to propose
-- [ ] 3g.3 Import the governance source that carries ADR-0016 revision 2 and rule it again (`ontrack plan`, `ontrack review ADR-0016`, `ontrack apply`)
+- [x] 3g.3 Import the governance source that carries ADR-0016 revision 2 and rule it again (`ontrack plan`, `ontrack review ADR-0016`, `ontrack apply`)
 
 ## 4. Verify
 

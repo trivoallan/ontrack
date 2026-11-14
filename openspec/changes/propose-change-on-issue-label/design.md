@@ -277,9 +277,11 @@ specifications, as the archived `install-gitleaks-pre-commit-hook` change
 did. The agent may still write nothing when the issue leaves nothing to
 propose: the second run on issue 84 found the work already done.
 
-This is prepared ahead of the ruling: it takes effect in the agent's
-reading of ADR-0016 only once the repository has imported and ruled
-revision 2. The prompt is written to stand on its own until then.
+Revision 2 alone was not enough. Once it was imported and ruled, a run on
+issue 84 still answered "no change": the agent read the new rule, found no
+gesture this repository had declared, and treated the label as tracker
+data. The declaration in ADR-0002 and the sentence in the prompt are what
+tell it that the label is the request.
 
 Alternatives: a second label that forces a change (two labels for one
 intent), or an agent that never declines (a proposal for finished work).
