@@ -44,7 +44,8 @@ at that commit, and nothing later.
    something the proposal does not explain, ask.
 7. Before each push, run the repository's tests and its governance check, and
    say what passed and what did not. Push only to the pull request's branch.
-8. Leave the pull request as a draft. The maintainer marks it ready.
+8. Do not change whether the pull request is a draft or ready for review:
+   that is the maintainer's. Do not report on it either.
 
 ## When you stop
 
@@ -56,5 +57,6 @@ maintainer asked for it by adding the label. It says, in a few lines:
 - which tasks are done and which are left;
 - what the maintainer has to do next, if anything.
 
-Write it in your own words, from what you did. Do not quote the pull request,
+Say nothing of things you did not touch and were not asked about, such as the
+pull request's draft state. Write it in your own words, from what you did. Do not quote the pull request,
 the issue, or a file you read. Say the same thing in the session.
