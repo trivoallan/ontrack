@@ -18,7 +18,7 @@
 
 ## 4. Behaviour over time and concepts
 
-- [ ] 4.1 Write `06-runtime-view.md` with two Mermaid sequence diagrams, `ontrack plan` and `ontrack apply`, following the calls made by `src/commands/plan` and `src/commands/apply`; verify both diagrams render in GitHub's preview of the branch
+- [x] 4.1 Write `06-runtime-view.md` with two Mermaid sequence diagrams, `ontrack plan` and `ontrack apply`, following the calls made by `src/commands/plan` and `src/commands/apply`; verify both diagrams render in GitHub's preview of the branch
 - [x] 4.2 Write `08-cross-cutting-concepts.md` (errors and exit codes, idempotence, the managed `AGENTS.md` block, testing); verify each concept links to its spec and restates no scenario
 
 ## 5. Decisions, quality, risks, glossary
