@@ -61,6 +61,21 @@ test('new ADR imported byte for byte', async () => {
   assert.equal(r.code, 0);
 });
 
+test('next step on stderr while ADRs are proposed, in a shell form and a prompt form', async () => {
+  const root = makeProject({ sources: { platform: { 'A.md': adr(1), 'B.md': adr(1) } } });
+  const first = await run(root, 'apply');
+  assert.equal(
+    first.stderr,
+    'next: 2 proposed ADRs to rule\n  from a shell:  claude "$(npx ontrack review)"\n  as a prompt:   Run `npx ontrack review` and follow its output.\n',
+  );
+  assert.doesNotMatch(first.stdout, /next:/);
+  writeFileSync(path.join(root, 'docs/adr/platform/A.md'), adr(1, 'accepted'));
+  const second = await run(root, 'apply');
+  assert.match(second.stderr, /^next: 1 proposed ADR to rule$/m);
+  writeFileSync(path.join(root, 'docs/adr/platform/B.md'), adr(1, 'accepted'));
+  assert.equal((await run(root, 'apply')).stderr, '');
+});
+
 // Flat-layout migration
 
 test('outside git: flat files renamed with identical content', async () => {

@@ -5,6 +5,7 @@ import type { Io } from '../cli.ts';
 import type { Argv } from 'yargs';
 import { findLinks } from '../links.ts';
 import { buildPlan, formatPlan, hasPendingChanges } from '../plan.ts';
+import { pendingAdrs } from '../review.ts';
 
 export const command = 'apply';
 export const describe = 'Import new ADRs, move flat-layout files and update AGENTS.md, as plan reports';
@@ -40,6 +41,19 @@ function agentsStep(
   return { lines: [`AGENTS.md: rules block to ${verb}`, ...(status.warning ? [status.warning] : [])], pending: true, wrote: true };
 }
 
+// The next step, on stderr so that stdout keeps the README format: imported
+// ADRs are `proposed`, which the plan no longer reports. Both forms are given,
+// since the reader is at a shell or is a coding agent.
+function nextStep(io: Io, root: string): void {
+  const n = pendingAdrs(root).length;
+  if (n === 0) return;
+  io.stderr.write(
+    `next: ${n} proposed ADR${n > 1 ? 's' : ''} to rule\n` +
+      '  from a shell:  claude "$(npx ontrack review)"\n' +
+      '  as a prompt:   Run `npx ontrack review` and follow its output.\n',
+  );
+}
+
 export function handler({
   io,
   prune,
@@ -61,9 +75,11 @@ export function handler({
 
   if (actions.length === 0 && !agents.wrote) {
     io.stdout.write(formatPlan(plan) + agents.lines.map((l) => `${l}\n`).join(''));
+    nextStep(io, root);
     return hasPendingChanges(plan) || agents.pending ? 2 : 0;
   }
   const remaining = actions.length === 0 ? plan : dryRun ? planAfter(plan, actions) : buildPlan(root);
   io.stdout.write(formatApply({ actions, links, agents: agents.lines, remaining, dryRun }));
+  nextStep(io, root);
   return hasPendingChanges(remaining) || agents.pending ? 2 : 0;
 }
