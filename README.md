@@ -382,6 +382,7 @@ pass       Branching (trivoallan/ADR-0009-branching)
 - The ADRs read, their status and their supersession are those of `instructions`. An ADR carries a check when it is `accepted`, is not superseded, and has a non-empty `check:` value. A local ADR that supersedes a source's ADR silences its check and may carry its own.
 - The command is the rest of the `check:` line. A trailing ` # comment` is removed, and so is one pair of matching quotes around the whole value. Lines below are not part of it: put a longer command in a script.
 - Commands run through the shell, from the project root, with your environment, one at a time, in reference order. A failure does not stop the run.
+- Each command also gets `ONTRACK_ADR`: the path of its ADR's file, relative to the project root, with forward slashes, the value of the `rule:` line. A script that reads the ruled traits opens that file instead of searching for it.
 - `pass`: the command exited with `0`. `fail`: anything else, including a program that is not installed. `unchecked`: the ADR carries decided traits and no `check:`, or its command exited with `78`, the code reserved for a command that has nothing to verify (a tool the decision does not use, for instance). Like a pass, its output is not printed.
 - A `fail` line is followed by the ADR's path, the command, and the command's standard output then standard error, each line after `  | `. The output of a passing command is not printed.
 - Lines are sorted by reference. The last line counts each status, and is the only line when there is nothing to report.

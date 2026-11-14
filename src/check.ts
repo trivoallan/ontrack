@@ -20,7 +20,14 @@ export function runChecks(root: string): CheckResult[] {
     .map((adr): CheckResult => {
       if (!adr.check) return { adr, status: 'unchecked', output: [] };
       // ponytail: sequential and without timeout; CI has its own.
-      const r = spawnSync(adr.check, { shell: true, cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+      const r = spawnSync(adr.check, {
+        shell: true,
+        cwd: root,
+        // The command learns which ADR it enforces: the path of the `rule:` line.
+        env: { ...process.env, ONTRACK_ADR: adr.path },
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
       if (r.status === 0) return { adr, status: 'pass', output: [] };
       // Reserved (EX_CONFIG): the command had nothing to verify for this verdict.
       if (r.status === 78) return { adr, status: 'unchecked', output: [] };
