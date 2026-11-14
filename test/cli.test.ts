@@ -1,8 +1,9 @@
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { main } from '../src/cli.mjs';
-import { adr, cleanup, makeProject, makeTree } from './helpers/project.mjs';
+import { main } from '../src/cli.ts';
+import type { Command } from '../src/cli.ts';
+import { adr, cleanup, makeProject, makeTree } from './helpers/project.ts';
 
 after(cleanup);
 
@@ -10,19 +11,19 @@ const { version } = JSON.parse(
   readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
 );
 
-async function runWith(commands, argv, cwd = process.cwd()) {
+async function runWith(commands: Command[] | undefined, argv: string[], cwd = process.cwd()) {
   let stdout = '';
   let stderr = '';
   const io = {
     cwd: () => cwd,
-    stdout: { write: (s) => { stdout += s; } },
-    stderr: { write: (s) => { stderr += s; } },
+    stdout: { write: (s: string) => { stdout += s; } },
+    stderr: { write: (s: string) => { stderr += s; } },
   };
   const code = await main(argv, io, commands);
   return { code, stdout, stderr };
 }
 
-const run = (...argv) => runWith(undefined, argv);
+const run = (...argv: string[]) => runWith(undefined, argv);
 
 for (const args of [['--help'], ['-h'], []]) {
   test(`help: ontrack ${args.join(' ') || '(no argument)'}`, async () => {

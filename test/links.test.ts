@@ -2,12 +2,12 @@ import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { findLinks } from '../src/links.mjs';
-import { cleanup, makeTree } from './helpers/project.mjs';
+import { findLinks } from '../src/links.ts';
+import { cleanup, makeTree } from './helpers/project.ts';
 
 after(cleanup);
 
-const move = (root, file) => ({
+const move = (root: string, file: string) => ({
   from: path.join(root, 'docs/adr', file),
   to: path.join(root, 'docs/adr/platform', file),
 });

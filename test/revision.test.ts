@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readRevision, compareRevision, readTitle, setRevision } from '../src/revision.mjs';
+import { readRevision, compareRevision, readTitle, setRevision } from '../src/revision.ts';
 
-const adr = (...frontmatter) => ['---', ...frontmatter, '---', '', '# Title', ''].join('\n');
+const adr = (...frontmatter: string[]) => ['---', ...frontmatter, '---', '', '# Title', ''].join('\n');
 
 // Bounded frontmatter
 

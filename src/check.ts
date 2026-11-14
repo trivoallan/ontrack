@@ -2,7 +2,10 @@
 // (`check:`). ontrack judges nothing itself: it links a failed tool back to
 // the decision it enforces.
 import { spawnSync } from 'node:child_process';
-import { adrsInForce, heading } from './instructions.mjs';
+import { adrsInForce, heading } from './instructions.ts';
+import type { Adr } from './instructions.ts';
+
+export type CheckResult = { adr: Adr; status: 'pass' | 'fail' | 'unchecked'; output: string[] };
 
 /**
  * One { adr, status, output } per ADR in force that has a check or decided
@@ -10,23 +13,23 @@ import { adrsInForce, heading } from './instructions.mjs';
  * holds the lines a failed command printed. Throws, before running anything,
  * when the traits conflict.
  */
-export function runChecks(root) {
+export function runChecks(root: string): CheckResult[] {
   return adrsInForce(root)
     .filter((adr) => adr.check || adr.traits)
-    .map((adr) => {
+    .map((adr): CheckResult => {
       if (!adr.check) return { adr, status: 'unchecked', output: [] };
       // ponytail: sequential and without timeout; CI has its own.
       const r = spawnSync(adr.check, { shell: true, cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
       if (r.status === 0) return { adr, status: 'pass', output: [] };
       const output = [r.stdout, r.stderr].join('').split('\n');
-      while (output.length > 0 && output.at(-1).trim() === '') output.pop();
+      while (output.length > 0 && output[output.length - 1].trim() === '') output.pop();
       return { adr, status: 'fail', output };
     });
 }
 
 /** The contract output (see README). */
-export function formatChecks(results) {
-  const lines = [];
+export function formatChecks(results: CheckResult[]): string {
+  const lines: string[] = [];
   const count = { fail: 0, pass: 0, unchecked: 0 };
   for (const { adr, status, output } of results) {
     count[status] += 1;

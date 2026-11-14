@@ -2,26 +2,26 @@ import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import { agentsStatus, writeAgents } from '../src/agents.mjs';
-import { buildInstructions, formatInstructions } from '../src/instructions.mjs';
-import { main } from '../src/cli.mjs';
-import { adr, cleanup, makeProject, makeTree, withAgents } from './helpers/project.mjs';
+import { agentsStatus, writeAgents } from '../src/agents.ts';
+import { buildInstructions, formatInstructions } from '../src/instructions.ts';
+import { main } from '../src/cli.ts';
+import { adr, cleanup, makeProject, makeTree, withAgents } from './helpers/project.ts';
 
 after(cleanup);
 
 const decided = (key = 'commits') =>
   ['---', 'status: accepted', 'revision: 1', 'traits:', `  ${key}:`, '    tool: commitlint', '---', '', '# Commits', ''].join('\n');
-const block = (root) => formatInstructions(buildInstructions(root));
-const read = (root, rel = 'AGENTS.md') => readFileSync(path.join(root, rel), 'utf8');
+const block = (root: string) => formatInstructions(buildInstructions(root));
+const read = (root: string, rel = 'AGENTS.md') => readFileSync(path.join(root, rel), 'utf8');
 const WARNING = 'AGENTS.md: not read by Claude Code while CLAUDE.md exists; add a line "@AGENTS.md" to CLAUDE.md';
 
-async function run(root, ...argv) {
+async function run(root: string, ...argv: string[]) {
   let stdout = '';
   let stderr = '';
   const io = {
     cwd: () => root,
-    stdout: { write: (s) => { stdout += s; } },
-    stderr: { write: (s) => { stderr += s; } },
+    stdout: { write: (s: string) => { stdout += s; } },
+    stderr: { write: (s: string) => { stderr += s; } },
   };
   const code = await main(argv, io);
   return { code, stdout, stderr };
@@ -151,7 +151,9 @@ test('CRLF file without markers gets a CRLF block', async () => {
 
 test('a block ending the file without a newline stays that way', () => {
   const root = makeTree({ 'package.json': '{}', 'docs/adr/0001.md': decided(), 'AGENTS.md': '<!-- ontrack:begin -->\nold\n<!-- ontrack:end -->' });
-  assert.equal(writeAgents(agentsStatus(root)), 'updated');
+  const status = agentsStatus(root);
+  assert.ok(status.state === 'out of date');
+  assert.equal(writeAgents(status), 'updated');
   assert.equal(read(root), block(root).trimEnd());
 });
 

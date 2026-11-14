@@ -1,22 +1,24 @@
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { buildPlan, formatPlan, hasPendingChanges } from '../src/plan.mjs';
-import { main } from '../src/cli.mjs';
-import { adr, cleanup, makeProject, makeTree, withAgents } from './helpers/project.mjs';
+import { buildPlan, formatPlan, hasPendingChanges } from '../src/plan.ts';
+import type { Plan } from '../src/plan.ts';
+import { main } from '../src/cli.ts';
+import { adr, cleanup, makeProject, makeTree, withAgents } from './helpers/project.ts';
+import type { Files } from './helpers/project.ts';
 
 after(cleanup);
 
-const categories = (plan) =>
+const categories = (plan: Plan) =>
   Object.fromEntries(plan[0].adrs.map((a) => [a.name, a.category]));
 
-async function plan(root) {
+async function plan(root: string) {
   let stdout = '';
   let stderr = '';
   const io = {
     cwd: () => root,
-    stdout: { write: (s) => { stdout += s; } },
-    stderr: { write: (s) => { stderr += s; } },
+    stdout: { write: (s: string) => { stdout += s; } },
+    stderr: { write: (s: string) => { stderr += s; } },
   };
   const code = await main(['plan'], io);
   return { code, stdout, stderr };
@@ -109,8 +111,8 @@ test('a single migrated file is singular', () => {
 // Output format
 
 test('nothing to do', async () => {
-  const sources = { platform: {} };
-  const local = {};
+  const sources: Record<string, Files> = { platform: {} };
+  const local: Files = {};
   for (let i = 1; i <= 14; i += 1) {
     sources.platform[`SDR-${i}.md`] = adr(1);
     local[`docs/adr/platform/SDR-${i}.md`] = adr(1);
@@ -121,8 +123,8 @@ test('nothing to do', async () => {
 });
 
 test('mixed source: counts in contract order', () => {
-  const sources = { platform: { 'N.md': adr(1), 'R1.md': adr(2), 'R2.md': adr(2) } };
-  const local = { 'docs/adr/platform/R1.md': adr(1), 'docs/adr/platform/R2.md': adr(1) };
+  const sources: Record<string, Files> = { platform: { 'N.md': adr(1), 'R1.md': adr(2), 'R2.md': adr(2) } };
+  const local: Files = { 'docs/adr/platform/R1.md': adr(1), 'docs/adr/platform/R2.md': adr(1) };
   for (let i = 1; i <= 11; i += 1) {
     sources.platform[`U${i}.md`] = adr(1);
     local[`docs/adr/platform/U${i}.md`] = adr(1);
@@ -152,14 +154,15 @@ test('no source', async () => {
 
 test('the README example is what formatPlan prints', () => {
   const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
-  const example = /```\n(platform: [\s\S]*?)```/.exec(readme)[1];
-  const p = [{
+  const example = /```\n(platform: [\s\S]*?)```/.exec(readme)?.[1];
+  const p: Plan = [{
     namespace: 'platform',
+    adrDir: 'node_modules/platform/adr',
     adrs: [
-      { name: 'SDR-0001.md', category: 'unchanged' },
-      { name: 'SDR-0003.md', category: 'unchanged' },
+      { name: 'SDR-0001.md', category: 'unchanged', title: null },
+      { name: 'SDR-0003.md', category: 'unchanged', title: null },
       { name: 'SDR-0006.md', category: 'revised', title: 'Commits', from: 1, to: 2 },
-      { name: 'SDR-0008.md', category: 'unchanged' },
+      { name: 'SDR-0008.md', category: 'unchanged', title: null },
       { name: 'SDR-0010.md', category: 'revised', title: 'Forge and CI', from: 3, to: 4 },
       { name: 'SDR-0015.md', category: 'new', title: 'Observability' },
     ],

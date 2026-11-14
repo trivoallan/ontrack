@@ -2,14 +2,15 @@ import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
-import { formatReview, formatSequence, pendingAdrs, selectAdr } from '../src/review.mjs';
-import { main } from '../src/cli.mjs';
-import { cleanup, makeTree } from './helpers/project.mjs';
+import { formatReview, formatSequence, pendingAdrs, selectAdr } from '../src/review.ts';
+import { main } from '../src/cli.ts';
+import type { Adr } from '../src/instructions.ts';
+import { cleanup, makeTree } from './helpers/project.ts';
 
 after(cleanup);
 
 /** An ADR with the given frontmatter lines and, unless null, a `# title` heading. */
-const adr = (title, ...frontmatter) =>
+const adr = (title: string | null, ...frontmatter: string[]) =>
   ['---', ...frontmatter, '---', '', ...(title === null ? [] : [`# ${title}`, '']), 'Body.', ''].join('\n');
 
 const COMMITS = 'docs/adr/trivoallan/ADR-0006-commits.md';
@@ -24,26 +25,26 @@ const tree = () =>
     [COMMITS]: adr('Commits', 'adr: ADR-0006', 'status: proposed'),
   });
 
-async function review(root, ...args) {
+async function review(root: string, ...args: string[]) {
   let stdout = '';
   let stderr = '';
   const io = {
     cwd: () => root,
-    stdout: { write: (s) => { stdout += s; } },
-    stderr: { write: (s) => { stderr += s; } },
+    stdout: { write: (s: string) => { stdout += s; } },
+    stderr: { write: (s: string) => { stderr += s; } },
   };
   const code = await main(['review', ...args], io);
   return { code, stdout, stderr };
 }
 
-function snapshot(dir, base = dir) {
+function snapshot(dir: string, base = dir): [string, string][] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
     const full = path.join(dir, e.name);
     return e.isDirectory() ? snapshot(full, base) : [[path.relative(base, full), readFileSync(full, 'utf8')]];
   });
 }
 
-const refs = (adrs) => adrs.map((a) => a.ref);
+const refs = (adrs: Adr[]) => adrs.map((a) => a.ref);
 
 // Every pending ADR
 
@@ -70,7 +71,7 @@ test('pending: nothing pending, or no docs/adr/, gives none', () => {
 });
 
 test('a conflict between decided ADRs does not stop the review', () => {
-  const decided = (title) => adr(title, 'status: accepted', 'traits:', '  commits:', '    tool: commitlint');
+  const decided = (title: string) => adr(title, 'status: accepted', 'traits:', '  commits:', '    tool: commitlint');
   const root = makeTree({
     [COMMITS]: decided('Commits'),
     'docs/adr/ADR-0012-commits.md': decided('Commits again'),
@@ -99,7 +100,7 @@ test('named: ambiguous lists both references', () => {
   });
   assert.throws(
     () => selectAdr(root, 'ADR-0006'),
-    (err) => err.message.includes('local/ADR-0006-release') && err.message.includes('trivoallan/ADR-0006-commits'),
+    (err) => err instanceof Error && err.message.includes('local/ADR-0006-release') && err.message.includes('trivoallan/ADR-0006-commits'),
   );
 });
 
@@ -139,7 +140,7 @@ test('prompt: same text for every ADR, and an untitled ADR is named by its path'
   });
   const a = selectAdr(root, 'ADR-0006-commits');
   const b = selectAdr(root, 'ADR-0020-release');
-  const strip = (x) => formatReview(x).replace(x.path, '').replace(x.title ? ` (${x.title})` : '', '');
+  const strip = (x: Adr) => formatReview(x).replace(x.path, '').replace(x.title ? ` (${x.title})` : '', '');
   assert.equal(strip(a), strip(b));
   assert.ok(formatReview({ ...b, title: '' }).includes(`\`${RELEASE}\`.`));
 });
@@ -161,7 +162,7 @@ test('sequence: the next ADR comes after agreement and apply', () => {
 });
 
 test('sequence: same steps as the single prompt, and a list of one', () => {
-  const steps = (out) => out.slice(out.indexOf('1. '), out.indexOf('AGENTS.md.') + 10);
+  const steps = (out: string) => out.slice(out.indexOf('1. '), out.indexOf('AGENTS.md.') + 10);
   const root = makeTree({ [LOCALIZATION]: adr('Localization', 'status: proposed') });
   const sequence = formatSequence(pendingAdrs(root));
   assert.equal(steps(sequence), steps(formatReview(selectAdr(root, 'ADR-0002-localization'))));
@@ -177,7 +178,7 @@ test('prompt: both forms ask for agreement with a question tool when there is on
 test('prompt: both forms end with tracking items, proposed after the whole review', () => {
   const single = formatReview(selectAdr(tree(), 'ADR-0006'));
   const sequence = formatSequence(pendingAdrs(tree()));
-  const tail = (out) => out.slice(out.indexOf('Once every ADR is ruled'));
+  const tail = (out: string) => out.slice(out.indexOf('Once every ADR is ruled'));
   for (const out of [single, sequence]) {
     const at = out.indexOf('Once every ADR is ruled');
     assert.ok(at > out.indexOf('npx ontrack apply'));

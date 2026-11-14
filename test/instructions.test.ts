@@ -2,31 +2,32 @@ import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
-import { buildInstructions, formatInstructions } from '../src/instructions.mjs';
-import { main } from '../src/cli.mjs';
-import { cleanup, makeProject, makeTree } from './helpers/project.mjs';
+import { buildInstructions, formatInstructions } from '../src/instructions.ts';
+import type { Adr } from '../src/instructions.ts';
+import { main } from '../src/cli.ts';
+import { cleanup, makeProject, makeTree } from './helpers/project.ts';
 
 after(cleanup);
 
 /** An ADR with the given frontmatter lines and a `# title` heading. */
-const adr = (title, ...frontmatter) => ['---', ...frontmatter, '---', '', `# ${title}`, '', 'Body.', ''].join('\n');
+const adr = (title: string, ...frontmatter: string[]) => ['---', ...frontmatter, '---', '', `# ${title}`, '', 'Body.', ''].join('\n');
 
-const commits = (...extra) =>
+const commits = (...extra: string[]) =>
   adr('Commits', 'adr: ADR-0006', 'status: accepted', ...extra, 'traits:', '  commits:', '    scopes: [api, cli, docs]', '    tool: commitlint');
 
-async function instructions(root) {
+async function instructions(root: string) {
   let stdout = '';
   let stderr = '';
   const io = {
     cwd: () => root,
-    stdout: { write: (s) => { stdout += s; } },
-    stderr: { write: (s) => { stderr += s; } },
+    stdout: { write: (s: string) => { stdout += s; } },
+    stderr: { write: (s: string) => { stderr += s; } },
   };
   const code = await main(['instructions'], io);
   return { code, stdout, stderr };
 }
 
-const refs = (adrs) => adrs.map((a) => a.ref);
+const refs = (adrs: Adr[]) => adrs.map((a) => a.ref);
 
 // ADRs read
 
@@ -202,7 +203,7 @@ test('the README example: one decided, one pending', async () => {
     'docs/adr/trivoallan/ADR-0002-localization.md': adr('Localization', 'status: proposed'),
   });
   const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
-  const example = /~~~\n(<!-- ontrack:begin -->[\s\S]*?)~~~/.exec(readme)[1];
+  const example = /~~~\n(<!-- ontrack:begin -->[\s\S]*?)~~~/.exec(readme)?.[1];
   const r = await instructions(root);
   assert.equal(r.stdout, example);
   assert.equal(r.code, 0);
@@ -226,7 +227,7 @@ test('nothing decided, nothing pending: the block is still printed', async () =>
 
 // Read-only
 
-function snapshot(dir, base = dir, out = {}) {
+function snapshot(dir: string, base = dir, out: Record<string, string> = {}) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) snapshot(full, base, out);

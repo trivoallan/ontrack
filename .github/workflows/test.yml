@@ -18,16 +18,20 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - run: npm run typecheck
       - run: npm test
+      - run: npm run build
+      # The tests run the sources; this is the check of what an install ships.
+      - run: node dist/bin/ontrack.js --help
 
-  node-20:
+  # The lowest supported Node (engines in package.json).
+  node-22:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
-          node-version: '20.19'
+          node-version: '22.18'
           cache: npm
       - run: npm ci
-      # Coverage thresholds need Node 22.8+; check behavior only.
-      - run: node --test
+      - run: npm test

@@ -1,30 +1,48 @@
 import { spawnSync } from 'node:child_process';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { formatPlan, hasPendingChanges, label, row, stem } from './plan.mjs';
-import { setRevision } from './revision.mjs';
+import type { Link } from './links.ts';
+import { formatPlan, hasPendingChanges, label, row, stem } from './plan.ts';
+import type { Plan, PlannedAdr, SourcePlan } from './plan.ts';
+import { setRevision } from './revision.ts';
 
-const KINDS = ['imported', 'moved', 'confirmed', 'pruned'];
+// An undetermined ADR whose upstream copy carries a revision to adopt.
+type ConfirmableAdr = PlannedAdr & { to: number };
+type Target = { source: SourcePlan; to: string };
+export type Action =
+  | (Target & { kind: 'imported'; adr: PlannedAdr; from: string })
+  | (Target & { kind: 'moved'; file: string; from: string })
+  | (Target & { kind: 'confirmed'; adr: ConfirmableAdr })
+  | (Target & { kind: 'pruned'; adr: PlannedAdr });
+type Kind = Action['kind'];
+
+const KINDS: Kind[] = ['imported', 'moved', 'confirmed', 'pruned'];
+const confirmable = (adr: PlannedAdr): adr is ConfirmableAdr =>
+  adr.category === 'undetermined' && typeof adr.to === 'number';
 
 /**
  * The actions `apply` would take on `plan`, checked before anything is
  * written. Throws on a `--confirm` name it cannot honor or a taken target.
  */
-export function planActions(root, plan, { prune = false, confirm = [] } = {}) {
+export function planActions(
+  root: string,
+  plan: Plan,
+  { prune = false, confirm = [] }: { prune?: boolean; confirm?: string[] } = {},
+): Action[] {
   const all = confirm.includes('all');
   const wanted = new Set(confirm.filter((n) => n !== 'all').map(stem));
-  const confirmed = new Set();
-  const actions = [];
+  const confirmed = new Set<string>();
+  const actions: Action[] = [];
 
   for (const source of plan) {
     const dir = path.join(root, 'docs', 'adr', source.namespace);
-    const at = (name) => path.join(dir, name);
+    const at = (name: string) => path.join(dir, name);
     for (const adr of source.adrs) {
       if (adr.category === 'new') {
         actions.push({ kind: 'imported', source, adr, from: path.join(source.adrDir, adr.name), to: at(adr.name) });
       } else if (adr.category === 'removed' && prune) {
         actions.push({ kind: 'pruned', source, adr, to: at(adr.name) });
-      } else if (adr.category === 'undetermined' && adr.to !== null && (all || wanted.has(stem(adr.name)))) {
+      } else if (confirmable(adr) && (all || wanted.has(stem(adr.name)))) {
         actions.push({ kind: 'confirmed', source, adr, to: at(adr.name) });
         confirmed.add(stem(adr.name));
       }
@@ -47,13 +65,13 @@ export function planActions(root, plan, { prune = false, confirm = [] } = {}) {
   return actions.sort((a, b) => KINDS.indexOf(a.kind) - KINDS.indexOf(b.kind));
 }
 
-function insideGitWorkTree(root) {
+function insideGitWorkTree(root: string): boolean {
   const r = spawnSync('git', ['rev-parse', '--is-inside-work-tree'], { cwd: root, encoding: 'utf8' });
   return r.status === 0 && r.stdout.trim() === 'true';
 }
 
 /** Executes checked actions, in order: import, move, confirm, prune. */
-export function runActions(root, actions) {
+export function runActions(root: string, actions: Action[]): void {
   const git = insideGitWorkTree(root);
   for (const a of actions) {
     if (a.kind !== 'pruned') mkdirSync(path.dirname(a.to), { recursive: true });
@@ -68,31 +86,43 @@ export function runActions(root, actions) {
 }
 
 /** The plan `actions` would leave, without running them (for `--dry-run`). */
-export function planAfter(plan, actions) {
-  const done = new Set(actions.filter((a) => a.adr && a.kind !== 'pruned').map((a) => a.adr));
-  const pruned = new Set(actions.filter((a) => a.kind === 'pruned').map((a) => a.adr));
+export function planAfter(plan: Plan, actions: Action[]): Plan {
+  const done = new Set(actions.flatMap((a) => (a.kind === 'imported' || a.kind === 'confirmed' ? [a.adr] : [])));
+  const pruned = new Set(actions.flatMap((a) => (a.kind === 'pruned' ? [a.adr] : [])));
   return plan.map((source) => ({
     ...source,
     adrs: source.adrs
       .filter((adr) => !pruned.has(adr))
-      .map((adr) => (done.has(adr) ? { ...adr, category: 'unchanged' } : adr)),
+      .map((adr): PlannedAdr => (done.has(adr) ? { ...adr, category: 'unchanged' } : adr)),
     migration: [],
   }));
 }
 
-function actionLine(a) {
+function actionLine(a: Action): string {
   if (a.kind === 'moved') return row('moved', a.file);
   if (a.kind === 'confirmed') return row('confirmed', `${label(a.adr)} (revision ${a.adr.to})`);
   return row(a.kind, label(a.adr));
 }
 
 /** The `apply` output (see README). */
-export function formatApply({ actions, links, agents = [], remaining, dryRun }) {
+export function formatApply({
+  actions,
+  links,
+  agents = [],
+  remaining,
+  dryRun,
+}: {
+  actions: Action[];
+  links: Link[];
+  agents?: string[];
+  remaining: Plan;
+  dryRun?: boolean;
+}): string {
   const lines = dryRun ? ['dry run: nothing written'] : [];
   const sources = [...new Set(actions.map((a) => a.source.namespace))];
   for (const namespace of sources) {
     const mine = actions.filter((a) => a.source.namespace === namespace);
-    const counts = KINDS.map((k) => [k, mine.filter((a) => a.kind === k).length]).filter(([, n]) => n > 0);
+    const counts = KINDS.map((k): [Kind, number] => [k, mine.filter((a) => a.kind === k).length]).filter(([, n]) => n > 0);
     lines.push(`${namespace}: ${counts.map(([k, n]) => `${n} ${k}`).join(', ')}`);
     lines.push(...mine.map(actionLine));
   }

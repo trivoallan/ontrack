@@ -85,6 +85,18 @@ sources and consumers run `dist/`, CI runs `node dist/bin/ontrack.js
 is the whole check of the emitted code: `tsc` output of erasable-only syntax
 is the source minus its types.
 
+**`package.json` is imported, not read from disk.** `cli.ts` read its version
+through a path relative to itself, which the compiled `dist/src/cli.js` no
+longer reaches. It now imports `../package.json` as a JSON module
+(`resolveJsonModule`), which Node runs natively and `tsc` copies to
+`dist/package.json`: the tarball holds that one extra file. Alternative:
+`module.findPackageJSON`, still marked as in active development.
+
+**`@types/yargs` is a dev dependency.** yargs 18 ships no declarations for
+Node. The options a command's builder declares and the arguments its handler
+receives are linked only by yargs at run time: `cli.ts` casts once, where it
+calls the handler, and nowhere else.
+
 **Strict mode from the first commit, no `any` escape hatches added to make
 it pass.** The existing JSDoc types (`discoverSources`, `compareRevision`)
 become real signatures. Where the compiler finds a genuine hole, the fix
