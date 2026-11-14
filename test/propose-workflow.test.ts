@@ -51,10 +51,10 @@ const proposal = {
  * small repository. `gh` is a stub that logs its arguments; `origin` is a bare
  * repository, so the push is real.
  */
-function publish(change: (repo: string) => void, name = 'my-change') {
+function publish(change: (repo: string) => void, name = 'my-change', opts: { env?: Record<string, string>; agents?: string } = {}) {
   const root = makeTree({
     'repo/package.json': '{}\n',
-    'repo/AGENTS.md': 'rules\n',
+    'repo/AGENTS.md': opts.agents ?? 'rules\n',
     'repo/.githooks/pre-commit': 'hook\n',
     'repo/docs/adr/ADR-0001-a.md': 'a\n',
     'repo/test/a.test.ts': '\n',
@@ -93,6 +93,7 @@ function publish(change: (repo: string) => void, name = 'my-change') {
       GITHUB_OUTPUT: path.join(root, 'output'),
       GH_LOG: ghLog,
       PATH: `${path.join(root, 'bin')}${path.delimiter}${process.env.PATH}`,
+      ...opts.env,
     },
   });
   return {
@@ -269,4 +270,99 @@ test('an agent that says it was blocked fails the run instead of reporting nothi
   assert.equal(run.status, 1);
   assert.match(run.stdout, /::error::the agent could not write the change/);
   assert.match(readFileSync(path.join(root, 'summary'), 'utf8'), /a command was refused/);
+});
+
+/** An `AGENTS.md` that declares traits, as ontrack writes it. */
+const agents = (yaml: string) => `## Project rules (ontrack)\n\n### A rule\n\n\`\`\`yaml\n${yaml}\n\`\`\`\n`;
+
+/** Runs the `catalog` step of `draft` and returns its status and outputs. */
+function catalog(frameworks: string | undefined, agentsFile?: string) {
+  const root = makeTree(agentsFile === undefined ? { '.keep': '' } : { 'AGENTS.md': agentsFile });
+  const output = path.join(root, 'output');
+  const run = spawnSync('bash', ['-e', '-c', stepScript('catalog')], {
+    cwd: root,
+    encoding: 'utf8',
+    env: { ...process.env, GITHUB_OUTPUT: output, ...(frameworks === undefined ? {} : { FRAMEWORKS: frameworks }) },
+  });
+  const out = run.status === 0 ? readFileSync(output, 'utf8') : '';
+  return { status: run.status, stdout: run.stdout, out: (key: string) => out.match(new RegExp(`^${key}=(.*)$`, 'm'))?.[1] ?? '' };
+}
+
+test('by default the catalog enables OpenSpec and ADRs under docs/adr', () => {
+  const r = catalog(undefined);
+  assert.equal(r.status, 0, r.stdout);
+  assert.equal(r.out('openspec'), 'true');
+  assert.match(r.out('allowed'), /Edit\(openspec\/changes\/\*\*\)/);
+  assert.match(r.out('allowed'), /Edit\(docs\/adr\/\*\*\)/);
+  assert.equal(r.out('writes'), '`openspec/changes/` and `docs/adr/`');
+});
+
+test('an entry outside the catalog fails before the agent', () => {
+  const r = catalog('openspec,speckit$(id)');
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /::error::not in the catalog: speckitid$/m);
+  assert.equal(catalog(' , ').status, 1);
+});
+
+test('OpenSpec alone gives the agent no ADR directory and installs the command line', () => {
+  const r = catalog('openspec');
+  assert.equal(r.status, 0, r.stdout);
+  assert.doesNotMatch(r.out('allowed'), /docs\/adr/);
+  assert.match(r.out('allowed'), /Bash\(openspec validate:\*\)/);
+});
+
+test('ADRs alone give the agent no change framework and install nothing', () => {
+  const r = catalog('adr');
+  assert.equal(r.status, 0, r.stdout);
+  assert.equal(r.out('openspec'), 'false');
+  assert.doesNotMatch(r.out('allowed'), /openspec/);
+  assert.equal(r.out('writes'), '`docs/adr/`');
+});
+
+test('a changes trait that names a framework the run does not enable fails before the agent', () => {
+  assert.equal(catalog('adr', agents('changes:\n  framework: openspec\n  schema: spec-driven')).status, 1);
+  assert.equal(catalog('openspec,adr', agents('changes:\n  framework: speckit')).status, 1);
+  assert.equal(catalog('openspec', agents('changes:\n  framework: "openspec"  # quoted')).status, 0);
+});
+
+test('the ADR directory comes from its trait, and must stay inside the repository and out of steering files', () => {
+  const dir = (value: string) => catalog('openspec,adr', agents(`record-architecture-decisions:\n  format: nygard\n  directory: ${value}`));
+  assert.match(dir('decisions/').out('allowed'), /Edit\(decisions\/\*\*\)/);
+  for (const bad of ['../elsewhere', 'docs/../..', '.github/adr', '.claude', 'node_modules/x', '/etc', 'a b', '$(id)']) {
+    assert.equal(dir(bad).status, 1, bad);
+  }
+});
+
+test('publish refuses an ADR when only OpenSpec is enabled, and a change when only ADRs are', () => {
+  const openspecOnly = publish(() => {}, 'my-change', { env: { FRAMEWORKS: 'openspec' } });
+  assert.notEqual(openspecOnly.status, 0);
+  assert.match(openspecOnly.output, /::error::refused: A 100644 docs\/adr\/ADR-0002-new-thing\.md/);
+  const adrOnly = publish(() => {}, 'my-change', { env: { FRAMEWORKS: 'adr' } });
+  assert.notEqual(adrOnly.status, 0);
+  assert.match(adrOnly.output, /::error::refused: A 100644 openspec\/changes\/my-change\//);
+  assert.deepEqual([...openspecOnly.branches, ...adrOnly.branches], []);
+});
+
+test('publish accepts ADRs only in the directory the trait names', () => {
+  const trait = agents('record-architecture-decisions:\n  directory: decisions');
+  const moved = (repo: string) => {
+    mkdirSync(path.join(repo, 'decisions'), { recursive: true });
+    writeFileSync(path.join(repo, 'decisions/ADR-0002-new-thing.md'), '# x\n');
+    rmSync(path.join(repo, 'docs/adr/ADR-0002-new-thing.md'));
+  };
+  assert.equal(publish(moved, 'my-change', { agents: trait }).status, 0);
+  assert.notEqual(publish(() => {}, 'my-change', { agents: trait }).status, 0);
+  const checked = (repo: string) => {
+    moved(repo);
+    writeFileSync(path.join(repo, 'decisions/ADR-0002-new-thing.md'), '---\ncheck: x\n---\n');
+  };
+  assert.match(publish(checked, 'my-change', { agents: trait }).output, /declares a check command/);
+});
+
+test('a caller names its own label, which reaches the scripts only through the environment', () => {
+  assert.equal(workflow.match(/github\.event\.label\.name == \(inputs\.label \|\| 'ontrack:propose'\)/g)?.length, 2);
+  for (const line of workflow.split('\n').filter((l) => l.includes('inputs.'))) {
+    assert.match(line, /^\s*(if|LABEL|FRAMEWORKS): /, line);
+  }
+  assert.match(workflow, /--remove-label "\$LABEL"$/m);
 });

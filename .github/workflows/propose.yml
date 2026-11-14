@@ -15,10 +15,25 @@ name: propose
 #
 # The prompt names no change framework: the agent reads the `changes` trait of
 # AGENTS.md (ADR-0016). The permission rules of `draft` and the path filter of
-# `publish` do name it: a filter that knows no path filters nothing.
+# `publish` do name it: a filter that knows no path filters nothing. They come
+# from a closed catalog, below.
+#
+# docs/adr/ADR-0004-other-repositories-call-the-propose-and-apply-workflows.md:
+# other repositories call this workflow by commit SHA. They choose catalog
+# entries by name and never pass a path, a pattern or a tool rule.
 on:
   issues:
     types: [labeled]
+  workflow_call:
+    inputs:
+      label:
+        description: The label that asks for a proposal.
+        type: string
+        default: 'ontrack:propose'
+      frameworks:
+        description: Comma-separated catalog entries the agent may write for (openspec, adr).
+        type: string
+        default: 'openspec,adr'
 
 permissions: {}
 
@@ -33,7 +48,7 @@ jobs:
     # that can reach the model provider read it too. The agent action also refuses an actor
     # without write access.
     # Open issues only: a closed issue asks for nothing.
-    if: github.event.label.name == 'ontrack:propose' && github.event.issue.state == 'open'
+    if: github.event.label.name == (inputs.label || 'ontrack:propose') && github.event.issue.state == 'open'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -53,6 +68,77 @@ jobs:
         with:
           persist-credentials: false
 
+      # The catalog: the only frameworks the agent may write for, and what
+      # each one allows. A caller picks entries by name; anything else fails
+      # here, before anything that costs. The `changes` trait of AGENTS.md
+      # must name an enabled entry. The ADR directory comes from the
+      # `record-architecture-decisions.directory` trait, `docs/adr` without
+      # it, and must stay inside the repository and out of the files that
+      # steer an agent or run on a contributor's machine.
+      # The `pr` step of `publish` reads the same traits again: it trusts
+      # nothing this job hands over.
+      - id: catalog
+        env:
+          FRAMEWORKS: ${{ inputs.frameworks || 'openspec,adr' }}
+        run: |
+          trait() {
+            [ -f AGENTS.md ] || return 0
+            awk -v top="$1" -v key="$2" '
+              /^```yaml[[:space:]]*$/ { y = 1; t = ""; next }
+              /^```[[:space:]]*$/ { y = 0; next }
+              y && /^[^[:space:]#][^:]*:/ { t = $0; sub(/:.*/, "", t); next }
+              y && t == top && $0 ~ ("^[[:space:]]+" key ":") {
+                v = $0; sub(/^[^:]*:[[:space:]]*/, "", v); sub(/[[:space:]]+#.*$/, "", v)
+                gsub(/^["\047]|["\047]$/, "", v); print v; exit
+              }' AGENTS.md
+          }
+          openspec=false; adr=false
+          IFS=',' read -ra names <<< "${FRAMEWORKS:-openspec,adr}"
+          for name in "${names[@]}"; do
+            name="${name//[[:space:]]/}"
+            case "$name" in
+              openspec) openspec=true ;;
+              adr) adr=true ;;
+              *) echo "::error::not in the catalog: $(printf '%s' "$name" | tr -cd 'A-Za-z0-9_-' | head -c 40)"; exit 1 ;;
+            esac
+          done
+          if [ "$openspec" != true ] && [ "$adr" != true ]; then
+            echo "::error::no catalog entry is enabled"
+            exit 1
+          fi
+          framework=$(trait changes framework)
+          if [ -n "$framework" ]; then
+            case "$framework" in
+              openspec) [ "$openspec" = true ] ;;
+              adr) [ "$adr" = true ] ;;
+              *) false ;;
+            esac || { echo "::error::the changes trait names a framework this run does not enable: $(printf '%s' "$framework" | tr -cd 'A-Za-z0-9_-' | head -c 40)"; exit 1; }
+          fi
+          dir=$(trait record-architecture-decisions directory)
+          dir="${dir:-docs/adr}"
+          dir="${dir%/}"
+          if [[ ! "$dir" =~ ^[A-Za-z0-9_-][A-Za-z0-9._-]*(/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$ ]] \
+            || [[ "/$dir/" == */../* ]] \
+            || [[ "$dir" =~ ^(\.github|\.claude|\.githooks|node_modules)(/|$) ]]; then
+            echo "::error::the ADR directory trait is not a directory this run may write to"
+            exit 1
+          fi
+          allowed="Glob,Grep,Skill"
+          writes=()
+          if [ "$openspec" = true ]; then
+            allowed="$allowed,Edit(openspec/changes/**),Bash(openspec --version),Bash(openspec list:*),Bash(openspec context:*),Bash(openspec new change:*),Bash(openspec status:*),Bash(openspec instructions:*),Bash(openspec validate:*),Bash(openspec schemas:*)"
+            writes+=("\`openspec/changes/\`")
+          fi
+          if [ "$adr" = true ]; then
+            allowed="$allowed,Edit($dir/**)"
+            writes+=("\`$dir/\`")
+          fi
+          {
+            echo "openspec=$openspec"
+            echo "allowed=$allowed"
+            echo "writes=${writes[0]}${writes[1]:+ and ${writes[1]}}"
+          } >> "$GITHUB_OUTPUT"
+
       # Before anything that costs: one proposal per issue.
       - id: existing
         run: |
@@ -61,36 +147,47 @@ jobs:
           fi
 
       # No cache: this job must not be able to write one that others restore.
-      - if: steps.existing.outputs.exists != 'true'
+      # Node from the caller's .nvmrc, or a fixed version without one.
+      - if: steps.existing.outputs.exists != 'true' && steps.catalog.outputs.openspec == 'true'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version-file: .nvmrc
+          node-version-file: ${{ hashFiles('.nvmrc') != '' && '.nvmrc' || '' }}
+          node-version: ${{ hashFiles('.nvmrc') == '' && '24' || '' }}
 
       # The agent may run the change framework's command line, so it must not
-      # be able to rewrite it: installed outside the checkout, from the
-      # lockfile, and owned by root. The same goes for the files that steer an
-      # agent or run on a contributor's machine.
+      # be able to rewrite it: installed outside the checkout, at the version
+      # the catalog pins (a caller may list another one, or none), and owned
+      # by root. The same goes for the files that steer an agent or run on a
+      # contributor's machine, whatever the catalog enables.
+      # ponytail: the version is pinned here, out of Dependabot's reach; bump
+      # it by hand with the one in package-lock.json.
       #
       # The agent's commands do not inherit the PATH of this job: the command
       # is reached through a wrapper in /usr/local/bin that names the Node
       # binary and the script by their full paths. The last line proves it
       # runs with an empty environment.
       - if: steps.existing.outputs.exists != 'true'
+        env:
+          OPENSPEC: ${{ steps.catalog.outputs.openspec }}
         run: |
           tools=/opt/propose-tools
           sudo install -d -o "$(id -un)" "$tools"
-          cp package.json package-lock.json "$tools/"
-          npm ci --ignore-scripts --prefix "$tools"
-          printf '#!/bin/sh\nexec "%s" "%s" "$@"\n' "$(command -v node)" "$(readlink -f "$tools/node_modules/.bin/openspec")" \
-            | sudo tee /usr/local/bin/openspec > /dev/null
-          sudo chmod 755 /usr/local/bin/openspec
+          if [ "$OPENSPEC" = true ]; then
+            echo '{"private":true}' > "$tools/package.json"
+            npm install --ignore-scripts --no-save --prefix "$tools" @fission-ai/openspec@2.0.0
+            printf '#!/bin/sh\nexec "%s" "%s" "$@"\n' "$(command -v node)" "$(readlink -f "$tools/node_modules/.bin/openspec")" \
+              | sudo tee /usr/local/bin/openspec > /dev/null
+            sudo chmod 755 /usr/local/bin/openspec
+          fi
           for path in "$tools" .claude .github .githooks; do
             if [ -e "$path" ]; then
               sudo chown -R root:root "$path"
               sudo chmod -R go-w "$path"
             fi
           done
-          env -i /usr/local/bin/openspec --version
+          if [ "$OPENSPEC" = true ]; then
+            env -i /usr/local/bin/openspec --version
+          fi
 
       # Keeping the provider token out of the commands the agent runs
       # (CLAUDE_CODE_SUBPROCESS_ENV_SCRUB below) makes them run in a sandbox,
@@ -118,8 +215,8 @@ jobs:
           jq -r '"# " + .issue.title + "\n\n" + (.issue.body // "")' "$GITHUB_EVENT_PATH" \
             | perl -0pe 's/<!--.*?-->//gs; s/<!--.*//s' > .propose/issue.md
 
-      # The agent may write where a change and an ADR live, and nowhere else:
-      # the same paths `publish` accepts. `acceptEdits` alone did not let it
+      # The agent may write where the catalog's enabled entries live, and
+      # nowhere else: the same paths `publish` accepts. `acceptEdits` alone did not let it
       # write in the checkout. What no rule covers is denied. Seven
       # subcommands of one command line; no `git`, no `gh`. The deny rules
       # repeat what file ownership already enforces, and close the subcommands
@@ -148,7 +245,7 @@ jobs:
           claude_args: |
             --model claude-sonnet-5-5
             --permission-mode acceptEdits
-            --allowedTools "Glob,Grep,Skill,Edit(openspec/changes/**),Edit(docs/adr/**),Bash(openspec --version),Bash(openspec list:*),Bash(openspec context:*),Bash(openspec new change:*),Bash(openspec status:*),Bash(openspec instructions:*),Bash(openspec validate:*),Bash(openspec schemas:*)"
+            --allowedTools "${{ steps.catalog.outputs.allowed }}"
             --disallowedTools "Edit(.claude/**)" "Edit(.github/**)" "Edit(.githooks/**)" "Edit(node_modules/**)" "Bash(openspec install:*)" "Bash(openspec feedback:*)" "Bash(openspec config:*)" "Bash(openspec store:*)" "Bash(openspec completion:*)" "WebFetch" "WebSearch"
             --json-schema '{"type":"object","properties":{"status":{"type":"string","enum":["drafted","nothing_to_propose","blocked"]},"change":{"type":"string"},"reason":{"type":"string"}},"required":["status","change","reason"]}'
           prompt: |
@@ -191,8 +288,8 @@ jobs:
             What you can do in this run, and nothing else:
             - read and search any file of the repository with your file
               tools, never with a shell command;
-            - create files with your writing tool where the change
-              framework keeps its changes, and under `docs/adr/`;
+            - create files with your writing tool under
+              ${{ steps.catalog.outputs.writes }}, and nowhere else;
             - run the command line of the change framework. It is
               installed and on the PATH: call it by its bare name, one
               command per call, never through `npx`, never chained to
@@ -287,7 +384,7 @@ jobs:
     needs: draft
     # `always()` so that a failed draft is still reported and the label
     # removed; the label condition is repeated because of it.
-    if: always() && github.event.label.name == 'ontrack:propose'
+    if: always() && github.event.label.name == (inputs.label || 'ontrack:propose')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -298,6 +395,7 @@ jobs:
       ISSUE: ${{ github.event.issue.number }}
       OUTCOME: ${{ needs.draft.outputs.outcome }}
       NAME: ${{ needs.draft.outputs.name }}
+      LABEL: ${{ inputs.label || 'ontrack:propose' }}
     steps:
       - if: needs.draft.outputs.outcome == 'change'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -309,7 +407,8 @@ jobs:
 
       # The patch and the name come from the job that ran the agent: nothing
       # in them is trusted. A proposal only adds plain Markdown and YAML files
-      # under its own change, and new ADRs. Anything else fails the run: a
+      # under its own change, and new ADRs, as far as the catalog's enabled
+      # entries allow: read again here from the input and the default branch. Anything else fails the run: a
       # modified file, a script, a hook, a manifest, a symbolic link, or an
       # ADR with a `check:` command, which `ontrack check` would execute.
       #
@@ -320,21 +419,46 @@ jobs:
         if: needs.draft.outputs.outcome == 'change'
         env:
           BASE: ${{ github.event.repository.default_branch }}
+          FRAMEWORKS: ${{ inputs.frameworks || 'openspec,adr' }}
         run: |
           [[ "$NAME" =~ ^[a-z0-9][a-z0-9-]{0,62}$ ]]
+          frameworks="${FRAMEWORKS:-openspec,adr}"
+          # ponytail: same reader as the `catalog` step of `draft`, copied
+          # because a called workflow has no file of its own on disk.
+          trait() {
+            [ -f AGENTS.md ] || return 0
+            awk -v top="$1" -v key="$2" '
+              /^```yaml[[:space:]]*$/ { y = 1; t = ""; next }
+              /^```[[:space:]]*$/ { y = 0; next }
+              y && /^[^[:space:]#][^:]*:/ { t = $0; sub(/:.*/, "", t); next }
+              y && t == top && $0 ~ ("^[[:space:]]+" key ":") {
+                v = $0; sub(/^[^:]*:[[:space:]]*/, "", v); sub(/[[:space:]]+#.*$/, "", v)
+                gsub(/^["\047]|["\047]$/, "", v); print v; exit
+              }' AGENTS.md
+          }
+          dir=$(trait record-architecture-decisions directory)
+          dir="${dir:-docs/adr}"
+          dir="${dir%/}"
+          [[ "$dir" =~ ^[A-Za-z0-9_-][A-Za-z0-9._-]*(/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$ ]]
+          [[ "/$dir/" != */../* ]]
+          [[ ! "$dir" =~ ^(\.github|\.claude|\.githooks|node_modules)(/|$) ]]
+          parts=()
+          [[ ",${frameworks//[[:space:]]/}," == *,openspec,* ]] && parts+=("openspec/changes/${NAME}/[A-Za-z0-9._/-]+\.(md|yaml)")
+          [[ ",${frameworks//[[:space:]]/}," == *,adr,* ]] && parts+=("${dir//./\\.}/ADR-[0-9]{4}-[a-z0-9-]+\.md")
+          [ "${#parts[@]}" -gt 0 ]
+          allowed="^($(IFS='|'; echo "${parts[*]}"))$"
           patch="$RUNNER_TEMP/change/change.patch"
           [ "$(wc -c < "$patch")" -le 500000 ]
           branch="feat/${ISSUE}-${NAME}"
           git switch -c "$branch"
           git apply --index "$patch"
 
-          allowed="^(openspec/changes/${NAME}/[A-Za-z0-9._/-]+\.(md|yaml)|docs/adr/ADR-[0-9]{4}-[a-z0-9-]+\.md)$"
           while read -r _ mode _ _ status path; do
             if [ "$status" != "A" ] || [ "$mode" != "100644" ] || [[ ! "$path" =~ $allowed ]]; then
               echo "::error::refused: ${status} ${mode} ${path}"
               exit 1
             fi
-            if [[ "$path" == docs/adr/* ]] && git show ":${path}" | grep -Eq "^[[:space:]]*[\"']?check[\"']?[[:space:]]*:"; then
+            if [[ "$path" == "$dir"/* ]] && git show ":${path}" | grep -Eq "^[[:space:]]*[\"']?check[\"']?[[:space:]]*:"; then
               echo "::error::refused: ${path} declares a check command"
               exit 1
             fi
@@ -373,4 +497,4 @@ jobs:
       # Consumed whatever the outcome: adding it again is the only way to
       # start another run.
       - if: always()
-        run: gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --remove-label 'ontrack:propose'
+        run: gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --remove-label "$LABEL"

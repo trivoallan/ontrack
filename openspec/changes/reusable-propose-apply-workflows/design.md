@@ -165,5 +165,5 @@ ontrack. The example caller in the documentation says so in a comment.
 
 ## Open Questions
 
-- Where does Node come from when a caller has no `.nvmrc`: a fixed version,
-  or an input?
+None left. Node comes from the caller's `.nvmrc`, or a fixed version
+without one (decision 3). The federation answer is under Risks.

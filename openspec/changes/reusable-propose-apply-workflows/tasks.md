@@ -6,32 +6,32 @@
 
 ## 2. Make `propose.yml` callable
 
-- [ ] 2.1 Add `workflow_call` with the inputs `label` (default `ontrack:propose`) and `frameworks` (default `openspec,adr`), keeping `issues: labeled`; condition both jobs on the label taken from the input or its default
-- [ ] 2.2 Write the catalog step: turn `frameworks` into the agent's `allowedTools` and `disallowedTools`, the command lines to install and the `publish` pattern; fail on a name outside the catalog with the fixed failure comment
-- [ ] 2.3 Install OpenSpec at the version pinned in the catalog, with `--ignore-scripts`, outside the checkout and owned by root, instead of copying the checkout's `package.json` and `package-lock.json`; install nothing when the `openspec` entry is not enabled
-- [ ] 2.4 Take Node from the caller's `.nvmrc` when it exists, and from a fixed version otherwise
-- [ ] 2.5 Read `changes.framework` from the YAML blocks of the caller's `AGENTS.md` with `yq`, and fail before the agent when it names an entry that is not enabled
-- [ ] 2.6 Read the ADR directory from `record-architecture-decisions.directory`, default `docs/adr`; refuse an absolute path, `..`, or a path under `.github`, `.claude`, `.githooks` or `node_modules`
-- [ ] 2.7 Feed the ADR directory and the enabled entries to the agent's rules, to the prompt's list of what it may write, and to the `publish` filter
-- [ ] 2.8 Pass the label to every script through `env`, and remove that label in the final step
+- [x] 2.1 Add `workflow_call` with the inputs `label` (default `ontrack:propose`) and `frameworks` (default `openspec,adr`), keeping `issues: labeled`; condition both jobs on the label taken from the input or its default
+- [x] 2.2 Write the catalog step: turn `frameworks` into the agent's `allowedTools` and `disallowedTools`, the command lines to install and the `publish` pattern; fail on a name outside the catalog with the fixed failure comment
+- [x] 2.3 Install OpenSpec at the version pinned in the catalog, with `--ignore-scripts`, outside the checkout and owned by root, instead of copying the checkout's `package.json` and `package-lock.json`; install nothing when the `openspec` entry is not enabled
+- [x] 2.4 Take Node from the caller's `.nvmrc` when it exists, and from a fixed version otherwise
+- [x] 2.5 Read `changes.framework` from the YAML blocks of the caller's `AGENTS.md` with `yq`, and fail before the agent when it names an entry that is not enabled
+- [x] 2.6 Read the ADR directory from `record-architecture-decisions.directory`, default `docs/adr`; refuse an absolute path, `..`, or a path under `.github`, `.claude`, `.githooks` or `node_modules`
+- [x] 2.7 Feed the ADR directory and the enabled entries to the agent's rules, to the prompt's list of what it may write, and to the `publish` filter
+- [x] 2.8 Pass the label to every script through `env`, and remove that label in the final step
 
 ## 3. Make `apply.yml` callable
 
-- [ ] 3.1 Add `workflow_call` with the inputs `label` (default `ontrack:apply`) and `routine_id`, and the secret `fire_token`, keeping `pull_request_target: labeled`
-- [ ] 3.2 Fall back to `vars.ONTRACK_APPLY_ROUTINE_ID` and `secrets.ONTRACK_APPLY_FIRE_TOKEN` on ontrack's own trigger
-- [ ] 3.3 Post the fixed "could not be started" comment when the token or the routine is missing
+- [x] 3.1 Add `workflow_call` with the inputs `label` (default `ontrack:apply`) and `routine_id`, and the secret `fire_token`, keeping `pull_request_target: labeled`
+- [x] 3.2 Fall back to `vars.ONTRACK_APPLY_ROUTINE_ID` and `secrets.ONTRACK_APPLY_FIRE_TOKEN` on ontrack's own trigger
+- [x] 3.3 Post the fixed "could not be started" comment when the token or the routine is missing
 
 ## 4. Test
 
-- [ ] 4.1 In `test/propose-workflow.test.ts`: an unknown entry fails; `openspec` only refuses an ADR; `adr` only refuses a change file; a trait that names an entry that is not enabled fails; a trait with `..` or `.github/adr` fails; no trait accepts `docs/adr`; a renamed label is removed at the end
-- [ ] 4.2 In `test/apply-workflow.test.ts`: a renamed label starts the gate; a missing token gives the fixed comment; the answer parsing still finds the session address in a recorded answer
-- [ ] 4.3 Run `npm test` and `npx ontrack check`
+- [x] 4.1 In `test/propose-workflow.test.ts`: an unknown entry fails; `openspec` only refuses an ADR; `adr` only refuses a change file; a trait that names an entry that is not enabled fails; a trait with `..` or `.github/adr` fails; no trait accepts `docs/adr`; a renamed label is removed at the end
+- [x] 4.2 In `test/apply-workflow.test.ts`: a renamed label starts the gate; a missing token gives the fixed comment; the answer parsing still finds the session address in a recorded answer
+- [x] 4.3 Run `npm test` and `npx ontrack check`
 
 ## 5. Document
 
-- [ ] 5.1 Add a documentation page with an example caller for each workflow: trigger, the union of the permissions with a comment on why, `uses:` pinned by SHA with its tag, inputs, the federation variables, and a reminder to keep Dependabot on
-- [ ] 5.2 List the prerequisites per caller: labels, federation rule, variables, routine and its secret, `.github/apply-session.md`
-- [ ] 5.3 Head both workflow files with a comment naming ADR-0004
+- [x] 5.1 Add a documentation page with an example caller for each workflow: trigger, the union of the permissions with a comment on why, `uses:` pinned by SHA with its tag, inputs, the federation variables, and a reminder to keep Dependabot on
+- [x] 5.2 List the prerequisites per caller: labels, federation rule, variables, routine and its secret, `.github/apply-session.md`
+- [x] 5.3 Head both workflow files with a comment naming ADR-0004
 
 ## 6. Roll out
 

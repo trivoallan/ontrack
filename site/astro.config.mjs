@@ -77,6 +77,7 @@ export default defineConfig({
         { slug: 'write-your-own-source' },
         { slug: 'revise-a-question' },
         { slug: 'run-ontrack-in-ci' },
+        { slug: 'draft-changes-from-issues' },
         { slug: 'commands' },
         { slug: 'file-formats' },
         // ponytail: lists the one imported namespace; make it `adr` once the
