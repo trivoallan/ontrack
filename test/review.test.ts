@@ -222,6 +222,20 @@ test('prompt: both forms end with tracking items, proposed after the whole revie
   assert.equal(tail(single), tail(sequence));
 });
 
+test('prompt: tracking items are labelled ontrack, titled by ruling, and checked for duplicates first', () => {
+  const tail = (out: string) => out.slice(out.indexOf('Once every ADR is ruled'));
+  for (const out of [formatReview(selectAdr(tree(), 'ADR-0006')), formatSequence(pendingAdrs(tree()))].map(tail)) {
+    const list = out.indexOf('list the items in that tracker that carry the label `ontrack`, open and closed');
+    assert.ok(list > 0 && list < out.indexOf('propose a tracking item'));
+    assert.match(out, /`ADR-0015 secrets\.guard`/);
+    assert.match(out, /propose nothing for a ruling whose identifier starts the title of one of those items/);
+    assert.match(out, /say in one line which closed items name a ruling this repository still does not follow/);
+    assert.match(out, /When you cannot list the tracker's items, propose every ruling and say that duplicates were not checked/);
+    assert.match(out, /its title starts with the ruling's identifier, as in `ADR-0015 secrets\.guard: install gitleaks`/);
+    assert.match(out, /each with the label `ontrack`, creating the label first when the tracker requires it/);
+  }
+});
+
 test('prompt: every form matches the README contract', () => {
   const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
   assert.ok(readme.includes(`~~~\n${formatReview(selectAdr(tree(), 'ADR-0006'))}~~~`));
