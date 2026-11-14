@@ -1,23 +1,26 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
-import { compareRevision, readRevision, readTitle } from './revision.ts';
+import { compareRevision, readCheckLine, readRevision, readTitle } from './revision.ts';
 import type { Comparison } from './revision.ts';
 import { discoverSources } from './sources.ts';
 import type { Source } from './sources.ts';
 
-export type Category = 'revised' | 'new' | 'removed' | 'undetermined' | 'unreadable' | 'unchanged';
-/** `from` is set when revised, `to` when revised or undetermined. */
+export type Category = 'revised' | 'new' | 'removed' | 'undetermined' | 'unreadable' | 'check' | 'unchanged';
+/** The `check:` line of the local copy (`from`) and of the source (`to`); null when absent. */
+export type CheckChange = { from: string | null; to: string | null };
+/** `from` is set when revised, `to` when revised or undetermined, `check` when check. */
 export type PlannedAdr = {
   name: string;
   category: Category;
   title: string | null;
   from?: number | null;
   to?: number | null;
+  check?: CheckChange;
 };
 export type SourcePlan = { namespace: string; adrDir: string; adrs: PlannedAdr[]; migration: string[] };
 export type Plan = SourcePlan[];
 
-const ORDER: Category[] = ['revised', 'new', 'removed', 'undetermined', 'unreadable', 'unchanged'];
+const ORDER: Category[] = ['revised', 'new', 'removed', 'undetermined', 'unreadable', 'check', 'unchanged'];
 const CATEGORY: Record<Comparison, Category> = {
   stale: 'revised',
   'up-to-date': 'unchanged',
@@ -65,6 +68,11 @@ function planSource(root: string, source: Source): SourcePlan {
     const adr: PlannedAdr = { name: file, category: CATEGORY[result], title };
     if (adr.category === 'revised') adr.from = readRevision(local);
     if (adr.category === 'revised' || adr.category === 'undetermined') adr.to = readRevision(upstream);
+    if (adr.category === 'unchanged') {
+      // The check line follows the source; the verdict stays the repository's.
+      const check = { from: readCheckLine(local), to: readCheckLine(upstream) };
+      if (check.from !== check.to) Object.assign(adr, { category: 'check', check });
+    }
     adrs.push(adr);
   }
 
@@ -97,6 +105,12 @@ export const label = (adr: PlannedAdr) => {
   return name + (adr.title && !/\d-./.test(name) ? `  ${adr.title}` : '');
 };
 
+/** The `- ` / `+ ` lines under a `check` ADR: the line that goes, the line that comes. */
+export const checkLines = (adr: PlannedAdr): string[] =>
+  Object.entries({ '-': adr.check?.from, '+': adr.check?.to })
+    .filter(([, line]) => line != null)
+    .map(([sign, line]) => `    ${sign} ${line}`);
+
 /** The contract output (see README). */
 export function formatPlan(plan: Plan): string {
   if (plan.length === 0) return 'no ontrack source found\n';
@@ -111,7 +125,7 @@ export function formatPlan(plan: Plan): string {
     for (const adr of source.adrs) {
       if (adr.category === 'unchanged') continue;
       const revision = adr.category === 'revised' ? ` (revision ${adr.from} → ${adr.to})` : '';
-      lines.push(row(adr.category, label(adr) + revision));
+      lines.push(row(adr.category, label(adr) + revision), ...checkLines(adr));
     }
 
     if (source.migration.length > 0) {

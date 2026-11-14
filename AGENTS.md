@@ -47,7 +47,7 @@ validation:
 
 ```yaml
 commits:
-  scopes: [apply, cli, governance, instructions, openspec, plan, review, revision, sources]
+  scopes: [apply, check, cli, governance, instructions, openspec, plan, review, revision, sources]
   tool: commitlint
 ```
 
@@ -120,5 +120,11 @@ secrets:
   storage: keychain
   guard: gitleaks
 ```
+
+### Not yet decided
+
+- Changes (trivoallan/ADR-0016-changes)
+- Agent tooling (trivoallan/ADR-0017-agent-tooling)
+- Dependencies (trivoallan/ADR-0018-dependencies)
 
 <!-- ontrack:end -->

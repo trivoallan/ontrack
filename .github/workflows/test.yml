@@ -12,8 +12,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The commits check (ADR-0006) reads the history since origin/HEAD.
+          fetch-depth: 0
+      - run: git remote set-head origin --auto
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -23,13 +27,15 @@ jobs:
       - run: npm run build
       # The tests run the sources; this is the check of what an install ships.
       - run: node dist/bin/ontrack.js --help
+      # The repository's own governance: fails when a decided ADR's check does.
+      - run: node dist/bin/ontrack.js check
 
   # The lowest supported Node (engines in package.json).
   node-22:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22.18'
           cache: npm

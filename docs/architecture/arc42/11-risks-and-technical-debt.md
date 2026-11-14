@@ -15,12 +15,7 @@ state.
 
 | Issue | Gap | ADR it serves |
 | --- | --- | --- |
-| [#32](https://github.com/trivoallan/ontrack/issues/32) | Publish a JSON Schema for a source's `ontrack` key | [ADR-0005](../../adr/trivoallan/ADR-0005-validation.md) |
-| [#33](https://github.com/trivoallan/ontrack/issues/33) | Enforce commit format and scopes with commitlint in CI | [ADR-0006](../../adr/trivoallan/ADR-0006-commits.md) |
-| [#37](https://github.com/trivoallan/ontrack/issues/37) | Pin GitHub Actions by commit SHA | [ADR-0011](../../adr/trivoallan/ADR-0011-forge-and-ci.md) |
-| [#38](https://github.com/trivoallan/ontrack/issues/38) | Require the lowest-Node check on `main` | [ADR-0011](../../adr/trivoallan/ADR-0011-forge-and-ci.md) |
 | [#39](https://github.com/trivoallan/ontrack/issues/39) | Release tagged versions with release-please | [ADR-0012](../../adr/trivoallan/ADR-0012-delivery.md) |
-| [#40](https://github.com/trivoallan/ontrack/issues/40) | Install the gitleaks pre-commit hook | [ADR-0015](../../adr/trivoallan/ADR-0015-secrets.md) |
 
 ## Risks that follow from the design
 

@@ -4,12 +4,13 @@ slug: commits
 title: Commits
 status: accepted
 revision: 1
+check: npx --no-install governance-check ADR-0006
 date: 2026-11-14
 authors: [Tristan Rivoallan]
 supersedes: []
 traits:
   commits:
-    scopes: [apply, cli, governance, instructions, openspec, plan, review, revision, sources]
+    scopes: [apply, check, cli, governance, instructions, openspec, plan, review, revision, sources]
     tool: commitlint
 ---
 

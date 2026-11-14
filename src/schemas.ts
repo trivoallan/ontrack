@@ -40,3 +40,20 @@ export const adrFrontmatter = z.object({
     .transform((raw) => raw.replace(/^(["'])(.*)\1$/, '$2').trim())
     .pipe(z.string().min(1)),
 });
+
+/**
+ * The JSON Schema published for source authors (schema/ontrack.schema.json),
+ * derived from `ontrackKey` so the two cannot disagree. It applies to a whole
+ * package.json, the file an editor can attach a schema to, and constrains its
+ * `ontrack` property only.
+ */
+export function ontrackJsonSchema(): Record<string, unknown> {
+  const key = ontrackKey.describe(
+    'Declares this package as an ontrack source. `adr` is the directory holding the ADRs, as a path relative to the package: it must stay inside the package, a rule ontrack enforces and JSON Schema cannot state. `namespace` is the alias the source proposes.',
+  );
+  return {
+    $id: 'https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/ontrack.schema.json',
+    title: 'The ontrack key of a source package.json',
+    ...z.toJSONSchema(z.looseObject({ ontrack: key.optional() })),
+  };
+}
