@@ -15,5 +15,9 @@
     "astro-mermaid": "^2.2.0",
     "likec4": "^1.60.0",
     "mermaid": "^12.3.0"
+  },
+  "allowScripts": {
+    "esbuild": false,
+    "fsevents": false
   }
 }
