@@ -8,7 +8,7 @@
 
 ## 2. Documentation
 
-- [x] 2.1 Add to the README's development section the gitleaks install command and `git config core.hooksPath .githooks`, with one sentence on why (ADR-0015); verify the two commands, run on a fresh clone, reproduce 1.2
+- [ ] 2.1 Add to the README's development section the gitleaks install command and `git config core.hooksPath .githooks`, with one sentence on why (ADR-0015); verify the two commands, run on a fresh clone, reproduce 1.2
 
 ## 3. Verify
 
