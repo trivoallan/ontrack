@@ -10,7 +10,8 @@ export type CheckResult = { adr: Adr; status: 'pass' | 'fail' | 'unchecked'; out
 /**
  * One { adr, status, output } per ADR in force that has a check or decided
  * traits, sorted by reference. `status` is pass, fail or unchecked; `output`
- * holds the lines a failed command printed. Throws, before running anything,
+ * holds the lines a failed command printed. A command that exits with 78 is
+ * unchecked. Throws, before running anything,
  * when the traits conflict.
  */
 export function runChecks(root: string): CheckResult[] {
@@ -21,6 +22,8 @@ export function runChecks(root: string): CheckResult[] {
       // ponytail: sequential and without timeout; CI has its own.
       const r = spawnSync(adr.check, { shell: true, cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
       if (r.status === 0) return { adr, status: 'pass', output: [] };
+      // Reserved (EX_CONFIG): the command had nothing to verify for this verdict.
+      if (r.status === 78) return { adr, status: 'unchecked', output: [] };
       const output = [r.stdout, r.stderr].join('').split('\n');
       while (output.length > 0 && output[output.length - 1].trim() === '') output.pop();
       return { adr, status: 'fail', output };

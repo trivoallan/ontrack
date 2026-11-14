@@ -78,6 +78,16 @@ test('exit 3 fails, true passes, and a failure does not stop the run', async () 
   assert.equal(r.code, 2);
 });
 
+test('exit 78: unchecked, output not printed, exit code unchanged', async () => {
+  const root = makeTree({
+    'docs/adr/ADR-0001-a.md': adr('A', 'status: accepted', 'check: echo nothing to check; exit 78'),
+    'docs/adr/ADR-0002-b.md': adr('B', 'status: accepted', 'check: true'),
+  });
+  const r = await check(root);
+  assert.equal(r.stdout, 'unchecked  A (local/ADR-0001-a)\npass       B (local/ADR-0002-b)\n0 failed, 1 passed, 1 unchecked\n');
+  assert.equal(r.code, 0);
+});
+
 test('unknown program: fail, with the shell message', async () => {
   const root = makeTree({ 'docs/adr/ADR-0001-a.md': adr('A', 'status: accepted', 'check: no-such-program-xyz') });
   const r = await check(root);
