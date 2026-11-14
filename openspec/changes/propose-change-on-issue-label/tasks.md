@@ -29,7 +29,7 @@
 - [x] 3b.3 Keep the provider key out of the environment of the commands the agent runs; turn the command line's telemetry off; write no cache
 - [x] 3b.4 In `publish`, refuse the patch unless every entry adds a regular Markdown or YAML file under the change or a new ADR without `check:`; cap its size; match the change name as a whole string
 - [x] 3b.5 Show the agent's reasons in the run summary as truncated plain text; warn in the pull request description that the proposal comes from text anyone can write
-- [x] 3b.6 Run the `publish` filter against crafted patches (modified manifest, hook, skill, test file, symbolic link, executable, ADR with a command, other change, bad names) and confirm each is refused and a clean proposal is accepted
+- [x] 3b.6 Test the `publish` filter and the issue step in `test/propose-workflow.test.ts`, which runs both scripts as taken from the workflow file: a clean proposal is pushed; a modified manifest, hook, ADR or agent file, a new test file or skill, another change, a script, a symbolic link, an executable, an ADR with a command and invalid names are refused
 
 ## 4. Verify
 

@@ -84,8 +84,10 @@ jobs:
       # itself: an edit made after the label is not read. HTML comments do not
       # show in the issue a maintainer reads, so they are removed. No text of
       # the issue goes through a `${{ }}` expression. `.propose/` is left out
-      # of the patch below.
-      - if: steps.existing.outputs.exists != 'true'
+      # of the patch below. test/propose-workflow.test.ts runs this step and
+      # the `pr` step of `publish`, found by their `id`.
+      - id: issue
+        if: steps.existing.outputs.exists != 'true'
         run: |
           mkdir .propose
           jq -r '"# " + .issue.title + "\n\n" + (.issue.body // "")' "$GITHUB_EVENT_PATH" \
