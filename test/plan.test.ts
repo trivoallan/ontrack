@@ -12,7 +12,7 @@ after(cleanup);
 const categories = (plan: Plan) =>
   Object.fromEntries(plan[0].adrs.map((a) => [a.name, a.category]));
 
-async function plan(root: string) {
+async function plan(root: string, ...options: string[]) {
   let stdout = '';
   let stderr = '';
   const io = {
@@ -20,7 +20,7 @@ async function plan(root: string) {
     stdout: { write: (s: string) => { stdout += s; } },
     stderr: { write: (s: string) => { stderr += s; } },
   };
-  const code = await main(['plan'], io);
+  const code = await main(['plan', ...options], io);
   return { code, stdout, stderr };
 }
 
@@ -65,7 +65,7 @@ test('new, revised, unchanged, undetermined and unreadable', () => {
   assert.deepEqual(categories(p), {
     'A.md': 'new', 'B.md': 'revised', 'C.md': 'unchanged', 'D.md': 'undetermined', 'E.md': 'unreadable',
   });
-  assert.deepEqual(p[0].adrs.find((a) => a.name === 'B.md'), { name: 'B.md', category: 'revised', title: null, from: 1, to: 2 });
+  assert.deepEqual(p[0].adrs.find((a) => a.name === 'B.md'), { name: 'B.md', category: 'revised', title: null, status: 'accepted', from: 1, to: 2 });
 });
 
 test('an ADR shipped no more is removed', () => {
@@ -274,4 +274,99 @@ test('check output: counts, then the - and + lines; exit 2', async () => {
 test('check output: added shows + only, removed shows - only', () => {
   assert.equal(formatPlan(buildPlan(one(ruled(), shipped(1, 'check: exit 0')))), 'trivoallan: 1 check, 0 unchanged\n  check         ADR-0006-commits\n    + check: exit 0\n');
   assert.equal(formatPlan(buildPlan(one(ruled('check: exit 0'), shipped(1)))), 'trivoallan: 1 check, 0 unchanged\n  check         ADR-0006-commits\n    - check: exit 0\n');
+});
+
+// Full listing (--all)
+
+const fm = (status: string | null, revision = 1, ...extra: string[]) =>
+  ['---', ...(status === null ? [] : [`status: ${status}`]), `revision: ${revision}`, ...extra, '---', '', 'Body.', ''].join('\n');
+const listing = (sources: Files, local: Files) =>
+  formatPlan(buildPlan(makeProject({ sources: { platform: sources }, local })), { all: true });
+const at = (file: string) => `docs/adr/platform/${file}`;
+
+test('--all lists the unchanged ADRs with their verdict', () => {
+  const out = listing(
+    { 'SDR-0001.md': fm('proposed'), 'SDR-0002.md': fm('proposed') },
+    { [at('SDR-0001.md')]: fm('accepted'), [at('SDR-0002.md')]: fm('accepted') },
+  );
+  assert.equal(out, 'platform: 2 unchanged\n  unchanged     accepted    SDR-0001\n  unchanged     accepted    SDR-0002\n');
+});
+
+test('--all interleaves the categories by name', () => {
+  const out = listing(
+    { 'SDR-0001.md': fm('proposed'), 'SDR-0002.md': fm('proposed', 2), 'SDR-0003.md': fm('proposed') },
+    { [at('SDR-0001.md')]: fm('accepted'), [at('SDR-0002.md')]: fm('accepted'), [at('SDR-0003.md')]: fm('accepted') },
+  );
+  assert.deepEqual(out.split('\n').slice(1, 4), [
+    '  unchanged     accepted    SDR-0001',
+    '  revised       accepted    SDR-0002 (revision 1 → 2)',
+    '  unchanged     accepted    SDR-0003',
+  ]);
+});
+
+test('without --all: no unchanged line, no verdict column', () => {
+  const root = makeProject({
+    sources: { platform: { 'SDR-0001.md': fm('proposed'), 'SDR-0002.md': fm('proposed', 2), 'SDR-0003.md': fm('proposed') } },
+    local: { [at('SDR-0001.md')]: fm('accepted'), [at('SDR-0002.md')]: fm('accepted') },
+  });
+  assert.equal(
+    formatPlan(buildPlan(root)),
+    'platform: 1 revised, 1 new, 1 unchanged\n  revised       SDR-0002 (revision 1 → 2)\n  new           SDR-0003\n',
+  );
+});
+
+test('--all keeps the check lines in place', () => {
+  const out = formatPlan(buildPlan(one(ruled('check: exit 0'), shipped(1, 'check: exit 1'))), { all: true });
+  assert.equal(out, 'trivoallan: 1 check, 0 unchanged\n  check         accepted    ADR-0006-commits\n    - check: exit 0\n    + check: exit 1\n');
+});
+
+test('--all: a rejected ADR', () => {
+  const out = listing({ 'ADR-0013-frontend.md': fm('proposed') }, { [at('ADR-0013-frontend.md')]: fm('rejected') });
+  assert.match(out, /^ {2}unchanged {5}rejected {4}ADR-0013-frontend$/m);
+});
+
+test('the verdict is the local one, not the source\'s', () => {
+  const root = makeProject({ sources: { platform: { 'A.md': fm('proposed') } }, local: { [at('A.md')]: fm('accepted') } });
+  assert.equal(buildPlan(root)[0].adrs[0].status, 'accepted');
+});
+
+test('--all: a trailing comment is not part of the verdict', () => {
+  const out = listing(
+    { 'A.md': fm('proposed') },
+    { [at('A.md')]: fm('accepted     # proposed as shipped; accepted or rejected once ruled') },
+  );
+  assert.match(out, /^ {2}unchanged {5}accepted {4}A$/m);
+});
+
+test('--all: a new ADR has no verdict', () => {
+  assert.match(listing({ 'A.md': fm('proposed') }, {}), /^ {2}new {11}- {11}A$/m);
+});
+
+test('--all: an unreadable copy, or one without status, has no verdict', () => {
+  const out = listing(
+    { 'A.md': fm('proposed'), 'B.md': fm('proposed') },
+    { [at('A.md')]: 'no frontmatter\n', [at('B.md')]: fm(null) },
+  );
+  assert.match(out, /^ {2}unreadable {4}- {11}A$/m);
+  assert.match(out, /^ {2}unchanged {5}- {11}B$/m);
+});
+
+test('--all: a removed ADR keeps its verdict and title', () => {
+  const out = listing({ 'SDR-0001.md': fm('proposed') }, { [at('SDR-0012.md')]: fm('accepted', 1, 'title: Hosting') });
+  assert.match(out, /^ {2}removed {7}accepted {4}SDR-0012 {2}Hosting$/m);
+});
+
+test('--all: the exit code is the one of plan', async () => {
+  const done = withAgents(makeProject({
+    sources: { platform: { 'A.md': fm('proposed'), 'B.md': fm('proposed') } },
+    local: { [at('A.md')]: fm('accepted'), [at('B.md')]: fm('rejected') },
+  }));
+  assert.equal((await plan(done)).code, 0);
+  const all = await plan(done, '--all');
+  assert.equal(all.code, 0);
+  assert.match(all.stdout, /^ {2}unchanged {5}rejected {4}B$/m);
+
+  const pending = makeProject({ sources: { platform: { 'A.md': fm('proposed', 2) } }, local: { [at('A.md')]: fm('accepted') } });
+  assert.equal((await plan(pending)).code, 2);
+  assert.equal((await plan(pending, '--all')).code, 2);
 });

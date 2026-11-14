@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
-import { compareRevision, readCheckLine, readRevision, readTitle } from './revision.ts';
+import { compareRevision, readCheckLine, readRevision, readStatus, readTitle } from './revision.ts';
 import type { Comparison } from './revision.ts';
 import { discoverSources } from './sources.ts';
 import type { Source } from './sources.ts';
@@ -8,7 +8,10 @@ import type { Source } from './sources.ts';
 export type Category = 'revised' | 'new' | 'removed' | 'undetermined' | 'unreadable' | 'check' | 'unchanged';
 /** The `check:` line of the local copy (`from`) and of the source (`to`); null when absent. */
 export type CheckChange = { from: string | null; to: string | null };
-/** `from` is set when revised, `to` when revised or undetermined, `check` when check. */
+/**
+ * `from` is set when revised, `to` when revised or undetermined, `check` when check.
+ * `status` is the verdict of the repository's copy: set when there is one, null when it states none.
+ */
 export type PlannedAdr = {
   name: string;
   category: Category;
@@ -16,6 +19,7 @@ export type PlannedAdr = {
   from?: number | null;
   to?: number | null;
   check?: CheckChange;
+  status?: string | null;
 };
 export type SourcePlan = { namespace: string; adrDir: string; adrs: PlannedAdr[]; migration: string[] };
 export type Plan = SourcePlan[];
@@ -65,7 +69,7 @@ function planSource(root: string, source: Source): SourcePlan {
     }
     const local = readFileSync(localPath, 'utf8');
     const result = compareRevision(local, upstream);
-    const adr: PlannedAdr = { name: file, category: CATEGORY[result], title };
+    const adr: PlannedAdr = { name: file, category: CATEGORY[result], title, status: readStatus(local) };
     if (adr.category === 'revised') adr.from = readRevision(local);
     if (adr.category === 'revised' || adr.category === 'undetermined') adr.to = readRevision(upstream);
     if (adr.category === 'unchanged') {
@@ -78,8 +82,8 @@ function planSource(root: string, source: Source): SourcePlan {
 
   for (const file of existsSync(localDir) ? markdownFiles(localDir) : []) {
     if (shipped.includes(file)) continue;
-    const title = readTitle(readFileSync(path.join(localDir, file), 'utf8'), stem(file));
-    adrs.push({ name: file, category: 'removed', title });
+    const local = readFileSync(path.join(localDir, file), 'utf8');
+    adrs.push({ name: file, category: 'removed', title: readTitle(local, stem(file)), status: readStatus(local) });
   }
   adrs.sort((a, b) => a.name.localeCompare(b.name));
   return { namespace: source.namespace, adrDir: source.adrDir, adrs, migration };
@@ -111,8 +115,11 @@ export const checkLines = (adr: PlannedAdr): string[] =>
     .filter(([, line]) => line != null)
     .map(([sign, line]) => `    ${sign} ${line}`);
 
-/** The contract output (see docs/commands.md). */
-export function formatPlan(plan: Plan): string {
+/**
+ * The contract output (see docs/commands.md). With `all`, the unchanged ADRs
+ * get a line too and every ADR line carries the repository's verdict.
+ */
+export function formatPlan(plan: Plan, { all = false } = {}): string {
   if (plan.length === 0) return 'no ontrack source found\n';
   const lines: string[] = [];
   for (const source of plan) {
@@ -123,9 +130,10 @@ export function formatPlan(plan: Plan): string {
     lines.push(`${source.namespace}: ${counts.map(([c, n]) => `${n} ${c}`).join(', ')}`);
 
     for (const adr of source.adrs) {
-      if (adr.category === 'unchanged') continue;
+      if (adr.category === 'unchanged' && !all) continue;
       const revision = adr.category === 'revised' ? ` (revision ${adr.from} → ${adr.to})` : '';
-      lines.push(row(adr.category, label(adr) + revision), ...checkLines(adr));
+      const verdict = all ? `${(adr.status ?? '-').padEnd(10)}  ` : '';
+      lines.push(row(adr.category, verdict + label(adr) + revision), ...checkLines(adr));
     }
 
     if (source.migration.length > 0) {
