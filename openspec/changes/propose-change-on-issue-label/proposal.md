@@ -22,6 +22,9 @@ good enough to implement from is what the experiment measures.
 - The agent only writes files in the checkout, in a job whose token can
   write nothing. Every act on GitHub (branch, commit, draft pull request,
   label, comment) is a fixed step of a second job that runs no agent.
+- The second job treats what the first hands over as untrusted: it accepts
+  only new Markdown and YAML files under the change, and new ADRs that
+  declare no command.
 - One draft pull request per issue, on `feat/<issue>-<change-name>`, with
   `Refs <issue>`. Implementation continues on the same branch and the whole
   is squashed (ADR-0009).
@@ -32,7 +35,7 @@ good enough to implement from is what the experiment measures.
 - One new secret, named `ANTHROPIC_API_KEY`; a person sets its value.
 
 Out of scope: any change to the `ontrack` CLI or to the governance source,
-any abstraction over change frameworks, the case of an issue edited after it
+any second change framework, the case of an issue edited after it
 was labelled, and the implementation of the proposed change by the workflow.
 
 ## Capabilities

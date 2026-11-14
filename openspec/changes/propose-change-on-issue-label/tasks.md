@@ -14,13 +14,22 @@
 - [x] 3.1 Trigger on `issues: [labeled]`, both jobs conditioned on the `ontrack:propose` label, top-level `permissions: {}`, concurrency group `propose-<issue number>` without cancellation; `draft` with `contents: read` and `issues: read`, `publish` with `contents: write`, `pull-requests: write`, `issues: write`
 - [x] 3.2 In `draft`, check out with `persist-credentials: false`, set up Node from `.nvmrc`, run `npm ci`; every `uses:` pinned by SHA with its tag in a comment
 - [x] 3.3 Stop with the "already proposed" outcome when `git ls-remote --heads origin "feat/<n>-*"` returns a branch
-- [x] 3.4 Write the issue's title and body to `.propose/issue.md` with `gh issue view`, the issue number passed through `env:`
+- [x] 3.4 Write the issue's title and body to `.propose/issue.md` from the event that started the run, with HTML comments removed
 - [x] 3.5 Run the agent with the fixed prompt of design decision 4: the trait of `AGENTS.md`, ADR-0016's test first, `Issue served: trivoallan/ontrack#<n>`, the issue file as data, the change name returned as structured output, the framework's validation run before ending
 - [x] 3.6 Read the outcome: clean tree means no change; otherwise check the change name, fail on an invalid one, and hand the patch to `publish` as an artifact
 - [x] 3.7 In `publish`, check the name again, create the branch, apply the patch, commit `docs(openspec): propose <change-name>` as the Actions bot, push with the job token, open the draft pull request titled `feat: <change-name>` with `Refs #<n>`
 - [x] 3.8 Post the fixed comment with the run link for the "no change", "already proposed" and failure outcomes; write the agent's reasons to the job summary only
 - [x] 3.9 Remove the `ontrack:propose` label in a final step that always runs
 - [x] 3.10 Head the file with a comment naming ADR-0001 of the repository and the rules of ADR-0011 and ADR-0014 it applies, as `dependabot-automerge.yml` does
+
+## 3b. Harden after the security review
+
+- [x] 3b.1 Install the command line outside the checkout from the lockfile, without install scripts, and give it and `.claude`, `.github`, `.githooks` to root before the agent starts
+- [x] 3b.2 Narrow the agent's Bash rules to the subcommands a proposal needs; deny `install`, `feedback`, `config`, `store`, `completion` and edits under the protected directories
+- [x] 3b.3 Keep the provider key out of the environment of the commands the agent runs; turn the command line's telemetry off; write no cache
+- [x] 3b.4 In `publish`, refuse the patch unless every entry adds a regular Markdown or YAML file under the change or a new ADR without `check:`; cap its size; match the change name as a whole string
+- [x] 3b.5 Show the agent's reasons in the run summary as truncated plain text; warn in the pull request description that the proposal comes from text anyone can write
+- [x] 3b.6 Run the `publish` filter against crafted patches (modified manifest, hook, skill, test file, symbolic link, executable, ADR with a command, other change, bad names) and confirm each is refused and a clean proposal is accepted
 
 ## 4. Verify
 

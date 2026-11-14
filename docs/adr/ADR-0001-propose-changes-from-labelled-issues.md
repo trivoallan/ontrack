@@ -42,25 +42,31 @@ A workflow runs a coding agent when a maintainer adds the `ontrack:propose` labe
 an issue. This job is added to those ADR-0011 lists, within these
 boundaries:
 
-1. **The label is the request.** Only a user with triage rights can add it.
-   Adding it says the maintainer read the issue and asks for a proposal,
-   which is what lets a job holding a secret read that issue. The label is
-   removed when the run ends.
-2. **The agent cannot write to GitHub.** It runs in a job of its own whose
-   token is read-only. It receives the model provider's key and no other
-   secret, and neither `git` nor `gh`. It reads the issue's title and body
-   from a file and writes files in the checkout.
+1. **The label is the request.** Adding it says the maintainer read the
+   issue and asks for a proposal, which is what lets a job holding a secret
+   read that issue. The text the agent receives is the one the issue had at
+   that moment. The label is removed when the run ends.
+2. **The agent cannot write to GitHub, nor rewrite what it runs.** It runs
+   in a job of its own whose token is read-only. It receives the model
+   provider's key and no other secret, and neither `git` nor `gh`. The
+   command line it may run, and the files that steer an agent or a
+   workflow, are not writable by it.
 3. **A second job acts on GitHub, with fixed text.** It runs no agent.
    Branch, commit, draft pull request, label removal and comments are steps
-   whose content
-   does not come from the agent or from the issue, except the change name,
-   which is checked before it is used. These tracker writes are the
-   maintainer's request carried out by a script: ADR-0014 rule 2, which
-   binds an agent with tracker access, is not departed from.
-4. **The workflow names the trait, not the framework.** The agent is asked
+   whose content does not come from the agent or from the issue, except the
+   change name, which is checked before it is used. These tracker writes
+   are the maintainer's request carried out by a script: ADR-0014 rule 2,
+   which binds an agent with tracker access, is not departed from.
+4. **What the agent's job hands over is untrusted.** The second job accepts
+   only new planning files: Markdown and YAML under the change, and new
+   ADRs that declare no command. A file that can run, on a runner or on a
+   contributor's machine, is refused.
+5. **The prompt names the trait, not the framework.** The agent is asked
    for the change the `changes` trait calls for, and applies ADR-0016's test
    first: an issue that moves no expected behaviour gets no pull request.
-5. **One issue, one draft pull request.** The proposal and, later, its
+   The permission rules and the path filter name the framework, because a
+   filter that knows no path filters nothing.
+6. **One issue, one draft pull request.** The proposal and, later, its
    implementation share one branch and are squashed
    ([ADR-0009](trivoallan/ADR-0009-branching.md)). The pull request
    references the issue without closing it.
@@ -71,8 +77,8 @@ boundaries:
 
 - The decision to work on an issue is a visible act on the issue, and it
   can be taken away from a workstation and for several issues at once.
-- An injected instruction in an issue can at worst produce files in a draft
-  pull request that a person reviews.
+- An injected instruction in an issue can at worst produce Markdown and YAML
+  files in a draft pull request that a person reviews.
 - Removing the experiment is deleting one workflow file and one secret.
 
 ### Negative
@@ -82,6 +88,8 @@ boundaries:
   starts no workflow for an event caused by the job token. They run on the
   first push a person makes.
 - A proposal nobody reviews is still a pull request to close.
+- The proposal is prose that a local agent later follows. No filter reads
+  prose: a person reads the proposal before running anything on the branch.
 
 ### Neutral
 

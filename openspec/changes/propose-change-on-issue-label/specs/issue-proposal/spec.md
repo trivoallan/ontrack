@@ -28,11 +28,19 @@ A proposal run SHALL open at most one pull request for its issue. Runs for the s
 - **THEN** the second run waits for the first to end
 
 ### Requirement: The issue is read as data
-The run SHALL give the agent the title and the body of the issue, and nothing else from the tracker. The agent's instructions MUST come from the workflow file only. No text of the issue is interpolated into a shell script, and neither the title nor an excerpt of the issue is copied into the repository by the workflow.
+The run SHALL give the agent the title and the body of the issue as they were when the label was added, with HTML comments removed, and nothing else from the tracker. The agent's instructions MUST come from the workflow file only. No text of the issue is interpolated into a shell script, and neither the title nor an excerpt of the issue is copied into the repository by the workflow.
 
 #### Scenario: Comments are ignored
 - **WHEN** issue 103 has comments
 - **THEN** the agent receives none of them
+
+#### Scenario: The body is edited after the label
+- **WHEN** the body of issue 103 is edited after the label was added and before the agent starts
+- **THEN** the agent receives the body as it was when the label was added
+
+#### Scenario: Text hidden in an HTML comment
+- **WHEN** the body of the issue contains `<!-- … -->`, closed or not
+- **THEN** the agent receives the body without that comment
 
 #### Scenario: A body that contains shell syntax
 - **WHEN** the body of the issue contains `$(…)` or a backtick expression
@@ -43,7 +51,7 @@ The run SHALL give the agent the title and the body of the issue, and nothing el
 - **THEN** the agent's instructions still come from the workflow file only
 
 ### Requirement: The agent only writes files
-The agent SHALL run in a job whose token can write nothing, and without tracker access. It writes files in the checkout and runs the change framework's command line; every act on GitHub (branch, commit, pull request, label, comment) MUST be performed in a separate job that runs no agent, by steps whose text is fixed in the workflow file.
+The agent SHALL run in a job whose token can write nothing, and without tracker access. It writes files in the checkout and runs a fixed list of subcommands of the change framework's command line; every act on GitHub (branch, commit, pull request, label, comment) MUST be performed in a separate job that runs no agent, by steps whose text is fixed in the workflow file.
 
 #### Scenario: The agent tries to reach GitHub
 - **WHEN** the agent runs
@@ -58,16 +66,54 @@ The agent SHALL run in a job whose token can write nothing, and without tracker 
 - **WHEN** the workflow is read
 - **THEN** `ANTHROPIC_API_KEY` is the only secret it names, and only the agent step receives it
 
+### Requirement: The agent cannot rewrite what it runs
+The command line the agent is allowed to run SHALL be installed outside the checkout and MUST NOT be writable by the agent, and neither are the files of the checkout that steer an agent or a workflow. The provider key MUST NOT be in the environment of the commands the agent runs, and the subcommands that reach the network are denied.
+
+#### Scenario: The command line is out of reach
+- **WHEN** the agent starts
+- **THEN** the command line it may run and the directories `.claude`, `.github` and `.githooks` belong to another user and are not writable by the agent's user
+
+#### Scenario: A command run by the agent
+- **WHEN** the agent runs an allowed command
+- **THEN** the environment of that command does not hold the provider key
+
+#### Scenario: A subcommand that reaches the network
+- **WHEN** the agent asks to run the command line's `install` or `feedback` subcommand
+- **THEN** the call is denied
+
 ### Requirement: The change follows the repository's trait
-The agent SHALL produce the change that the `changes` trait of `AGENTS.md` calls for. The workflow file MUST NOT name a change framework or its paths.
+The agent SHALL produce the change that the `changes` trait of `AGENTS.md` calls for. The agent's prompt MUST NOT name a change framework or its paths; only the permission rules of the agent's job and the path filter of the publishing job do.
 
 #### Scenario: The trait says openspec
 - **WHEN** `AGENTS.md` carries `changes.framework: openspec` and the issue moves an expected behaviour
 - **THEN** the run adds a change that the framework's own validation accepts
 - **AND** its first artefact carries `Issue served: trivoallan/ontrack#103` for issue 103
 
+### Requirement: A proposal only adds planning files
+The publishing job SHALL treat the patch and the change name as untrusted, and MUST refuse the whole patch unless every entry adds a regular, non-executable file that is either a Markdown or YAML file under `openspec/changes/<change-name>/` or a new `docs/adr/ADR-NNNN-slug.md` that declares no `check:` command. A refused patch fails the run before anything is committed.
+
+#### Scenario: A proposal and its ADR
+- **WHEN** the patch adds `openspec/changes/scan-dependencies/proposal.md` and `docs/adr/ADR-0002-scan-dependencies.md`
+- **THEN** the patch is accepted
+
+#### Scenario: A modified file
+- **WHEN** the patch modifies `package.json`, `AGENTS.md`, an existing ADR or a file under `.githooks/`
+- **THEN** the run fails and nothing is pushed
+
+#### Scenario: A file outside the change
+- **WHEN** the patch adds a file under `test/`, `.claude/` or another change's directory
+- **THEN** the run fails and nothing is pushed
+
+#### Scenario: A file that is not plain text to read
+- **WHEN** the patch adds a symbolic link, an executable file or a `.sh` file under the change
+- **THEN** the run fails and nothing is pushed
+
+#### Scenario: An ADR that carries a command
+- **WHEN** the patch adds an ADR whose frontmatter declares `check:`
+- **THEN** the run fails and nothing is pushed
+
 ### Requirement: A draft pull request carries the proposal
-When the agent produced a change, the run SHALL commit it on a new branch named `feat/<issue>-<change-name>` and open a draft pull request whose description references the issue with `Refs`, never with a closing keyword. The change name MUST be made of lower-case letters, digits and hyphens; any other name fails the run.
+When the agent produced a change, the run SHALL commit it on a new branch named `feat/<issue>-<change-name>` and open a draft pull request whose description references the issue with `Refs`, never with a closing keyword. The change name MUST be a single line of at most 63 lower-case letters, digits and hyphens; any other name fails the run. The description of the pull request warns that the proposal was generated from text anyone can write.
 
 #### Scenario: A change was produced
 - **WHEN** the agent produced the change `scan-dependencies` for issue 103
@@ -80,7 +126,7 @@ When the agent produced a change, the run SHALL commit it on a new branch named 
 - **THEN** issue 103 is not closed by the proposal run's description alone
 
 #### Scenario: An invalid change name
-- **WHEN** the agent reports a change name that contains a space or a slash
+- **WHEN** the agent reports a change name that contains a space, a slash or a line break
 - **THEN** the run fails and opens no pull request
 
 ### Requirement: An issue that opens no change says so

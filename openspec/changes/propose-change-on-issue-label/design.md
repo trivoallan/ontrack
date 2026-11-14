@@ -35,7 +35,8 @@ In-force ADRs that constrain this design:
 
 - A label on an issue produces a draft pull request with a valid change.
 - The agent cannot act on GitHub, whatever an issue body says.
-- The workflow knows nothing of OpenSpec.
+- The agent's prompt knows nothing of OpenSpec. The permission rules and
+  the path filter do (decision 8).
 - The experiment can be judged on a handful of issues, then kept, moved to
   the governance source, or deleted by removing one file.
 
@@ -51,18 +52,18 @@ In-force ADRs that constrain this design:
 
 ### 1. Two jobs: the agent drafts, the workflow publishes
 
-- `draft` has `contents: read` and `issues: read`. It checks the repository
+- `draft` has `contents: read`. It checks the repository
   out with `persist-credentials: false`, runs the agent, and hands over a
   patch (an artifact) and a change name (a job output).
 - `publish` has the write permissions and runs no agent. It checks the name
   again, applies the patch, pushes, opens the pull request, comments and
   removes the label.
 
-The agent runs with `--permission-mode acceptEdits` and the rules
-`Glob`, `Grep`, `Skill` and `Bash(openspec:*)`: it edits files inside the
-checkout, and what no rule covers is denied. Neither `git` nor `gh`, no
-network tool, and no bare `Read` or `Write` rule, which would reach outside
-the checkout.
+The agent runs with `--permission-mode acceptEdits`, the rules `Glob`,
+`Grep`, `Skill` and seven read-or-plan subcommands of `openspec`, and deny
+rules for the rest (decision 8). It edits files inside the checkout, and
+what no rule covers is denied. Neither `git` nor `gh`, and no bare `Read` or
+`Write` rule, which would reach outside the checkout.
 
 Why: an issue body is written by anyone, and it ends up in the context of an
 agent. An agent that can write a file can write the runner's own command
@@ -91,13 +92,19 @@ new.
 
 ### 3. The issue reaches the agent as a file
 
-A step writes the title and body to `.propose/issue.md` in the checkout with
-`gh issue view`, taking the issue number from the event. The directory is
-left out of the patch. Nothing from the event payload other than the number,
-the label name and the repository name appears in a `${{ }}` expression. The
-prompt, fixed in the workflow, tells the agent that the file is the
-description of a need, not instructions, and that it copies neither the
-title nor an excerpt (ADR-0014 rule 3).
+A step writes the title and body to `.propose/issue.md` in the checkout,
+read with `jq` from the event that started the run (`$GITHUB_EVENT_PATH`):
+the text is the one the issue had when the label was added, and the job
+needs no access to the tracker. HTML comments are removed, since they do not
+show in the issue a maintainer reads. The directory is left out of the
+patch. Nothing from the event payload other than the number, the label name
+and the repository name appears in a `${{ }}` expression. The prompt, fixed
+in the workflow, tells the agent that the file is the description of a need,
+not instructions, and that it copies neither the title nor an excerpt
+(ADR-0014 rule 3).
+
+Alternative: `gh issue view` when the job runs. It reads whatever the author
+wrote since the label, during a window that lasts as long as the run waits.
 
 ### 4. The prompt names the trait, not the framework
 
@@ -111,8 +118,8 @@ The workflow learns the outcome without knowing the framework:
 
 - a clean working tree means "no change";
 - otherwise the agent has returned the change name as structured output,
-  which both jobs check against `^[a-z0-9][a-z0-9-]{0,62}$` before it is
-  used in a branch name. The length limit keeps the commit header within
+  which both jobs match as a whole string against
+  `^[a-z0-9][a-z0-9-]{0,62}$` before it is used in a branch name. The length limit keeps the commit header within
   what the commit check accepts.
 
 Alternative: look for a new directory under `openspec/changes/`. It works
@@ -165,6 +172,51 @@ settled in issues 106 to 108.
 
 The agent's reasons go to the job summary, which is not the tracker.
 
+### 8. Everything the agent's job hands over is untrusted
+
+A security review of the first version found that an injected agent could
+run its own code and that nothing limited what was pushed. The design now
+assumes the `draft` job is compromised and asks what it can still do.
+
+In `draft`, so that compromise is hard:
+
+- `openspec` is installed from the lockfile into a directory outside the
+  checkout, with `--ignore-scripts`, then given to root. The agent could
+  otherwise edit the command line under `node_modules/` and run it.
+- `.claude`, `.github` and `.githooks` are given to root too: a skill
+  written during the run could grant itself tools.
+- The Bash rules name seven subcommands; `install`, `feedback`, `config`,
+  `store` and `completion` are denied, as are edits under those directories.
+  `install` downloads and runs a script, `feedback` files an issue elsewhere.
+- `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` keeps the provider key out of the
+  environment of the commands the agent runs; `DO_NOT_TRACK` turns the
+  command line's telemetry off.
+- The agent's own settings refuse reads and writes outside the checkout.
+  The documentation of its permission modes leaves reads outside the
+  working directory ambiguous in a run with nobody to ask.
+- No cache is written.
+
+The documentation says a skill's own `allowed-tools` grants tools for the
+turn that invokes it, that a deny rule wins over any allow rule, and that a
+Bash rule "isn't a security boundary around the program". The deny rules
+are therefore a second line; file ownership and the `publish` filter are
+the first.
+
+In `publish`, so that compromise is contained: the patch is applied to the
+index and refused unless every entry adds a regular file, mode `100644`,
+that is Markdown or YAML under `openspec/changes/<name>/` or a new
+`docs/adr/ADR-NNNN-slug.md` without a `check:` key. `ontrack check` runs
+that key through a shell, so an ADR is a place to hide a command. The patch
+is capped at 500 kB and the name is matched as a whole string.
+
+This writes the framework's paths into the workflow, which decision 4 set
+out to avoid. A filter that knows no path filters nothing, and there is one
+framework: the prompt stays free of it, the rules and the filter do not.
+
+Alternative: forbid a list of dangerous paths (`package.json`, `.claude/`,
+hooks). A deny-list is one forgotten path away from code running on the
+maintainer's machine.
+
 ## Risks / Trade-offs
 
 - [The experiment's sample opens no change] Issues 103 to 108 all concern
@@ -172,23 +224,27 @@ The agent's reasons go to the job summary, which is not the tracker.
   should produce "no change". → Accepted: the sample is kept, and the
   runs measure first whether the agent's verdict matches the maintainer's.
   See Open Questions.
-- [Prompt injection through the issue body] → A read-only job, no `git`, no
-  `gh`, draft pull request, human review. The job token cannot push a change
-  to `.github/workflows/` either.
-- [The provider key leaks into a proposal] The key is in the environment of
-  the agent's job. → No rule lets the agent read outside the checkout or
-  print its environment; the secrets check runs on the first push a person
-  makes. Residual, and a reason to give the key a low spending limit.
-- [The action does not run with a read-only token] Not verifiable before the
-  first run. → Task 4.3; the fallback is the alternative of decision 6.
-- [The agent edits files outside the change] → Visible in the pull request;
-  review is the control, as ADR-0014 says of the `Issue served` line.
+- [Prompt injection through the issue body] → Decision 8: a read-only job
+  that cannot rewrite what it runs, and a publishing job that accepts only
+  planning files.
+- [The proposal itself carries the injection] `tasks.md` is what a local
+  agent later follows, with the maintainer's rights. No filter reads prose.
+  → The pull request says so in its description; reading the proposal
+  before running anything on the branch is the control.
+- [The provider key leaks] The key is in the agent's own process. → It is
+  kept out of the commands the agent runs, and nothing the agent may write
+  can be code. Residual: a dedicated key with a low spending limit.
+- [The file-ownership steps break the agent action] Not verifiable before
+  the first run. → Task 4.3.
+- [The agent edits files outside the change] → Refused by `publish`.
 - [Cost] One agent run per label. → The label is a human act; the
   branch-exists check runs before the agent.
 - [Required checks never run on a proposal nobody implements] → Intended: a
   draft with no implementation is not mergeable.
 - [`feat/` is wrong for a fix] → Accepted for the experiment; the title is
   editable and is what the squash keeps.
+- [The action does not run with a read-only token] Not verifiable before the
+  first run. → Task 4.3; the fallback is the alternative of decision 6.
 
 ## Migration Plan
 
