@@ -48,6 +48,21 @@ A page SHALL show its title once. When the body of a file opens with a level-one
 - **WHEN** a file has `title: Documentation` and its body opens with `# Documentation`
 - **THEN** its page holds exactly one level-one heading
 
+### Requirement: An ADR page opens with its ruling
+The page of an architecture decision record SHALL show, before its body, the status the record declares and, when the record is `accepted` and declares traits, its `traits:` block as written. The status and traits shown MUST be those the `ontrack instructions` command reads. Other pages are unchanged.
+
+#### Scenario: Accepted ADR with traits
+- **WHEN** `ADR-0006-commits.md` is `accepted` and declares `commits.tool: commitlint`
+- **THEN** its page shows "Status: accepted" and a block holding `tool: commitlint` above the body
+
+#### Scenario: Rejected ADR
+- **WHEN** `ADR-0013-frontend.md` is `rejected` and declares no traits
+- **THEN** its page shows "Status: rejected" and no traits block
+
+#### Scenario: A page that is not an ADR
+- **WHEN** `docs/index.md` is built
+- **THEN** its page shows no status
+
 ### Requirement: Links between pages
 A relative link from one page to another Markdown file under `docs/` SHALL lead to that file's page, with its fragment kept. Links to anything else are left as written.
 

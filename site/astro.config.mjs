@@ -1,8 +1,11 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import mermaid from 'astro-mermaid';
+import { readAdrs } from '../src/instructions.ts';
 
 export const base = '/ontrack';
+
+const repository = new URL('..', import.meta.url).pathname;
 
 const walk = (node, visit) => {
   visit(node);
@@ -24,6 +27,17 @@ const pages = () => (tree, file) => {
   // Starlight renders the frontmatter title: drop the heading that repeats it.
   const first = tree.children.findIndex((node) => node.type === 'heading');
   if (first >= 0 && tree.children[first].depth === 1) tree.children.splice(first, 1);
+  // Starlight does not show the frontmatter, which is where an ADR holds its
+  // ruling: open the page with it. The CLI reads it, so that the site and
+  // AGENTS.md cannot disagree.
+  const adr = readAdrs(repository).find((a) => file.path.endsWith(a.path.replace(/^docs/, '')));
+  if (!adr) return;
+  const ruling = [{ type: 'paragraph', children: [
+    { type: 'strong', children: [{ type: 'text', value: 'Status:' }] },
+    { type: 'text', value: ` ${adr.status}` },
+  ] }];
+  if (adr.traits) ruling.push({ type: 'code', lang: 'yaml', meta: 'title="Decided traits"', value: adr.traits.join('\n') });
+  tree.children.unshift(...ruling);
 };
 
 export default defineConfig({

@@ -1,4 +1,5 @@
 node_modules/
+dist/
 
 # Private context (PM notes, local tooling): never publish
 .nanopm/
