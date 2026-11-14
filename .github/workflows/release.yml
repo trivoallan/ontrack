@@ -46,6 +46,8 @@ jobs:
           # No cache in a job that publishes: nothing restored from an earlier
           # run ends up in the package.
           package-manager-cache: false
+      # npm 12, which runs no dependency's install script: see test.yml.
+      - run: npm install --global npm@12.2.2
       # `prepare` builds dist/, which is what the package ships.
       - run: npm ci
       # Build provenance (ADR-0021, level 2). Trusted publishing is meant to

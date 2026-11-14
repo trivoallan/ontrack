@@ -27,6 +27,8 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+      # npm 12, which runs no dependency's install script: see test.yml.
+      - run: npm install --global npm@12.2.2
       # Installing builds ontrack (the `prepare` script).
       - run: npm ci
       # The alias of each source this repository imports.
