@@ -183,3 +183,36 @@ test('the issue reaches the agent without its HTML comments, closed or not', () 
 test('shell syntax in the issue is written, not run', () => {
   assert.equal(issueFile({ title: 'T `id` $(id)', body: null }), '# T `id` $(id)\n\n\n');
 });
+
+/** The comment the `report` step of `publish` posts, with `gh` stubbed. */
+function report(env: Record<string, string>): string {
+  const root = makeTree({ 'bin/gh': '#!/bin/sh\necho "$*" >> "$GH_LOG"\n' });
+  chmodSync(path.join(root, 'bin/gh'), 0o755);
+  const ghLog = path.join(root, 'gh.log');
+  const run = spawnSync('bash', ['-e', '-c', stepScript('report')], {
+    cwd: root,
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      ISSUE: '103',
+      GITHUB_REPOSITORY: 'o/r',
+      RUN: 'https://example.test/run',
+      GH_LOG: ghLog,
+      PATH: `${path.join(root, 'bin')}${path.delimiter}${process.env.PATH}`,
+      ...env,
+    },
+  });
+  assert.equal(run.status, 0, run.stderr);
+  return readFileSync(ghLog, 'utf8');
+}
+
+test('a closed issue starts no agent and is told so', () => {
+  const [draft] = workflow.split(/^  publish:$/m);
+  assert.match(draft, /^    if: .*github\.event\.issue\.state == 'open'$/m);
+  assert.match(report({ STATE: 'closed', OUTCOME: '' }), /^issue comment 103 --repo o\/r --body This issue is closed/);
+});
+
+test('an open issue is told when no change was opened, and when the run failed', () => {
+  assert.match(report({ STATE: 'open', OUTCOME: 'none' }), /--body No change was opened/);
+  assert.match(report({ STATE: 'open', OUTCOME: '' }), /--body The proposal run failed/);
+});

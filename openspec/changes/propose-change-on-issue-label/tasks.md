@@ -31,12 +31,17 @@
 - [x] 3b.5 Show the agent's reasons in the run summary as truncated plain text; warn in the pull request description that the proposal comes from text anyone can write
 - [x] 3b.6 Test the `publish` filter and the issue step in `test/propose-workflow.test.ts`, which runs both scripts as taken from the workflow file: a clean proposal is pushed; a modified manifest, hook, ADR or agent file, a new test file or skill, another change, a script, a symbolic link, an executable, an ADR with a command and invalid names are refused
 
+## 3c. Open issues only
+
+- [x] 3c.1 Start the agent only when the issue is open; on a closed issue, post the fixed comment and remove the label
+- [x] 3c.2 Test the comment the `publish` job posts for a closed issue, for "no change" and for a failure
+
 ## 4. Verify
 
 - [x] 4.1 Check the file against the `issue-proposal` spec: no secret named, no `${{ github.event.issue.title }}` or `.body` anywhere, no `git` or `gh` in the agent's tools, no agent step in the job that writes
 - [x] 4.2 Run `npx ontrack check` and `npm test` locally
 - [ ] 4.3 After merge, add the label to one issue that moves a behaviour of the CLI and confirm a draft pull request with a valid change and `Refs`
-- [ ] 4.4 Add the label to issue 103 and confirm the "no change" comment and the removed label
+- [ ] 4.4 Add the label to an open issue that only concerns continuous integration and confirm the "no change" comment and the removed label
 - [ ] 4.5 Add the label again to the issue of 4.3 and confirm the run stops before the agent
 - [ ] 4.6 Confirm that `test`, `node-22` and the commit check start on the first push made by a person to a proposal branch
 
