@@ -72,6 +72,7 @@ export default defineConfig({
       // stay one click away, collapsed.
       sidebar: [
         { slug: 'tutorial' },
+        { slug: 'find-a-source' },
         { slug: 'how-it-works' },
         { slug: 'write-your-own-source' },
         { slug: 'revise-a-question' },
