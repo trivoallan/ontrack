@@ -53,10 +53,11 @@ trivoallan: 4 new, 0 unchanged
 ## Usage
 
 ```bash
-npx ontrack --help      # list commands
+npx ontrack --help         # list commands
 npx ontrack --version
-npx ontrack plan        # what importing the sources would change
-npx ontrack apply       # do it (see below)
+npx ontrack plan          # what importing the sources would change
+npx ontrack apply         # do it (see below)
+npx ontrack instructions  # the decided traits, as a block for AGENTS.md
 ```
 
 ### Exit codes
@@ -146,6 +147,55 @@ prints the same output as `plan`. Exit codes are those of `plan`, computed on
 what remains after the run: `0` nothing left, `2` something still needs a
 human, `1` error. Every check runs before the first write, so an error never
 leaves a half-applied repository.
+
+## `ontrack instructions` output contract
+
+Coding agents read `AGENTS.md`, not ADRs. A trivoallan/governance ADR ships
+its question as empty **trait** keys. Your repository answers in its own copy:
+it fills the keys and switches `status:` to `accepted`.
+
+```yaml
+---
+adr: ADR-0006
+title: Commits
+status: accepted
+traits:
+  commits:
+    scopes: [api, cli, docs]
+    tool: commitlint
+---
+```
+
+`instructions` prints the decided traits as a block to paste into `AGENTS.md`:
+
+~~~
+<!-- ontrack:begin -->
+## Project rules (ontrack)
+
+### Commits (trivoallan/ADR-0006-commits)
+
+```yaml
+commits:
+  scopes: [api, cli, docs]
+  tool: commitlint
+```
+
+### Not yet decided
+
+- Localization (trivoallan/ADR-0002-localization)
+
+<!-- ontrack:end -->
+~~~
+
+- The ADRs read are the repository's: `docs/adr/*.md`, named `local/<file name without .md>`, and `docs/adr/<namespace>/*.md`, named `<namespace>/<file name without .md>`. Sources in `node_modules` are not read, because a shipped ADR holds a question, not an answer.
+- An ADR carries decided traits when it is `accepted`, is not superseded, and has an indented `traits:` block. The block is copied verbatim, dedented, and its values are never interpreted. `traits: {}` declares nothing, and any other inline value is an error.
+- An `accepted` ADR supersedes the ADRs named in its `supersedes:` key (`[A, B]` or `- A` lines). A plain name matches an ADR's `adr:` value, or its file name, in the same directory. `<namespace>/<name>` and `local/<name>` reach another directory.
+- `proposed` ADRs are listed under "Not yet decided". Every other status is ignored.
+- Two decided ADRs sharing a top-level trait key are an error that names both. Superseding one of them settles it.
+- Sections are sorted by reference. With nothing decided and nothing pending, the block holds only its heading.
+- `instructions` never writes a file and makes no network call. It exits with `0`, or with `1` on an error; it never returns `2`.
+
+Any change to this format goes through this README first.
 
 ## Development
 
