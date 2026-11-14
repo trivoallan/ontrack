@@ -3,7 +3,7 @@ adr: ADR-0008
 slug: documentation
 title: Documentation
 status: accepted
-revision: 1
+revision: 2
 check: npx --no-install governance-check ADR-0008
 date: 2026-11-14
 authors: [Tristan Rivoallan]
@@ -38,6 +38,13 @@ it may write in it**. It drops the file by guesswork, leaves a stale table
 of contents behind, and may publish an internal URL in a page the world
 reads. Once these three values are written, it knows.
 
+**This ADR governs the documentation written for whoever uses the
+product**: guides, tutorials, references. Two other readers have their own
+documents, ruled elsewhere: whoever changes the product reads the
+architecture document ([ADR-0010](ADR-0010-architecture-documentation.md)),
+and whoever rules reads the ADRs in `docs/adr/`. `docs.root`,
+`docs.audience` and Diátaxis apply to the user documentation only.
+
 **The classification is not decided here.** governance requires
 [Diátaxis](https://diataxis.fr/) (tutorial, how-to guide, explanation,
 reference) and the Google developer documentation style for prose. What is
@@ -50,7 +57,7 @@ yours is the **tooling**, the **location** and the **audience**.
 | Key | Recommended value | Reason |
 | --- | --- | --- |
 | `docs.tool` | `starlight` | the fastest build measured (see References), navigation **generated from the directory tree** so adding a page touches no table of contents, built-in search, and LikeC4 views (ADR-0010) embedded through its Vite plugin with no generation step |
-| `docs.root` | `docs/` | where governance's other paths already live (`docs/adr/`, `docs/architecture/`), and an agent looking for where to put a page has nothing to guess |
+| `docs.root` | `docs/` | an agent looking for where to put a page has nothing to guess, and sharing the directory with `docs/adr/` and `docs/architecture/` lets one site serve all three if you want it to; that is a convenience, not a constraint |
 | `docs.audience` | `public` | governance's repositories are public on GitHub, so their documentation is read by anyone whether or not that was intended; writing for that audience from the start is the honest default |
 
 **Starlight does not read `docs/` by default**: it expects
@@ -68,6 +75,15 @@ export const collections = {
     schema: docsSchema(),
   }),
 };
+```
+
+**This pattern also publishes `docs/adr/` and `docs/architecture/`.**
+Whether that is right depends on who may read them, which is not
+`docs.audience` (see ADR-0010). To publish the user documentation only,
+exclude them in the pattern:
+
+```ts
+loader: glob({ pattern: ['**/*.{md,mdx}', '!adr/**', '!architecture/**'], base: './docs' }),
 ```
 
 Each page then needs a `title:` in its frontmatter. Mermaid diagrams
@@ -187,12 +203,14 @@ value must be written rather than assumed.
 reading this file: does a site already exist, and where do the pages live.
 Only `docs.audience` is decided by reading.
 
-**If `docs.root` is not `docs/`**, the ADR directory and the check command
-move with it: the ADRs live under the documentation root, whatever it is.
+**`docs/adr/` does not move with `docs.root`.** It is where ontrack reads
+the ADRs, not a documentation page; the architecture document stays where
+ADR-0010 puts it.
 
 **What these keys do not cover:** the Diátaxis classification, the prose
-style, or the language. **And Diátaxis itself is not refused here**:
-`rejected` means you keep no documentation, not that you classify it
+style, the language, the architecture document and the ADRs. **And Diátaxis
+itself is not refused here**: `rejected` means you keep no user
+documentation, whatever ADR-0010 answers, not that you classify it
 differently.
 
 **All three keys are required**: an empty key is not an answer. The value is
