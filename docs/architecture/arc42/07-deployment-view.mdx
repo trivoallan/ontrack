@@ -1,0 +1,41 @@
+---
+title: Deployment View
+---
+
+import { LikeC4View } from 'likec4:react';
+
+# Deployment View
+
+ontrack is delivered as a package and deployed nowhere
+([ADR-0012](../../adr/trivoallan/ADR-0012-delivery.md)): there is no server,
+no image and no environment to operate.
+
+A project adds ontrack as a dev dependency, installed from the git
+repository. When npm installs it, the `prepare` script compiles the
+TypeScript sources to `dist/`, and `node_modules/.bin/ontrack` points at
+`dist/bin/ontrack.js`. Sources are dev dependencies of the same project,
+installed the same way under `node_modules/<alias>/`. The
+[README](https://github.com/trivoallan/ontrack#installation) gives the
+commands.
+
+ontrack then runs as a short-lived Node process (Node 22.18 or later),
+started with `npx ontrack <command>` from the project root, in two places:
+
+| Where | Who starts it | What it does there |
+| --- | --- | --- |
+| A developer machine | the maintainer, or a coding agent on their behalf | every command; `apply` is the only one that writes, and it writes in the working tree |
+| A CI runner | a job of the project's pipeline, after `npm ci` | the commands that do not write, `plan` and `check`, for their exit code |
+
+In both places the process needs the project's checked-out files and its
+installed `node_modules`, and nothing else: no network, no credentials, no
+state outside the working tree. `apply` uses `git` when it is installed, and
+`check` runs the commands the ADRs declare through the shell, with the
+environment of the caller.
+
+## Diagram
+
+<LikeC4View viewId="deployment" client:only="react" />
+
+This is the `deployment` view of the LikeC4 model in
+[`docs/architecture/model/`](https://github.com/trivoallan/ontrack/tree/main/docs/architecture/model). It is drawn on the
+documentation site only; elsewhere, read the model's `.c4` files.

@@ -1,0 +1,12 @@
+#!/bin/sh
+# Refuses a commit that stages a secret (ADR-0015).
+# Enable once per clone: git config core.hooksPath .githooks
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "pre-commit: gitleaks is not installed, so the staged changes cannot be scanned." >&2
+  echo "pre-commit: install it (brew install gitleaks), then commit again." >&2
+  exit 1
+fi
+
+# --verbose prints each finding (file, line, rule); --redact hides the secret itself.
+exec gitleaks git --pre-commit --staged --redact --verbose

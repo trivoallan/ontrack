@@ -76,6 +76,29 @@ npx ontrack apply
 claude "$(npx ontrack review)"
 ```
 
+### Checking the `ontrack` key in your editor
+
+A source author can have their editor check the `ontrack` key while they
+type. ontrack publishes a JSON Schema for it,
+[`schema/ontrack.schema.json`](schema/ontrack.schema.json), derived from the
+model ontrack itself validates with. It applies to a `package.json` and only
+constrains its `ontrack` property. In VS Code, add it next to the standard
+`package.json` schema, in `.vscode/settings.json`:
+
+```json
+{
+  "json.schemas": [
+    {
+      "fileMatch": ["package.json"],
+      "url": "https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/ontrack.schema.json"
+    }
+  ]
+}
+```
+
+One rule is outside what the schema can state: `adr` must resolve inside the
+package.
+
 ## Usage
 
 ```bash
@@ -394,11 +417,27 @@ node bin/ontrack.ts plan   # the CLI, from the sources
 npm test                   # tests and coverage; fails below 95% lines, branches or functions
 npm run typecheck          # strict type check of bin/, src/ and test/
 npm run build              # compiles bin/ and src/ to dist/, what an install ships
+npm run schema             # regenerates schema/ontrack.schema.json from its model
 ```
 
 Node does not run TypeScript from `node_modules`, so the installed package is
 the JavaScript in `dist/`. npm builds it when it installs ontrack from git
 (`prepare`); `dist/` is never committed.
+
+### Secret scanning
+
+A pre-commit hook scans the staged changes with
+[gitleaks](https://github.com/gitleaks/gitleaks) and refuses a commit that
+holds a secret (ADR-0015). Git does not version hooks, so enable it once per
+clone:
+
+```bash
+brew install gitleaks                 # or any other install of the gitleaks binary
+git config core.hooksPath .githooks
+```
+
+Without gitleaks on the `PATH`, the hook refuses the commit rather than skip
+the scan.
 
 ### Documentation site
 
@@ -414,6 +453,16 @@ npm ci
 npm run dev      # local preview, reloads on change
 npm run build    # build into site/dist/, then check every internal link
 ```
+
+The architecture diagrams of `docs/architecture/arc42/` are views of a
+[LikeC4](https://likec4.dev/) model, the `.c4` files in
+`docs/architecture/model/`. To preview the model while editing it, and to
+check it as CI does:
+
+```bash
+cd site
+npx likec4 serve ../docs/architecture/model      # local preview, reloads on change
+npx likec4 validate ../docs/architecture/model   # fails on an unknown element or a dangling relationship
 
 ### Releases
 

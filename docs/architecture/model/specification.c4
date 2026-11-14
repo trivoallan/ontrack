@@ -1,0 +1,27 @@
+// The vocabulary of the model: what kinds of things exist.
+// Structure lives here and in model.c4; sequences and flows are drawn in
+// Mermaid, in the arc42 sections (ADR-0010).
+specification {
+  element actor {
+    notation "Person or agent"
+    style { shape person }
+  }
+  element system {
+    notation "The system described"
+  }
+  element module {
+    notation "Module, a file of src/"
+    style { shape component }
+  }
+  element external {
+    notation "Neighbour, outside ontrack"
+    style { color muted }
+  }
+
+  deploymentNode machine {
+    notation "Machine"
+  }
+  deploymentNode runtime {
+    notation "Runtime"
+  }
+}
