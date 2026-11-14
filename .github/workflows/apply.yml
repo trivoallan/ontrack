@@ -73,7 +73,8 @@ jobs:
       # The one call that starts a session. The token can do nothing else. The
       # text is all the session learns from here: a number and a commit, built
       # from the event, never from the pull request's own text. No retry: a
-      # second call would open a second session.
+      # second call would open a second session. The answer names the session:
+      # its address is kept only if it has the expected shape.
       - id: fire
         if: steps.gate.outputs.verdict == 'approved'
         env:
@@ -82,26 +83,32 @@ jobs:
         run: |
           body=$(jq -nc --arg repo "$GITHUB_REPOSITORY" --arg pr "$PR" --arg sha "$HEAD_SHA" \
             '{text: "repository=\($repo) pull_request=\($pr) head_commit=\($sha)"}')
-          curl --silent --show-error --fail-with-body --max-time 60 \
+          response=$(curl --silent --show-error --fail-with-body --max-time 60 \
             -X POST "https://api.anthropic.com/v1/claude_code/routines/${ROUTINE_ID}/fire" \
             -H "Authorization: Bearer ${TOKEN}" \
             -H "anthropic-version: 2023-06-01" \
             -H "anthropic-beta: experimental-cc-routine-2026-04-01" \
             -H "Content-Type: application/json" \
-            -d "$body" > /dev/null
+            -d "$body")
           echo "started=true" >> "$GITHUB_OUTPUT"
+          session=$(printf '%s' "$response" | jq -r '.claude_code_session_url // ""' 2> /dev/null || true)
+          if [[ "$session" =~ ^https://claude\.ai/code/session_[A-Za-z0-9]+$ ]]; then
+            echo "session=$session" >> "$GITHUB_OUTPUT"
+          fi
 
-      # Fixed sentences. The link to the session is not posted: its owner
-      # finds it in their own list of sessions.
+      # Fixed sentences, and the address of the session: only its owner can
+      # open it. Why a session stopped is for the session to say, in a comment
+      # of its own (.github/apply-session.md).
       - id: report
         if: always()
         env:
           VERDICT: ${{ steps.gate.outputs.verdict }}
           STARTED: ${{ steps.fire.outputs.started }}
+          SESSION: ${{ steps.fire.outputs.session }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           case "${VERDICT}:${STARTED}" in
-            approved:true) text="An apply session was started for commit ${HEAD_SHA}. Its owner finds it in their Claude Code sessions." ;;
+            approved:true) text="An apply session was started for commit ${HEAD_SHA}: ${SESSION:-its owner finds it in their Claude Code sessions}. It reports here when it stops." ;;
             approved:*) text="The pull request is approved, but the apply session could not be started. Run: ${RUN}" ;;
             stale:*) text="Not applied: the approval was given before the last push. Approve commit ${HEAD_SHA}, then add the label again." ;;
             changes-requested:*) text="Not applied: a reviewer has requested changes." ;;
