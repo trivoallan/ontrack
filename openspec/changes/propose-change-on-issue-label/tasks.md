@@ -49,17 +49,24 @@
 
 - [x] 3f.1 Run the agent on `claude-sonnet-5-5` instead of the action's default
 
+## 3g. The label is an explicit request
+
+- [x] 3g.1 Record `docs/adr/ADR-0002-a-label-asks-for-a-change.md`, which declares the label as the repository's request for a change and supersedes ADR-0001
+- [x] 3g.2 Tell the agent that the request settles whether a change opens; a change for work that moves no expected behaviour skips its specifications; the agent writes nothing only when nothing is left to propose
+- [ ] 3g.3 Import the governance source that carries ADR-0016 revision 2 and rule it again (`ontrack plan`, `ontrack review ADR-0016`, `ontrack apply`)
+
 ## 4. Verify
 
 - [x] 4.1 Check the file against the `issue-proposal` spec: no secret named, no `${{ github.event.issue.title }}` or `.body` anywhere, no `git` or `gh` in the agent's tools, no agent step in the job that writes
 - [x] 4.2 Run `npx ontrack check` and `npm test` locally
 - [ ] 4.3 After merge, add the label to one issue that moves a behaviour of the CLI and confirm a draft pull request with a valid change and `Refs`
-- [x] 4.4 Add the label to an open issue that only concerns continuous integration and confirm the "no change" comment and the removed label
+- [x] 4.4 Add the label to an open issue that only concerns continuous integration and confirm the "no change" comment and the removed label (seen on issues 105 and 84, before the label became an explicit request)
+- [ ] 4.7 Add the label to an open issue that only concerns continuous integration and confirm a draft pull request whose change skips its specifications
 - [ ] 4.5 Add the label again to the issue of 4.3 and confirm the run stops before the agent
 - [ ] 4.6 Confirm that `test`, `node-22` and the commit check start on the first push made by a person to a proposal branch
 
 ## 5. Judge the experiment
 
-- [ ] 5.1 Write down, before labelling, the maintainer's own verdict (change or no change) for each of issues 103 to 108, then label them
-- [ ] 5.2 Record for each one whether the proposal reached implementation without being rewritten, and whether a "no change" verdict matched the maintainer's
+- [ ] 5.1 Label the open issues to be worked on next
+- [ ] 5.2 Record for each one whether the proposal reached implementation without being rewritten
 - [ ] 5.3 Decide: keep, propose it to the governance source, or delete the workflow, the variables and the federation rule
