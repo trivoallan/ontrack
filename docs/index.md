@@ -132,16 +132,10 @@ ontrack is at version 0.2.0. It is young, and it changes.
 - It is installed from GitHub, by git URL. It is not published to the npm
   registry.
 - It needs Node 22.18 or later.
-- Its own decisions and architecture are on this site, and its command
-  outputs are specified in the
+- Its command outputs are specified in the
   [README](https://github.com/trivoallan/ontrack#readme).
 
 ## Questions
-
-### Do I have to accept the source's answers?
-
-No. A source recommends; the repository rules. You can accept, adapt or
-reject each ADR, and supersede an imported one with your own later.
 
 ### Does it need a server, an account or a network call?
 
