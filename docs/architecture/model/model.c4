@@ -146,7 +146,3 @@ model {
   ontrack.agents -> project.agentsFile "reads and writes the rules block of"
   ontrack.check -> checks "runs"
 }
-
-model {
-  ontrack.cli -> ontrack.nowhere "temporary: must fail CI"
-}
