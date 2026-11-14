@@ -429,6 +429,16 @@ The workflow opens that pull request with the repository secret
 `release` workflow fails on the next push to `main`: renew it and update the
 secret.
 
+The token's value is kept in the macOS keychain (ADR-0015), so renewing the
+secret never shows it:
+
+```bash
+# store the new value (prompts for it; -U replaces the existing entry)
+security add-generic-password -U -a "$USER" -s ontrack-release-please-token -w
+# send it to GitHub
+security find-generic-password -s ontrack-release-please-token -w | gh secret set RELEASE_PLEASE_TOKEN --repo trivoallan/ontrack
+```
+
 ## License
 
 [Apache License 2.0](LICENSE).
