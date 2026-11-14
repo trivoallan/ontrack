@@ -1,0 +1,14 @@
+# What the SBOM of a release lists (ADR-0019): ontrack and the dependencies
+# it needs to run, as the lockfile resolves them. Read by the `sbom` job of
+# .github/workflows/release.yml, which installs nothing before the scan.
+
+# The documentation site is not part of the package.
+exclude:
+  - ./site/**
+
+# Nor are the actions the workflows use.
+select-catalogers:
+  - "-github-actions-usage-cataloger"
+
+source:
+  name: "@trivoallan/ontrack"
