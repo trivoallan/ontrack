@@ -70,6 +70,7 @@ export default defineConfig({
         { slug: 'tutorial' },
         { slug: 'features' },
         { slug: 'commands' },
+        { slug: 'file-formats' },
         // ponytail: lists the one imported namespace; make it `adr` once the
         // repository has ADRs of its own or a second source.
         { label: 'ontrack on itself', collapsed: true, items: [{ autogenerate: { directory: 'adr/trivoallan' } }] },
