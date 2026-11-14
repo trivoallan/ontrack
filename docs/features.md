@@ -10,8 +10,8 @@ for itself, and tells you when an answer is out of date.
 
 ```mermaid
 flowchart TD
-  platform["Source: platform<br/>one copy of each question"]
-  security["Source: security<br/>one copy of each question"]
+  platform["Source: platform governance<br/>one copy of each question"]
+  security["Source: security governance<br/>one copy of each question"]
   subgraph repos["Your repositories"]
     a["Repository A<br/>its own answers"]
     b["Repository B<br/>its own answers"]
