@@ -2,7 +2,7 @@ import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
-import { buildInstructions, formatInstructions } from '../src/instructions.ts';
+import { buildInstructions, formatInstructions, readAdrs, supersededBy } from '../src/instructions.ts';
 import type { Adr } from '../src/instructions.ts';
 import { main } from '../src/cli.ts';
 import { cleanup, makeProject, makeTree } from './helpers/project.ts';
@@ -91,6 +91,24 @@ test('an indented block list and an empty supersedes', () => {
     'docs/adr/NONE.md': adr('None', 'status: accepted', 'supersedes: []', 'traits:', '  j: 1'),
   });
   assert.deepEqual(refs(buildInstructions(root).decided), ['local/NEW', 'local/NONE']);
+});
+
+test('supersededBy maps each superseded ADR to the one superseding it', () => {
+  const root = makeTree({
+    'docs/adr/trivoallan/ADR-0006-commits.md': commits(),
+    'docs/adr/trivoallan/ADR-0007-tests.md': adr('Tests', 'adr: ADR-0007', 'status: accepted'),
+    'docs/adr/trivoallan/ADR-0008-docs.md': adr('Docs', 'adr: ADR-0008', 'status: accepted', 'supersedes: [ADR-0007]'),
+    'docs/adr/ADR-0001-commits.md': adr('Own commits', 'status: accepted', 'supersedes: [trivoallan/ADR-0006]'),
+    'docs/adr/ADR-0002-release.md': adr('Release', 'status: accepted'),
+    'docs/adr/ADR-0003-release.md': adr('Release again', 'status: accepted', 'supersedes: [local/ADR-0002-release]'),
+    'docs/adr/ADR-0004-docs.md': adr('Own docs', 'status: proposed', 'supersedes: [trivoallan/ADR-0008]'),
+  });
+  const pairs = [...supersededBy(readAdrs(root))].map(([old, by]) => `${old.ref} <- ${by.ref}`).sort();
+  assert.deepEqual(pairs, [
+    'local/ADR-0002-release <- local/ADR-0003-release',
+    'trivoallan/ADR-0006-commits <- local/ADR-0001-commits',
+    'trivoallan/ADR-0007-tests <- trivoallan/ADR-0008-docs',
+  ]);
 });
 
 test('a proposed ADR supersedes nothing', () => {

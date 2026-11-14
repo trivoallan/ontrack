@@ -1,17 +1,18 @@
-import { formatReview, formatSequence, pendingAdrs, selectAdr } from '../review.ts';
+import { formatReview, formatSequence, formatSupersession, pendingAdrs, selectAdr } from '../review.ts';
 import type { Io } from '../cli.ts';
 import type { Argv } from 'yargs';
 
 export const command = 'review [adr]';
-export const describe = 'Print a prompt asking a coding agent to rule the proposed ADRs, or one of them';
+export const describe = 'Print a prompt asking a coding agent to rule the proposed ADRs, or one of them, or to supersede an accepted one';
 
 export const builder = (y: Argv) =>
-  y.positional('adr', { type: 'string', describe: 'A reference, file name or identifier (default: every proposed ADR, in sequence)' });
+  y.positional('adr', { type: 'string', describe: 'A reference, file name or identifier: a proposed ADR to rule, or an accepted one to supersede (default: every proposed ADR, in sequence)' });
 
 export function handler({ io, adr }: { io: Io; adr?: string }): number {
   const root = io.cwd();
   if (adr !== undefined) {
-    io.stdout.write(formatReview(selectAdr(root, adr)));
+    const selected = selectAdr(root, adr);
+    io.stdout.write(selected.status === 'accepted' ? formatSupersession(selected) : formatReview(selected));
     return 2;
   }
   const pending = pendingAdrs(root);

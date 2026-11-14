@@ -124,18 +124,26 @@ export function readAdrs(root: string): Adr[] {
   return adrFiles(root).map((f) => readAdr(root, f)).filter((adr) => adr !== null);
 }
 
-// Resolves supersession and trait conflicts once for instructions and check.
-function resolve(root: string) {
-  const adrs = readAdrs(root);
-
-  const superseded = new Set<Adr>();
+/**
+ * Each superseded ADR mapped to the `accepted` ADR that names it in
+ * `supersedes:`. A plain name matches in the superseding ADR's directory.
+ */
+export function supersededBy(adrs: Adr[]): Map<Adr, Adr> {
+  const superseded = new Map<Adr, Adr>();
   for (const adr of adrs) {
     for (const name of adr.supersedes) {
       const slash = name.indexOf('/');
       const [ns, id] = slash < 0 ? [adr.ns, name] : [name.slice(0, slash), name.slice(slash + 1)];
-      for (const other of adrs) if (other !== adr && other.ns === ns && other.id === id) superseded.add(other);
+      for (const other of adrs) if (other !== adr && other.ns === ns && other.id === id) superseded.set(other, adr);
     }
   }
+  return superseded;
+}
+
+// Resolves supersession and trait conflicts once for instructions and check.
+function resolve(root: string) {
+  const adrs = readAdrs(root);
+  const superseded = supersededBy(adrs);
 
   const inForce = adrs.filter((a) => a.status === 'accepted' && !superseded.has(a)).sort(byRef);
   const decided = inForce.filter((a): a is DecidedAdr => a.traits !== null);
