@@ -104,6 +104,28 @@ test('commands run from the project root', async () => {
 
 // Conflicting traits stop the run
 
+test('ONTRACK_ADR: each command gets the path of its own ADR, and the caller\'s environment', async () => {
+  const root = makeTree({
+    'docs/adr/ADR-0001-a.md': adr('A', 'status: accepted', 'check: echo "$ONTRACK_ADR"; exit 1'),
+    'docs/adr/trivoallan/ADR-0006-commits.md': adr('Commits', 'status: accepted', 'check: echo "$ONTRACK_ADR"; exit 1'),
+    'docs/adr/trivoallan/ADR-0009-b.md': adr(
+      'B',
+      'status: accepted',
+      'check: test "$ONTRACK_ADR" = docs/adr/trivoallan/ADR-0009-b.md && test "$ONTRACK_TEST_MARK" = kept',
+    ),
+  });
+  process.env.ONTRACK_TEST_MARK = 'kept';
+  try {
+    const r = await check(root);
+    for (const file of ['docs/adr/ADR-0001-a.md', 'docs/adr/trivoallan/ADR-0006-commits.md']) {
+      assert.ok(r.stdout.includes(`  rule: ${file}\n  check: echo "$ONTRACK_ADR"; exit 1\n  | ${file}\n`), file);
+    }
+    assert.match(r.stdout, /^pass {7}B \(trivoallan\/ADR-0009-b\)$/m);
+  } finally {
+    delete process.env.ONTRACK_TEST_MARK;
+  }
+});
+
 test('trait conflict: exit 1, empty stdout, nothing ran', async () => {
   const root = makeTree({
     'docs/adr/trivoallan/ADR-0006-commits.md': adr('Commits', 'status: accepted', 'check: touch marker', ...traits('commits')),
