@@ -48,5 +48,7 @@ jobs:
           package-manager-cache: false
       # `prepare` builds dist/, which is what the package ships.
       - run: npm ci
-      # The provenance attestation comes with trusted publishing; no flag.
-      - run: npm publish
+      # Build provenance (ADR-0021, level 2). Trusted publishing is meant to
+      # attach it on its own; the flag says so, and is what the ADR's check
+      # looks for.
+      - run: npm publish --provenance

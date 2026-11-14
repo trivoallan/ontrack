@@ -27,6 +27,11 @@ jobs:
       - run: npm run build
       # The tests run the sources; this is the check of what an install ships.
       - run: node dist/bin/ontrack.js --help
+      # The repository's own governance: fails when the installed source asks
+      # a question this repository has not imported or ruled again. It bites
+      # on the pull request that updates the source; source-updates.yml is
+      # what notices that an update exists.
+      - run: node dist/bin/ontrack.js plan
       # The secrets check (ADR-0015) runs gitleaks, a Go binary outside npm:
       # pinned by version and checksum (ADR-0011).
       - name: Install gitleaks
@@ -39,7 +44,7 @@ jobs:
           echo "${GITLEAKS_SHA256}  ${archive}" | sha256sum -c -
           tar -xzf "${archive}" -C "$RUNNER_TEMP" gitleaks
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
-      # The repository's own governance: fails when a decided ADR's check does.
+      # And fails when a decided ADR's check does.
       # On a pull request, the branch check (ADR-0009) reads GITHUB_HEAD_REF;
       # the changes check (ADR-0016) finds openspec in node_modules/.bin.
       - run: node dist/bin/ontrack.js check

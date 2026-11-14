@@ -145,4 +145,28 @@ dependencies:
   automerge: patch
 ```
 
+### Vulnerabilities (trivoallan/ADR-0019-vulnerabilities)
+
+```yaml
+vulnerabilities:
+  sbom: cyclonedx
+  scanner: grype
+  fail_on: critical
+```
+
+### Adding a dependency (trivoallan/ADR-0020-adding-dependencies)
+
+```yaml
+admission:
+  approver: person
+  install_scripts: ignored
+```
+
+### Build provenance (trivoallan/ADR-0021-build-provenance)
+
+```yaml
+supply_chain:
+  build_level: 2
+```
+
 <!-- ontrack:end -->
