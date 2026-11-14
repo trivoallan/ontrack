@@ -134,10 +134,20 @@ migration: 5 files docs/adr/ → docs/adr/platform/
   move          SDR-0010.md
 ```
 
-- Line 1, per source: `<alias>: <count per category>`, in the order revised, new, removed, undetermined, unreadable, unchanged. Zero counts are omitted, except "unchanged".
+- Line 1, per source: `<alias>: <count per category>`, in the order revised, new, removed, undetermined, unreadable, check, unchanged. Zero counts are omitted, except "unchanged".
 - Then one line per ADR that is not unchanged, sorted by name: two spaces, the category in a 12-character column, two spaces, the file name without `.md`, then two spaces and the ADR's title, unless the name already carries a slug (`ADR-0006-commits`). A `revised` line ends with `(revision <local> → <upstream>)`.
 - The title is the frontmatter `title:` key, or else the first `# ` heading, without a leading `<name>: ` that repeats the file name. It comes from the source's copy (the local copy for a `removed` ADR). An ADR without a title shows its name only.
-- Categories: `new` (not imported yet), `revised` (the question moved upstream), `removed` (no longer shipped by the source), `undetermined` (no usable `revision:` to compare), `unreadable` (no recognizable frontmatter).
+- Categories: `new` (not imported yet), `revised` (the question moved upstream), `removed` (no longer shipped by the source), `undetermined` (no usable `revision:` to compare), `unreadable` (no recognizable frontmatter), `check` (up to date, but the source's `check:` line differs from yours).
+- A `check` line is followed by the `check:` line that would go (four spaces, `- `) and the one that would come (four spaces, `+ `), so you read the command before `apply` writes it:
+
+  ```
+  trivoallan: 1 check, 13 unchanged
+    check         ADR-0006-commits
+      - check: exit 0
+      + check: npx commitlint --last
+  ```
+
+  The `check:` line is the first one at column zero in the frontmatter. Only an ADR that is up to date can be `check`: a `revised` ADR gets its check once you have ruled again.
 - A flat-layout migration (`docs/adr/<file>` that belongs to the source but is not under `docs/adr/<alias>/`) is always shown: `migration: <n> file(s) docs/adr/ → docs/adr/<alias>/`, then one `move` line per file.
 - When there is nothing to do, one line per source (`platform: 14 unchanged`), and the exit code is `0`. Any other category, or a migration, gives `2`.
 - With no source at all, `plan` prints `no ontrack source found` and exits with `0`.
@@ -148,7 +158,8 @@ Any change to this format goes through this README first.
 
 `apply` brings the repository in line with what `plan` reports, in one
 command. It is the only command that writes, it never commits, and it never
-touches an ADR you already decided on. Besides `docs/adr/`, it writes one
+touches an ADR you already decided on, except for its `check:` line. Besides
+`docs/adr/`, it writes one
 file: the rules block of `AGENTS.md` (see below).
 
 ```bash
@@ -165,6 +176,7 @@ What it does, per source:
 - `moved`: a flat-layout file moves from `docs/adr/` to `docs/adr/<alias>/` (`git mv` in a git repository, a plain rename otherwise).
 - `pruned`, only with `--prune`: a `removed` ADR is deleted.
 - `confirmed`, only with `--confirm`: an `undetermined` ADR gets the upstream `revision:`; nothing else in the file changes.
+- `synced`: a `check` ADR gets the source's `check:` line, set, replaced or removed; nothing else in the file changes. It needs no option. The `check:` line of an imported ADR belongs to its source: to run a different check, supersede the ADR with one of your own.
 
 A `revised` or `unreadable` ADR is never written to or deleted (only moved by
 a migration): its verdict must be taken again by a person.
@@ -368,7 +380,7 @@ pass       Branching (trivoallan/ADR-0009-branching)
 - Lines are sorted by reference. The last line counts each status, and is the only line when there is nothing to report.
 - Conflicting traits are an error, as in `instructions`, and no command runs.
 - `check` exits with `2` when at least one check failed, `0` otherwise, `1` on an error. `unchecked` ADRs do not change the exit code.
-- Only ADRs committed under `docs/adr/` are read, never `node_modules`. A source's command therefore runs only once `apply` has copied its ADR and your repository holds it as `accepted`. Read the `check:` line of an imported ADR as you would an npm install script.
+- Only ADRs committed under `docs/adr/` are read, never `node_modules`. A source's command therefore runs only once `apply` has written it into your copy and your repository holds the ADR as `accepted`. `apply` keeps that line in step with the source, so updating a source can change what runs here: `plan` prints the old and new lines first. Read them as you would an npm install script.
 
 Any change to this format goes through this README first.
 

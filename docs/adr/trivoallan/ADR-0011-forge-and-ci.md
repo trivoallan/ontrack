@@ -118,7 +118,7 @@ to the job log, with three known causes: a policy refused the manifest (fix
 the manifest, not the policy), a secret is missing (set it, named as
 listed), an image is not found (check it was pushed and matches the pin).
 
-Adopted as recommended: `blocking`. The ruleset "main requires test" is active on the default branch and requires the `test` check.
+Adopted as recommended: `blocking`. The ruleset "main requires test" is active on the default branch and requires the `test` and `node-22` checks.
 
 ## Consequences
 
