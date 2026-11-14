@@ -66,13 +66,17 @@
 - [x] 3i.1 Allow the agent to write under `openspec/changes/` and `docs/adr/`
 - [x] 3i.2 Tell the agent what it can do: file tools to read, the framework's command line by its bare name, one command per call
 
+## 3j. Reach the command line from the agent
+
+- [x] 3j.1 Install the command line under `/opt`, owned by root, with a wrapper in `/usr/local/bin` that depends on no PATH
+
 ## 4. Verify
 
 - [x] 4.1 Check the file against the `issue-proposal` spec: no secret named, no `${{ github.event.issue.title }}` or `.body` anywhere, no `git` or `gh` in the agent's tools, no agent step in the job that writes
 - [x] 4.2 Run `npx ontrack check` and `npm test` locally
 - [ ] 4.3 After merge, add the label to one issue that moves a behaviour of the CLI and confirm a draft pull request with a valid change and `Refs`
 - [x] 4.4 Add the label to an open issue that only concerns continuous integration and confirm the "no change" comment and the removed label (seen on issues 105 and 84, before the label became an explicit request)
-- [ ] 4.7 Add the label to an open issue that only concerns continuous integration and confirm a draft pull request whose change skips its specifications
+- [x] 4.7 Add the label to an open issue that only concerns continuous integration and confirm a draft pull request whose change skips its specifications
 - [ ] 4.5 Add the label again to the issue of 4.3 and confirm the run stops before the agent
 - [ ] 4.6 Confirm that `test`, `node-22` and the commit check start on the first push made by a person to a proposal branch
 

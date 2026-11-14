@@ -324,6 +324,21 @@ it under `node_modules/`, where decision 8 no longer puts it, tried
 Alternative: allow `npx` and `cd`. A rule for `npx` is a rule for any
 package's binary.
 
+### 13. The command line is reached through a wrapper
+
+The first run that produced a pull request (issue 105, change
+`verify-release-provenance`) wrote its files by hand: the agent reported
+that the framework's command was not found. A directory added to the job's
+PATH does not reach the commands the agent runs. The command line is now
+installed under `/opt/propose-tools`, owned by root, and reached through a
+wrapper in `/usr/local/bin` that names the Node binary and the script by
+their full paths. The installation step runs it with an empty environment
+to prove it needs none.
+
+Alternative: pass a PATH to the agent through its settings. It depends on
+how the sandbox builds the environment of a command, which the first runs
+showed is not the job's.
+
 ## Risks / Trade-offs
 
 - [The experiment's sample opens no change] Issues 103 to 108 all concern

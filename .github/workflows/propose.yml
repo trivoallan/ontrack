@@ -70,19 +70,27 @@ jobs:
       # be able to rewrite it: installed outside the checkout, from the
       # lockfile, and owned by root. The same goes for the files that steer an
       # agent or run on a contributor's machine.
+      #
+      # The agent's commands do not inherit the PATH of this job: the command
+      # is reached through a wrapper in /usr/local/bin that names the Node
+      # binary and the script by their full paths. The last line proves it
+      # runs with an empty environment.
       - if: steps.existing.outputs.exists != 'true'
         run: |
-          tools="$RUNNER_TEMP/tools"
-          mkdir "$tools"
+          tools=/opt/propose-tools
+          sudo install -d -o "$(id -un)" "$tools"
           cp package.json package-lock.json "$tools/"
           npm ci --ignore-scripts --prefix "$tools"
+          printf '#!/bin/sh\nexec "%s" "%s" "$@"\n' "$(command -v node)" "$(readlink -f "$tools/node_modules/.bin/openspec")" \
+            | sudo tee /usr/local/bin/openspec > /dev/null
+          sudo chmod 755 /usr/local/bin/openspec
           for path in "$tools" .claude .github .githooks; do
             if [ -e "$path" ]; then
               sudo chown -R root:root "$path"
               sudo chmod -R go-w "$path"
             fi
           done
-          echo "$tools/node_modules/.bin" >> "$GITHUB_PATH"
+          env -i /usr/local/bin/openspec --version
 
       # Keeping the provider token out of the commands the agent runs
       # (CLAUDE_CODE_SUBPROCESS_ENV_SCRUB below) makes them run in a sandbox,
