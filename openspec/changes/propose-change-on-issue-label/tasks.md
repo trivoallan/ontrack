@@ -2,7 +2,7 @@
 
 - [x] 1.1 Create the `ontrack:propose` label in `trivoallan/ontrack`
 - [x] 1.2 In the Claude Console, register the GitHub Actions issuer, create a service account and a federation rule limited to this repository (to `propose.yml` on `main` if the rule allows it); set the repository variables `ANTHROPIC_FEDERATION_RULE_ID`, `ANTHROPIC_ORGANIZATION_ID`, `ANTHROPIC_SERVICE_ACCOUNT_ID` and `ANTHROPIC_WORKSPACE_ID`; the rule matches the subject GitHub sends, `repo:<owner>@<owner id>/<repo>@<repo id>:ref:refs/heads/main`, not `repo:<owner>/<repo>:…`
-- [ ] 1.3 Allow GitHub Actions to create pull requests (Settings, Actions, Workflow permissions)
+- [x] 1.3 Allow GitHub Actions to create pull requests (Settings, Actions, Workflow permissions)
 
 ## 2. Settle the agent step
 

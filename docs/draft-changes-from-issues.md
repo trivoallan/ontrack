@@ -23,12 +23,14 @@ You need, in your repository:
 
 1. An `AGENTS.md` written by `ontrack apply`, with a `changes` trait. The run
    checks that this trait names a framework you enabled.
-2. The labels `ontrack:propose` and `ontrack:apply`, or the names you pass
+2. For `openspec`: the framework's skill for proposing a change, committed
+   under `.claude/`. The agent drafts the change with it.
+3. The labels `ontrack:propose` and `ontrack:apply`, or the names you pass
    as `label`.
-3. **Settings → Actions → General → Workflow permissions:** allow GitHub
+4. **Settings → Actions → General → Workflow permissions:** allow GitHub
    Actions to create pull requests. Without it, the proposal branch is
    pushed but no pull request opens.
-4. A federation rule in the Claude Console (**Settings → Workload identity
+5. A federation rule in the Claude Console (**Settings → Workload identity
    federation → Rules**) for the GitHub Actions issuer. Use pattern matching,
    with your repository's exact subject:
 
@@ -40,10 +42,10 @@ You need, in your repository:
    identifiers. In a called workflow the subject names your repository, not
    ontrack. Do not add a `job_workflow_ref` condition: extra conditions are
    exact matches, and the SHA in that claim changes at every update.
-5. The repository variables `ANTHROPIC_FEDERATION_RULE_ID`,
+6. The repository variables `ANTHROPIC_FEDERATION_RULE_ID`,
    `ANTHROPIC_ORGANIZATION_ID`, `ANTHROPIC_SERVICE_ACCOUNT_ID` and
    `ANTHROPIC_WORKSPACE_ID`. They are identifiers, not credentials.
-6. For `apply` only: a Claude Code routine for your repository, its
+7. For `apply` only: a Claude Code routine for your repository, its
    identifier in a variable, the token that fires it in a secret, and a
    `.github/apply-session.md` that tells the session how to work.
 

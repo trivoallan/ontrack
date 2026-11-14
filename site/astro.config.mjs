@@ -77,6 +77,7 @@ export default defineConfig({
         { slug: 'write-your-own-source' },
         { slug: 'revise-a-question' },
         { slug: 'run-ontrack-in-ci' },
+        { slug: 'draft-a-change-from-an-issue' },
         { slug: 'draft-changes-from-issues' },
         { slug: 'commands' },
         { slug: 'file-formats' },
