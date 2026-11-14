@@ -20,7 +20,8 @@
 
 ## Repository-Level ADRs Created
 
-- docs/adr/ADR-0001-propose-changes-from-labelled-issues.md - a coding agent runs in continuous integration when a maintainer labels an issue, with no access to GitHub; the workflow performs every act on the forge.
+- docs/adr/ADR-0002-a-label-asks-for-a-change.md - the label is the repository's declared request for a change, so the agent always drafts one; supersedes ADR-0001 and restates its boundaries.
+- docs/adr/ADR-0001-propose-changes-from-labelled-issues.md - superseded by ADR-0002. A coding agent runs in continuous integration when a maintainer labels an issue, with no access to GitHub; the workflow performs every act on the forge.
 
 ## Notes
 

@@ -142,11 +142,23 @@ When the agent produced a change, the run SHALL commit it on a new branch named 
 - **WHEN** the agent reports a change name that contains a space, a slash or a line break
 - **THEN** the run fails and opens no pull request
 
-### Requirement: An issue that opens no change says so
-When the agent finds that the issue moves no expected behaviour, the run SHALL open no pull request and post one comment on the issue, whose text is fixed in the workflow file and links to the run.
+### Requirement: The label is a request for a change
+The agent SHALL treat the label as an explicit request for a change and MUST NOT decide again whether a change opens. For an issue that moves no expected behaviour, the change it drafts declares that it skips its specifications and still carries its other artefacts.
 
-#### Scenario: A continuous-integration issue
-- **WHEN** the agent produces no file for an issue that only concerns continuous integration
+#### Scenario: An issue about continuous integration
+- **WHEN** the label is added to an open issue that only concerns continuous integration
+- **THEN** a draft pull request is opened with a change that the framework's own validation accepts
+- **AND** that change carries no specification delta
+
+#### Scenario: An issue that moves a behaviour
+- **WHEN** the label is added to an open issue that changes what a command prints
+- **THEN** the change carries a specification delta
+
+### Requirement: An issue that leaves nothing to propose says so
+When the agent finds that the work the issue describes is already done, or that the issue does not say what it asks for, the run SHALL open no pull request and post one comment on the issue, whose text is fixed in the workflow file and links to the run.
+
+#### Scenario: Work already done
+- **WHEN** the agent produces no file because the repository already does what the issue asks
 - **THEN** no branch and no pull request are created
 - **AND** the issue receives the fixed comment
 

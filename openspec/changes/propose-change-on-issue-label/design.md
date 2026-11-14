@@ -115,9 +115,9 @@ wrote since the label, during a window that lasts as long as the run waits.
 
 The prompt asks for "the change the `changes` trait of `AGENTS.md` calls for,
 for this issue, with `Issue served: trivoallan/ontrack#<n>` in its first
-artefact", and for the ADR-0016 test first: when the issue moves no expected
-behaviour, write nothing. The agent finds the propose skill in the
-repository.
+artefact". It first asked for the ADR-0016 test, and wrote nothing when the
+issue moved no expected behaviour; decision 10 replaced that. The agent
+finds the propose skill in the repository.
 
 The workflow learns the outcome without knowing the framework:
 
@@ -177,7 +177,7 @@ settled in issues 106 to 108.
 | Outcome | Pull request | Comment on the issue |
 | --- | --- | --- |
 | A change was produced | draft, `Refs #<n>` | none: the pull request shows on the issue |
-| No expected behaviour moves | none | fixed sentence, link to the run |
+| Nothing left to propose | none | fixed sentence, link to the run |
 | A step failed, or a branch existed | none | fixed sentence, link to the run |
 
 The agent's reasons go to the job summary, which is not the tracker.
@@ -262,6 +262,30 @@ model text exists then, so nothing shaped by the issue can reach the log.
 Alternative: a repository secret `ANTHROPIC_API_KEY` with a low spending
 limit. Simpler to set up; it has to be stored, rotated, and it leaks whole.
 
+### 10. The label is an explicit request: the agent always drafts
+
+The first runs that reached the model answered "no change" for issues 105
+and 84, which a maintainer had labelled to get a proposal. The agent was
+right by the rule and the result was useless. ADR-0016 was revised at the
+governance source (revision 2): an explicit request opens a change,
+whatever the work. `docs/adr/ADR-0002-a-label-asks-for-a-change.md`
+declares the label as this repository's request and supersedes ADR-0001.
+
+The prompt now tells the agent that the request settles whether a change
+opens. For work that moves no expected behaviour the change skips its
+specifications, as the archived `install-gitleaks-pre-commit-hook` change
+did. The agent may still write nothing when the issue leaves nothing to
+propose: the second run on issue 84 found the work already done.
+
+Revision 2 alone was not enough. Once it was imported and ruled, a run on
+issue 84 still answered "no change": the agent read the new rule, found no
+gesture this repository had declared, and treated the label as tracker
+data. The declaration in ADR-0002 and the sentence in the prompt are what
+tell it that the label is the request.
+
+Alternatives: a second label that forces a change (two labels for one
+intent), or an agent that never declines (a proposal for finished work).
+
 ## Risks / Trade-offs
 
 - [The experiment's sample opens no change] Issues 103 to 108 all concern
@@ -307,13 +331,11 @@ limit. Simpler to set up; it has to be stored, rotated, and it leaks whole.
 
 ## Open Questions
 
-- **What do issues 103 to 108 measure?** They are the sample, by decision.
-  Most should end in "no change", so the first measure is whether the
-  agent's verdict matches the maintainer's on each of the six. Proposal
-  quality ("reaches implementation without being rewritten") is recorded
-  for those that do open a change, and the threshold of four in six that
-  sends the idea to the governance source applies to whichever of the two
-  measures has six data points.
+- **What does the experiment measure now?** The sample of issues 103 to
+  108 is gone: five were closed during the first runs, and the agent no
+  longer gives a verdict on whether a change opens. What is left to measure
+  is proposal quality: of the labelled issues, how many proposals reach
+  implementation without being rewritten.
 - **Label name.** Decided: `ontrack:propose`. Every label this automation
   reads or writes carries the `ontrack:` prefix, so that it cannot be
   mistaken for a label people use to sort issues. There is one such label
@@ -321,7 +343,5 @@ limit. Simpler to set up; it has to be stored, rotated, and it leaks whole.
 - **Does the action run with a read-only token?** Its code at the pinned
   commit takes the token it is given and posts no comment when a prompt is
   set; only a first run confirms it.
-- **Should "no change" issues still get a pull request?** With
-  `framework: none` ADR-0016 makes the pull request description the first
-  artefact. Out of scope here; it is the natural next step if most labelled
-  issues turn out to be of that kind.
+- **Should "no change" issues still get a pull request?** Answered by
+  decision 10: they get a change that skips its specifications.
