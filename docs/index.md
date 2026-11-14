@@ -116,6 +116,15 @@ An ADR is a Markdown file in `docs/adr/`. A source is an npm dependency. The
 rules are a block in `AGENTS.md`. If you stop using ontrack, all three remain
 and read the same.
 
+## It governs itself
+
+ontrack is built under its own rules. This repository imports
+[trivoallan/governance](https://github.com/trivoallan/governance), and every
+ruling it made is published here, starting with
+[how decisions are recorded](adr/trivoallan/ADR-0001-record-architecture-decisions.md).
+Its [architecture](architecture/arc42/01-introduction-and-goals.md) is
+documented the way those decisions prescribe.
+
 ## Where the project stands
 
 ontrack is at version 0.2.0. It is young, and it changes.
@@ -126,6 +135,35 @@ ontrack is at version 0.2.0. It is young, and it changes.
 - Its own decisions and architecture are on this site, and its command
   outputs are specified in the
   [README](https://github.com/trivoallan/ontrack#readme).
+
+## Questions
+
+### Do I have to accept the source's answers?
+
+No. A source recommends; the repository rules. You can accept, adapt or
+reject each ADR, and supersede an imported one with your own later.
+
+### Does it need a server, an account or a network call?
+
+No. A source is an npm dependency, and decisions are Markdown files under
+`docs/adr/`. `plan`, `instructions` and `review` make no network call.
+
+### What does it change in my repository?
+
+Only `ontrack apply` writes: the ADRs under `docs/adr/` and one marked block
+in `AGENTS.md`. It never commits, and it never rewrites an ADR you have
+decided on.
+
+### Which coding agents does it work with?
+
+Any agent that reads `AGENTS.md`. ontrack warns when Claude Code would not
+read it because a `CLAUDE.md` exists without importing it.
+
+### How do I write my own source?
+
+A `package.json` with an `ontrack` key and a directory of ADRs.
+[trivoallan/governance](https://github.com/trivoallan/governance) is a
+working example to start from.
 
 ## Try it on one repository
 
