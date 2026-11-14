@@ -80,7 +80,7 @@ A revised ADR yields the prompt to rule again, whatever its status and whether o
 - **THEN** standard output holds the supersession prompt for the named ADR
 
 ### Requirement: Prompt
-The prompt SHALL be printed to standard output and follow the contract in the README. It names each selected ADR by its path relative to the project root, with `/` separators, and by its title when it has one. For a named ADR, it names that ADR alone. Without an argument, it lists the selected ADRs in order, one per line, and tells the agent to rule them one at a time, in that order, and not to start an ADR before the previous one is ruled. In both forms of the review prompt it SHALL tell the agent, for an ADR and in this order, to:
+The prompt SHALL be printed to standard output and follow the contract in the commands reference, `docs/commands.md`. It names each selected ADR by its path relative to the project root, with `/` separators, and by its title when it has one. For a named ADR, it names that ADR alone. Without an argument, it lists the selected ADRs in order, one per line, and tells the agent to rule them one at a time, in that order, and not to start an ADR before the previous one is ruled. In both forms of the review prompt it SHALL tell the agent, for an ADR and in this order, to:
 1. read its file in full, and edit no other ADR;
 2. start from the recommendation the ADR makes, look in the repository for evidence that it does not apply, and say so in one line when there is none;
 3. check the condition of every conditional recommendation, and cite the evidence that settles it;
@@ -89,7 +89,13 @@ The prompt SHALL be printed to standard output and follow the contract in the RE
 6. present the proposed ruling, then stop, ask for the user's agreement with a question tool such as `AskUserQuestion` when the agent has one, and write nothing until the user agrees;
 7. once the user agrees, fill the traits or remove the block when rejected, set the status, write in the ADR the reason for every departure from the recommendation, and run `npx ontrack apply`.
 
-After the seven steps, and in the sequence form after the instruction to take the next ADR, the prompt SHALL tell the agent, once every ADR is ruled, to list the rulings the repository does not follow yet, to propose a tracking item for each with its title and the ADR it serves, and to create in the tracker named by the decided `tracking` trait (`tracking.tool`, in `tracking.project`) only the items the user agrees to; when no `tracking` trait is decided or `tracking.tool` is `none`, to list them in its reply and create nothing. This text SHALL be the same in both forms.
+After the seven steps, and in the sequence form after the instruction to take the next ADR, the prompt SHALL tell the agent, once every ADR is ruled, to list the rulings the repository does not follow yet, and to create in the tracker named by the decided `tracking` trait (`tracking.tool`, in `tracking.project`) only the items the user agrees to; when no `tracking` trait is decided or `tracking.tool` is `none`, to list them in its reply and create nothing. It SHALL identify a ruling by its ADR number and trait key, as in `ADR-0015 secrets.guard`, and tell the agent, before proposing:
+- to list the tracker's items that carry the label `ontrack`, open and closed;
+- to propose nothing for a ruling whose identifier starts the title of one of those items;
+- to say in one line which closed items name a ruling the repository still does not follow;
+- when it cannot list the tracker's items, to propose every ruling and say that duplicates were not checked.
+
+Each proposed item SHALL have a title that starts with the ruling's identifier, followed by `: ` and a short description, and name the ADR it serves. Each created item SHALL carry the label `ontrack`, and the prompt SHALL tell the agent to create that label first when the tracker requires it. This text SHALL be the same in both forms.
 
 The review prompt SHALL also say that an ADR's own instructions on how to rule prevail over the prompt. The seven steps SHALL be the same text in both forms. Apart from the ADR's path and title, the prompt for a named pending ADR SHALL be the same text for every ADR. The output SHALL be the same for the same files, whatever the order the file system lists them in.
 
@@ -120,6 +126,23 @@ The review prompt SHALL also say that an ADR's own instructions on how to rule p
 - **THEN** after the instruction to run `npx ontrack apply`, and after the instruction to take the next ADR in the sequence form, it tells the agent to propose a tracking item for every ruling the repository does not follow yet
 - **AND** it names `tracking.tool` and `tracking.project`, asks for the user's agreement before creating an item, and says to create nothing when `tracking.tool` is `none`
 
+#### Scenario: Label on created items
+- **WHEN** `ontrack review` prints a prompt, in either form
+- **THEN** the tracking-items text tells the agent to put the label `ontrack` on every item it creates, and to create the label first when the tracker requires it
+
+#### Scenario: Ruling identifier in the title
+- **WHEN** `ontrack review` prints a prompt, in either form
+- **THEN** the tracking-items text gives `ADR-0015 secrets.guard` as the form of a ruling's identifier, and tells the agent to start each proposed item's title with it
+
+#### Scenario: Existing items checked first
+- **WHEN** `ontrack review` prints a prompt, in either form
+- **THEN** the instruction to list the items labelled `ontrack`, open and closed, comes before the instruction to propose a tracking item
+- **AND** it tells the agent to propose nothing for a ruling whose identifier starts an existing item's title, and to report in one line the closed items whose ruling is still not followed
+
+#### Scenario: Tracker that cannot be listed
+- **WHEN** `ontrack review` prints a prompt, in either form
+- **THEN** the tracking-items text tells the agent, when it cannot list the tracker's items, to propose every ruling and say that duplicates were not checked
+
 #### Scenario: Own ADR
 - **WHEN** `ontrack review ADR-0020-release` selects `local/ADR-0020-release`
 - **THEN** standard output contains `docs/adr/ADR-0020-release.md`
@@ -129,7 +152,7 @@ The review prompt SHALL also say that an ADR's own instructions on how to rule p
 - **THEN** they are identical
 
 ### Requirement: Supersession prompt
-For a named `accepted` ADR that is not superseded, the prompt SHALL be the supersession prompt, printed to standard output and following the contract in the README. It names the ADR by its path relative to the project root, with `/` separators, by its title when it has one, and by its reference. It names no other ADR. It SHALL say that the ADR is `accepted`, that its text is frozen, and that changing the decision takes a new ADR that supersedes it. It SHALL say that the repository's own rules on recording decisions prevail over the prompt. It SHALL tell the agent, in this order, to:
+For a named `accepted` ADR that is not superseded, the prompt SHALL be the supersession prompt, printed to standard output and following the contract in the commands reference, `docs/commands.md`. It names the ADR by its path relative to the project root, with `/` separators, by its title when it has one, and by its reference. It names no other ADR. It SHALL say that the ADR is `accepted`, that its text is frozen, and that changing the decision takes a new ADR that supersedes it. It SHALL say that the repository's own rules on recording decisions prevail over the prompt. It SHALL tell the agent, in this order, to:
 1. read the ADR's file in full, and the repository's rules on recording decisions;
 2. establish what changes in the decision, asking the user when they have not said, and cite the evidence that supports the change, whether the repository moved since the decision was taken or the decision never matched it, or say in one line that there is none;
 3. list every key under the ADR's `traits:` and propose, for each, the value it keeps or the value it takes, with the evidence for every change, leaving no key out, because a key the new ADR omits is no longer decided;
@@ -195,7 +218,7 @@ A revised ADR is one the `plan` capability reports as `revised` and whose copy u
 - **THEN** standard output is empty and the exit code is `0`
 
 ### Requirement: Prompt to rule again
-For revised ADRs, the prompt SHALL follow the contract in the README. It names each ADR by its path relative to the project root, with `/` separators, and by its title when it has one; next to it, the path of the source's copy, relative to the project root, the revision the repository ruled on and the revision the source asks. It SHALL say that the ruling stands until it is taken again, and that the source's copy prevails over the prompt where it says how to rule. It SHALL tell the agent, in this order, to:
+For revised ADRs, the prompt SHALL follow the contract in the commands reference, `docs/commands.md`. It names each ADR by its path relative to the project root, with `/` separators, and by its title when it has one; next to it, the path of the source's copy, relative to the project root, the revision the repository ruled on and the revision the source asks. It SHALL say that the ruling stands until it is taken again, and that the source's copy prevails over the prompt where it says how to rule. It SHALL tell the agent, in this order, to:
 1. read both copies in full, and edit neither the source's copy nor any other ADR;
 2. list what moved in the question: trait keys added, removed or renamed, allowed values changed, recommendations changed;
 3. keep the ruled value of every trait key that did not move, with the reason written for a departure;
