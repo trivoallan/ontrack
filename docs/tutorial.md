@@ -33,11 +33,14 @@ The package is scoped; the command it installs is `ontrack`.
 
 A **source** is an npm dependency that ships ADRs. Its npm alias is its
 namespace. [trivoallan/governance](https://github.com/trivoallan/governance)
-is a public one:
+is a public one, published as `@trivoallan/ontrack-governance`:
 
 ```bash
-npm i -D trivoallan@git+https://github.com/trivoallan/governance.git
+npm i -D trivoallan@npm:@trivoallan/ontrack-governance
 ```
+
+`trivoallan@npm:` is npm's alias syntax: the package is installed under the
+name `trivoallan`, which becomes its namespace.
 
 ## 2. See what importing would change
 

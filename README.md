@@ -45,8 +45,11 @@ npm i -D ontrack@git+https://github.com/trivoallan/ontrack.git#v0.3.0
 Add a source with npm, under the alias of your choice:
 
 ```bash
-npm i -D <alias>@git+<source-repository-url>
+npm i -D <alias>@npm:<source-package>
 ```
+
+npm 12 fetches no git dependency by default. To install ontrack or a source
+from a git repository, set `allow-git=root` in the project's `.npmrc`.
 
 ## Usage
 

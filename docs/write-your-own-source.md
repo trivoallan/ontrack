@@ -24,7 +24,6 @@ cd platform-governance
 {
   "name": "platform-governance",
   "version": "0.1.0",
-  "private": true,
   "files": ["adr/"],
   "ontrack": { "adr": "adr", "namespace": "platform" }
 }
@@ -110,18 +109,32 @@ source shows in the next `npx ontrack plan`, with no reinstall.
 
 ## 4. Publish it
 
-Push the source to a git host. A repository then installs it by URL, under
-the alias you proposed:
+Publish the source to an npm registry, as you would any package:
 
 ```bash
-npm i -D platform@git+https://github.com/<owner>/platform-governance.git
+npm publish
 ```
+
+A repository then installs it under the alias you proposed:
+
+```bash
+npm i -D platform@npm:platform-governance
+```
+
+`platform@npm:` is npm's alias syntax: the package keeps its name on the
+registry and is installed as `platform`. A scoped package works the same
+way: `platform@npm:@acme/platform-governance`.
 
 The alias is the namespace: the ADRs land in `docs/adr/platform/`. It must
 be unscoped. A repository may pick another alias than the one you propose.
 
 In the trial repository, replace the `file:` dependency with this one before
 you commit.
+
+A source can also be installed from its git repository, with
+`platform@git+https://github.com/<owner>/platform-governance.git`. npm 12
+fetches no git dependency by default: each repository then needs
+`allow-git=root` in its `.npmrc`.
 
 ## When you change a question
 
