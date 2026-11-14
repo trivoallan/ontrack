@@ -1,23 +1,38 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
-function readJson(file) {
+// The part of a package.json ontrack reads. Taken on trust: JSON.parse is
+// untyped, and validating it is the zod change's job.
+type Manifest = {
+  name: string;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  ontrack?: unknown;
+};
+
+/** An installed package that ships ADRs. The npm alias is the namespace. */
+export type Source = {
+  namespace: string;
+  declaredNamespace: string | null;
+  packageName: string;
+  adrDir: string;
+};
+
+function readJson(file: string): Manifest {
   return JSON.parse(readFileSync(file, 'utf8'));
 }
 
-function isObject(value) {
+function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 /**
  * Lists the project's ontrack sources: npm dependencies whose installed
- * package.json carries an `ontrack` object. The npm alias is the namespace.
- * @returns {{ namespace: string, declaredNamespace: string | null,
- *   packageName: string, adrDir: string }[]} sorted by namespace
+ * package.json carries an `ontrack` object. Sorted by namespace.
  */
-export function discoverSources(projectRoot) {
+export function discoverSources(projectRoot: string): Source[] {
   const manifest = path.join(projectRoot, 'package.json');
-  let project;
+  let project: Manifest;
   try {
     project = readJson(manifest);
   } catch {
@@ -25,11 +40,11 @@ export function discoverSources(projectRoot) {
   }
 
   const aliases = Object.keys({ ...project.dependencies, ...project.devDependencies });
-  const sources = [];
+  const sources: Source[] = [];
 
   for (const alias of aliases) {
     const pkgDir = path.join(projectRoot, 'node_modules', alias);
-    let pkg;
+    let pkg: Manifest;
     try {
       pkg = readJson(path.join(pkgDir, 'package.json'));
     } catch {

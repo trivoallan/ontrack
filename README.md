@@ -19,7 +19,7 @@ asks a question and recommends an answer.
 
 ## Installation
 
-Node 20.19 or later.
+Node 22.18 or later. Installing compiles ontrack once, which npm does on its own.
 
 ```bash
 npm i -D ontrack@git+https://github.com/trivoallan/ontrack.git
@@ -343,13 +343,21 @@ yours and is never touched.
 
 ## Development
 
-Development uses Node 24 (see `.nvmrc`): the coverage thresholds of `npm test`
-need Node 22.8 or later. CI also runs the tests on Node 20.19.
+The code is TypeScript, written so that Node runs it as it is: nothing is
+compiled to work in this repository. Development uses Node 24 (see `.nvmrc`);
+CI also runs the tests on Node 22.18, the lowest supported version.
 
 ```bash
 npm install
-npm test     # tests and coverage; fails below 95% lines, branches or functions
+node bin/ontrack.ts plan   # the CLI, from the sources
+npm test                   # tests and coverage; fails below 95% lines, branches or functions
+npm run typecheck          # strict type check of bin/, src/ and test/
+npm run build              # compiles bin/ and src/ to dist/, what an install ships
 ```
+
+Node does not run TypeScript from `node_modules`, so the installed package is
+the JavaScript in `dist/`. npm builds it when it installs ontrack from git
+(`prepare`); `dist/` is never committed.
 
 ### Documentation site
 

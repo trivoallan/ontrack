@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { discoverSources } from '../src/sources.mjs';
+import { discoverSources } from '../src/sources.ts';
 
-const roots = [];
+const roots: string[] = [];
 after(() => {
   for (const root of roots) rmSync(root, { recursive: true, force: true });
   assert.ok(roots.every((root) => !existsSync(root)));
@@ -13,7 +13,17 @@ after(() => {
 
 // Builds a project: `deps` go in package.json, `installed` maps an alias to
 // its installed package.json. `devDeps` lands in devDependencies.
-function project({ deps = {}, devDeps = {}, installed = {}, manifest = true } = {}) {
+function project({
+  deps = {},
+  devDeps = {},
+  installed = {},
+  manifest = true,
+}: {
+  deps?: Record<string, string>;
+  devDeps?: Record<string, string>;
+  installed?: Record<string, unknown>;
+  manifest?: boolean;
+} = {}) {
   const root = mkdtempSync(path.join(tmpdir(), 'ontrack-sources-'));
   roots.push(root);
   if (manifest) {
@@ -30,7 +40,7 @@ function project({ deps = {}, devDeps = {}, installed = {}, manifest = true } = 
   return root;
 }
 
-const source = (name, ontrack = { namespace: name, adr: 'docs/adr' }) => ({ name, ontrack });
+const source = (name: string, ontrack: { namespace?: string; adr?: string } = { namespace: name, adr: 'docs/adr' }) => ({ name, ontrack });
 
 test('one source among other dependencies', () => {
   const root = project({

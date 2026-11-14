@@ -1,7 +1,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import mermaid from 'astro-mermaid';
-import { readAdrs } from '../src/instructions.mjs';
+import { readAdrs } from '../src/instructions.ts';
 
 export const base = '/ontrack';
 

@@ -2,22 +2,22 @@ import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import { main } from '../src/cli.mjs';
-import { cleanup, makeProject, makeTree } from './helpers/project.mjs';
+import { main } from '../src/cli.ts';
+import { cleanup, makeProject, makeTree } from './helpers/project.ts';
 
 after(cleanup);
 
 /** An ADR with the given frontmatter lines and a `# title` heading. */
-const adr = (title, ...frontmatter) => ['---', ...frontmatter, '---', '', `# ${title}`, '', 'Body.', ''].join('\n');
-const traits = (key) => ['traits:', `  ${key}:`, '    tool: x'];
+const adr = (title: string, ...frontmatter: string[]) => ['---', ...frontmatter, '---', '', `# ${title}`, '', 'Body.', ''].join('\n');
+const traits = (key: string) => ['traits:', `  ${key}:`, '    tool: x'];
 
-async function check(root) {
+async function check(root: string) {
   let stdout = '';
   let stderr = '';
   const io = {
     cwd: () => root,
-    stdout: { write: (s) => { stdout += s; } },
-    stderr: { write: (s) => { stderr += s; } },
+    stdout: { write: (s: string) => { stdout += s; } },
+    stderr: { write: (s: string) => { stderr += s; } },
   };
   const code = await main(['check'], io);
   return { code, stdout, stderr };
@@ -118,7 +118,7 @@ test('one of each: the README example, byte for byte', async () => {
   });
   const r = await check(root);
   const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
-  const example = /```\n(unchecked  [\s\S]*?unchecked\n)```/.exec(readme)[1];
+  const example = /```\n(unchecked  [\s\S]*?unchecked\n)```/.exec(readme)?.[1];
   assert.equal(r.stdout, example);
   assert.equal(r.code, 2);
 });

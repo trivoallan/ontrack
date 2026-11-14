@@ -1,23 +1,30 @@
-import { agentsPending, agentsReport, agentsStatus, writeAgents } from '../agents.mjs';
-import { formatApply, planActions, planAfter, runActions } from '../apply.mjs';
-import { findLinks } from '../links.mjs';
-import { buildPlan, formatPlan, hasPendingChanges } from '../plan.mjs';
+import { agentsPending, agentsReport, agentsStatus, writeAgents } from '../agents.ts';
+import { formatApply, planActions, planAfter, runActions } from '../apply.ts';
+import type { Action } from '../apply.ts';
+import type { Io } from '../cli.ts';
+import type { Argv } from 'yargs';
+import { findLinks } from '../links.ts';
+import { buildPlan, formatPlan, hasPendingChanges } from '../plan.ts';
 
 export const command = 'apply';
 export const describe = 'Import new ADRs, move flat-layout files and update AGENTS.md, as plan reports';
 
-export const builder = (y) =>
+export const builder = (y: Argv) =>
   y
     .option('prune', { type: 'boolean', default: false, describe: 'Delete ADRs the source no longer ships' })
     .option('confirm', { type: 'string', array: true, default: [], describe: 'Declare an undetermined verdict still holds (a name, or "all")' })
     .option('dry-run', { type: 'boolean', default: false, describe: 'Print what apply would do, write nothing' });
 
-const CHANGES_BLOCK = ['imported', 'moved', 'pruned'];
+const CHANGES_BLOCK: Action['kind'][] = ['imported', 'moved', 'pruned'];
 
 // The AGENTS.md lines of this run, and whether the block is still pending.
 // The block is computed on the resulting tree, which a dry run does not have:
 // there, any import, move or prune announces an update.
-function agentsStep(root, actions, dryRun) {
+function agentsStep(
+  root: string,
+  actions: Action[],
+  dryRun: boolean,
+): { lines: string[]; pending: boolean; wrote?: boolean } {
   const status = agentsStatus(root);
   const writable = status.state === 'missing' || status.state === 'out of date';
   if (!dryRun) {
@@ -33,7 +40,17 @@ function agentsStep(root, actions, dryRun) {
   return { lines: [`AGENTS.md: rules block to ${verb}`, ...(status.warning ? [status.warning] : [])], pending: true, wrote: true };
 }
 
-export function handler({ io, prune, confirm, dryRun }) {
+export function handler({
+  io,
+  prune,
+  confirm,
+  dryRun,
+}: {
+  io: Io;
+  prune: boolean;
+  confirm: string[];
+  dryRun: boolean;
+}): number {
   const root = io.cwd();
   const plan = buildPlan(root);
   const actions = planActions(root, plan, { prune, confirm });

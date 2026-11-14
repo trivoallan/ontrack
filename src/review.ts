@@ -2,11 +2,12 @@
 // one in sequence, or a single named one. The prompt is fixed text plus paths
 // and titles: everything specific to a question is in its ADR, which the
 // agent reads.
-import { readAdrs } from './instructions.mjs';
+import { readAdrs } from './instructions.ts';
+import type { Adr } from './instructions.ts';
 
-const stem = (adr) => adr.ref.slice(adr.ns.length + 1);
-const sorted = (root) => readAdrs(root).sort((a, b) => a.ref.localeCompare(b.ref));
-const named = (adr) => `\`${adr.path}\`${adr.title ? ` (${adr.title})` : ''}`;
+const stem = (adr: Adr) => adr.ref.slice(adr.ns.length + 1);
+const sorted = (root: string) => readAdrs(root).sort((a, b) => a.ref.localeCompare(b.ref));
+const named = (adr: Adr) => `\`${adr.path}\`${adr.title ? ` (${adr.title})` : ''}`;
 
 const STEPS = `1. Read its file in full. Do not edit any other ADR.
 2. Start from the recommendation the ADR makes. Look in this repository for evidence that it does not apply here. If you find none, say so in one line.
@@ -23,7 +24,7 @@ const TRACKING = `Once every ADR is ruled, list the rulings this repository does
 `;
 
 /** The `proposed` ADRs, in reference order. */
-export function pendingAdrs(root) {
+export function pendingAdrs(root: string): Adr[] {
   return sorted(root).filter((a) => a.status === 'proposed');
 }
 
@@ -32,7 +33,7 @@ export function pendingAdrs(root) {
  * identifier. Throws when the name matches no ADR, several, or one that is
  * not `proposed`.
  */
-export function selectAdr(root, name) {
+export function selectAdr(root: string, name: string): Adr {
   const adrs = sorted(root);
   const matches = name.includes('/')
     ? adrs.filter((a) => a.ref === name)
@@ -49,7 +50,7 @@ export function selectAdr(root, name) {
 }
 
 /** The contract prompt for one ADR (see README). */
-export function formatReview(adr) {
+export function formatReview(adr: Adr): string {
   return `Review one architecture decision record of this repository: ${named(adr)}.
 
 It is \`proposed\`: a question this repository has not answered yet, shipped with the answer its source recommends. Propose a ruling; the user decides. Where the ADR itself says how to rule, it prevails over this prompt.
@@ -59,7 +60,7 @@ ${TRACKING}`;
 }
 
 /** The contract prompt for every pending ADR, ruled one at a time (see README). */
-export function formatSequence(adrs) {
+export function formatSequence(adrs: Adr[]): string {
   return `Review the architecture decision records of this repository that are still \`proposed\`, one at a time, in this order:
 
 ${adrs.map((adr) => `- ${named(adr)}`).join('\n')}

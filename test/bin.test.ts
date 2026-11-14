@@ -4,11 +4,11 @@ import { spawnSync } from 'node:child_process';
 import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { adr, cleanup, makeProject } from './helpers/project.mjs';
+import { adr, cleanup, makeProject } from './helpers/project.ts';
 
 after(cleanup);
 
-const bin = fileURLToPath(new URL('../bin/ontrack.mjs', import.meta.url));
+const bin = fileURLToPath(new URL('../bin/ontrack.ts', import.meta.url));
 
 test('the installed bin reports the real exit code', () => {
   assert.equal(spawnSync(process.execPath, [bin, '--help']).status, 0);
@@ -16,7 +16,7 @@ test('the installed bin reports the real exit code', () => {
 });
 
 // Every file under `root`, relative path → bytes.
-function snapshot(root) {
+function snapshot(root: string) {
   return Object.fromEntries(
     readdirSync(root, { recursive: true, withFileTypes: true })
       .filter((e) => e.isFile())

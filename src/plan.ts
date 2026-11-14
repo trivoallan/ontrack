@@ -1,20 +1,39 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
-import { compareRevision, readRevision, readTitle } from './revision.mjs';
-import { discoverSources } from './sources.mjs';
+import { compareRevision, readRevision, readTitle } from './revision.ts';
+import type { Comparison } from './revision.ts';
+import { discoverSources } from './sources.ts';
+import type { Source } from './sources.ts';
 
-const ORDER = ['revised', 'new', 'removed', 'undetermined', 'unreadable', 'unchanged'];
-const CATEGORY = { stale: 'revised', 'up-to-date': 'unchanged' };
+export type Category = 'revised' | 'new' | 'removed' | 'undetermined' | 'unreadable' | 'unchanged';
+/** `from` is set when revised, `to` when revised or undetermined. */
+export type PlannedAdr = {
+  name: string;
+  category: Category;
+  title: string | null;
+  from?: number | null;
+  to?: number | null;
+};
+export type SourcePlan = { namespace: string; adrDir: string; adrs: PlannedAdr[]; migration: string[] };
+export type Plan = SourcePlan[];
+
+const ORDER: Category[] = ['revised', 'new', 'removed', 'undetermined', 'unreadable', 'unchanged'];
+const CATEGORY: Record<Comparison, Category> = {
+  stale: 'revised',
+  'up-to-date': 'unchanged',
+  undetermined: 'undetermined',
+  unreadable: 'unreadable',
+};
 
 // `*.md` files placed directly in `dir` (subdirectories ignored), sorted.
-export function markdownFiles(dir) {
+export function markdownFiles(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true })
     .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
     .map((entry) => entry.name)
     .sort();
 }
 
-function sourceFiles(source) {
+function sourceFiles(source: Source): string[] {
   try {
     return markdownFiles(source.adrDir);
   } catch {
@@ -22,12 +41,12 @@ function sourceFiles(source) {
   }
 }
 
-function planSource(root, source) {
+function planSource(root: string, source: Source): SourcePlan {
   const adrRoot = path.join(root, 'docs', 'adr');
   const localDir = path.join(adrRoot, source.namespace);
   const shipped = sourceFiles(source);
-  const adrs = [];
-  const migration = [];
+  const adrs: PlannedAdr[] = [];
+  const migration: string[] = [];
 
   for (const file of shipped) {
     const upstream = readFileSync(path.join(source.adrDir, file), 'utf8');
@@ -43,7 +62,7 @@ function planSource(root, source) {
     }
     const local = readFileSync(localPath, 'utf8');
     const result = compareRevision(local, upstream);
-    const adr = { name: file, category: CATEGORY[result] ?? result, title };
+    const adr: PlannedAdr = { name: file, category: CATEGORY[result], title };
     if (adr.category === 'revised') adr.from = readRevision(local);
     if (adr.category === 'revised' || adr.category === 'undetermined') adr.to = readRevision(upstream);
     adrs.push(adr);
@@ -59,31 +78,31 @@ function planSource(root, source) {
 }
 
 /** What importing each source would change, as data. Reads only. */
-export function buildPlan(root) {
+export function buildPlan(root: string): Plan {
   return discoverSources(root).map((source) => planSource(root, source));
 }
 
 /** True when anything in the plan needs a human. */
-export function hasPendingChanges(plan) {
+export function hasPendingChanges(plan: { adrs: { category: Category }[]; migration: unknown[] }[]): boolean {
   return plan.some(
     (s) => s.migration.length > 0 || s.adrs.some((a) => a.category !== 'unchanged'),
   );
 }
 
-export const stem = (file) => file.replace(/\.md$/, '');
-export const row = (category, text) => `  ${category.padEnd(12)}  ${text}`;
+export const stem = (file: string) => file.replace(/\.md$/, '');
+export const row = (category: string, text: string) => `  ${category.padEnd(12)}  ${text}`;
 /** An ADR's name, followed by its title when the name carries no slug of its own. */
-export const label = (adr) => {
+export const label = (adr: PlannedAdr) => {
   const name = stem(adr.name);
   return name + (adr.title && !/\d-./.test(name) ? `  ${adr.title}` : '');
 };
 
 /** The contract output (see README). */
-export function formatPlan(plan) {
+export function formatPlan(plan: Plan): string {
   if (plan.length === 0) return 'no ontrack source found\n';
-  const lines = [];
+  const lines: string[] = [];
   for (const source of plan) {
-    const counts = ORDER.map((category) => [
+    const counts = ORDER.map((category): [Category, number] => [
       category,
       source.adrs.filter((a) => a.category === category).length,
     ]).filter(([category, n]) => n > 0 || category === 'unchanged');

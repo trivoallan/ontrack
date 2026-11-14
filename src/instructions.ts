@@ -3,15 +3,32 @@
 // trait "is read without interpretation", and agents read YAML natively.
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
-import { markdownFiles } from './plan.mjs';
-import { frontmatter, readTitle } from './revision.mjs';
+import { markdownFiles } from './plan.ts';
+import { frontmatter, readTitle } from './revision.ts';
 
-const stem = (file) => file.replace(/\.md$/, '');
-const byRef = (a, b) => a.ref.localeCompare(b.ref);
-const unquote = (v) => v.replace(/^(["'])(.*)\1$/, '$2');
+type AdrFile = { dir: string; ns: string; file: string };
+
+/** An ADR as read from docs/adr/. `traits` and `check` are null unless it is `accepted`. */
+export type Adr = {
+  ref: string;
+  path: string;
+  ns: string;
+  id: string;
+  status: string | null;
+  title: string | null;
+  supersedes: string[];
+  traits: string[] | null;
+  check: string | null;
+};
+export type DecidedAdr = Adr & { traits: string[] };
+export type Instructions = { decided: DecidedAdr[]; pending: Adr[] };
+
+const stem = (file: string) => file.replace(/\.md$/, '');
+const byRef = (a: Adr, b: Adr) => a.ref.localeCompare(b.ref);
+const unquote = (v: string) => v.replace(/^(["'])(.*)\1$/, '$2');
 
 // docs/adr/*.md as `local`, docs/adr/<namespace>/*.md as `<namespace>`.
-function adrFiles(root) {
+function adrFiles(root: string): AdrFile[] {
   const adrRoot = path.join(root, 'docs', 'adr');
   if (!existsSync(adrRoot)) return [];
   const files = markdownFiles(adrRoot).map((file) => ({ dir: adrRoot, ns: 'local', file }));
@@ -24,25 +41,25 @@ function adrFiles(root) {
 }
 
 // Value of a column-zero key, without a trailing `# comment`; null when absent.
-function topValue(lines, key) {
+function topValue(lines: string[], key: string): string | null {
   const prefix = `${key}:`;
   const line = lines.find((l) => l.startsWith(prefix));
   return line === undefined ? null : unquote(line.slice(prefix.length).replace(/\s#.*$/, '').trim());
 }
 
 // The lines that follow `key:` and belong to it (indented, `- item` or blank).
-function blockAfter(lines, key, belongs) {
+function blockAfter(lines: string[], key: string, belongs: (line: string) => boolean): string[] {
   const start = lines.findIndex((l) => l.startsWith(`${key}:`));
-  const block = [];
+  const block: string[] = [];
   for (const line of lines.slice(start + 1)) {
     if (line.trim() !== '' && !belongs(line)) break;
     block.push(line);
   }
-  while (block.length > 0 && block.at(-1).trim() === '') block.pop();
+  while (block.length > 0 && block[block.length - 1].trim() === '') block.pop();
   return block;
 }
 
-function readSupersedes(lines) {
+function readSupersedes(lines: string[]): string[] {
   const inline = topValue(lines, 'supersedes');
   if (inline === null) return [];
   const items = inline.startsWith('[')
@@ -52,17 +69,17 @@ function readSupersedes(lines) {
 }
 
 // The dedented traits block, or null when the ADR declares none.
-function readTraitsBlock(lines, file) {
+function readTraitsBlock(lines: string[], file: string): string[] | null {
   const inline = topValue(lines, 'traits');
   if (inline === null || inline === '{}') return null;
   if (inline !== '') throw new Error(`${file}: write traits: as an indented block, not "${inline}"`);
   const block = blockAfter(lines, 'traits', (l) => /^\s/.test(l));
   if (block.length === 0) return null;
-  const indent = /^\s*/.exec(block[0])[0].length;
+  const indent = block[0].length - block[0].trimStart().length;
   return block.map((l) => l.replace(new RegExp(`^\\s{0,${indent}}`), ''));
 }
 
-function readAdr(root, { dir, ns, file }) {
+function readAdr(root: string, { dir, ns, file }: AdrFile): Adr | null {
   const full = path.join(dir, file);
   const text = readFileSync(full, 'utf8');
   const lines = frontmatter(text);
@@ -84,17 +101,18 @@ function readAdr(root, { dir, ns, file }) {
 
 // Dotted paths of the mapping keys in a traits block, and those with no key
 // nested under them. List items are not keys: they belong to their parent.
-function keyPaths(traits) {
-  const stack = [];
-  const paths = new Set();
-  const parents = new Set();
+function keyPaths(traits: string[]) {
+  const stack: { indent: number; path: string }[] = [];
+  const top = () => stack[stack.length - 1];
+  const paths = new Set<string>();
+  const parents = new Set<string>();
   for (const line of traits) {
     const m = /^(\s*)([A-Za-z_][\w-]*)\s*:/.exec(line);
     if (m === null) continue;
     const indent = m[1].length;
-    while (stack.length > 0 && stack.at(-1).indent >= indent) stack.pop();
-    if (stack.length > 0) parents.add(stack.at(-1).path);
-    const p = stack.length > 0 ? `${stack.at(-1).path}.${m[2]}` : m[2];
+    while (stack.length > 0 && top().indent >= indent) stack.pop();
+    if (stack.length > 0) parents.add(top().path);
+    const p = stack.length > 0 ? `${top().path}.${m[2]}` : m[2];
     stack.push({ indent, path: p });
     paths.add(p);
   }
@@ -102,15 +120,15 @@ function keyPaths(traits) {
 }
 
 /** Every readable ADR of the repository, unsorted. Reads docs/adr/ only. */
-export function readAdrs(root) {
-  return adrFiles(root).map((f) => readAdr(root, f)).filter(Boolean);
+export function readAdrs(root: string): Adr[] {
+  return adrFiles(root).map((f) => readAdr(root, f)).filter((adr) => adr !== null);
 }
 
 // Resolves supersession and trait conflicts once for instructions and check.
-function resolve(root) {
+function resolve(root: string) {
   const adrs = readAdrs(root);
 
-  const superseded = new Set();
+  const superseded = new Set<Adr>();
   for (const adr of adrs) {
     for (const name of adr.supersedes) {
       const slash = name.indexOf('/');
@@ -120,9 +138,9 @@ function resolve(root) {
   }
 
   const inForce = adrs.filter((a) => a.status === 'accepted' && !superseded.has(a)).sort(byRef);
-  const decided = inForce.filter((a) => a.traits);
-  const pathOwner = new Map();
-  const leafOwner = new Map();
+  const decided = inForce.filter((a): a is DecidedAdr => a.traits !== null);
+  const pathOwner = new Map<string, string>();
+  const leafOwner = new Map<string, string>();
   for (const adr of decided) {
     const { paths, leaves } = keyPaths(adr.traits);
     // A leaf of one ADR clashes with any path of the other: same key, or a
@@ -146,18 +164,18 @@ function resolve(root) {
  * `proposed`, each sorted by reference. Throws when two decided ADRs decide
  * the same trait key. Reads docs/adr/ only.
  */
-export function buildInstructions(root) {
+export function buildInstructions(root: string): Instructions {
   const { decided, pending } = resolve(root);
   return { decided, pending };
 }
 
 /** Every `accepted` ADR not superseded, sorted by reference. Throws like buildInstructions. */
-export const adrsInForce = (root) => resolve(root).inForce;
+export const adrsInForce = (root: string) => resolve(root).inForce;
 
-export const heading = (adr) => (adr.title ? `${adr.title} (${adr.ref})` : adr.ref);
+export const heading = (adr: Adr) => (adr.title ? `${adr.title} (${adr.ref})` : adr.ref);
 
 /** The contract output (see README). */
-export function formatInstructions({ decided, pending }) {
+export function formatInstructions({ decided, pending }: Instructions): string {
   const lines = ['<!-- ontrack:begin -->', '## Project rules (ontrack)', ''];
   for (const adr of decided) lines.push(`### ${heading(adr)}`, '', '```yaml', ...adr.traits, '```', '');
   if (pending.length > 0) {

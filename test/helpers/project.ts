@@ -1,17 +1,20 @@
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
-import { buildInstructions, formatInstructions } from '../../src/instructions.mjs';
+import { buildInstructions, formatInstructions } from '../../src/instructions.ts';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-const roots = [];
+/** Relative path to content. */
+export type Files = Record<string, string>;
+
+const roots: string[] = [];
 
 /** Removes every project built so far. Call from `after()`. */
-export function cleanup() {
+export function cleanup(): void {
   for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true });
 }
 
 /** Writes `files` ({ relative path: content }) under a new temporary root. */
-export function makeTree(files) {
+export function makeTree(files: Files): string {
   const root = mkdtempSync(path.join(tmpdir(), 'ontrack-'));
   roots.push(root);
   for (const [rel, content] of Object.entries(files)) {
@@ -26,8 +29,11 @@ export function makeTree(files) {
  * A project depending on `sources` ({ alias: { file: content } }) installed
  * with an `ontrack` key and `adr: "adr"`, plus `local` files under the root.
  */
-export function makeProject({ sources = {}, local = {} } = {}) {
-  const files = {
+export function makeProject({
+  sources = {},
+  local = {},
+}: { sources?: Record<string, Files>; local?: Files } = {}): string {
+  const files: Files = {
     'package.json': JSON.stringify({
       name: 'project',
       devDependencies: Object.fromEntries(Object.keys(sources).map((a) => [a, '1'])),
@@ -47,7 +53,7 @@ export function makeProject({ sources = {}, local = {} } = {}) {
 }
 
 /** A minimal ADR with the given revision (omit it for none) and optional title. */
-export const adr = (revision, status = 'proposed', title) =>
+export const adr = (revision?: number, status = 'proposed', title?: string) =>
   [
     '---',
     `status: ${status}`,
@@ -60,7 +66,7 @@ export const adr = (revision, status = 'proposed', title) =>
   ].join('\n');
 
 /** Writes a current rules block into the project's AGENTS.md; returns the root. */
-export function withAgents(root, { before = '', after = '' } = {}) {
+export function withAgents(root: string, { before = '', after = '' }: { before?: string; after?: string } = {}): string {
   const block = formatInstructions(buildInstructions(root));
   writeFileSync(path.join(root, 'AGENTS.md'), before + block + after);
   return root;
