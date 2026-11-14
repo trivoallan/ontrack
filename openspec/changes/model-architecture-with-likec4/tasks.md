@@ -18,6 +18,6 @@
 
 ## 4. CI and record
 
-- [ ] 4.1 Add a `likec4 validate` step before the build in the `docs` job; verify the check passes on the pull request, and fails on a temporary commit that references an undefined element (then drop that commit)
+- [x] 4.1 Add a `likec4 validate` step before the build in the `docs` job; verify the check passes on the pull request, and fails on a temporary commit that references an undefined element (then drop that commit)
 - [x] 4.2 Add one sentence to the body of `docs/adr/trivoallan/ADR-0010-architecture-documentation.md` recording that sections 3, 5 and 7 are `.mdx`; verify `ontrack plan` still reports the ADR as up to date
 - [x] 4.3 Add to the README's development section how to preview the model (`npx likec4 serve` from `site/`); verify the command works as written and that `git diff --stat -- package.json package-lock.json` at the root is empty
