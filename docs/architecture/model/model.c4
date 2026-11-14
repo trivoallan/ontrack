@@ -1,0 +1,148 @@
+// What exists and what depends on what. One `module` per file of src/.
+// A relationship between two modules is an import: check it against
+//   grep -n "^import" src/*.ts src/commands/*.ts
+model {
+  maintainer = actor "Maintainer" {
+    description "Runs ontrack in a repository, by hand or from a CI job"
+  }
+  agent = actor "Coding agent" {
+    description "Follows the rules of AGENTS.md and proposes rulings"
+  }
+
+  ontrack = system "ontrack" {
+    description "Imports shared ADRs from npm sources into a repository"
+
+    cli = module "cli" {
+      description "Parses the command line, runs the subcommand, maps errors to exit code 1"
+    }
+
+    commands = module "commands" {
+      description "One thin module per subcommand"
+
+      plan = module "commands/plan"
+      apply = module "commands/apply"
+      instructions = module "commands/instructions"
+      review = module "commands/review"
+      check = module "commands/check"
+    }
+
+    schemas = module "schemas" {
+      description "zod models of everything read from outside"
+    }
+    sources = module "sources" {
+      description "Lists the sources among the project's npm dependencies"
+    }
+    revision = module "revision" {
+      description "Reads frontmatter without a YAML parser and compares revisions"
+    }
+    planner = module "plan" {
+      description "Builds the plan: each source ADR and its category"
+    }
+    applier = module "apply" {
+      description "Turns a plan into checked actions and executes them"
+    }
+    links = module "links" {
+      description "Finds the Markdown links a migration breaks"
+    }
+    instructions = module "instructions" {
+      description "Gathers the decided traits into the rules block"
+    }
+    agents = module "agents" {
+      description "Keeps the rules block of AGENTS.md current"
+    }
+    review = module "review" {
+      description "Formats the prompts that ask an agent to rule or supersede"
+    }
+    check = module "check" {
+      description "Runs the check command of each ADR in force"
+    }
+
+    // Imports: the entry point and its commands
+    cli -> commands.plan "dispatches to"
+    cli -> commands.apply "dispatches to"
+    cli -> commands.instructions "dispatches to"
+    cli -> commands.review "dispatches to"
+    cli -> commands.check "dispatches to"
+    commands.plan -> cli "Io type"
+    commands.apply -> cli "Io type"
+    commands.instructions -> cli "Io type"
+    commands.review -> cli "Io type"
+    commands.check -> cli "Io type"
+
+    // Imports: commands to domain modules
+    commands.plan -> planner "buildPlan"
+    commands.plan -> agents "agentsStatus"
+    commands.apply -> planner "buildPlan"
+    commands.apply -> applier "planActions, runActions"
+    commands.apply -> links "findLinks"
+    commands.apply -> agents "agentsStatus, writeAgents"
+    commands.instructions -> instructions "buildInstructions"
+    commands.review -> review "selectAdr, pendingAdrs"
+    commands.check -> check "runChecks"
+
+    // Imports: between domain modules
+    planner -> sources "discoverSources"
+    planner -> revision "compareRevision"
+    applier -> planner "plan types and formatting"
+    applier -> revision "setRevision"
+    applier -> links "Link type"
+    instructions -> planner "markdownFiles"
+    instructions -> revision "frontmatter, readTitle"
+    agents -> instructions "buildInstructions"
+    review -> instructions "readAdrs"
+    check -> instructions "adrsInForce"
+    sources -> schemas "validates with"
+    revision -> schemas "validates with"
+  }
+
+  project = external "Project repository" {
+    description "The repository ontrack runs in"
+
+    manifest = external "package.json" {
+      description "Declares the sources as npm dependencies"
+    }
+    adrs = external "docs/adr/<namespace>/" {
+      description "The ADRs the repository holds, with its rulings"
+    }
+    agentsFile = external "AGENTS.md" {
+      description "Holds the rules block between two markers"
+    }
+    markdown = external "Other Markdown files" {
+      description "May link to ADRs a migration moves"
+    }
+  }
+  installed = external "Installed source packages" {
+    description "node_modules/<alias>/: a package.json with an ontrack key, and ADR files"
+  }
+  npm = external "npm and git" {
+    description "How ontrack and the sources arrive; never called by ontrack"
+  }
+  git = external "git" {
+    description "Moves files in a work tree"
+  }
+  checks = external "Check commands" {
+    description "The commands ADRs declare in check:, run through the shell"
+  }
+
+  // People and agents
+  maintainer -> ontrack.cli "runs a command, reads the report and the exit code"
+  maintainer -> npm "installs ontrack and sources with"
+  npm -> installed "installs"
+  npm -> project.manifest "records dependencies in"
+  ontrack.review -> agent "prints a prompt for"
+  agent -> project.agentsFile "reads the rules in"
+  agent -> project.adrs "writes rulings in"
+
+  // Files each module reads or writes
+  ontrack.sources -> project.manifest "reads the dependency aliases of"
+  ontrack.sources -> installed "reads the ontrack key of"
+  ontrack.planner -> installed "reads the ADRs of"
+  ontrack.planner -> project.adrs "reads local copies in"
+  ontrack.applier -> installed "copies new ADRs from"
+  ontrack.applier -> project.adrs "imports, moves, confirms and prunes in"
+  ontrack.applier -> git "moves files with"
+  ontrack.links -> project.markdown "reads links in"
+  ontrack.instructions -> project.adrs "reads status and traits in"
+  ontrack.agents -> project.agentsFile "reads and writes the rules block of"
+  ontrack.check -> checks "runs"
+}

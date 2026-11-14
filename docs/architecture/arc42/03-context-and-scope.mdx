@@ -2,6 +2,8 @@
 title: Context and Scope
 ---
 
+import { LikeC4View } from 'likec4:react';
+
 # Context and Scope
 
 ontrack is a process started in a repository, the *project*. It reads files
@@ -41,4 +43,10 @@ declared checks. Outside: installing sources (npm), ruling an ADR (a person,
 helped by an agent), committing (the maintainer), and judging whether the
 repository follows a rule (the tool each `check:` names).
 
-The context diagram comes from the LikeC4 model in `docs/architecture/model/`.
+## Diagram
+
+<LikeC4View viewId="context" client:only="react" />
+
+This is the `context` view of the LikeC4 model in
+[`docs/architecture/model/`](https://github.com/trivoallan/ontrack/tree/main/docs/architecture/model). It is drawn on the
+documentation site only; elsewhere, read the model's `.c4` files.

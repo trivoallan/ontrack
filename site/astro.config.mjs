@@ -1,6 +1,8 @@
 import { defineConfig } from 'astro/config';
+import react from '@astrojs/react';
 import starlight from '@astrojs/starlight';
 import mermaid from 'astro-mermaid';
+import { LikeC4VitePlugin } from 'likec4/vite-plugin';
 import { readAdrs } from '../src/instructions.ts';
 import { statusTone } from './src/adr-status.mjs';
 
@@ -21,9 +23,9 @@ const pages = () => (tree, file) => {
   // except for an index page, which is served at its own directory.
   const up = /(^|\/)index\.mdx?$/.test(file.path) ? './' : '../';
   walk(tree, (node) => {
-    if (node.type !== 'link' || !/^[^:#/][^:#]*\.md(#.*)?$/.test(node.url)) return;
+    if (node.type !== 'link' || !/^[^:#/][^:#]*\.mdx?(#.*)?$/.test(node.url)) return;
     const [path, fragment = ''] = node.url.toLowerCase().split(/(?=#)/);
-    node.url = up + path.replace(/(^|\/)index\.md$/, '$1').replace(/\.md$/, '/') + fragment;
+    node.url = up + path.replace(/(^|\/)index\.mdx?$/, '$1').replace(/\.mdx?$/, '/') + fragment;
   });
   // Starlight renders the frontmatter title: drop the heading that repeats it.
   const first = tree.children.findIndex((node) => node.type === 'heading');
@@ -47,8 +49,15 @@ export default defineConfig({
   // The logo is the favicon too: serve docs/assets as static files.
   publicDir: '../docs/assets',
   markdown: { remarkPlugins: [pages] },
+  // The architecture model (ADR-0010): its views are components the arc42
+  // pages embed, laid out at build time. An invalid model fails the build.
+  vite: {
+    plugins: [LikeC4VitePlugin({ workspace: '../docs/architecture/model', throwIfInvalid: true })],
+  },
   integrations: [
     mermaid(),
+    // LikeC4 views are React components, rendered in the browser.
+    react(),
     starlight({
       title: 'ontrack',
       logo: { src: '../docs/assets/logo.png' },

@@ -2,6 +2,8 @@
 title: Deployment View
 ---
 
+import { LikeC4View } from 'likec4:react';
+
 # Deployment View
 
 ontrack is delivered as a package and deployed nowhere
@@ -30,4 +32,10 @@ state outside the working tree. `apply` uses `git` when it is installed, and
 `check` runs the commands the ADRs declare through the shell, with the
 environment of the caller.
 
-The deployment diagram comes from the LikeC4 model in `docs/architecture/model/`.
+## Diagram
+
+<LikeC4View viewId="deployment" client:only="react" />
+
+This is the `deployment` view of the LikeC4 model in
+[`docs/architecture/model/`](https://github.com/trivoallan/ontrack/tree/main/docs/architecture/model). It is drawn on the
+documentation site only; elsewhere, read the model's `.c4` files.
