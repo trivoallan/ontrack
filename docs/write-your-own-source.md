@@ -109,7 +109,14 @@ source shows in the next `npx ontrack plan`, with no reinstall.
 
 ## 4. Publish it
 
-Publish the source to an npm registry, as you would any package:
+First add the keyword `ontrack-source` to its `package.json`. On the public
+registry, the keyword is how a person [finds your source](find-a-source.md):
+
+```json
+"keywords": ["ontrack-source"]
+```
+
+Then publish the source to an npm registry, as you would any package:
 
 ```bash
 npm publish
@@ -136,6 +143,19 @@ A source can also be installed from its git repository, with
 fetches no git dependency by default: each repository then needs
 `allow-git=root` in its `.npmrc`.
 
+### Say what the source asks
+
+A repository that installs your source receives every question in it. Write
+a README, which the registry and the git host both show, so that a person
+can judge the source before installing it:
+
+- how many questions it asks, and on which subjects;
+- which questions carry a `check` command, because that command runs in the
+  repository that accepts the ADR;
+- the alias you propose.
+
+ontrack does not read the README.
+
 ## When you change a question
 
 Raise its `revision` in the source. Each repository that answered the
@@ -161,5 +181,7 @@ repository that rules again.
   repository that accepted the ADR.
 - Let your editor check the `ontrack` key as you type, with the
   [published JSON Schema](file-formats.md#the-ontrack-key-of-a-source).
+- See how a person [finds a source](find-a-source.md) to install, yours
+  included.
 - Read [trivoallan/governance](https://github.com/trivoallan/governance), a
   source in use.

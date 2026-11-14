@@ -167,6 +167,12 @@ A `package.json` with an `ontrack` key and a directory of ADRs.
 [trivoallan/governance](https://github.com/trivoallan/governance) is a
 working example to start from.
 
+### Where do I find a source someone else wrote?
+
+Published sources carry the keyword `ontrack-source` on the npm registry.
+[Find a source](find-a-source.md) gives the search, and what to read before
+you install one.
+
 ## Try it on one repository
 
 The [tutorial](tutorial.md) takes four commands. On a fresh repository, the
