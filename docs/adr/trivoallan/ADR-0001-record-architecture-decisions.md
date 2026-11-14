@@ -3,7 +3,7 @@ adr: ADR-0001
 slug: record-architecture-decisions
 title: Record architecture decisions
 status: accepted
-revision: 1
+revision: 3
 date: 2026-11-14
 authors: [Tristan Rivoallan]
 supersedes: []
@@ -74,6 +74,7 @@ revision: 1          # written by governance: it dates the question, not the fil
 date: 2026-11-14     # the day you ruled
 authors: [Your Name] # the people who decided, no email addresses
 supersedes: []       # the ADRs this one replaces
+check: npx --no-install governance-check ADR-0006  # optional, see rule 8
 traits: {...}        # the machine-readable part of the answer
 ```
 
@@ -81,11 +82,18 @@ The reverse edge is not written, it is computed: an ADR is superseded when
 another one lists it in `supersedes:`. Storing it twice would give two
 places to keep in step, and nothing would compare them.
 
-**4. The body freezes once ruled; the status does not.** From `accepted`
-or `rejected` on, the text does not change, and reopening the decision takes
-a new ADR. The one thing still written in a frozen ADR is its `status`. A
-superseded ADR stays in the directory, marked: the directory is a log of
-decisions, not a list of what is in force.
+**4. The body freezes once ruled; the status does not.** Once your
+repository rules an ADR `accepted` or `rejected`, your copy's text does not
+change, and reopening the decision takes a new ADR. The things still
+written in a frozen ADR are its `status` and its `check:` line (rule 8),
+which says how the decision is checked, not what it is. A superseded ADR stays in the
+directory, marked: the directory is a log of decisions, not a list of what
+is in force.
+
+This freeze is about **your verdict**. The ADRs governance ships, this one
+included, change only through `revision` (rule 6): governance edits the
+file and raises the number, and `ontrack plan` tells you. It does not write
+a superseding ADR for its own revisions.
 
 **5. A governance ADR asks a question, and the answer belongs to your
 repository.** It arrives `status: proposed`, with every key under `traits:`
@@ -104,8 +112,12 @@ stands in for the decision, so an agent knows what to go by.
 **6. `revision` dates the question.** governance raises it by one when, and
 only when, the question changes: a trait added, removed or renamed, an enum
 value changed, or the recommended answer changed. A wording, typo or link
-fix leaves it alone. `ontrack plan` then reports an ADR as `revised` only
-when there is something to rule on again.
+fix leaves it alone, and so does a change to a `Suggested skills` line in
+an ADR's References: that line names the Claude Code skills that help carry
+out the decision ([ADR-0017](ADR-0017-agent-tooling.md)), and it is advice,
+not part of the question. The same goes for a `check:` line (rule 8) and
+for the scripts it calls. `ontrack plan` then reports an ADR as `revised`
+only when there is something to rule on again.
 
 **7. `mdschema` attests, it refuses nothing.** The `.mdschema.yml` shipped
 next to these ADRs checks that a ruled ADR carries its verdict: status
@@ -125,7 +137,23 @@ It names what is missing and stops there. If `npx` answers
 releases of [its repository](https://github.com/jackchuka/mdschema) and run
 `mdschema check '*.md'` from the same directory.
 
-**8. If governance asks the wrong question,** write your own ADR in
+**8. A `check:` line says when your work departs from a decision.** An ADR
+may carry, in its frontmatter, a `check:` key holding one shell command.
+Once your repository rules the ADR `accepted`, `ontrack check` runs it from
+your repository's root and reports the ADR as `pass` or `fail`. A command
+governance ships calls `npx --no-install governance-check <ADR number>`: the
+script reads the traits you ruled, so the same line holds whatever you
+decide, and `--no-install` keeps `npx` from fetching anything from a
+registry. Read an imported `check:` line as you would an npm install script:
+it runs governance's code in your repository.
+
+Those scripts follow the version of governance's package, not `revision`:
+an `npm update` can change what a check does, and `ontrack plan` does not
+report it. A `check:` line added to an ADR you have already ruled does not
+reach your frozen copy either: copy the line into it by hand, as rule 4
+allows.
+
+**9. If governance asks the wrong question,** write your own ADR in
 `docs/adr/`, cite the governance ADR you depart from, and say how. It does
 not depend on any network: the record lives where the decision applies.
 
@@ -140,6 +168,8 @@ not depend on any network: the record lives where the decision applies.
 - The supersession graph and the open questions (`status: proposed`) can be
   computed from the frontmatter.
 - `ontrack plan` reports a question as `revised` only when it moved.
+- An ADR that carries a `check:` line is checked by `ontrack check`, so a
+  departure from it fails before review instead of in it.
 
 ### Negative
 
@@ -190,7 +220,9 @@ would describe governance's context instead of its own.
 
 ## References
 
+- Suggested skills: `develop-adr` from `pm-skills@product-on-purpose`, to write a governance ADR or your own.
 - Adapted from surdesrails [SDR-0001](https://github.com/trivoallan/surdesrails/blob/main/resources/docs/adr/SDR-0001-record-architecture-decisions.md), revision 1.
 - Michael Nygard, [Documenting Architecture Decisions](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions) (2011).
 - [ontrack](https://github.com/trivoallan/ontrack): imports these ADRs and reports `new`, `revised` and `removed` ones.
 - [mdschema](https://github.com/jackchuka/mdschema): the checker behind `.mdschema.yml`.
+- [`ontrack check`](https://github.com/trivoallan/ontrack#ontrack-check-output-contract): runs the `check:` line of each decided ADR.

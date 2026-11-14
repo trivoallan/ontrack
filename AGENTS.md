@@ -99,6 +99,7 @@ delivery:
   target: package
   environments:
     - { name: github, trigger: tag }
+    - { name: npm, trigger: tag }
   release_tool: release-please
   registry: none
 deployment:
