@@ -78,6 +78,7 @@ npx ontrack plan          # what importing the sources would change
 npx ontrack apply         # do it (see below)
 npx ontrack instructions  # the decided traits, as a block for AGENTS.md
 npx ontrack review        # a prompt asking a coding agent to rule the proposed ADRs
+npx ontrack check         # run the check command of each decided ADR
 ```
 
 ### Exit codes
@@ -87,7 +88,7 @@ Every command shares the same exit codes:
 | Code | Meaning |
 |------|---------|
 | `0` | Nothing to do |
-| `2` | Changes pending |
+| `2` | Changes pending, or a check failed |
 | `1` | Error (unknown command, unreadable source…) |
 
 A CI job can detect an out-of-date repository on `2` without parsing the output.
@@ -282,6 +283,49 @@ Once every ADR is ruled, list the rulings this repository does not follow yet: a
 - It exits with `2` when it prints a prompt, because a ruling is pending. With no `proposed` ADR it exits with `0`, says so on standard error and prints nothing, so that no agent receives that sentence as a prompt. An unknown, ambiguous or already ruled name is an error, with `1`.
 
 Any change to this prompt goes through this README first.
+
+## `ontrack check` output contract
+
+`instructions` tells an agent what the repository decided. `check` tells it
+when its work departs from a decision. ontrack judges nothing itself: an ADR
+names the command that does, in a top-level `check:` key of its frontmatter.
+
+```yaml
+---
+adr: ADR-0006
+title: Commits
+status: accepted
+check: npx commitlint --from origin/main
+traits:
+  commits:
+    scopes: [api, cli, docs]
+    tool: commitlint
+---
+```
+
+`check` runs each command and reports one line per ADR:
+
+```
+unchecked  Record architecture decisions (trivoallan/ADR-0001-record-architecture-decisions)
+fail       Commits (trivoallan/ADR-0006-commits)
+  rule: docs/adr/trivoallan/ADR-0006-commits.md
+  check: echo "scope may not be empty"; exit 1
+  | scope may not be empty
+pass       Branching (trivoallan/ADR-0009-branching)
+1 failed, 1 passed, 1 unchecked
+```
+
+- The ADRs read, their status and their supersession are those of `instructions`. An ADR carries a check when it is `accepted`, is not superseded, and has a non-empty `check:` value. A local ADR that supersedes a source's ADR silences its check and may carry its own.
+- The command is the rest of the `check:` line. A trailing ` # comment` is removed, and so is one pair of matching quotes around the whole value. Lines below are not part of it: put a longer command in a script.
+- Commands run through the shell, from the project root, with your environment, one at a time, in reference order. A failure does not stop the run.
+- `pass`: the command exited with `0`. `fail`: anything else, including a program that is not installed. `unchecked`: the ADR carries decided traits and no `check:`.
+- A `fail` line is followed by the ADR's path, the command, and the command's standard output then standard error, each line after `  | `. The output of a passing command is not printed.
+- Lines are sorted by reference. The last line counts each status, and is the only line when there is nothing to report.
+- Conflicting traits are an error, as in `instructions`, and no command runs.
+- `check` exits with `2` when at least one check failed, `0` otherwise, `1` on an error. `unchecked` ADRs do not change the exit code.
+- Only ADRs committed under `docs/adr/` are read, never `node_modules`. A source's command therefore runs only once `apply` has copied its ADR and your repository holds it as `accepted`. Read the `check:` line of an imported ADR as you would an npm install script.
+
+Any change to this format goes through this README first.
 
 ## The rules block in `AGENTS.md`
 

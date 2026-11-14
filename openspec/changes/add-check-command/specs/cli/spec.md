@@ -1,0 +1,32 @@
+# Spec Delta
+
+## MODIFIED Requirements
+
+### Requirement: Command help
+The `ontrack` command SHALL print to standard output a help text listing its subcommands, including `plan`, `instructions`, `review` and `check`, and exit with code `0`, when run with `--help`, `-h`, or no argument.
+
+#### Scenario: Help requested explicitly
+- **WHEN** the user runs `ontrack --help`
+- **THEN** standard output lists the `plan`, `instructions`, `review` and `check` subcommands
+- **AND** the exit code is `0`
+
+#### Scenario: No argument
+- **WHEN** the user runs `ontrack` with no argument
+- **THEN** the same help is printed
+- **AND** the exit code is `0`
+
+### Requirement: Exit codes shared by subcommands
+Every `ontrack` subcommand SHALL exit with one of three codes: `0` when there is nothing to do, `2` when changes are pending or a check failed, `1` on error. No other code is emitted on purpose.
+
+#### Scenario: Pending changes
+- **WHEN** the user runs `ontrack plan` in a project where a source revised an imported ADR
+- **THEN** the exit code is `2`
+
+#### Scenario: Failed check
+- **WHEN** the user runs `ontrack check` in a project where a decided ADR's check command exits with a non-zero code
+- **THEN** the exit code is `2`
+
+#### Scenario: Error
+- **WHEN** the user runs `ontrack plan` in a directory without a `package.json`
+- **THEN** standard error explains the problem
+- **AND** the exit code is `1`
