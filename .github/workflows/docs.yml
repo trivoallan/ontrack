@@ -25,6 +25,10 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: site/package-lock.json
+      # The site config imports ../src, which needs the CLI's own runtime
+      # dependencies. --ignore-scripts skips `prepare`, which needs dev ones.
+      - run: npm ci --omit=dev --ignore-scripts
+        working-directory: .
       - run: npm ci
       # Builds the site, then fails on a broken internal link.
       - run: npm run build
