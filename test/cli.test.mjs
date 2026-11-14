@@ -30,6 +30,7 @@ for (const args of [['--help'], ['-h'], []]) {
     assert.equal(r.code, 0);
     assert.match(r.stdout, /ontrack plan/);
     assert.match(r.stdout, /ontrack instructions/);
+    assert.match(r.stdout, /ontrack review/);
     assert.equal(r.stderr, '');
   });
 }

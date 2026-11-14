@@ -58,6 +58,7 @@ npx ontrack --version
 npx ontrack plan          # what importing the sources would change
 npx ontrack apply         # do it (see below)
 npx ontrack instructions  # the decided traits, as a block for AGENTS.md
+npx ontrack review        # a prompt asking a coding agent to rule the proposed ADRs
 ```
 
 ### Exit codes
@@ -197,6 +198,66 @@ commits:
 - `instructions` never writes a file and makes no network call. It exits with `0`, or with `1` on an error; it never returns `2`.
 
 Any change to this format goes through this README first.
+
+## `ontrack review` prompt contract
+
+An ADR stays `proposed` until someone rules. `review` prints a prompt that
+asks a coding agent to rule them with you, one at a time: the agent proposes,
+you agree, and only then does it write.
+
+```bash
+claude "$(npx ontrack review)"           # every proposed ADR, in sequence
+claude "$(npx ontrack review ADR-0006)"  # this one alone
+```
+
+Without an argument, the prompt lists every `proposed` ADR and gives the
+steps once:
+
+~~~
+Review the architecture decision records of this repository that are still `proposed`, one at a time, in this order:
+
+- `docs/adr/trivoallan/ADR-0002-localization.md` (Localization)
+- `docs/adr/trivoallan/ADR-0006-commits.md` (Commits)
+
+Each is a question this repository has not answered yet, shipped with the answer its source recommends. Propose a ruling; the user decides. Where an ADR itself says how to rule, it prevails over this prompt.
+
+For each ADR, in turn:
+
+1. Read its file in full. Do not edit any other ADR.
+2. Start from the recommendation the ADR makes. Look in this repository for evidence that it does not apply here. If you find none, say so in one line.
+3. When a recommendation is conditional ("if this repository…"), check the condition and cite the file or command output that settles it.
+4. For every key under `traits:` that the ADR leaves to the repository, propose a value drawn from the repository, with its evidence.
+5. Propose `rejected` only on evidence that the question does not apply here, and say what stands in for it.
+6. Present the proposed ruling: the status, one line per trait key with its value and evidence, and every departure from the recommendation with its reason. Then stop and ask for the user's agreement, with a question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees.
+7. Once the user agrees: fill the `traits:` keys, or remove the block when rejected; set the status; write in the ADR the reason for every departure from the recommendation; then run `npx ontrack apply` to update AGENTS.md.
+
+Then take the next ADR in the list. Do not start an ADR before the previous one is ruled.
+~~~
+
+With an argument, the prompt names that ADR alone, with the same steps. It is
+the same text for every ADR, apart from its path and title:
+
+~~~
+Review one architecture decision record of this repository: `docs/adr/trivoallan/ADR-0006-commits.md` (Commits).
+
+It is `proposed`: a question this repository has not answered yet, shipped with the answer its source recommends. Propose a ruling; the user decides. Where the ADR itself says how to rule, it prevails over this prompt.
+
+1. Read its file in full. Do not edit any other ADR.
+2. Start from the recommendation the ADR makes. Look in this repository for evidence that it does not apply here. If you find none, say so in one line.
+3. When a recommendation is conditional ("if this repository…"), check the condition and cite the file or command output that settles it.
+4. For every key under `traits:` that the ADR leaves to the repository, propose a value drawn from the repository, with its evidence.
+5. Propose `rejected` only on evidence that the question does not apply here, and say what stands in for it.
+6. Present the proposed ruling: the status, one line per trait key with its value and evidence, and every departure from the recommendation with its reason. Then stop and ask for the user's agreement, with a question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees.
+7. Once the user agrees: fill the `traits:` keys, or remove the block when rejected; set the status; write in the ADR the reason for every departure from the recommendation; then run `npx ontrack apply` to update AGENTS.md.
+~~~
+
+- The ADRs read are those of `instructions`. Without an argument, the prompt lists every `proposed` ADR in reference order, the order of "Not yet decided", even when there is only one.
+- An argument with a `/` is a reference (`trivoallan/ADR-0006-commits`). Any other argument is a file name without `.md` (`ADR-0006-commits`) or an `adr:` identifier (`ADR-0006`), looked up in every directory. It must name exactly one ADR, and that ADR must be `proposed`.
+- An ADR without a title is named by its path alone.
+- `review` never writes a file and makes no network call. Two decided ADRs sharing a trait key do not stop it.
+- It exits with `2` when it prints a prompt, because a ruling is pending. With no `proposed` ADR it exits with `0`, says so on standard error and prints nothing, so that no agent receives that sentence as a prompt. An unknown, ambiguous or already ruled name is an error, with `1`.
+
+Any change to this prompt goes through this README first.
 
 ## The rules block in `AGENTS.md`
 

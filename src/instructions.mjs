@@ -71,6 +71,7 @@ function readAdr(root, { dir, ns, file }) {
   const traits = status === 'accepted' ? readTraitsBlock(lines, path.relative(root, full)) : null;
   return {
     ref: `${ns}/${stem(file)}`,
+    path: path.relative(root, full).split(path.sep).join('/'),
     ns,
     id: topValue(lines, 'adr') || stem(file),
     status,
@@ -80,13 +81,18 @@ function readAdr(root, { dir, ns, file }) {
   };
 }
 
+/** Every readable ADR of the repository, unsorted. Reads docs/adr/ only. */
+export function readAdrs(root) {
+  return adrFiles(root).map((f) => readAdr(root, f)).filter(Boolean);
+}
+
 /**
  * { decided, pending }: the ADRs whose traits are in force, and those still
  * `proposed`, each sorted by reference. Throws when two decided ADRs share a
  * top-level trait key. Reads docs/adr/ only.
  */
 export function buildInstructions(root) {
-  const adrs = adrFiles(root).map((f) => readAdr(root, f)).filter(Boolean);
+  const adrs = readAdrs(root);
 
   const superseded = new Set();
   for (const adr of adrs) {
