@@ -154,5 +154,5 @@ agents read.
   question or changes one you answered.
 - Write your own source: a `package.json` with an `ontrack` key that points
   to a directory of ADRs.
-- Read the [README](https://github.com/trivoallan/ontrack#readme) for every
-  command and its output format.
+- Look up every command, its options and its exit codes in the
+  [commands reference](commands.md).
