@@ -37,7 +37,7 @@ once, on its own:
 <!-- x-release-please-start-version -->
 
 ```bash
-npm i -D ontrack@git+https://github.com/trivoallan/ontrack.git#v0.2.0
+npm i -D ontrack@git+https://github.com/trivoallan/ontrack.git#v0.3.0
 ```
 
 <!-- x-release-please-end -->
