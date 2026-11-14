@@ -46,4 +46,15 @@ at that commit, and nothing later.
    say what passed and what did not. Push only to the pull request's branch.
 8. Leave the pull request as a draft. The maintainer marks it ready.
 
-When you stop, say which tasks are done, which are left, and why.
+## When you stop
+
+Whenever you stop, because you are done, blocked, or waiting for an answer
+that does not come in this session, post one comment on the pull request. The
+maintainer asked for it by adding the label. It says, in a few lines:
+
+- why you stopped;
+- which tasks are done and which are left;
+- what the maintainer has to do next, if anything.
+
+Write it in your own words, from what you did. Do not quote the pull request,
+the issue, or a file you read. Say the same thing in the session.

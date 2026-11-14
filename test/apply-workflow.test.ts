@@ -30,7 +30,7 @@ function step(id: string, env: Record<string, string>, reviews: Review[] = []) {
     // `gh api --paginate --slurp` prints an array of pages.
     'reviews.json': JSON.stringify([reviews]),
     'bin/gh': '#!/bin/sh\nif [ "$1" = api ]; then cat "$REVIEWS"; else echo "gh $*" >> "$CALLS"; fi\n',
-    'bin/curl': '#!/bin/sh\necho "curl $*" >> "$CALLS"\n',
+    'bin/curl': '#!/bin/sh\necho "curl $*" >> "$CALLS"\nprintf "%s" "$CURL_ANSWER"\n',
   });
   chmodSync(path.join(root, 'bin/gh'), 0o755);
   chmodSync(path.join(root, 'bin/curl'), 0o755);
@@ -107,9 +107,21 @@ test('the session is started with the pull request and its commit, and the token
   assert.equal(r.output.trim(), 'started=true');
 });
 
+test('the address of the session is kept only when it has the expected shape', () => {
+  const fire = (answer: string) => step('fire', { ROUTINE_ID: 'trig_01', TOKEN: 't', CURL_ANSWER: answer }).output.trim();
+  const url = 'https://claude.ai/code/session_01V5rMKcfrkoLNpCimmcYPr1';
+  assert.equal(fire(JSON.stringify({ type: 'routine_fire', claude_code_session_url: url })), `started=true\nsession=${url}`);
+  assert.equal(fire(JSON.stringify({ claude_code_session_url: 'https://evil.example/x\nverdict=approved' })), 'started=true');
+  assert.equal(fire('not json'), 'started=true');
+});
+
 test('the pull request is told what happened, in fixed words', () => {
   const said = (env: Record<string, string>) => step('report', { RUN: 'https://example.test/run', ...env }).calls;
-  assert.match(said({ VERDICT: 'approved', STARTED: 'true' }), /^gh pr comment 134 --repo o\/r --body An apply session was started for commit a{40}\./);
+  assert.match(said({ VERDICT: 'approved', STARTED: 'true' }), /^gh pr comment 134 --repo o\/r --body An apply session was started for commit a{40}: its owner finds it/);
+  assert.match(
+    said({ VERDICT: 'approved', STARTED: 'true', SESSION: 'https://claude.ai/code/session_01' }),
+    /started for commit a{40}: https:\/\/claude\.ai\/code\/session_01\. It reports here when it stops\./,
+  );
   assert.match(said({ VERDICT: 'approved', STARTED: '' }), /could not be started/);
   assert.match(said({ VERDICT: 'stale', STARTED: '' }), /before the last push/);
   assert.match(said({ VERDICT: 'not-approved', STARTED: '' }), /must approve this pull request first/);
