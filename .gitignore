@@ -1,7 +1,12 @@
 node_modules/
+dist/
 
 # Private context (PM notes, local tooling): never publish
 .nanopm/
 CONTEXT.md
 .claude/
 .serena/
+
+# Documentation site (site/)
+site/dist/
+site/.astro/
