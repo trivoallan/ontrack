@@ -80,7 +80,7 @@ When at least one source ADR's local copy is a flat-layout file, `plan` SHALL re
 - **THEN** the output holds `migration: 2 files docs/adr/ → docs/adr/platform/`, then `  move          SDR-0006.md` and `  move          SDR-0010.md`
 
 ### Requirement: Output format
-The output SHALL follow the contract in the README, per source, sources sorted by alias:
+The output SHALL follow the contract in the commands reference, `docs/commands.md`, per source, sources sorted by alias:
 1. `<alias>: <counts>`, with counts in the order revised, new, removed, undetermined, unreadable, check, unchanged, zero counts omitted except `unchanged`;
 2. one line per ADR that is not `unchanged`, sorted by name: two spaces, the category left-aligned in a 12-character column, two spaces, the file name without `.md`, then two spaces and the ADR's title when it has one (see `adr-revision`); for `revised`, followed by ` (revision <local> → <upstream>)`. The title SHALL be read from the source's copy, or from the local copy for a `removed` ADR;
 3. after a `check` ADR's line: when the local copy has a check line, four spaces, `- ` and that line; then, when the source has a check line, four spaces, `+ ` and that line;

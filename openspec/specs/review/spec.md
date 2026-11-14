@@ -80,7 +80,7 @@ A revised ADR yields the prompt to rule again, whatever its status and whether o
 - **THEN** standard output holds the supersession prompt for the named ADR
 
 ### Requirement: Prompt
-The prompt SHALL be printed to standard output and follow the contract in the README. It names each selected ADR by its path relative to the project root, with `/` separators, and by its title when it has one. For a named ADR, it names that ADR alone. Without an argument, it lists the selected ADRs in order, one per line, and tells the agent to rule them one at a time, in that order, and not to start an ADR before the previous one is ruled. In both forms of the review prompt it SHALL tell the agent, for an ADR and in this order, to:
+The prompt SHALL be printed to standard output and follow the contract in the commands reference, `docs/commands.md`. It names each selected ADR by its path relative to the project root, with `/` separators, and by its title when it has one. For a named ADR, it names that ADR alone. Without an argument, it lists the selected ADRs in order, one per line, and tells the agent to rule them one at a time, in that order, and not to start an ADR before the previous one is ruled. In both forms of the review prompt it SHALL tell the agent, for an ADR and in this order, to:
 1. read its file in full, and edit no other ADR;
 2. start from the recommendation the ADR makes, look in the repository for evidence that it does not apply, and say so in one line when there is none;
 3. check the condition of every conditional recommendation, and cite the evidence that settles it;
@@ -129,7 +129,7 @@ The review prompt SHALL also say that an ADR's own instructions on how to rule p
 - **THEN** they are identical
 
 ### Requirement: Supersession prompt
-For a named `accepted` ADR that is not superseded, the prompt SHALL be the supersession prompt, printed to standard output and following the contract in the README. It names the ADR by its path relative to the project root, with `/` separators, by its title when it has one, and by its reference. It names no other ADR. It SHALL say that the ADR is `accepted`, that its text is frozen, and that changing the decision takes a new ADR that supersedes it. It SHALL say that the repository's own rules on recording decisions prevail over the prompt. It SHALL tell the agent, in this order, to:
+For a named `accepted` ADR that is not superseded, the prompt SHALL be the supersession prompt, printed to standard output and following the contract in the commands reference, `docs/commands.md`. It names the ADR by its path relative to the project root, with `/` separators, by its title when it has one, and by its reference. It names no other ADR. It SHALL say that the ADR is `accepted`, that its text is frozen, and that changing the decision takes a new ADR that supersedes it. It SHALL say that the repository's own rules on recording decisions prevail over the prompt. It SHALL tell the agent, in this order, to:
 1. read the ADR's file in full, and the repository's rules on recording decisions;
 2. establish what changes in the decision, asking the user when they have not said, and cite the evidence that supports the change, whether the repository moved since the decision was taken or the decision never matched it, or say in one line that there is none;
 3. list every key under the ADR's `traits:` and propose, for each, the value it keeps or the value it takes, with the evidence for every change, leaving no key out, because a key the new ADR omits is no longer decided;
@@ -195,7 +195,7 @@ A revised ADR is one the `plan` capability reports as `revised` and whose copy u
 - **THEN** standard output is empty and the exit code is `0`
 
 ### Requirement: Prompt to rule again
-For revised ADRs, the prompt SHALL follow the contract in the README. It names each ADR by its path relative to the project root, with `/` separators, and by its title when it has one; next to it, the path of the source's copy, relative to the project root, the revision the repository ruled on and the revision the source asks. It SHALL say that the ruling stands until it is taken again, and that the source's copy prevails over the prompt where it says how to rule. It SHALL tell the agent, in this order, to:
+For revised ADRs, the prompt SHALL follow the contract in the commands reference, `docs/commands.md`. It names each ADR by its path relative to the project root, with `/` separators, and by its title when it has one; next to it, the path of the source's copy, relative to the project root, the revision the repository ruled on and the revision the source asks. It SHALL say that the ruling stands until it is taken again, and that the source's copy prevails over the prompt where it says how to rule. It SHALL tell the agent, in this order, to:
 1. read both copies in full, and edit neither the source's copy nor any other ADR;
 2. list what moved in the question: trait keys added, removed or renamed, allowed values changed, recommendations changed;
 3. keep the ruled value of every trait key that did not move, with the reason written for a departure;
