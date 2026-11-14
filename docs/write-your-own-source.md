@@ -141,6 +141,8 @@ repository that rules again.
 
 ## Go further
 
+- Read [how ontrack works](how-it-works.md) for the model behind these
+  steps: the pieces, the life of a question, and the cycle.
 - Have a question name the command that verifies its answer, in a `check`
   key. [`ontrack check`](commands.md#ontrack-check) runs it in each
   repository that accepted the ADR.
