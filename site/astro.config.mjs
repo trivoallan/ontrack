@@ -70,6 +70,8 @@ export default defineConfig({
         { slug: 'tutorial' },
         { slug: 'how-it-works' },
         { slug: 'write-your-own-source' },
+        { slug: 'revise-a-question' },
+        { slug: 'run-ontrack-in-ci' },
         { slug: 'commands' },
         { slug: 'file-formats' },
         // ponytail: lists the one imported namespace; make it `adr` once the
