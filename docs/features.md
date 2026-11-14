@@ -131,7 +131,7 @@ A decision can name the command that verifies it, such as
 ## Get started
 
 ```bash
-npm i -D ontrack@git+https://github.com/trivoallan/ontrack.git
+npm i -D @trivoallan/ontrack
 npm i -D trivoallan@git+https://github.com/trivoallan/governance.git
 npx ontrack plan
 ```

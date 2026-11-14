@@ -19,7 +19,20 @@ asks a question and recommends an answer.
 
 ## Installation
 
-Node 22.18 or later. Installing compiles ontrack once, which npm does on its own.
+Node 22.18 or later. ontrack is published to the npm registry as
+`@trivoallan/ontrack`; the command it installs is `ontrack`.
+
+```bash
+npm i -D @trivoallan/ontrack
+```
+
+The unscoped `ontrack` on the registry is another project: `npx ontrack`
+runs yours only once the package above is installed in the project.
+
+Every version is listed on the
+[releases page](https://github.com/trivoallan/ontrack/releases). To install
+one from the git repository instead, name its tag; npm then compiles ontrack
+once, on its own:
 
 <!-- x-release-please-start-version -->
 
@@ -28,9 +41,6 @@ npm i -D ontrack@git+https://github.com/trivoallan/ontrack.git#v0.2.0
 ```
 
 <!-- x-release-please-end -->
-
-Every version is listed on the
-[releases page](https://github.com/trivoallan/ontrack/releases).
 
 Add a source with npm, under the alias of your choice:
 
@@ -422,8 +432,8 @@ npm run schema             # regenerates schema/ontrack.schema.json from its mod
 ```
 
 Node does not run TypeScript from `node_modules`, so the installed package is
-the JavaScript in `dist/`. npm builds it when it installs ontrack from git
-(`prepare`); `dist/` is never committed.
+the JavaScript in `dist/`. npm builds it before publishing and when it
+installs ontrack from git (`prepare`); `dist/` is never committed.
 
 ### Secret scanning
 
@@ -495,7 +505,9 @@ npx likec4 validate ../docs/architecture/model   # fails on an unknown element o
 request titled `chore: release X.Y.Z` open, computed from the commits on
 `main`. Merging it bumps the version, writes `CHANGELOG.md`, tags `vX.Y.Z`
 and creates the GitHub release; it also updates the version in the
-installation command above.
+installation command above. The same workflow run then publishes that
+version to the npm registry as `@trivoallan/ontrack` (ADR-0012), with a
+provenance attestation.
 
 The workflow opens that pull request with the repository secret
 `RELEASE_PLEASE_TOKEN`, a fine-grained token limited to this repository
@@ -512,6 +524,35 @@ security add-generic-password -U -a "$USER" -s ontrack-release-please-token -w
 # send it to GitHub
 security find-generic-password -s ontrack-release-please-token -w | gh secret set RELEASE_PLEASE_TOKEN --repo trivoallan/ontrack
 ```
+
+Publishing to npm stores no token. The `publish` job uses npm's
+[trusted publishing](https://docs.npmjs.com/trusted-publishers): the
+registry accepts the package because the job proves, by OIDC, that it is the
+`release.yml` workflow of this repository. It is set up once, on npmjs.com,
+in the package's settings, under Trusted Publisher:
+
+| Field | Value |
+| --- | --- |
+| Publisher | GitHub Actions |
+| Organization or user | `trivoallan` |
+| Repository | `ontrack` |
+| Workflow filename | `release.yml` |
+| Environment name | *(empty)* |
+| Allowed actions | `npm publish` |
+
+A new configuration expires unless a publish succeeds within two days, so
+create it right before merging a release pull request. If the settings of
+`@trivoallan/ontrack` cannot be reached because no version exists yet,
+publish the first one by hand from a checkout of its tag, then configure:
+
+```bash
+npm login
+npm publish
+```
+
+Once a release has been published by the workflow, set the package's
+publishing access to "Require two-factor authentication and disallow
+tokens": no token can then publish it.
 
 ## License
 

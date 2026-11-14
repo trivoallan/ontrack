@@ -1,7 +1,9 @@
 name: release
 
 # Keeps a release pull request open; merging it tags vX.Y.Z and creates the
-# GitHub release (ADR-0012). Configuration: release-please-config.json.
+# GitHub release, then publishes that version to the npm registry: the two
+# environments of ADR-0012, both on tag. Configuration:
+# release-please-config.json.
 on:
   push:
     branches: [main]
@@ -13,9 +15,38 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
     steps:
-      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+      - id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
           # A pull request opened with the default GITHUB_TOKEN triggers no
           # workflow, so its required checks would never run.
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+
+  # Runs only on the push that merged the release pull request: the commit
+  # checked out is the one release-please just tagged.
+  publish:
+    needs: release-please
+    if: github.ref == 'refs/heads/main' && needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # npm trusted publishing: the job proves to the registry, by OIDC, that
+      # it is this workflow in this repository. No token is stored anywhere.
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          # Trusted publishing needs npm 11.5.1 or later; Node 24 ships it.
+          node-version-file: .nvmrc
+          registry-url: https://registry.npmjs.org
+          # No cache in a job that publishes: nothing restored from an earlier
+          # run ends up in the package.
+          package-manager-cache: false
+      # `prepare` builds dist/, which is what the package ships.
+      - run: npm ci
+      # The provenance attestation comes with trusted publishing; no flag.
+      - run: npm publish

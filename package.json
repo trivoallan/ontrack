@@ -1,8 +1,15 @@
 {
-  "name": "ontrack",
+  "name": "@trivoallan/ontrack",
   "version": "0.2.0",
   "description": "Imports shared architecture decision records (ADRs) provided by npm sources into a repository.",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trivoallan/ontrack.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "bin": {
     "ontrack": "dist/bin/ontrack.js"
