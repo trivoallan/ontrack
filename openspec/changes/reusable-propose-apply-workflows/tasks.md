@@ -11,8 +11,8 @@
 - [x] 2.3 Install OpenSpec at the version pinned in the catalog, with `--ignore-scripts`, outside the checkout and owned by root, instead of copying the checkout's `package.json` and `package-lock.json`; install nothing when the `openspec` entry is not enabled
 - [x] 2.4 Take Node from the caller's `.nvmrc` when it exists, and from a fixed version otherwise
 - [x] 2.5 Read `changes.framework` from the YAML blocks of the caller's `AGENTS.md` with `yq`, and fail before the agent when it names an entry that is not enabled
-- [x] 2.6 Read the ADR directory from `record-architecture-decisions.directory`, default `docs/adr`; refuse an absolute path, `..`, or a path under `.github`, `.claude`, `.githooks` or `node_modules`
-- [x] 2.7 Feed the ADR directory and the enabled entries to the agent's rules, to the prompt's list of what it may write, and to the `publish` filter
+- [x] 2.6 Keep ADRs in `docs/adr`, a fixed path: no trait and no input (a directory trait was proposed in trivoallan/governance#89 and abandoned)
+- [x] 2.7 Feed the enabled entries to the agent's rules, to the prompt's list of what it may write, and to the `publish` filter
 - [x] 2.8 Pass the label to every script through `env`, and remove that label in the final step
 
 ## 3. Make `apply.yml` callable
@@ -23,7 +23,7 @@
 
 ## 4. Test
 
-- [x] 4.1 In `test/propose-workflow.test.ts`: an unknown entry fails; `openspec` only refuses an ADR; `adr` only refuses a change file; a trait that names an entry that is not enabled fails; a trait with `..` or `.github/adr` fails; no trait accepts `docs/adr`; a renamed label is removed at the end
+- [x] 4.1 In `test/propose-workflow.test.ts`: an unknown entry fails; `openspec` only refuses an ADR; `adr` only refuses a change file; a trait that names an entry that is not enabled fails; a renamed label is removed at the end
 - [x] 4.2 In `test/apply-workflow.test.ts`: a renamed label starts the gate; a missing token gives the fixed comment; the answer parsing still finds the session address in a recorded answer
 - [x] 4.3 Run `npm test` and `npx ontrack check`
 
@@ -35,7 +35,6 @@
 
 ## 6. Roll out
 
-- [x] 6.1 Propose the `record-architecture-decisions.directory` trait of ADR-0001 in `trivoallan/governance`, with `docs/adr` as its default (trivoallan/governance#89)
 - [ ] 6.2 After the merge, label one issue of ontrack and one pull request, and confirm both runs behave as before
 - [ ] 6.3 Call `propose` from `governance` with `frameworks: openspec`, label one issue, and confirm a draft pull request with a valid change and no ADR
 - [ ] 6.4 Call both workflows from one open source project and confirm a draft proposal and an apply session

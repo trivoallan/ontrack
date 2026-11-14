@@ -44,8 +44,8 @@ posture drifts copy by copy.
 4. The labels are inputs, with `ontrack:propose` and `ontrack:apply` as
    defaults. The apply routine and the token that fires it are passed
    explicitly, never with `secrets: inherit`.
-5. The ADR directory comes from an ADR-0001 trait of the governance source,
-   with `docs/adr` as the default.
+5. ADRs are added in `docs/adr`, the directory ADR-0001 of the governance
+   source names. A caller cannot choose another one.
 
 ## Consequences
 

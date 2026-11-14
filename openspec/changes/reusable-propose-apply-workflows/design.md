@@ -64,7 +64,7 @@ install and the `publish` filter. A name outside the table fails the step.
 | Entry | Agent may write | Installed | `publish` accepts |
 |---|---|---|---|
 | `openspec` | `openspec/changes/**` | the OpenSpec command line, the version pinned in the catalog | new `.md` and `.yaml` files under `openspec/changes/<name>/` |
-| `adr` | `<adr directory>/**` | nothing | new `ADR-NNNN-slug.md` files in the ADR directory, without `check:` |
+| `adr` | `docs/adr/**` | nothing | new `ADR-NNNN-slug.md` files in `docs/adr`, without `check:` |
 
 The input is `frameworks`, a comma-separated list of entry names, with
 `openspec,adr` as the default. `governance` passes `openspec`.
@@ -91,19 +91,19 @@ provides. When the trait names a framework that the caller did not enable,
 the run fails with the fixed failure comment. No trait means no check: the
 agent's own reading of `AGENTS.md` decides, as today.
 
-### 5. The ADR directory comes from an ADR-0001 trait
+### 5. ADRs live in `docs/adr`, a fixed path
 
-The governance source gains a trait under ADR-0001,
-`record-architecture-decisions.directory`. That trait is proposed in
-`trivoallan/governance` and not written here. The run reads it from the
-caller's `AGENTS.md`, with `docs/adr` as the default. The value is checked
-before the agent starts: a relative path, no `..`, not under `.github`,
-`.claude`, `.githooks` or `node_modules`. It feeds both the agent's
-`Edit(...)` rule and the `publish` filter.
+Rule 2 of ADR-0001 in the governance source puts a repository's own ADRs in
+`docs/adr`, and ontrack writes and reads them there (`apply.ts`, `plan.ts`,
+`instructions.ts`). The `adr` entry uses that path as is, in the agent's
+`Edit(...)` rule and in the `publish` filter.
 
-Today ontrack itself writes every consumer's ADRs to `docs/adr` (`apply.ts`,
-`plan.ts`). The trait therefore reads `docs/adr` in every repository until
-ontrack lets a repository move its ADRs. That is a separate change.
+Alternative: a `record-architecture-decisions.directory` trait of ADR-0001,
+read from the caller's `AGENTS.md`. Proposed in trivoallan/governance#89 and
+abandoned: ontrack hard-codes `docs/adr`, so the only value that worked was
+the default, and the trait added a reader, a path check and a revision of
+ADR-0001 for nothing. It becomes worth it the day ontrack lets a repository
+move its ADRs.
 
 ### 6. Labels and apply credentials are inputs
 

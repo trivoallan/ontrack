@@ -17,7 +17,7 @@ The frameworks the agent may write for SHALL come from a catalog kept in ontrack
 
 #### Scenario: A caller enables OpenSpec only
 - **WHEN** a repository calls `propose` with the `openspec` entry only
-- **THEN** the agent may write under `openspec/changes/` and nowhere under the ADR directory
+- **THEN** the agent may write under `openspec/changes/` and nowhere under `docs/adr`
 - **AND** `publish` refuses a patch that adds an ADR
 
 #### Scenario: A caller names an unknown framework
@@ -43,16 +43,16 @@ The label that starts a proposal and the label that starts an apply SHALL be inp
 - **WHEN** that same repository's issue receives the label `ontrack:propose`
 - **THEN** no proposal run starts
 
-### Requirement: The ADR directory comes from a trait
-The directory where the agent may add an ADR SHALL be read from the ADR directory trait of ADR-0001 in the caller's `AGENTS.md`, and SHALL be `docs/adr` when the trait is absent. The value MUST be a relative path inside the repository, without `..`, and outside `.github`, `.claude`, `.githooks` and `node_modules`; any other value MUST fail the run before the agent starts. The file name pattern, the rule that a proposal only adds files and the refusal of an ADR that declares a `check:` command SHALL stay as they are.
+### Requirement: ADRs are added under docs/adr
+With the `adr` entry enabled, the agent SHALL add ADRs only as new `ADR-NNNN-slug.md` files directly in `docs/adr`, the directory ADR-0001 of the governance source names and ontrack assumes. A caller MUST NOT be able to choose another directory. The refusal of an ADR that declares a `check:` command SHALL stay as it is.
 
-#### Scenario: No trait
-- **WHEN** the caller's `AGENTS.md` has no ADR directory trait and the agent adds `docs/adr/ADR-0004-cache-results.md`
+#### Scenario: An ADR in docs/adr
+- **WHEN** the agent adds `docs/adr/ADR-0004-cache-results.md` with the `adr` entry enabled
 - **THEN** `publish` accepts the file
 
-#### Scenario: A trait that points outside the repository
-- **WHEN** the trait's value is `../elsewhere` or `.github/adr`
-- **THEN** the run fails before the agent starts
+#### Scenario: An ADR elsewhere
+- **WHEN** the agent adds `decisions/ADR-0004-cache-results.md`
+- **THEN** `publish` refuses the patch and nothing is pushed
 
 ### Requirement: The apply credentials are passed explicitly
 A caller of `apply` SHALL pass the routine identifier as an input and the token that fires the routine as a named secret. The workflow MUST NOT require `secrets: inherit` and MUST read no other secret of the caller.

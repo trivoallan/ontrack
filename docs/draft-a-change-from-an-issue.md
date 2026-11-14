@@ -139,7 +139,7 @@ The agent may only write for the entries you enable:
 | Entry | The agent may add |
 | --- | --- |
 | `openspec` | A change under `openspec/changes/` |
-| `adr` | A new ADR in the directory the `record-architecture-decisions.directory` trait names, `docs/adr` without it |
+| `adr` | A new ADR in `docs/adr` |
 
 An ADR that declares a `check:` command is always refused: a person writes
 that command. A framework that is not in the catalog cannot be enabled; to

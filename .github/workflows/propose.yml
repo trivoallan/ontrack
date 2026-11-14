@@ -71,12 +71,8 @@ jobs:
       # The catalog: the only frameworks the agent may write for, and what
       # each one allows. A caller picks entries by name; anything else fails
       # here, before anything that costs. The `changes` trait of AGENTS.md
-      # must name an enabled entry. The ADR directory comes from the
-      # `record-architecture-decisions.directory` trait, `docs/adr` without
-      # it, and must stay inside the repository and out of the files that
-      # steer an agent or run on a contributor's machine.
-      # The `pr` step of `publish` reads the same traits again: it trusts
-      # nothing this job hands over.
+      # must name an enabled entry. ADRs live in `docs/adr`, as ADR-0001 of
+      # the governance source states and ontrack assumes.
       - id: catalog
         env:
           FRAMEWORKS: ${{ inputs.frameworks || 'openspec,adr' }}
@@ -114,15 +110,6 @@ jobs:
               *) false ;;
             esac || { echo "::error::the changes trait names a framework this run does not enable: $(printf '%s' "$framework" | tr -cd 'A-Za-z0-9_-' | head -c 40)"; exit 1; }
           fi
-          dir=$(trait record-architecture-decisions directory)
-          dir="${dir:-docs/adr}"
-          dir="${dir%/}"
-          if [[ ! "$dir" =~ ^[A-Za-z0-9_-][A-Za-z0-9._-]*(/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$ ]] \
-            || [[ "/$dir/" == */../* ]] \
-            || [[ "$dir" =~ ^(\.github|\.claude|\.githooks|node_modules)(/|$) ]]; then
-            echo "::error::the ADR directory trait is not a directory this run may write to"
-            exit 1
-          fi
           allowed="Glob,Grep,Skill"
           writes=()
           if [ "$openspec" = true ]; then
@@ -130,8 +117,8 @@ jobs:
             writes+=("\`openspec/changes/\`")
           fi
           if [ "$adr" = true ]; then
-            allowed="$allowed,Edit($dir/**)"
-            writes+=("\`$dir/\`")
+            allowed="$allowed,Edit(docs/adr/**)"
+            writes+=("\`docs/adr/\`")
           fi
           {
             echo "openspec=$openspec"
@@ -408,7 +395,7 @@ jobs:
       # The patch and the name come from the job that ran the agent: nothing
       # in them is trusted. A proposal only adds plain Markdown and YAML files
       # under its own change, and new ADRs, as far as the catalog's enabled
-      # entries allow: read again here from the input and the default branch. Anything else fails the run: a
+      # entries allow: read again here from the input. Anything else fails the run: a
       # modified file, a script, a hook, a manifest, a symbolic link, or an
       # ADR with a `check:` command, which `ontrack check` would execute.
       #
@@ -423,28 +410,9 @@ jobs:
         run: |
           [[ "$NAME" =~ ^[a-z0-9][a-z0-9-]{0,62}$ ]]
           frameworks="${FRAMEWORKS:-openspec,adr}"
-          # ponytail: same reader as the `catalog` step of `draft`, copied
-          # because a called workflow has no file of its own on disk.
-          trait() {
-            [ -f AGENTS.md ] || return 0
-            awk -v top="$1" -v key="$2" '
-              /^```yaml[[:space:]]*$/ { y = 1; t = ""; next }
-              /^```[[:space:]]*$/ { y = 0; next }
-              y && /^[^[:space:]#][^:]*:/ { t = $0; sub(/:.*/, "", t); next }
-              y && t == top && $0 ~ ("^[[:space:]]+" key ":") {
-                v = $0; sub(/^[^:]*:[[:space:]]*/, "", v); sub(/[[:space:]]+#.*$/, "", v)
-                gsub(/^["\047]|["\047]$/, "", v); print v; exit
-              }' AGENTS.md
-          }
-          dir=$(trait record-architecture-decisions directory)
-          dir="${dir:-docs/adr}"
-          dir="${dir%/}"
-          [[ "$dir" =~ ^[A-Za-z0-9_-][A-Za-z0-9._-]*(/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$ ]]
-          [[ "/$dir/" != */../* ]]
-          [[ ! "$dir" =~ ^(\.github|\.claude|\.githooks|node_modules)(/|$) ]]
           parts=()
           [[ ",${frameworks//[[:space:]]/}," == *,openspec,* ]] && parts+=("openspec/changes/${NAME}/[A-Za-z0-9._/-]+\.(md|yaml)")
-          [[ ",${frameworks//[[:space:]]/}," == *,adr,* ]] && parts+=("${dir//./\\.}/ADR-[0-9]{4}-[a-z0-9-]+\.md")
+          [[ ",${frameworks//[[:space:]]/}," == *,adr,* ]] && parts+=("docs/adr/ADR-[0-9]{4}-[a-z0-9-]+\.md")
           [ "${#parts[@]}" -gt 0 ]
           allowed="^($(IFS='|'; echo "${parts[*]}"))$"
           patch="$RUNNER_TEMP/change/change.patch"
@@ -458,7 +426,7 @@ jobs:
               echo "::error::refused: ${status} ${mode} ${path}"
               exit 1
             fi
-            if [[ "$path" == "$dir"/* ]] && git show ":${path}" | grep -Eq "^[[:space:]]*[\"']?check[\"']?[[:space:]]*:"; then
+            if [[ "$path" == docs/adr/* ]] && git show ":${path}" | grep -Eq "^[[:space:]]*[\"']?check[\"']?[[:space:]]*:"; then
               echo "::error::refused: ${path} declares a check command"
               exit 1
             fi

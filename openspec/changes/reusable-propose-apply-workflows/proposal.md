@@ -31,10 +31,9 @@ so no new repository and no new dependency is needed.
   expression inside a `run` script.
 - `apply` takes the routine identifier as an input and the token that fires
   it as a named secret. Callers never pass `secrets: inherit`.
-- The ADR directory comes from a new trait of ADR-0001 in the governance
-  source, with `docs/adr` as the default until the trait exists. The file
-  name pattern, the "added files only" rule and the ban on `check:` do not
-  change.
+- ADRs stay in `docs/adr`, as ADR-0001 of the governance source states. The
+  file name pattern, the "added files only" rule and the ban on `check:` do
+  not change.
 - `governance` calls `propose` with the `openspec` entry only: no ADR is
   drafted from an issue there, because its ADRs are rules that every
   repository ends up running.
@@ -45,7 +44,7 @@ so no new repository and no new dependency is needed.
 
 - `shared-change-workflows`: other repositories call the `propose` and
   `apply` workflows of ontrack, with a closed framework catalog, labels as
-  inputs, the ADR directory taken from a trait, and the apply credentials
+  inputs, ADRs in `docs/adr`, and the apply credentials
   passed explicitly.
 
 ### Modified Capabilities
@@ -66,7 +65,5 @@ another repository calls the workflows.
   the caller grants the union of the jobs' permissions.
 - The Anthropic federation rule may need to match `job_workflow_ref` for a
   call from another repository. That is checked first.
-- Upstream, in `trivoallan/governance`: a new trait of ADR-0001 for the ADR
-  directory. It is proposed there and is not written in this repository.
 - The roadmap: this work comes before the pilot review of 2026-12-18, which
   the plan did not foresee.

