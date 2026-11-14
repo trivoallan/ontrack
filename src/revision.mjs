@@ -72,6 +72,29 @@ export function setRevision(text, revision) {
   return lines.join('\n');
 }
 
+/** The first column-zero `check:` line of the frontmatter, right-trimmed; null when there is none. */
+export function readCheckLine(text) {
+  const line = (frontmatter(text) ?? []).find((l) => l.startsWith('check:'));
+  return line === undefined ? null : line.trimEnd();
+}
+
+/**
+ * `text` with its frontmatter `check:` line set to `line`: replaced, inserted
+ * after `revision:`, or removed when `line` is null. Nothing else changes.
+ * The frontmatter must be readable (an up-to-date ADR's always is).
+ */
+export function setCheckLine(text, line) {
+  const fm = frontmatter(text);
+  const lines = text.split('\n');
+  const eol = lines[0].endsWith('\r') ? '\r' : '';
+  const at = (re) => fm.findIndex((l) => re.test(l)) + 1; // index in `lines`, 0 if absent
+  const existing = at(/^check:/);
+  if (line === null) lines.splice(existing, 1);
+  else if (existing) lines[existing] = line + eol;
+  else lines.splice(at(/^revision:/) + 1, 0, line + eol);
+  return lines.join('\n');
+}
+
 /** The ADR's revision, or null when unreadable, absent or not an integer. */
 export function readRevision(text) {
   const lines = frontmatter(text);

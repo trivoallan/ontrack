@@ -1,10 +1,10 @@
 import { spawnSync } from 'node:child_process';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { formatPlan, hasPendingChanges, label, row, stem } from './plan.mjs';
-import { setRevision } from './revision.mjs';
+import { checkLines, formatPlan, hasPendingChanges, label, row, stem } from './plan.mjs';
+import { setCheckLine, setRevision } from './revision.mjs';
 
-const KINDS = ['imported', 'moved', 'confirmed', 'pruned'];
+const KINDS = ['imported', 'moved', 'confirmed', 'synced', 'pruned'];
 
 /**
  * The actions `apply` would take on `plan`, checked before anything is
@@ -27,6 +27,8 @@ export function planActions(root, plan, { prune = false, confirm = [] } = {}) {
       } else if (adr.category === 'undetermined' && adr.to !== null && (all || wanted.has(stem(adr.name)))) {
         actions.push({ kind: 'confirmed', source, adr, to: at(adr.name) });
         confirmed.add(stem(adr.name));
+      } else if (adr.category === 'check') {
+        actions.push({ kind: 'synced', source, adr, to: at(adr.name) });
       }
     }
     for (const file of source.migration) {
@@ -52,7 +54,7 @@ function insideGitWorkTree(root) {
   return r.status === 0 && r.stdout.trim() === 'true';
 }
 
-/** Executes checked actions, in order: import, move, confirm, prune. */
+/** Executes checked actions, in order: import, move, confirm, sync, prune. */
 export function runActions(root, actions) {
   const git = insideGitWorkTree(root);
   for (const a of actions) {
@@ -63,6 +65,7 @@ export function runActions(root, actions) {
       if (!mv || mv.status !== 0) renameSync(a.from, a.to);
     }
     if (a.kind === 'confirmed') writeFileSync(a.to, setRevision(readFileSync(a.to, 'utf8'), a.adr.to));
+    if (a.kind === 'synced') writeFileSync(a.to, setCheckLine(readFileSync(a.to, 'utf8'), a.adr.check.to));
     if (a.kind === 'pruned') rmSync(a.to);
   }
 }
@@ -94,7 +97,7 @@ export function formatApply({ actions, links, agents = [], remaining, dryRun }) 
     const mine = actions.filter((a) => a.source.namespace === namespace);
     const counts = KINDS.map((k) => [k, mine.filter((a) => a.kind === k).length]).filter(([, n]) => n > 0);
     lines.push(`${namespace}: ${counts.map(([k, n]) => `${n} ${k}`).join(', ')}`);
-    lines.push(...mine.map(actionLine));
+    lines.push(...mine.flatMap((a) => [actionLine(a), ...(a.kind === 'synced' ? checkLines(a.adr) : [])]));
   }
   if (links.length > 0) {
     lines.push('links to update:');

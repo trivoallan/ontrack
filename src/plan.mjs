@@ -1,9 +1,9 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
-import { compareRevision, readRevision, readTitle } from './revision.mjs';
+import { compareRevision, readCheckLine, readRevision, readTitle } from './revision.mjs';
 import { discoverSources } from './sources.mjs';
 
-const ORDER = ['revised', 'new', 'removed', 'undetermined', 'unreadable', 'unchanged'];
+const ORDER = ['revised', 'new', 'removed', 'undetermined', 'unreadable', 'check', 'unchanged'];
 const CATEGORY = { stale: 'revised', 'up-to-date': 'unchanged' };
 
 // `*.md` files placed directly in `dir` (subdirectories ignored), sorted.
@@ -46,6 +46,11 @@ function planSource(root, source) {
     const adr = { name: file, category: CATEGORY[result] ?? result, title };
     if (adr.category === 'revised') adr.from = readRevision(local);
     if (adr.category === 'revised' || adr.category === 'undetermined') adr.to = readRevision(upstream);
+    if (adr.category === 'unchanged') {
+      // The check line follows the source; the verdict stays the repository's.
+      const check = { from: readCheckLine(local), to: readCheckLine(upstream) };
+      if (check.from !== check.to) Object.assign(adr, { category: 'check', check });
+    }
     adrs.push(adr);
   }
 
@@ -78,6 +83,12 @@ export const label = (adr) => {
   return name + (adr.title && !/\d-./.test(name) ? `  ${adr.title}` : '');
 };
 
+/** The `- ` / `+ ` lines under a `check` ADR: the line that goes, the line that comes. */
+export const checkLines = (adr) =>
+  Object.entries({ '-': adr.check?.from, '+': adr.check?.to })
+    .filter(([, line]) => line != null)
+    .map(([sign, line]) => `    ${sign} ${line}`);
+
 /** The contract output (see README). */
 export function formatPlan(plan) {
   if (plan.length === 0) return 'no ontrack source found\n';
@@ -92,7 +103,7 @@ export function formatPlan(plan) {
     for (const adr of source.adrs) {
       if (adr.category === 'unchanged') continue;
       const revision = adr.category === 'revised' ? ` (revision ${adr.from} → ${adr.to})` : '';
-      lines.push(row(adr.category, label(adr) + revision));
+      lines.push(row(adr.category, label(adr) + revision), ...checkLines(adr));
     }
 
     if (source.migration.length > 0) {

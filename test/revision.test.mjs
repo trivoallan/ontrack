@@ -167,3 +167,24 @@ test('setRevision keeps CRLF line endings', () => {
 test('setRevision refuses an unreadable frontmatter', () => {
   assert.throws(() => setRevision('no frontmatter', 1), /frontmatter/);
 });
+
+// Check line
+
+test('readCheckLine reads the frontmatter line only, right-trimmed', async () => {
+  const { readCheckLine } = await import('../src/revision.mjs');
+  assert.equal(readCheckLine('---\nrevision: 1\ncheck: exit 0  # why  \n---\n'), 'check: exit 0  # why');
+  assert.equal(readCheckLine('---\nrevision: 1\n---\n\ncheck: exit 0\n'), null);
+  assert.equal(readCheckLine('no frontmatter'), null);
+});
+test('setCheckLine replaces, inserts after revision, removes, and nothing else', async () => {
+  const { setCheckLine } = await import('../src/revision.mjs');
+  const text = '---\nstatus: accepted\nrevision: 1\ncheck: exit 0\ntraits:\n  a:\n    b: c\n---\n\n# T\n\ncheck: body\n';
+  assert.equal(setCheckLine(text, 'check: exit 1  # stricter'), text.replace('check: exit 0', 'check: exit 1  # stricter'));
+  assert.equal(setCheckLine(text, null), text.replace('check: exit 0\n', ''));
+  const without = text.replace('check: exit 0\n', '');
+  assert.equal(setCheckLine(without, 'check: exit 0'), text);
+});
+test('setCheckLine keeps CRLF line endings', async () => {
+  const { setCheckLine } = await import('../src/revision.mjs');
+  assert.equal(setCheckLine('---\r\nrevision: 1\r\n---\r\n', 'check: x'), '---\r\nrevision: 1\r\ncheck: x\r\n---\r\n');
+});

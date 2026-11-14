@@ -263,3 +263,66 @@ test('apply twice: the second run writes nothing and exits like plan', () => {
   assert.equal(second.status, plan.status);
   assert.equal(second.stdout, plan.stdout);
 });
+
+// Synchronizing checks
+
+const ruled = (...extra) => ['---', 'status: accepted', 'revision: 1', ...extra, 'traits:', '  commits:', '    tool: commitlint', '---', '', 'Body.', ''].join('\n');
+const shipped = (revision, ...extra) => ['---', 'status: proposed', `revision: ${revision}`, ...extra, 'traits:', '  commits:', '    tool:', '---', '', 'Body.', ''].join('\n');
+const FILE = 'docs/adr/trivoallan/ADR-0006-commits.md';
+const synced = (local, upstream, at = FILE) =>
+  makeProject({ sources: { trivoallan: { 'ADR-0006-commits.md': upstream } }, local: { [at]: local } });
+
+test('check added to a ruled ADR: one line after revision, then unchanged', async () => {
+  const root = synced(ruled(), shipped(1, 'check: npx commitlint --last'));
+  await run(root, 'apply');
+  assert.equal(read(root, FILE), ruled('check: npx commitlint --last'));
+  assert.equal(buildPlan(root)[0].adrs[0].category, 'unchanged');
+  const again = await run(root, 'apply');
+  assert.equal(again.stdout, 'trivoallan: 1 unchanged\n');
+  assert.equal(again.code, 0);
+});
+
+test('check replaced in place, comment included', async () => {
+  const root = synced(ruled('check: exit 0'), shipped(1, 'check: exit 1  # stricter'));
+  await run(root, 'apply');
+  assert.equal(read(root, FILE), ruled('check: exit 1  # stricter'));
+});
+
+test('check removed when the source has none', async () => {
+  const root = synced(ruled('check: exit 0'), shipped(1));
+  await run(root, 'apply');
+  assert.equal(read(root, FILE), ruled());
+});
+
+test('CRLF local copy: the inserted line ends with CRLF', async () => {
+  const root = synced(ruled().replaceAll('\n', '\r\n'), shipped(1, 'check: exit 0'));
+  await run(root, 'apply');
+  assert.equal(read(root, FILE), ruled('check: exit 0').replaceAll('\n', '\r\n'));
+});
+
+test('flat-layout copy: moved, then synchronized', async () => {
+  const root = synced(ruled(), shipped(1, 'check: exit 0'), 'docs/adr/ADR-0006-commits.md');
+  await run(root, 'apply');
+  assert.equal(read(root, FILE), ruled('check: exit 0'));
+  assert.equal(existsSync(path.join(root, 'docs/adr/ADR-0006-commits.md')), false);
+});
+
+test('revised ADR does not get the new check', async () => {
+  const root = synced(ruled(), shipped(2, 'check: exit 0'));
+  const r = await run(root, 'apply');
+  assert.equal(read(root, FILE), ruled());
+  assert.equal(r.code, 2);
+});
+
+test('only a check to synchronize: synced with its lines, exit 0; dry run writes nothing', async () => {
+  const root = withAgents(synced(ruled('check: exit 0'), shipped(1, 'check: exit 1')));
+  const before = snapshot(root);
+  const expected = 'trivoallan: 1 synced\n  synced        ADR-0006-commits\n    - check: exit 0\n    + check: exit 1\n';
+  const dry = await run(root, 'apply', '--dry-run');
+  assert.equal(dry.stdout, `dry run: nothing written\n${expected}`);
+  assert.equal(dry.code, 0);
+  assert.deepEqual(snapshot(root), before);
+  const r = await run(root, 'apply');
+  assert.equal(r.stdout, expected);
+  assert.equal(r.code, 0);
+});
