@@ -2,22 +2,22 @@
 adr: ADR-0020
 slug: adding-dependencies
 title: Adding a dependency
-status: proposed
+status: accepted
 revision: 1
-date:
-authors: []
+date: 2026-11-14
+authors: [Tristan Rivoallan]
 supersedes: []
 traits:
   admission:
-    approver:
-    install_scripts:
+    approver: person
+    install_scripts: ignored
 ---
 
 # Adding a dependency
 
 ## Status
 
-Proposed
+Accepted
 
 > **What is this file?** A question governance asks your repository, with
 > the answer it recommends. While it says `status: proposed`, you may edit
@@ -143,80 +143,49 @@ every source distribution but one. Under `ignored`, a Python package with
 no wheel for your platform is not admitted: pick another package, or rule
 `allowed` and name that package in your Consequences.
 
-Everything below disappears when you rule, from this sentence up to the
-Consequences heading, which stays.
+The recommendation is adopted as is. Coding agents work in this repository
+(ADR-0017) and its secrets are within reach of their sessions (ADR-0015), so
+an agent asks before it installs. No dependency of the root package has an
+install script, so ignoring them breaks nothing there.
 
-**How to rule: five steps, all in this file.** Read all of them before
-doing any, because the last one deletes the other four, and do them in one
-commit.
-
-1. **Write the value of each key** under `traits:` in the frontmatter, or,
-   if you rule `rejected`, **remove the whole `traits:` block**.
-2. **Change `status:`** from `proposed` to `accepted` or `rejected`.
-3. **Fill `date:` and `authors:`**: `date:` as `YYYY-MM-DD`, the day you
-   rule; `authors:`, the names of the people who decided, without email
-   addresses.
-4. **Rewrite the Positive, Negative and Neutral lists under Consequences**
-   for your verdict: what it makes easier, and what it costs.
-5. **Last, delete this block**, from its first sentence up to the
-   Consequences heading, which stays. In its place, write the reason for
-   your decision wherever you depart from the recommendation, or, if you
-   adopt it as is, one line that says so.
-
-The first step is the one people forget: a decision written only in prose
-leaves an agent guessing. This is what the frontmatter looks like once
-filled, and it is the one part of the file an agent reads without
-interpreting it:
-
-```yaml
----
-adr: ADR-0020
-slug: adding-dependencies
-title: Adding a dependency
-status: accepted
-revision: 1
-date: 2026-11-14
-authors: [Your Name]
-supersedes: []
-traits:
-  admission:
-    approver: person
-    install_scripts: ignored
----
-```
-
-The Alternatives Considered below were weighed by governance without
-knowing your context. Weighing them against yours is still to do, and it is
-what makes a decision different from an accepted default.
+`ignored` is not in effect yet: it needs npm 12, and the repository installs
+with npm 10 and 11. npm 12 needs Node 22.22.2, 24.15 or 26, so the CI job on
+Node 22.18, the lowest version ontrack supports, keeps the npm it ships
+with. That job installs the root package only, where no script runs.
 
 ## Consequences
 
 ### Positive
 
-- An agent knows whether it may install a package now, or must ask first.
-- A package installed by mistake runs nothing until something imports it.
-- Every dependency in the manifest has a written reason and a source that
+- An agent knows it must ask before it installs a package, with the
+  declaration of rule 3 as its question.
+- A package installed by mistake runs nothing until something imports it,
+  once npm 12 is in use.
+- Every dependency added from now on has a written reason and a source that
   review can follow.
 - Additions and updates wait the same three days (ADR-0018).
 
 ### Negative
 
 - `person` adds a round trip to every new package.
-- `ignored` breaks packages that compile or download a binary at install
-  time. npm and pnpm allow them by name; Python cannot, so such a package is
-  not admitted.
-- On npm, an install-script exception is decided only after a first
-  install, with its scripts blocked.
+- Until npm 12 installs the dependencies, `ignored` is a ruling the
+  repository does not follow: npm 10 and 11 run install scripts.
+- The documentation site has two packages with an install script, `esbuild`
+  and `fsevents`. Each needs a named exception in `site/package.json`, and
+  each exception is an admission.
+- The cooldown of rule 2 is not configured: there is no `.npmrc` with
+  `min-release-age=3`.
 - The name check relies on the agent reading a real source. Review checks
   it by following the source given in the declaration.
-- A reported provenance is not a verified one, and in Python no installer
-  verifies it.
 
 ### Neutral
 
-- Updates to existing dependencies remain ADR-0018's question. What a
-  repository publishes, and with which provenance, is not this ADR's
-  question.
+- Rule 5 already holds: both lockfiles are committed, and CI installs with
+  `npm ci`.
+- ontrack installed from its git repository compiles through its `prepare`
+  script. A repository that rules `ignored` and installs ontrack that way
+  names it as an exception; installing from the npm registry needs none.
+- Updates to existing dependencies remain ADR-0018's question.
 
 ## Alternatives Considered
 

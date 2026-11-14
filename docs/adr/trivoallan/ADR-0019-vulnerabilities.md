@@ -2,23 +2,23 @@
 adr: ADR-0019
 slug: vulnerabilities
 title: Vulnerabilities
-status: proposed
+status: accepted
 revision: 1
-date:
-authors: []
+date: 2026-11-14
+authors: [Tristan Rivoallan]
 supersedes: []
 traits:
   vulnerabilities:
-    sbom:
-    scanner:
-    fail_on:
+    sbom: cyclonedx
+    scanner: grype
+    fail_on: critical
 ---
 
 # Vulnerabilities
 
 ## Status
 
-Proposed
+Accepted
 
 > **What is this file?** A question governance asks your repository, with
 > the answer it recommends. While it says `status: proposed`, you may edit
@@ -142,79 +142,40 @@ Grype refuses to scan with a database older than five days by default
 (`db.max-allowed-built-age`). Leave it: a stale database is a green check
 that knows nothing.
 
-Everything below disappears when you rule, from this sentence up to the
-Consequences heading, which stays.
-
-**How to rule: five steps, all in this file.** Read all of them before
-doing any, because the last one deletes the other four, and do them in one
-commit.
-
-1. **Write the value of each key** under `traits:` in the frontmatter, or,
-   if you rule `rejected`, **remove the whole `traits:` block**.
-2. **Change `status:`** from `proposed` to `accepted` or `rejected`.
-3. **Fill `date:` and `authors:`**: `date:` as `YYYY-MM-DD`, the day you
-   rule; `authors:`, the names of the people who decided, without email
-   addresses.
-4. **Rewrite the Positive, Negative and Neutral lists under Consequences**
-   for your verdict: what it makes easier, and what it costs.
-5. **Last, delete this block**, from its first sentence up to the
-   Consequences heading, which stays. In its place, write the reason for
-   your decision wherever you depart from the recommendation, or, if you
-   adopt it as is, one line that says so.
-
-The first step is the one people forget: a decision written only in prose
-leaves an agent guessing. This is what the frontmatter looks like once
-filled, and it is the one part of the file an agent reads without
-interpreting it:
-
-```yaml
----
-adr: ADR-0019
-slug: vulnerabilities
-title: Vulnerabilities
-status: accepted
-revision: 1
-date: 2026-11-14
-authors: [Your Name]
-supersedes: []
-traits:
-  vulnerabilities:
-    sbom: cyclonedx
-    scanner: grype
-    fail_on: critical
----
-```
-
-The Alternatives Considered below were weighed by governance without
-knowing your context. Weighing them against yours is still to do, and it is
-what makes a decision different from an accepted default.
+The recommendation is adopted as is. Nothing in this repository argues
+against it: `forge.gate` is `blocking` (ADR-0011), so a blocking threshold is
+allowed; releases are published by release-please to GitHub and npm
+(ADR-0012), so an SBOM has a release to describe; and no scanner was in
+place to replace. The repository ships no image: the SBOM is attached to the
+GitHub release, and nothing is attested to a digest.
 
 ## Consequences
 
 ### Positive
 
-- An agent facing a red scan knows its move: update the dependency, or
-  propose an ignore rule for a person to merge. Never silence it.
-- Every release says what it contains, in a file a scanner reads, so a CVE
-  published later can be checked against releases already shipped.
-- The weekly scan finds vulnerabilities in code nobody touched.
+- An agent facing a red scan knows its move: update the dependency, through
+  Dependabot (ADR-0018), or propose an ignore rule for a person to merge.
+  Never silence it.
+- Every release of ontrack says what it contains, in a file a scanner reads,
+  so a CVE published later can be checked against versions already on npm.
+- The weekly scan finds vulnerabilities in code nobody touched, which
+  matters for a package with few commits between releases.
 
 ### Negative
 
+- Two tools to pin by SHA and keep current, Grype and Syft, for a package
+  with two runtime dependencies.
 - The scheduled scan can turn the default branch red without any change;
   someone has to read it.
-- `critical` lets high vulnerabilities merge with only a report; the SARIF
-  upload is where they are seen, if anyone looks.
-- `--only-fixed` hides from the gate a critical vulnerability with no fix,
-  however exploitable; reading the report is the only defence.
-- Ignore rules accumulate, and Grype gives them no expiry date: they are
-  reviewed by reading `.grype.yaml`, or not at all.
+- `critical` lets high vulnerabilities merge with only a report.
+- `--only-fixed` hides from the gate a critical vulnerability with no fix;
+  reading the report is the only defence.
+- Until the scan job and the SBOM step exist, this ruling is not followed.
 
 ### Neutral
 
-- Dependabot alerts and GitHub's own SBOM export (SPDX, from the
-  dependency graph) may run alongside; neither is the gate this ADR asks
-  for.
+- Dependabot security updates stay on, alongside the scan; they are not the
+  gate this ADR asks for.
 
 ## Alternatives Considered
 

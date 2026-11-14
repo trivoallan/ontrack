@@ -2,22 +2,22 @@
 adr: ADR-0021
 slug: build-provenance
 title: Build provenance
-status: proposed
+status: accepted
 revision: 1
-date:
-authors: []
+date: 2026-11-14
+authors: [Tristan Rivoallan]
 supersedes: []
 check: npx --no-install governance-check ADR-0021
 traits:
   supply_chain:
-    build_level:
+    build_level: 2
 ---
 
 # Build provenance
 
 ## Status
 
-Proposed
+Accepted
 
 > **What is this file?** A question governance asks your repository, with
 > the answer it recommends. While it says `status: proposed`, you may edit
@@ -112,87 +112,44 @@ steps:
       subject-path: dist/*
 ```
 
-Everything below disappears when you rule, from this sentence up to the
-Consequences heading, which stays.
+The recommendation is adopted as is. This repository publishes a package
+(ADR-0012), so the key applies, and it is public, which is what level `2`
+needs on npm. The `publish` job of `.github/workflows/release.yml` already
+publishes from the workflow, by trusted publishing, with `id-token: write`
+confined to that job and its actions pinned by SHA. The GitHub release
+carries no built file, so nothing is attested there.
 
-**How to rule: five steps, all in this file.** Read all of them before
-doing any, because the last one deletes the other four, and do them in one
-commit.
-
-1. **Write the value of the key** under `traits:` in the frontmatter, as a
-   bare number (`2`, not `"2"`), or, if you rule `rejected`, **remove the
-   whole `traits:` block**.
-2. **Change `status:`** from `proposed` to `accepted` or `rejected`.
-3. **Fill `date:` and `authors:`**: `date:` as `YYYY-MM-DD`, the day you
-   rule; `authors:`, the names of the people who decided, without email
-   addresses.
-4. **Rewrite the Positive, Negative and Neutral lists under Consequences**
-   for your verdict: what it makes easier, and what it costs.
-5. **Last, delete this block**, from its first sentence up to the
-   Consequences heading, which stays. In its place, write the reason for
-   your decision wherever you depart from the recommendation, or, if you
-   adopt it as is, one line that says so.
-
-The first step is the one people forget: a decision written only in prose
-leaves an agent guessing. This is what the frontmatter looks like once
-filled, and it is the one part of the file an agent reads without
-interpreting it:
-
-```yaml
----
-adr: ADR-0021
-slug: build-provenance
-title: Build provenance
-status: accepted
-revision: 1
-date: 2026-11-14
-authors: [Your Name]
-supersedes: []
-check: npx --no-install governance-check ADR-0021
-traits:
-  supply_chain:
-    build_level: 2
----
-```
-
-**The `check:` line stays.** Once this ADR is `accepted`, `ontrack check`
-runs it from your repository's root. It reads the keys you ruled and checks
-only that the files they imply are committed, not what those files say:
-
-- `supply_chain.build_level`: with `1`, `2` or `3`, a workflow holds
-  `actions/attest-build-provenance`, `--provenance` or
-  `pypa/gh-action-pypi-publish`. It does not tell the levels apart.
-
-Any other value has nothing to check, and passes.
-
-The Alternatives Considered below were weighed by governance without
-knowing your context. Weighing them against yours is still to do, and it is
-what makes a decision different from an accepted default.
+`npm publish` now passes `--provenance` explicitly. The version on the
+registry when this was ruled, 0.3.0, carries registry signatures and no
+provenance attestation: the next release is the first that can show one.
 
 ## Consequences
 
 ### Positive
 
-- A consumer can tell which commit and which workflow produced what they
-  install, and refuse what no workflow explains.
-- A token leaked from a workstation can no longer publish a package that
-  passes for a release.
-- An agent setting up a release knows what to add to the workflow.
+- Someone who installs ontrack from npm can tell which commit and which
+  workflow produced it, with `npm audit signatures`.
+- A token leaked from a workstation cannot publish a package that passes
+  for a release: no token is stored, and the provenance names the workflow.
+- An agent touching the release workflow knows the flag is a decision, not
+  a leftover.
 
 ### Negative
 
-- The publishing workflow gains `id-token: write`, a permission to keep
-  confined to that job.
-- Level 2 does not protect against a step that tampers with the build
+- The `publish` job keeps `id-token: write`, a permission to keep confined
+  to that job.
+- Level `2` does not protect against a step that tampers with the build
   from inside the workflow.
-- The protection exists only where someone verifies.
-- A private repository on GitHub Free, Pro or Team cannot use npm
-  provenance or GitHub artifact attestations: level `2` there takes a
-  public repository or GitHub Enterprise Cloud.
+- The protection exists only where someone verifies, and 0.3.0 has nothing
+  to verify.
+- The check only sees that a workflow holds `--provenance`. Whether a
+  release carries an attestation is read on the registry, after it.
 
 ### Neutral
 
-- Attestations live on GitHub or in the registry, outside the repository.
+- The attestation lives in the npm registry, outside the repository.
+- Level `3` was not taken: it restructures the release around a hardened
+  reusable workflow, and no threat identified for this package asks for it.
 
 ## Alternatives Considered
 
