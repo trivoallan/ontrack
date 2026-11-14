@@ -15,6 +15,14 @@ The repository SHALL start one proposal run when the `ontrack:propose` label is 
 - **WHEN** the body of issue 103 is edited while it no longer carries the `ontrack:propose` label
 - **THEN** no proposal run starts
 
+### Requirement: Only an open issue gets a proposal
+A proposal run SHALL start the agent only when the issue is open at the moment the label is added. For a closed issue the run MUST NOT start the agent; it posts one fixed comment saying so and removes the label.
+
+#### Scenario: The label is added to a closed issue
+- **WHEN** a maintainer adds the `ontrack:propose` label to a closed issue
+- **THEN** the agent is not started and no pull request is opened
+- **AND** the issue receives the fixed comment and no longer carries the label
+
 ### Requirement: One proposal per issue
 A proposal run SHALL open at most one pull request for its issue. Runs for the same issue MUST NOT execute at the same time, and a run MUST stop before the agent starts when a branch for that issue already exists.
 

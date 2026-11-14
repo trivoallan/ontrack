@@ -85,6 +85,11 @@ Only a user with triage rights can add a label, so the label is the
 maintainer saying "I read this body" (ADR-0011 rule 5). The author of the
 issue is not checked.
 
+The `draft` job also requires the issue to be open. The first real runs
+were made on an issue that had been closed in the meantime, and each paid
+for a runner to prepare a proposal nobody had asked for. On a closed issue
+`draft` is skipped; `publish` says so on the issue and removes the label.
+
 The run removes the label when it ends (`if: always()`), so each run is one
 explicit act. Alternative: swap it for a `proposed` label; the pull request
 already shows on the issue through `Refs`, so a second label says nothing

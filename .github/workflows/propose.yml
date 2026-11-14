@@ -32,7 +32,8 @@ jobs:
     # A label is the maintainer saying the issue was read, which lets a job
     # that can reach the model provider read it too. The agent action also refuses an actor
     # without write access.
-    if: github.event.label.name == 'ontrack:propose'
+    # Open issues only: a closed issue asks for nothing.
+    if: github.event.label.name == 'ontrack:propose' && github.event.issue.state == 'open'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -271,11 +272,17 @@ jobs:
 
       # Fixed sentences: nothing the agent or the issue wrote reaches the
       # tracker (ADR-0014). The agent's reasons are in the run summary.
-      - if: always() && steps.pr.outputs.opened != 'true'
+      - id: report
+        if: always() && steps.pr.outputs.opened != 'true'
         env:
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          STATE: ${{ github.event.issue.state }}
         run: |
+          if [ "$STATE" != "open" ]; then
+            OUTCOME=closed
+          fi
           case "$OUTCOME" in
+            closed) text="This issue is closed: a proposal is only drafted for an open issue. Nothing was done." ;;
             none) text="No change was opened: this issue moves no expected behaviour (ADR-0016). The reasons are in the run summary: ${RUN}" ;;
             exists) text="A proposal branch already exists for this issue; nothing was done. Run: ${RUN}" ;;
             *) text="The proposal run failed. Run: ${RUN}" ;;
