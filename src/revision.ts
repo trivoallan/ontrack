@@ -111,6 +111,11 @@ export function setCheckLine(text: string, line: string | null): string {
   return lines.join('\n');
 }
 
+/** The ADR's verdict: its first frontmatter `status:` value, or null when unreadable, absent or empty. */
+export function readStatus(text: string): string | null {
+  return values(frontmatter(text) ?? [], 'status')[0] ?? null;
+}
+
 /** The ADR's revision, or null when unreadable, absent or not an integer. */
 export function readRevision(text: string): number | null {
   const lines = frontmatter(text);

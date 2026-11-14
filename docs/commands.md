@@ -62,6 +62,25 @@ Each ADR that is not up to date falls in one category:
 **Exit code.** `0` when every ADR is unchanged, or when there is no source at
 all. `2` for any other category, a migration, or a rules block to write.
 
+**Options.**
+
+| Option | Effect |
+| --- | --- |
+| `--all` | Lists every ADR, the unchanged ones too, each with your verdict |
+
+```bash
+npx ontrack plan --all
+```
+
+```
+trivoallan: 1 revised, 2 unchanged
+  unchanged     accepted    ADR-0005-validation
+  revised       accepted    ADR-0006-commits (revision 2 → 3)
+  unchanged     rejected    ADR-0013-frontend
+```
+
+The exit code is the same with and without `--all`.
+
 ### `plan` output contract
 
 `plan` never modifies a file and makes no network call. Its output follows
@@ -95,6 +114,8 @@ migration: 5 files docs/adr/ → docs/adr/platform/
 
   The `check:` line is the first one at column zero in the frontmatter. Only an ADR that is up to date can be `check`: a `revised` ADR gets its check once you have ruled again.
 - A flat-layout migration (`docs/adr/<file>` that belongs to the source but is not under `docs/adr/<alias>/`) is always shown: `migration: <n> file(s) docs/adr/ → docs/adr/<alias>/`, then one `move` line per file.
+- With `--all`, the unchanged ADRs get a line too, so every ADR has one, sorted by name whatever its category. Each ADR line then carries a verdict between the category and the name: the category in its 12-character column, two spaces, the verdict in a 10-character column, two spaces, then the name and the rest of the line as above. The summary line, the `- ` and `+ ` lines, the migration lines and the exit code do not change.
+- The verdict is the `status:` of your copy, never the source's: the first `status:` line at column zero in its frontmatter, without a trailing `# comment`. It is `-` when you have no copy yet (a `new` ADR), when the copy has no recognizable frontmatter, or when it states no status.
 - When there is nothing to do, one line per source (`platform: 14 unchanged`), and the exit code is `0`. Any other category, or a migration, gives `2`.
 - With no source at all, `plan` prints `no ontrack source found` and exits with `0`.
 

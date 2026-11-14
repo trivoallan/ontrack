@@ -192,3 +192,15 @@ test('setCheckLine refuses an unreadable frontmatter', async () => {
   const { setCheckLine } = await import('../src/revision.ts');
   assert.throws(() => setCheckLine('no frontmatter', 'check: x'), /frontmatter/);
 });
+
+test('readStatus reads the first frontmatter status, without comment or quotes', async () => {
+  const { readStatus } = await import('../src/revision.ts');
+  assert.equal(readStatus('---\nstatus: rejected\n---\n'), 'rejected');
+  assert.equal(readStatus('---\nstatus: accepted     # proposed as shipped\r\n---\n'), 'accepted');
+  assert.equal(readStatus('---\nstatus: "accepted"\n---\n'), 'accepted');
+  assert.equal(readStatus('---\nstatus: accepted\nstatus: rejected\n---\n'), 'accepted');
+  assert.equal(readStatus('---\nrevision: 1\n---\n\nstatus: accepted\n'), null);
+  assert.equal(readStatus('---\nstatus:\n---\n'), null);
+  assert.equal(readStatus('---\nstatus: # to rule\n---\n'), null);
+  assert.equal(readStatus('no frontmatter'), null);
+});
