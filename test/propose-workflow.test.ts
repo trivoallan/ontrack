@@ -235,11 +235,51 @@ test('an agent that failed on its first turn shows the error of the tool, cut sh
     { type: 'result', is_error: true, num_turns: 1, total_cost_usd: 0, result: `API Error: 403 ::add-mask::x ${'y'.repeat(2000)}` },
   ]);
   assert.match(out, /API Error: 403 : :add-mask: :x/);
-  assert.ok(out.length <= 801);
+  assert.ok(out.length <= 810);
 });
 
 test('an agent that ran for several turns keeps its output hidden', () => {
   const out = diagnose([{ type: 'result', is_error: true, num_turns: 4, total_cost_usd: 0.2, result: 'text the issue may have shaped' }]);
   assert.doesNotMatch(out, /text the issue/);
   assert.match(out, /stays hidden/);
+});
+
+test('denied tool calls are listed, cut short, whatever the length of the run', () => {
+  const out = diagnose([
+    {
+      type: 'result',
+      is_error: false,
+      num_turns: 24,
+      total_cost_usd: 0.2,
+      result: 'text the issue may have shaped',
+      permission_denials: [
+        { tool_name: 'Bash', tool_input: { command: 'npm ci' } },
+        { tool_name: 'Write', tool_input: { file_path: 'a.md', content: `::error::${'z'.repeat(500)}` } },
+      ],
+    },
+  ]);
+  assert.match(out, /^denied: Bash \{"command":"npm ci"\}$/m);
+  assert.match(out, /^denied: Write \{"file_path":"a\.md","content":": :error: :z+$/m);
+  assert.doesNotMatch(out, /text the issue/);
+  assert.ok(out.split('\n')[1].length <= 220);
+});
+
+test('an agent that says it was blocked fails the run instead of reporting nothing to propose', () => {
+  const root = makeTree({ 'a.md': 'a\n' });
+  git(root, 'init', '-q', '-b', 'main');
+  const run = spawnSync('bash', ['-e', '-c', stepScript('outcome')], {
+    cwd: root,
+    encoding: 'utf8',
+    env: {
+      ...gitEnv,
+      EXISTS: '',
+      RESULT: JSON.stringify({ status: 'blocked', change: '', reason: 'a command was refused' }),
+      GITHUB_OUTPUT: path.join(root, 'output'),
+      GITHUB_STEP_SUMMARY: path.join(root, 'summary'),
+      RUNNER_TEMP: root,
+    },
+  });
+  assert.equal(run.status, 1);
+  assert.match(run.stdout, /::error::the agent could not write the change/);
+  assert.match(readFileSync(path.join(root, 'summary'), 'utf8'), /a command was refused/);
 });

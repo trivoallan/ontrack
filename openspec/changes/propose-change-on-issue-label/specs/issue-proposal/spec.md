@@ -174,8 +174,8 @@ The run SHALL remove the `ontrack:propose` label from the issue when it ends, wh
 - **THEN** the issue no longer carries the `ontrack:propose` label
 - **AND** the issue receives a comment that links to the failed run
 
-### Requirement: A failure on the first turn shows its reason
-When the agent ends in error on its first turn at no cost, the run SHALL print the tool's own error in the run log, cut to 800 characters and unable to issue a workflow command. After a longer run the agent's output MUST stay hidden.
+### Requirement: A run shows why the agent could not work
+When the agent ends in error on its first turn at no cost, the run SHALL print the tool's own error in the run log, cut to 800 characters. The run SHALL also list the tool calls that were denied, at most twenty, each with its name and its input cut to 200 characters. Nothing printed can issue a workflow command, and nothing else of a run of several turns is shown.
 
 #### Scenario: The provider refuses the first call
 - **WHEN** the agent fails on its first turn and the run cost nothing
@@ -183,7 +183,19 @@ When the agent ends in error on its first turn at no cost, the run SHALL print t
 
 #### Scenario: The agent worked before failing
 - **WHEN** the agent fails after several turns
-- **THEN** the run log shows none of its output
+- **THEN** the run log shows none of its text
+
+#### Scenario: A command was refused
+- **WHEN** the agent asked for a tool call that was denied
+- **THEN** the run log names the tool and shows the start of what it was asked
+
+### Requirement: A blocked agent fails the run
+When the agent reports that it meant to write the change and could not, the run SHALL fail and the issue SHALL receive the comment of a failed run, not the comment that says nothing is left to propose.
+
+#### Scenario: A tool the agent needed was refused
+- **WHEN** the agent returns the status `blocked`
+- **THEN** the run fails before any patch is made
+- **AND** the issue receives a comment that links to the failed run
 
 ### Requirement: The workflow follows the forge rules
 The workflow SHALL pin every action by commit SHA and declare its permissions, with none granted at the top level.

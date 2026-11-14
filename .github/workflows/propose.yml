@@ -141,7 +141,7 @@ jobs:
             --permission-mode acceptEdits
             --allowedTools "Glob,Grep,Skill,Bash(openspec list:*),Bash(openspec context:*),Bash(openspec new change:*),Bash(openspec status:*),Bash(openspec instructions:*),Bash(openspec validate:*),Bash(openspec schemas:*)"
             --disallowedTools "Edit(.claude/**)" "Edit(.github/**)" "Edit(.githooks/**)" "Edit(node_modules/**)" "Bash(openspec install:*)" "Bash(openspec feedback:*)" "Bash(openspec config:*)" "Bash(openspec store:*)" "Bash(openspec completion:*)" "WebFetch" "WebSearch"
-            --json-schema '{"type":"object","properties":{"change":{"type":"string"},"reason":{"type":"string"}},"required":["change","reason"]}'
+            --json-schema '{"type":"object","properties":{"status":{"type":"string","enum":["drafted","nothing_to_propose","blocked"]},"change":{"type":"string"},"reason":{"type":"string"}},"required":["status","change","reason"]}'
           prompt: |
             You are preparing a change proposal for this repository. Nobody
             can answer questions during this run: never ask, decide and say
@@ -179,17 +179,25 @@ jobs:
                when the change records one. Modify or delete no existing
                file. Anything else is refused after you finish.
 
-            Return `change`: the name of the change, in lower-case letters,
-            digits and hyphens, or an empty string. Return `reason`: two or
-            three sentences on what you decided.
+            Return `status`: `drafted` when you wrote the change;
+            `nothing_to_propose` in the one case of step 2; `blocked` when
+            you meant to write the change and could not, because a tool or a
+            command you needed was refused or missing. Return `change`: the
+            name of the change, in lower-case letters, digits and hyphens,
+            or an empty string. Return `reason`: two or three sentences on
+            what you decided, or on what stopped you.
 
-      # The action hides what the agent printed, the reason of a failure
-      # included. When the run ended in error on its first turn and cost
-      # nothing, the model produced no text: what is left is the tool's own
-      # error (a refused call, a bad option), shown here cut short. After a
-      # longer run nothing is shown, since the text could be the agent's.
+      # The action hides what the agent printed. Two things are shown here,
+      # because a run cannot be understood without them:
+      # - when the run ended in error on its first turn and cost nothing, the
+      #   tool's own error (a refused call, a bad option): the model produced
+      #   no text then;
+      # - the tool calls that were denied, name and input cut short. They are
+      #   the agent's words, and may echo the issue: nothing here can issue a
+      #   workflow command, and the agent's commands hold no credential.
+      # Nothing else of a run of several turns is shown.
       - id: diagnose
-        if: failure() && steps.agent.conclusion == 'failure'
+        if: always() && steps.agent.conclusion != 'skipped'
         env:
           EXECUTION_FILE: ${{ steps.agent.outputs.execution_file }}
         run: |
@@ -201,9 +209,14 @@ jobs:
           jq -rs 'flatten
             | (map(select(.type == "result")) | last) as $r
             | if $r == null then "The execution file holds no result."
-              elif ($r.num_turns // 0) > 1 or ($r.total_cost_usd // 0) > 0 then "The agent ran for more than one turn: its output stays hidden."
-              else ($r | del(.usage, .modelUsage, .session_id, .uuid) | tostring)
-              end' "$file" | tr -d '\r' | sed 's/::/: :/g' | head -c 800
+              else
+                ( if ($r.is_error // false) | not then empty
+                  elif ($r.num_turns // 0) > 1 or ($r.total_cost_usd // 0) > 0 then "The agent ran for more than one turn: its output stays hidden."
+                  else ($r | {api_error_status, api_error_type, terminal_reason, result} | tostring | .[0:800])
+                  end ),
+                ( ($r.permission_denials // [])[0:20][]
+                  | "denied: \(.tool_name // "?") \(.tool_input // {} | tostring | .[0:200])" )
+              end' "$file" | tr -d '\r' | sed 's/::/: :/g' | head -c 6000
           echo
 
       # The name ends up in a branch name: checked here, and again in the job
@@ -225,6 +238,10 @@ jobs:
             echo
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$(printf '%s' "$RESULT" | jq -r '.status // ""')" = "blocked" ]; then
+            echo "::error::the agent could not write the change: see the denied tool calls above and the run summary"
+            exit 1
+          fi
           git add -A -- . ':!.propose'
           if git diff --cached --quiet; then
             echo "outcome=none" >> "$GITHUB_OUTPUT"
