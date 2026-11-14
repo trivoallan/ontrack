@@ -20,8 +20,9 @@ section with a table of recommended values and their reasons, and what
 ## Goals / Non-Goals
 
 **Goals:**
-- A pure step (`selectAdr(root, name)`) and a formatter (`formatReview(adr)`),
-  testable without the CLI, the way `instructions` is built.
+- Pure steps (`pendingAdrs(root)`, `selectAdr(root, name)`) and formatters
+  (`formatReview(adr)`, `formatSequence(adrs)`), testable without the CLI, the
+  way `instructions` is built.
 - A prompt short enough to read in the README.
 
 **Non-Goals:**
@@ -29,13 +30,13 @@ section with a table of recommended values and their reasons, and what
   agent has the repository and does it better.
 - Parsing the ADR's Decision section, or telling which trait keys carry a
   recommendation.
-- An order of decision between ADRs, a batch review, and re-review after a
-  source revision.
+- An order of decision between ADRs other than reference order, ruling
+  several ADRs on one agreement, and re-review after a source revision.
 - Launching an agent. ontrack prints text; the user chooses the agent.
 
 ## Decisions
 
-**The prompt is fixed text plus a path and a title.**
+**The prompt is fixed text plus paths and titles.**
 Everything specific to the question is already in the ADR, which the prompt
 tells the agent to read. ontrack adds what no single ADR holds: the protocol.
 The agent has to open the file to edit it anyway, so embedding the ADR's body
@@ -56,10 +57,22 @@ user validates the argument, not only the diff. A pull request as the
 validation step would assume branching and forge rules that are themselves
 among the pending ADRs.
 
-**One ADR per prompt; the next one is the first in reference order.**
-Reference order is free, deterministic, and the order `instructions` already
-prints. The argument lets the user pick another. A decision order between
-ADRs would need a dependency key no source ships today.
+**Without an argument, every pending ADR, in sequence; with one, that ADR
+alone.**
+One command then drains the whole queue in one session, and the argument
+keeps the single-ADR session for a question worth its own conversation. The
+sequence prompt lists the ADRs once and gives the seven steps once, "for each
+ADR, in turn". Ruling stays one at a time: the agent stops for agreement on
+each ADR, writes it, runs `apply`, and only then takes the next, so stopping
+midway leaves a consistent repository. Reference order is free,
+deterministic, and the order `instructions` already prints; a decision order
+between ADRs would need a dependency key no source ships today.
+*Alternative considered first:* one ADR per prompt, the next pending one by
+default. It needs one command per ADR, fourteen times here.
+
+**The sequence form is used even with one pending ADR.**
+The form depends on how the command was called, not on how many ADRs are
+left, so the same call always reads the same way.
 
 **The argument matches a reference, a file name or an identifier.**
 `ADR-0006` is what a user types. Without a `/`, the name is looked up in
@@ -93,7 +106,10 @@ mechanism.
   the diff before committing.
 - [Rubber-stamping: every ADR accepted as recommended, unread] → The prompt
   requires evidence for each condition and each repository-specific key, and
-  one ADR per prompt keeps each ruling visible.
+  an agreement per ADR, also in sequence.
+- [A long sequence outgrows the agent's context] → Each ADR is written and
+  applied before the next starts, so the session can stop anywhere and
+  `ontrack review` resumes with what is left.
 - [`npx ontrack apply` also imports new ADRs from sources] → It may touch more
   than `AGENTS.md`. It reports what it did, and it is what the user would run
   next anyway.

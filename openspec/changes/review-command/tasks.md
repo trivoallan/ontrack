@@ -21,3 +21,9 @@
 
 - [x] 5.1 In this repository, run `node bin/ontrack.mjs review` and check that it prints the prompt for `trivoallan/ADR-0002-localization` and exits `2`; run it with `ADR-0001` and check that it exits `1` naming `accepted`.
 - [x] 5.2 Run `npm test` and check that coverage stays at or above 95% on lines, branches and functions, then run `openspec validate review-command --strict`.
+
+## 6. Sequence prompt
+
+- [x] 6.1 Update the README contract: without an argument the prompt covers every pending ADR in sequence, with the full sequence prompt for two ADRs; with an argument, the single-ADR prompt.
+- [x] 6.2 In `src/review.mjs`, add `pendingAdrs(root)` and `formatSequence(adrs)` sharing the seven steps with `formatReview(adr)`, and make `selectAdr` require a name; the command prints the sequence prompt without an argument. Check the "Every pending ADR" scenarios and the "Sequence" and "Agreement after each ADR" scenarios in `test/review.test.mjs`.
+- [x] 6.3 Run `npm test` and `openspec validate review-command --strict`, then check in this repository that `node bin/ontrack.mjs review` lists the 14 pending ADRs and exits `2`.

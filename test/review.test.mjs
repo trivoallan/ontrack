@@ -2,7 +2,7 @@ import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
-import { formatReview, selectAdr } from '../src/review.mjs';
+import { formatReview, formatSequence, pendingAdrs, selectAdr } from '../src/review.mjs';
 import { main } from '../src/cli.mjs';
 import { cleanup, makeTree } from './helpers/project.mjs';
 
@@ -43,24 +43,30 @@ function snapshot(dir, base = dir) {
   });
 }
 
-// Next pending ADR
+const refs = (adrs) => adrs.map((a) => a.ref);
 
-test('next: first pending in reference order, local before a namespace', () => {
+// Every pending ADR
+
+test('pending: reference order, local before a namespace', () => {
   const root = makeTree({
     [RELEASE]: adr('Release', 'status: proposed'),
     [LOCALIZATION]: adr('Localization', 'status: proposed'),
     [COMMITS]: adr('Commits', 'status: proposed'),
   });
-  assert.equal(selectAdr(root).ref, 'local/ADR-0020-release');
+  assert.deepEqual(refs(pendingAdrs(root)), [
+    'local/ADR-0020-release',
+    'trivoallan/ADR-0002-localization',
+    'trivoallan/ADR-0006-commits',
+  ]);
 });
 
-test('next: decided ADRs are skipped', () => {
-  assert.equal(selectAdr(tree()).ref, 'trivoallan/ADR-0002-localization');
+test('pending: decided ADRs are skipped', () => {
+  assert.deepEqual(refs(pendingAdrs(tree())), ['trivoallan/ADR-0002-localization', 'trivoallan/ADR-0006-commits']);
 });
 
-test('next: nothing pending, or no docs/adr/, gives null', () => {
-  assert.equal(selectAdr(makeTree({ [RECORD]: adr('R', 'status: accepted'), [COMMITS]: adr('C', 'status: rejected') })), null);
-  assert.equal(selectAdr(makeTree({ 'README.md': '' })), null);
+test('pending: nothing pending, or no docs/adr/, gives none', () => {
+  assert.deepEqual(pendingAdrs(makeTree({ [RECORD]: adr('R', 'status: accepted'), [COMMITS]: adr('C', 'status: rejected') })), []);
+  assert.deepEqual(pendingAdrs(makeTree({ 'README.md': '' })), []);
 });
 
 test('a conflict between decided ADRs does not stop the review', () => {
@@ -70,7 +76,7 @@ test('a conflict between decided ADRs does not stop the review', () => {
     'docs/adr/ADR-0012-commits.md': decided('Commits again'),
     [LOCALIZATION]: adr('Localization', 'status: proposed'),
   });
-  assert.equal(selectAdr(root).ref, 'trivoallan/ADR-0002-localization');
+  assert.deepEqual(refs(pendingAdrs(root)), ['trivoallan/ADR-0002-localization']);
 });
 
 // Named ADR
@@ -113,7 +119,7 @@ test('prompt: names one ADR by path and title, and no other', () => {
 });
 
 test('prompt: agreement comes before writing, and apply closes it', () => {
-  const out = formatReview(selectAdr(tree()));
+  const out = formatReview(selectAdr(tree(), 'ADR-0002'));
   const stop = out.indexOf('Write nothing until the user agrees');
   assert.ok(stop > 0);
   assert.ok(stop < out.indexOf('set the status'));
@@ -123,7 +129,7 @@ test('prompt: agreement comes before writing, and apply closes it', () => {
 
 test('prompt: an own ADR sits directly in docs/adr/', () => {
   const root = makeTree({ [RELEASE]: adr('Release', 'status: proposed') });
-  assert.ok(formatReview(selectAdr(root)).includes(`\`${RELEASE}\``));
+  assert.ok(formatReview(selectAdr(root, 'ADR-0020-release')).includes(`\`${RELEASE}\``));
 });
 
 test('prompt: same text for every ADR, and an untitled ADR is named by its path', () => {
@@ -138,27 +144,53 @@ test('prompt: same text for every ADR, and an untitled ADR is named by its path'
   assert.ok(formatReview({ ...b, title: '' }).includes(`\`${RELEASE}\`.`));
 });
 
-test('prompt: matches the README contract', () => {
+test('sequence: lists every ADR in order and holds the steps once', () => {
+  const out = formatSequence(pendingAdrs(tree()));
+  assert.ok(out.includes(`- \`${LOCALIZATION}\` (Localization)\n- \`${COMMITS}\` (Commits)\n`));
+  assert.ok(out.includes('one at a time, in this order'));
+  assert.deepEqual(out.match(/^\d\./gm), ['1.', '2.', '3.', '4.', '5.', '6.', '7.']);
+  assert.ok(!out.includes(RECORD));
+});
+
+test('sequence: the next ADR comes after agreement and apply', () => {
+  const out = formatSequence(pendingAdrs(tree()));
+  const stop = out.indexOf('Write nothing until the user agrees');
+  const apply = out.indexOf('npx ontrack apply');
+  assert.ok(stop > 0 && stop < apply);
+  assert.ok(apply < out.indexOf('Then take the next ADR in the list'));
+});
+
+test('sequence: same steps as the single prompt, and a list of one', () => {
+  const steps = (out) => out.slice(out.indexOf('1. '), out.indexOf('AGENTS.md.') + 10);
+  const root = makeTree({ [LOCALIZATION]: adr('Localization', 'status: proposed') });
+  const sequence = formatSequence(pendingAdrs(root));
+  assert.equal(steps(sequence), steps(formatReview(selectAdr(root, 'ADR-0002-localization'))));
+  assert.ok(sequence.includes('one at a time, in this order'));
+});
+
+test('prompt: both forms match the README contract', () => {
   const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
   assert.ok(readme.includes(`~~~\n${formatReview(selectAdr(tree(), 'ADR-0006'))}~~~`));
+  assert.ok(readme.includes(`~~~\n${formatSequence(pendingAdrs(tree()))}~~~`));
 });
 
 // Command
 
-test('command: prints the prompt, exits 2, leaves the tree unchanged', async () => {
+test('command: prints the sequence prompt, exits 2, leaves the tree unchanged', async () => {
   const root = tree();
   const before = snapshot(root);
   const r = await review(root);
   assert.equal(r.code, 2);
-  assert.equal(r.stdout, formatReview(selectAdr(root)));
+  assert.equal(r.stdout, formatSequence(pendingAdrs(root)));
   assert.equal(r.stderr, '');
   assert.deepEqual(snapshot(root), before);
 });
 
 test('command: a named ADR', async () => {
-  const r = await review(tree(), 'ADR-0006');
+  const root = tree();
+  const r = await review(root, 'ADR-0006');
   assert.equal(r.code, 2);
-  assert.ok(r.stdout.includes(COMMITS));
+  assert.equal(r.stdout, formatReview(selectAdr(root, 'ADR-0006')));
 });
 
 test('command: nothing to review exits 0 with an empty stdout', async () => {

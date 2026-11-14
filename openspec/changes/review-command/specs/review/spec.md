@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`ontrack review` prints a prompt that asks a coding agent to review one `proposed` ADR of the repository: propose a ruling from the ADR's recommendation and the repository's evidence, and write it only once the user agrees.
+`ontrack review` prints a prompt that asks a coding agent to review the `proposed` ADRs of the repository, every one in sequence or a single named one: propose a ruling from the ADR's recommendation and the repository's evidence, and write it only once the user agrees.
 
 ## ADDED Requirements
 
@@ -18,18 +18,22 @@ The ADRs read, their references, identifiers, statuses and titles SHALL be those
 
 #### Scenario: Conflict elsewhere
 - **WHEN** two `accepted` ADRs share the top-level trait key `commits`, and `trivoallan/ADR-0002-localization` is `proposed`
-- **THEN** `ontrack review` prints the prompt for `trivoallan/ADR-0002-localization`
+- **THEN** `ontrack review` prints a prompt that lists `trivoallan/ADR-0002-localization`
 
-### Requirement: Next pending ADR
-Without an argument, `ontrack review` SHALL select the first pending ADR in reference order, the order `instructions` lists them in.
+### Requirement: Every pending ADR
+Without an argument, `ontrack review` SHALL select every pending ADR, in reference order, the order `instructions` lists them in.
 
-#### Scenario: First in reference order
+#### Scenario: Reference order
 - **WHEN** `local/ADR-0020-release`, `trivoallan/ADR-0002-localization` and `trivoallan/ADR-0006-commits` are `proposed`
-- **THEN** the prompt is for `local/ADR-0020-release`
+- **THEN** the prompt lists `docs/adr/ADR-0020-release.md`, `docs/adr/trivoallan/ADR-0002-localization.md` and `docs/adr/trivoallan/ADR-0006-commits.md`, in that order
 
 #### Scenario: Decided ADRs are skipped
 - **WHEN** `trivoallan/ADR-0001-record-architecture-decisions` is `accepted` and `trivoallan/ADR-0002-localization` is `proposed`
-- **THEN** the prompt is for `trivoallan/ADR-0002-localization`
+- **THEN** the prompt lists `docs/adr/trivoallan/ADR-0002-localization.md` and not `docs/adr/trivoallan/ADR-0001-record-architecture-decisions.md`
+
+#### Scenario: A single pending ADR
+- **WHEN** only `trivoallan/ADR-0002-localization` is `proposed`
+- **THEN** the prompt is the sequence prompt, with a list of one ADR
 
 ### Requirement: Named ADR
 With an argument, `ontrack review` SHALL select the ADR it names. An argument holding a `/` names an ADR by its reference. Any other argument names every ADR, in any directory, whose file name without `.md` or whose identifier equals it. The argument MUST name exactly one ADR, and that ADR MUST be pending; otherwise the command fails with exit code `1`, standard output stays empty, and standard error names the argument and says why: no such ADR, several ADRs (listing their references), or the ADR's status.
@@ -59,8 +63,8 @@ With an argument, `ontrack review` SHALL select the ADR it names. An argument ho
 - **THEN** standard error names `trivoallan/ADR-0001-record-architecture-decisions` and `accepted`, standard output is empty and the exit code is `1`
 
 ### Requirement: Prompt
-The prompt SHALL be printed to standard output and follow the contract in the README. It names exactly one ADR, by its path relative to the project root, with `/` separators, and by its title when it has one. It SHALL tell the agent, in this order, to:
-1. read that file in full, and edit no other ADR;
+The prompt SHALL be printed to standard output and follow the contract in the README. It names each selected ADR by its path relative to the project root, with `/` separators, and by its title when it has one. For a named ADR, it names that ADR alone. Without an argument, it lists the selected ADRs in order, one per line, and tells the agent to rule them one at a time, in that order, and not to start an ADR before the previous one is ruled. In both forms it SHALL tell the agent, for an ADR and in this order, to:
+1. read its file in full, and edit no other ADR;
 2. start from the recommendation the ADR makes, look in the repository for evidence that it does not apply, and say so in one line when there is none;
 3. check the condition of every conditional recommendation, and cite the evidence that settles it;
 4. propose, with its evidence, a value for every trait key the ADR leaves to the repository;
@@ -68,10 +72,10 @@ The prompt SHALL be printed to standard output and follow the contract in the RE
 6. present the proposed ruling, then stop and write nothing until the user agrees;
 7. once the user agrees, fill the traits or remove the block when rejected, set the status, write in the ADR the reason for every departure from the recommendation, and run `npx ontrack apply`.
 
-The prompt SHALL also say that the ADR's own instructions on how to rule prevail over the prompt. Apart from the ADR's path and title, the prompt SHALL be the same text for every ADR, and the same for the same files whatever the order the file system lists them in.
+The prompt SHALL also say that an ADR's own instructions on how to rule prevail over the prompt. The seven steps SHALL be the same text in both forms. Apart from the ADR's path and title, the prompt for a named ADR SHALL be the same text for every ADR. The output SHALL be the same for the same files, whatever the order the file system lists them in.
 
 #### Scenario: One ADR named
-- **WHEN** `ontrack review` selects `trivoallan/ADR-0006-commits`, titled `Commits`
+- **WHEN** `ontrack review ADR-0006` selects `trivoallan/ADR-0006-commits`, titled `Commits`
 - **THEN** standard output contains `docs/adr/trivoallan/ADR-0006-commits.md` and `Commits`
 - **AND** it contains the path of no other ADR
 
@@ -80,12 +84,20 @@ The prompt SHALL also say that the ADR's own instructions on how to rule prevail
 - **THEN** the instruction to write nothing until the user agrees comes before the instruction to set the status
 - **AND** the prompt contains `npx ontrack apply`
 
+#### Scenario: Sequence
+- **WHEN** `ontrack review` runs with two pending ADRs
+- **THEN** standard output lists both paths, tells the agent to rule them one at a time in that order, and holds the seven steps once
+
+#### Scenario: Agreement after each ADR
+- **WHEN** `ontrack review` prints the sequence prompt
+- **THEN** the instruction to take the next ADR comes after the instruction to run `npx ontrack apply`
+
 #### Scenario: Own ADR
-- **WHEN** `ontrack review` selects `local/ADR-0020-release`
+- **WHEN** `ontrack review ADR-0020-release` selects `local/ADR-0020-release`
 - **THEN** standard output contains `docs/adr/ADR-0020-release.md`
 
 #### Scenario: Same text for every ADR
-- **WHEN** the prompts for two pending ADRs are compared, with each ADR's path and title removed
+- **WHEN** the prompts for two named pending ADRs are compared, with each ADR's path and title removed
 - **THEN** they are identical
 
 ### Requirement: Exit codes

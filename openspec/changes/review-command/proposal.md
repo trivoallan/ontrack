@@ -18,13 +18,13 @@ stops for the user's agreement before writing.
 ## What Changes
 
 - New command `ontrack review [adr]`. It prints to standard output a prompt
-  that asks a coding agent to review **one** `proposed` ADR, for example
+  that asks a coding agent to review `proposed` ADRs, for example
   `claude "$(npx ontrack review)"`.
-- Without an argument, the ADR is the first pending one in reference order.
-  With an argument, it is the ADR named: by its reference
-  (`trivoallan/ADR-0006-commits`), its file name without `.md`, or its `adr:`
-  identifier.
-- The prompt names the ADR's file and title and fixes the protocol: touch
+- Without an argument, the prompt covers every pending ADR, in reference
+  order, ruled one at a time. With an argument, it covers the ADR named
+  alone: by its reference (`trivoallan/ADR-0006-commits`), its file name
+  without `.md`, or its `adr:` identifier.
+- The prompt names each ADR's file and title and fixes the protocol: touch
   this ADR only; start from the recommendation and look for evidence against
   it; check conditional recommendations with evidence; propose values for the
   keys left to the repository; propose `rejected` only on evidence; present
@@ -40,13 +40,13 @@ stops for the user's agreement before writing.
   first.
 
 Out of scope: ontrack gathering evidence itself, an order of decision between
-ADRs, reviewing several ADRs in one prompt, and re-reviewing an `accepted`
-ADR whose source revision moved.
+ADRs other than reference order, ruling several ADRs on one agreement, and
+re-reviewing an `accepted` ADR whose source revision moved.
 
 ## Capabilities
 
 ### New Capabilities
-- `review`: which ADR `ontrack review` selects, the prompt it prints, and its
+- `review`: which ADRs `ontrack review` selects, the prompt it prints, and its
   exit codes.
 
 ### Modified Capabilities
