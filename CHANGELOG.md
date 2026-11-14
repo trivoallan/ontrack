@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.0](https://github.com/trivoallan/ontrack/compare/v0.2.0...v0.3.0) (2026-11-14)
+
+
+### Features
+
+* **check:** pass the ADR path to check commands as ONTRACK_ADR ([#73](https://github.com/trivoallan/ontrack/issues/73)) ([8d426b6](https://github.com/trivoallan/ontrack/commit/8d426b6fb2f686688a1de18d6c45ed0cdb16212d))
+* **check:** report a command that exits with 78 as unchecked ([#72](https://github.com/trivoallan/ontrack/issues/72)) ([7eb5a16](https://github.com/trivoallan/ontrack/commit/7eb5a1643b3d97d4ef0c644ec9bb9e69ada026f0))
+* publish to the npm registry as @trivoallan/ontrack ([#88](https://github.com/trivoallan/ontrack/issues/88)) ([edf1c28](https://github.com/trivoallan/ontrack/commit/edf1c28742fbb3d7a02e15b7c2792fb85d9f7a36))
+
 ## [0.2.0](https://github.com/trivoallan/ontrack/compare/v0.1.0...v0.2.0) (2026-11-14)
 
 
