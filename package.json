@@ -1,6 +1,6 @@
 {
   "name": "ontrack",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Imports shared architecture decision records (ADRs) provided by npm sources into a repository.",
   "license": "Apache-2.0",
   "type": "module",
