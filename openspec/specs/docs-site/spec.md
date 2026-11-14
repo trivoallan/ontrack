@@ -48,19 +48,34 @@ A page SHALL show its title once. When the body of a file opens with a level-one
 - **THEN** its page holds exactly one level-one heading
 
 ### Requirement: An ADR page opens with its ruling
-The page of an architecture decision record SHALL show, before its body, the status the record declares and, when the record is `accepted` and declares traits, its `traits:` block as written. The status and traits shown MUST be those the `ontrack instructions` command reads. Other pages are unchanged.
+The page of an architecture decision record SHALL show, before its body, the status the record declares, as a badge, and, when the record is `accepted` and declares traits, its `traits:` block as written. The status and traits shown MUST be those the `ontrack instructions` command reads. Other pages are unchanged.
 
 #### Scenario: Accepted ADR with traits
 - **WHEN** `ADR-0006-commits.md` is `accepted` and declares `commits.tool: commitlint`
-- **THEN** its page shows "Status: accepted" and a block holding `tool: commitlint` above the body
+- **THEN** its page shows an "accepted" badge and a block holding `tool: commitlint` above the body
 
 #### Scenario: Rejected ADR
 - **WHEN** `ADR-0013-frontend.md` is `rejected` and declares no traits
-- **THEN** its page shows "Status: rejected" and no traits block
+- **THEN** its page shows a "rejected" badge and no traits block
 
 #### Scenario: A page that is not an ADR
 - **WHEN** `docs/index.md` is built
 - **THEN** its page shows no status
+
+### Requirement: Status badges
+A page whose frontmatter declares a `status:` SHALL carry that status as a badge next to its link in the navigation, with the same text and colour as the badge in its page. `accepted` is shown in green and `proposed` in orange. Every other status, `rejected` included, is shown in a neutral colour: it MUST NOT be shown as an error. A page without a `status:` has no badge.
+
+#### Scenario: Navigation of the decision records
+- **WHEN** the site is built with 14 `accepted` ADRs and one `rejected`
+- **THEN** the navigation shows 14 green "accepted" badges and one neutral "rejected" badge
+
+#### Scenario: Proposed ADR
+- **WHEN** an ADR is `proposed`
+- **THEN** its badge reads "proposed" and is orange, in the navigation and in its page
+
+#### Scenario: Home page
+- **WHEN** `docs/index.md` declares no `status:`
+- **THEN** its navigation link has no badge
 
 ### Requirement: Links between pages
 A relative link from one page to another Markdown file under `docs/` SHALL lead to that file's page, with its fragment kept. Links to anything else are left as written.
