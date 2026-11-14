@@ -71,6 +71,8 @@ The prompt SHALL be printed to standard output and follow the contract in the RE
 6. present the proposed ruling, then stop, ask for the user's agreement with a question tool such as `AskUserQuestion` when the agent has one, and write nothing until the user agrees;
 7. once the user agrees, fill the traits or remove the block when rejected, set the status, write in the ADR the reason for every departure from the recommendation, and run `npx ontrack apply`.
 
+After the seven steps, and in the sequence form after the instruction to take the next ADR, the prompt SHALL tell the agent, once every ADR is ruled, to list the rulings the repository does not follow yet, to propose a tracking item for each with its title and the ADR it serves, and to create in the tracker named by the decided `tracking` trait (`tracking.tool`, in `tracking.project`) only the items the user agrees to; when no `tracking` trait is decided or `tracking.tool` is `none`, to list them in its reply and create nothing. This text SHALL be the same in both forms.
+
 The prompt SHALL also say that an ADR's own instructions on how to rule prevail over the prompt. The seven steps SHALL be the same text in both forms. Apart from the ADR's path and title, the prompt for a named ADR SHALL be the same text for every ADR. The output SHALL be the same for the same files, whatever the order the file system lists them in.
 
 #### Scenario: One ADR named
@@ -94,6 +96,11 @@ The prompt SHALL also say that an ADR's own instructions on how to rule prevail 
 #### Scenario: Agreement after each ADR
 - **WHEN** `ontrack review` prints the sequence prompt
 - **THEN** the instruction to take the next ADR comes after the instruction to run `npx ontrack apply`
+
+#### Scenario: Tracking items for rulings ahead of the repository
+- **WHEN** `ontrack review` prints a prompt, in either form
+- **THEN** after the instruction to run `npx ontrack apply`, and after the instruction to take the next ADR in the sequence form, it tells the agent to propose a tracking item for every ruling the repository does not follow yet
+- **AND** it names `tracking.tool` and `tracking.project`, asks for the user's agreement before creating an item, and says to create nothing when `tracking.tool` is `none`
 
 #### Scenario: Own ADR
 - **WHEN** `ontrack review ADR-0020-release` selects `local/ADR-0020-release`
