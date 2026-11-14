@@ -91,7 +91,16 @@ jobs:
             -H "Content-Type: application/json" \
             -d "$body")
           echo "started=true" >> "$GITHUB_OUTPUT"
-          session=$(printf '%s' "$response" | jq -r '.claude_code_session_url // ""' 2> /dev/null || true)
+          # The names of the answer's fields are logged, never their values:
+          # the first real answer did not carry the address where the
+          # documentation puts it. The address is looked for anywhere in the
+          # answer, or built from the session's identifier.
+          printf '%s' "$response" | jq -r '"answer fields: " + ([paths(scalars) | map(tostring) | join(".")] | join(", "))' 2> /dev/null || echo "answer is not JSON"
+          session=$(printf '%s' "$response" | jq -r '
+            [ ( .. | strings | select(test("^https://claude\\.ai/code/session_[A-Za-z0-9]+$")) ),
+              ( .. | strings | select(test("^(session|cse)_[A-Za-z0-9]+$"))
+                | sub("^cse_"; "session_") | "https://claude.ai/code/" + . ) ]
+            | first // ""' 2> /dev/null || true)
           if [[ "$session" =~ ^https://claude\.ai/code/session_[A-Za-z0-9]+$ ]]; then
             echo "session=$session" >> "$GITHUB_OUTPUT"
           fi
