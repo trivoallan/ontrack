@@ -182,7 +182,7 @@ export const adrsInForce = (root: string) => resolve(root).inForce;
 
 export const heading = (adr: Adr) => (adr.title ? `${adr.title} (${adr.ref})` : adr.ref);
 
-/** The contract output (see README). */
+/** The contract output (see docs/commands.md). */
 export function formatInstructions({ decided, pending }: Instructions): string {
   const lines = ['<!-- ontrack:begin -->', '## Project rules (ontrack)', ''];
   for (const adr of decided) lines.push(`### ${heading(adr)}`, '', '```yaml', ...adr.traits, '```', '');

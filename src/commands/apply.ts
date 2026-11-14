@@ -42,7 +42,7 @@ function agentsStep(
   return { lines: [`AGENTS.md: rules block to ${verb}`, ...(status.warning ? [status.warning] : [])], pending: true, wrote: true };
 }
 
-// The next step, on stderr so that stdout keeps the README format: imported
+// The next step, on stderr so that stdout keeps its documented format: imported
 // ADRs are `proposed`, which the plan no longer reports, and a revised one is
 // ruled again with the same command. Both forms are given, since the reader
 // is at a shell or is a coding agent.

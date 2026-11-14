@@ -113,7 +113,7 @@ export function selectAdr(root: string, name: string): Adr {
   return adr;
 }
 
-/** The contract prompt for one ADR (see README). */
+/** The contract prompt for one ADR (see docs/commands.md). */
 export function formatReview(adr: Adr): string {
   return `Review one architecture decision record of this repository: ${named(adr)}.
 
@@ -123,7 +123,7 @@ ${STEPS}
 ${TRACKING}`;
 }
 
-/** The contract prompt to rule one revised ADR again (see README). */
+/** The contract prompt to rule one revised ADR again (see docs/commands.md). */
 export function formatRevision({ adr, source, from, to }: Revised): string {
   return `Rule again one architecture decision record of this repository: ${named(adr)}.
 
@@ -133,7 +133,7 @@ ${RULE_AGAIN}
 ${TRACKING}`;
 }
 
-/** The contract prompt for every revised ADR, ruled again one at a time (see README). */
+/** The contract prompt for every revised ADR, ruled again one at a time (see docs/commands.md). */
 export function formatRevisions(revised: Revised[]): string {
   return `Rule again the architecture decision records of this repository whose source has revised the question, one at a time, in this order:
 
@@ -155,7 +155,7 @@ export function selectRevised(root: string, name: string): Revised | undefined {
   return revisedAdrs(root).find((r) => r.adr.ref === ref);
 }
 
-/** The contract prompt to supersede one `accepted` ADR (see README). */
+/** The contract prompt to supersede one `accepted` ADR (see docs/commands.md). */
 export function formatSupersession(adr: Adr): string {
   return `Supersede one architecture decision record of this repository: ${named(adr)}.
 
@@ -165,7 +165,7 @@ ${supersedeSteps(adr)}
 ${TRACKING}`;
 }
 
-/** The contract prompt for every pending ADR, ruled one at a time (see README). */
+/** The contract prompt for every pending ADR, ruled one at a time (see docs/commands.md). */
 export function formatSequence(adrs: Adr[]): string {
   return `Review the architecture decision records of this repository that are still \`proposed\`, one at a time, in this order:
 

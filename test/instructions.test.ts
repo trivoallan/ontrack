@@ -215,13 +215,13 @@ test('a value where the other ADR nests keys conflicts, in either order', () => 
 
 // Output format
 
-test('the README example: one decided, one pending', async () => {
+test('the commands reference example: one decided, one pending', async () => {
   const root = makeTree({
     'docs/adr/trivoallan/ADR-0006-commits.md': commits(),
     'docs/adr/trivoallan/ADR-0002-localization.md': adr('Localization', 'status: proposed'),
   });
-  const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
-  const example = /~~~\n(<!-- ontrack:begin -->[\s\S]*?)~~~/.exec(readme)?.[1];
+  const reference = readFileSync(new URL('../docs/commands.md', import.meta.url), 'utf8');
+  const example = /~~~\n(<!-- ontrack:begin -->[\s\S]*?)~~~/.exec(reference)?.[1];
   const r = await instructions(root);
   assert.equal(r.stdout, example);
   assert.equal(r.code, 0);

@@ -63,13 +63,21 @@ export default defineConfig({
       logo: { src: '../docs/assets/logo.png' },
       favicon: '/logo.png',
       customCss: ['./src/adr.css'],
+      // The prompts `review` prints are single lines of a thousand characters,
+      // documented as they are in the commands reference: wrap code blocks
+      // rather than scroll them sideways.
+      expressiveCode: { defaultProps: { wrap: true } },
       // Labels a reader understands, not directory names. What ontrack is
       // for comes first; this repository's own decisions and architecture
       // stay one click away, collapsed.
       sidebar: [
         { slug: 'tutorial' },
-        { slug: 'features' },
+        { slug: 'how-it-works' },
+        { slug: 'write-your-own-source' },
+        { slug: 'revise-a-question' },
+        { slug: 'run-ontrack-in-ci' },
         { slug: 'commands' },
+        { slug: 'file-formats' },
         // ponytail: lists the one imported namespace; make it `adr` once the
         // repository has ADRs of its own or a second source.
         { label: 'ontrack on itself', collapsed: true, items: [{ autogenerate: { directory: 'adr/trivoallan' } }] },

@@ -236,14 +236,14 @@ test('prompt: tracking items are labelled ontrack, titled by ruling, and checked
   }
 });
 
-test('prompt: every form matches the README contract', () => {
-  const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
-  assert.ok(readme.includes(`~~~\n${formatReview(selectAdr(tree(), 'ADR-0006'))}~~~`));
-  assert.ok(readme.includes(`~~~\n${formatSequence(pendingAdrs(tree()))}~~~`));
-  assert.ok(readme.includes(`~~~\n${formatSupersession(selectAdr(tree(), 'ADR-0001'))}~~~`));
+test('prompt: every form matches the commands reference contract', () => {
+  const reference = readFileSync(new URL('../docs/commands.md', import.meta.url), 'utf8');
+  assert.ok(reference.includes(`~~~\n${formatReview(selectAdr(tree(), 'ADR-0006'))}~~~`));
+  assert.ok(reference.includes(`~~~\n${formatSequence(pendingAdrs(tree()))}~~~`));
+  assert.ok(reference.includes(`~~~\n${formatSupersession(selectAdr(tree(), 'ADR-0001'))}~~~`));
   const revised = revisedAdrs(stale());
-  assert.ok(readme.includes(`~~~\n${formatRevision(revised[1])}~~~`));
-  assert.ok(readme.includes(`~~~\n${formatRevisions(revised)}~~~`));
+  assert.ok(reference.includes(`~~~\n${formatRevision(revised[1])}~~~`));
+  assert.ok(reference.includes(`~~~\n${formatRevisions(revised)}~~~`));
 });
 
 // Supersession prompt

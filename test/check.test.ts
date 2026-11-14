@@ -140,7 +140,7 @@ test('trait conflict: exit 1, empty stdout, nothing ran', async () => {
 
 // Output format
 
-test('one of each: the README example, byte for byte', async () => {
+test('one of each: the commands reference example, byte for byte', async () => {
   const root = makeTree({
     'docs/adr/trivoallan/ADR-0001-record-architecture-decisions.md':
       adr('Record architecture decisions', 'status: accepted', ...traits('record-architecture-decisions')),
@@ -149,8 +149,8 @@ test('one of each: the README example, byte for byte', async () => {
     'docs/adr/trivoallan/ADR-0009-branching.md': adr('Branching', 'status: accepted', 'check: true'),
   });
   const r = await check(root);
-  const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
-  const example = /```\n(unchecked  [\s\S]*?unchecked\n)```/.exec(readme)?.[1];
+  const reference = readFileSync(new URL('../docs/commands.md', import.meta.url), 'utf8');
+  const example = /```\n(unchecked  [\s\S]*?unchecked\n)```/.exec(reference)?.[1];
   assert.equal(r.stdout, example);
   assert.equal(r.code, 2);
 });

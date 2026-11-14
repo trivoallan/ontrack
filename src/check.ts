@@ -37,7 +37,7 @@ export function runChecks(root: string): CheckResult[] {
     });
 }
 
-/** The contract output (see README). */
+/** The contract output (see docs/commands.md). */
 export function formatChecks(results: CheckResult[]): string {
   const lines: string[] = [];
   const count = { fail: 0, pass: 0, unchecked: 0 };

@@ -111,7 +111,7 @@ function actionLine(a: Action): string {
   return row(a.kind, label(a.adr));
 }
 
-/** The `apply` output (see README). */
+/** The `apply` output (see docs/commands.md). */
 export function formatApply({
   actions,
   links,
