@@ -76,6 +76,13 @@ test('next step on stderr while ADRs are proposed, in a shell form and a prompt 
   assert.equal((await run(root, 'apply')).stderr, '');
 });
 
+test('next step once nothing is proposed: the revised ADRs to rule again', async () => {
+  const root = withAgents(makeProject({ sources: { platform: { 'A.md': adr(2), 'B.md': adr(1) } }, local: { 'docs/adr/platform/A.md': adr(1, 'accepted') } }));
+  assert.match((await run(root, 'apply')).stderr, /^next: 1 proposed ADR to rule$/m);
+  writeFileSync(path.join(root, 'docs/adr/platform/B.md'), adr(1, 'accepted'));
+  assert.match((await run(root, 'apply')).stderr, /^next: 1 revised ADR to rule again\n {2}from a shell: /);
+});
+
 // Flat-layout migration
 
 test('outside git: flat files renamed with identical content', async () => {

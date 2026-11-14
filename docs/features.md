@@ -109,6 +109,7 @@ claude "$(npx ontrack review)"
 
 - The agent starts from the source's recommendation, looks for evidence that it does not apply here, and proposes a value for every trait.
 - It stops and asks before writing anything. The ruling is yours.
+- When a source revises a question you already ruled, the same command asks the agent to rule it again: it keeps your ruling where the question did not move, and proposes one where it did.
 - Naming an accepted ADR reopens it: the agent drafts a new ADR that supersedes it, and the original text stays frozen.
 - Once the rulings are made, the agent lists the ones the repository does not follow yet and offers to open a tracking item for each.
 
