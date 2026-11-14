@@ -1,16 +1,20 @@
-import { test } from 'node:test';
+import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { main } from '../src/cli.mjs';
+import { adr, cleanup, makeProject, makeTree } from './helpers/project.mjs';
+
+after(cleanup);
 
 const { version } = JSON.parse(
   readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
 );
 
-async function runWith(commands, argv) {
+async function runWith(commands, argv, cwd = process.cwd()) {
   let stdout = '';
   let stderr = '';
   const io = {
+    cwd: () => cwd,
     stdout: { write: (s) => { stdout += s; } },
     stderr: { write: (s) => { stderr += s; } },
   };
@@ -56,8 +60,16 @@ test('a subcommand that throws exits with code 1', async () => {
   assert.match(r.stderr, /boom/);
 });
 
-test('plan not available yet: code 1 and an explicit message', async () => {
-  const r = await run('plan');
+test('exit codes: pending changes give 2', async () => {
+  const root = makeProject({
+    sources: { platform: { 'A.md': adr(2) } },
+    local: { 'docs/adr/platform/A.md': adr(1) },
+  });
+  assert.equal((await runWith(undefined, ['plan'], root)).code, 2);
+});
+
+test('exit codes: an error gives 1 and explains it', async () => {
+  const r = await runWith(undefined, ['plan'], makeTree({ 'README.md': '' }));
   assert.equal(r.code, 1);
-  assert.match(r.stderr, /plan.*not available yet/);
+  assert.match(r.stderr, /package\.json/);
 });
