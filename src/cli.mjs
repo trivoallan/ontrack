@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import yargs from 'yargs';
+import * as apply from './commands/apply.mjs';
 import * as instructions from './commands/instructions.mjs';
 import * as plan from './commands/plan.mjs';
 
@@ -7,7 +8,7 @@ const { version } = JSON.parse(
   readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
 );
 
-const defaultCommands = [plan, instructions];
+const defaultCommands = [plan, apply, instructions];
 
 /**
  * Testable entry point: parses `argv`, writes to `io`, returns the contract
