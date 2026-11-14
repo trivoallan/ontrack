@@ -62,20 +62,24 @@ The page of an architecture decision record SHALL show, before its body, the sta
 - **WHEN** `docs/index.md` is built
 - **THEN** its page shows no status
 
-### Requirement: Status badges
-A page whose frontmatter declares a `status:` SHALL carry that status as a badge next to its link in the navigation, with the same text and colour as the badge in its page. `accepted` is shown in green and `proposed` in orange. Every other status, `rejected` included, is shown in a neutral colour: it MUST NOT be shown as an error. A page without a `status:` has no badge.
+### Requirement: Status marks in the navigation
+A page whose frontmatter declares a `status:` SHALL carry a coloured dot before its title in the navigation, in the colour of the badge in its page. `accepted` is shown in green and `proposed` in orange. Every other status, `rejected` included, is shown in a neutral colour: it MUST NOT be shown as an error. The status MUST also be present as text next to the dot for assistive technologies, because colour alone does not say it. A page without a `status:` has no dot.
 
 #### Scenario: Navigation of the decision records
 - **WHEN** the site is built with 14 `accepted` ADRs and one `rejected`
-- **THEN** the navigation shows 14 green "accepted" badges and one neutral "rejected" badge
+- **THEN** the navigation shows 14 green dots and one neutral dot, and no status word is visible in it
+
+#### Scenario: Screen reader
+- **WHEN** a screen reader reads the navigation link of an `accepted` ADR
+- **THEN** it finds the text "accepted" in the link
 
 #### Scenario: Proposed ADR
 - **WHEN** an ADR is `proposed`
-- **THEN** its badge reads "proposed" and is orange, in the navigation and in its page
+- **THEN** its dot is orange in the navigation, and its page shows an orange "proposed" badge
 
 #### Scenario: Home page
 - **WHEN** `docs/index.md` declares no `status:`
-- **THEN** its navigation link has no badge
+- **THEN** its navigation link has no dot
 
 ### Requirement: Links between pages
 A relative link from one page to another Markdown file under `docs/` SHALL lead to that file's page, with its fragment kept. Links to anything else are left as written.

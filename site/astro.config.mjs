@@ -2,7 +2,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import mermaid from 'astro-mermaid';
 import { readAdrs } from '../src/instructions.ts';
-import { statusBadge } from './src/adr-status.mjs';
+import { statusTone } from './src/adr-status.mjs';
 
 export const base = '/ontrack';
 
@@ -33,10 +33,9 @@ const pages = () => (tree, file) => {
   // AGENTS.md cannot disagree.
   const adr = readAdrs(repository).find((a) => file.path.endsWith(a.path.replace(/^docs/, '')));
   if (!adr) return;
-  const badge = statusBadge(adr.status);
   const ruling = [{
     type: 'html',
-    value: `<p><span class="adr-status ${badge.class ?? badge.variant}">${badge.text}</span></p>`,
+    value: `<p><span class="adr-status ${statusTone(adr.status)}">${adr.status}</span></p>`,
   }];
   if (adr.traits) ruling.push({ type: 'code', lang: 'yaml', meta: 'title="Decided traits"', value: adr.traits.join('\n') });
   tree.children.unshift(...ruling);

@@ -20,11 +20,38 @@
   --sl-color-border-badge: var(--sl-badge-caution-border);
   --sl-color-text-badge: var(--sl-badge-caution-text);
 }
-/* Starlight has no grey badge: its default variant is the accent colour.
-   The current page's sidebar link keeps Starlight's outline badge. */
-.adr-status.adr-neutral,
-a:not([aria-current='page']) > .sl-badge.adr-neutral {
+/* Starlight has no grey badge: its default variant is the accent colour. */
+.adr-status.adr-neutral {
   --sl-color-bg-badge: var(--sl-color-gray-5);
   --sl-color-border-badge: var(--sl-color-gray-3);
   --sl-color-text-badge: var(--sl-color-white);
+}
+
+/* In the sidebar the status is a dot before the title: fifteen words in a
+   column were noise, and wrapped under long titles. The word stays in the
+   page, clipped, so that a screen reader still says it. */
+.sidebar-content a:has(> .adr-dot) {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+}
+.sidebar-content .sl-badge.adr-dot {
+  order: -1;
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 50%;
+  color: transparent;
+  background-color: var(--sl-color-border-badge);
+}
+.sidebar-content .sl-badge.adr-dot.adr-neutral {
+  --sl-color-border-badge: var(--sl-color-gray-3);
+}
+/* On the current page's link the dot takes the colour of the text. */
+.sidebar-content a[aria-current='page'] > .sl-badge.adr-dot {
+  background-color: var(--sl-color-text-invert);
 }
