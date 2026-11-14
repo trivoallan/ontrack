@@ -145,4 +145,10 @@ dependencies:
   automerge: patch
 ```
 
+### Not yet decided
+
+- Vulnerabilities (trivoallan/ADR-0019-vulnerabilities)
+- Adding a dependency (trivoallan/ADR-0020-adding-dependencies)
+- Build provenance (trivoallan/ADR-0021-build-provenance)
+
 <!-- ontrack:end -->
