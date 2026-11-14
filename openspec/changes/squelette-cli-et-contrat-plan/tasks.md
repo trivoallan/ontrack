@@ -15,4 +15,4 @@
 ## 3. Contrat de sortie
 
 - [x] 3.1 Compléter le README avec l'installation (`npm i -D ontrack@git+https://github.com/trivoallan/ontrack.git`), l'usage, et une section « Contrat de sortie de `ontrack plan` » qui reprend le format et les codes 0/2/1 de design.md ; vérifier que l'exemple du README correspond mot pour mot à celui de design.md
-- [ ] 3.2 Vérifier `openspec validate squelette-cli-et-contrat-plan --strict` et lier le change dans trivoallan/ontrack#1
+- [x] 3.2 Vérifier `openspec validate squelette-cli-et-contrat-plan --strict` et lier le change dans trivoallan/ontrack#1
