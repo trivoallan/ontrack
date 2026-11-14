@@ -2,6 +2,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import mermaid from 'astro-mermaid';
 import { readAdrs } from '../src/instructions.ts';
+import { statusBadge } from './src/adr-status.mjs';
 
 export const base = '/ontrack';
 
@@ -32,10 +33,11 @@ const pages = () => (tree, file) => {
   // AGENTS.md cannot disagree.
   const adr = readAdrs(repository).find((a) => file.path.endsWith(a.path.replace(/^docs/, '')));
   if (!adr) return;
-  const ruling = [{ type: 'paragraph', children: [
-    { type: 'strong', children: [{ type: 'text', value: 'Status:' }] },
-    { type: 'text', value: ` ${adr.status}` },
-  ] }];
+  const badge = statusBadge(adr.status);
+  const ruling = [{
+    type: 'html',
+    value: `<p><span class="adr-status ${badge.class ?? badge.variant}">${badge.text}</span></p>`,
+  }];
   if (adr.traits) ruling.push({ type: 'code', lang: 'yaml', meta: 'title="Decided traits"', value: adr.traits.join('\n') });
   tree.children.unshift(...ruling);
 };
@@ -52,6 +54,7 @@ export default defineConfig({
       title: 'ontrack',
       logo: { src: '../docs/assets/logo.png' },
       favicon: '/logo.png',
+      customCss: ['./src/adr.css'],
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/trivoallan/ontrack' }],
     }),
   ],
