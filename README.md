@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/assets/logo.png" alt="" width="160"></p>
+
 # ontrack
 
 ontrack imports inherited ADRs and OpenSpec schemas into a repository from
