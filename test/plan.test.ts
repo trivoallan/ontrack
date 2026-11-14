@@ -232,3 +232,46 @@ test('missing source ADR directory gives 1 and names the source', async () => {
   assert.equal(r.code, 1);
   assert.match(r.stderr, /platform.*docs\/adr/);
 });
+
+// Check category
+
+const ruled = (...extra: string[]) => ['---', 'status: accepted', 'revision: 1', ...extra, 'traits:', '  commits:', '    tool: commitlint', '---', '', 'Body.', ''].join('\n');
+const shipped = (revision: number, ...extra: string[]) => ['---', 'status: proposed', `revision: ${revision}`, ...extra, 'traits:', '  commits:', '    tool:', '---', '', 'Body.', 'check: exit 0', ''].join('\n');
+const one = (local: string, upstream: string) =>
+  makeProject({ sources: { trivoallan: { 'ADR-0006-commits.md': upstream } }, local: { 'docs/adr/trivoallan/ADR-0006-commits.md': local } });
+
+test('check added, changed or removed upstream: check', () => {
+  for (const [local, upstream] of [
+    [ruled(), shipped(1, 'check: npx commitlint --last')],
+    [ruled('check: exit 0'), shipped(1, 'check: exit 1')],
+    [ruled('check: exit 0'), shipped(1)],
+  ]) {
+    assert.equal(buildPlan(one(local, upstream))[0].adrs[0].category, 'check');
+  }
+});
+
+test('same check with a different verdict, or a check line only in the body: unchanged', () => {
+  assert.equal(buildPlan(one(ruled('check: exit 0'), shipped(1, 'check: exit 0  ')))[0].adrs[0].category, 'unchanged');
+  assert.equal(buildPlan(one(ruled(), shipped(1)))[0].adrs[0].category, 'unchanged');
+});
+
+test('revised wins over check', () => {
+  const [s] = buildPlan(one(ruled(), shipped(2, 'check: exit 0')));
+  assert.equal(s.adrs[0].category, 'revised');
+  assert.equal(s.adrs[0].check, undefined);
+});
+
+test('check output: counts, then the - and + lines; exit 2', async () => {
+  const root = withAgents(makeProject({
+    sources: { trivoallan: { 'ADR-0001-a.md': adr(1), 'ADR-0006-commits.md': shipped(1, 'check: npx commitlint --last') } },
+    local: { 'docs/adr/trivoallan/ADR-0001-a.md': adr(1), 'docs/adr/trivoallan/ADR-0006-commits.md': ruled('check: exit 0') },
+  }));
+  const r = await plan(root);
+  assert.equal(r.stdout, 'trivoallan: 1 check, 1 unchanged\n  check         ADR-0006-commits\n    - check: exit 0\n    + check: npx commitlint --last\n');
+  assert.equal(r.code, 2);
+});
+
+test('check output: added shows + only, removed shows - only', () => {
+  assert.equal(formatPlan(buildPlan(one(ruled(), shipped(1, 'check: exit 0')))), 'trivoallan: 1 check, 0 unchanged\n  check         ADR-0006-commits\n    + check: exit 0\n');
+  assert.equal(formatPlan(buildPlan(one(ruled('check: exit 0'), shipped(1)))), 'trivoallan: 1 check, 0 unchanged\n  check         ADR-0006-commits\n    - check: exit 0\n');
+});
