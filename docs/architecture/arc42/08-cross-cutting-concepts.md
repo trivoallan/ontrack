@@ -65,7 +65,7 @@ tools. ontrack treats them accordingly:
 ## Output as a contract
 
 What each command prints is a format that CI jobs and agents rely on. It is
-documented in the [README](https://github.com/trivoallan/ontrack#readme)
+documented in the [commands reference](../../commands.md)
 before it changes, and each module that formats output is a pure function
 from data to a string (`formatPlan`, `formatApply`, `formatInstructions`,
 `formatChecks`, and the three prompts of `review`), tested on that string.

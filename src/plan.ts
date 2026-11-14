@@ -111,7 +111,7 @@ export const checkLines = (adr: PlannedAdr): string[] =>
     .filter(([, line]) => line != null)
     .map(([sign, line]) => `    ${sign} ${line}`);
 
-/** The contract output (see README). */
+/** The contract output (see docs/commands.md). */
 export function formatPlan(plan: Plan): string {
   if (plan.length === 0) return 'no ontrack source found\n';
   const lines: string[] = [];

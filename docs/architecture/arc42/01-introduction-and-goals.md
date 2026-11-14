@@ -10,7 +10,7 @@ dependencies whose `package.json` carries an `ontrack` key. Each ADR asks a
 question and recommends an answer; the repository answers it in its own
 copy, and ontrack writes the answers to `AGENTS.md` so that coding agents
 follow them. The
-[README](https://github.com/trivoallan/ontrack#readme) is the user's guide;
+[documentation site](../../index.md) is the user's guide;
 this document describes how the tool is built.
 
 ## Requirements overview
@@ -26,7 +26,7 @@ and does not repeat them.
 | `ontrack apply` | do what `plan` reports, and keep the rules block of `AGENTS.md` current | [apply](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/apply/spec.md), [agents-file](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/agents-file/spec.md) |
 | `ontrack instructions` | print the decided traits as the rules block | [instructions](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/instructions/spec.md) |
 | `ontrack review` | print a prompt asking a coding agent to rule proposed ADRs, or to supersede an accepted one | [review](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/review/spec.md) |
-| `ontrack check` | run the check command each decided ADR declares | [README contract](https://github.com/trivoallan/ontrack#ontrack-check-output-contract) |
+| `ontrack check` | run the check command each decided ADR declares | [output contract](../../commands.md#check-output-contract) |
 
 The entry point and the exit codes every command shares are specified in
 [cli](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/cli/spec.md).

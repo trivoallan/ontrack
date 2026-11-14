@@ -23,5 +23,5 @@ reasons are in that file and are not repeated here.
 | Constraint | Consequence for the design | Imposed by |
 | --- | --- | --- |
 | Tests cover 95 % of lines, branches and functions | `npm test` fails below the threshold, so every module is written to be called from a test | [ADR-0007](../../adr/trivoallan/ADR-0007-tests.md), `scripts.test` in [`package.json`](https://github.com/trivoallan/ontrack/blob/main/package.json) |
-| Output formats are contracts | a change to what a command prints goes through the README first | the "output contract" sections of the [README](https://github.com/trivoallan/ontrack#readme) |
+| Output formats are contracts | a change to what a command prints goes through the commands reference first | the contract sections of the [commands reference](../../commands.md) |
 | Documentation is public and in English | this document names no internal system and no person's contact detail | [ADR-0008](../../adr/trivoallan/ADR-0008-documentation.md), [ADR-0002](../../adr/trivoallan/ADR-0002-localization.md) |
