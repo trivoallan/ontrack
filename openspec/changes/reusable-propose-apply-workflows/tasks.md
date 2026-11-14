@@ -1,8 +1,8 @@
 ## 1. Check the federation first
 
-- [ ] 1.1 From a sandbox repository, call `propose.yml` on a branch of ontrack that only adds `workflow_call`, and record what the OIDC `sub` and `job_workflow_ref` claims say and whether the token exchange succeeds
-- [ ] 1.2 Record in the Claude Console whether a federation rule can match `job_workflow_ref` as well as `sub`, and write the rule a caller needs in the documentation draft
-- [ ] 1.3 Stop the change here and revise the design if no rule lets a call from another repository through
+- [x] 1.1 From a sandbox repository, call `propose.yml` on a branch of ontrack that only adds `workflow_call`, and record what the OIDC `sub` and `job_workflow_ref` claims say and whether the token exchange succeeds
+- [x] 1.2 Record in the Claude Console whether a federation rule can match `job_workflow_ref` as well as `sub`, and write the rule a caller needs in the documentation draft
+- [x] 1.3 Stop the change here and revise the design if no rule lets a call from another repository through
 
 ## 2. Make `propose.yml` callable
 

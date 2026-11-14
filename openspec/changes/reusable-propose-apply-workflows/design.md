@@ -127,11 +127,21 @@ ontrack. The example caller in the documentation says so in a comment.
 
 ## Risks / Trade-offs
 
-- [The federation rule rejects a call from another repository] → In a
-  called workflow, the OIDC `sub` claim names the caller's repository and
-  `job_workflow_ref` names ontrack's file. Each caller needs its own rule,
-  ideally matching both claims. Checked first, in one run from a sandbox
-  repository, before any other task.
+- [The federation rule rejects a call from another repository] → Checked
+  on 2026-11-15 from a private sandbox repository: the exchange passes. In a
+  called workflow, `sub` names the caller
+  (`repo:<owner>@<owner id>/<repo>@<repo id>:ref:refs/heads/main`) and
+  `job_workflow_ref` names ontrack's file at the SHA the caller pinned. Each
+  caller needs its own rule, which matches its exact `sub` in pattern mode,
+  as ontrack's rule does.
+- [The rule does not check which workflow uses the token] → It cannot do so
+  usefully today. Extra claim conditions are exact matches only, and an
+  exact `job_workflow_ref` breaks at every SHA bump. A CEL condition can use
+  `startsWith`, but the Console refuses a compound CEL condition on the
+  GitHub issuer unless a subject prefix is set beside it, and the CEL mode
+  shows no such field. Accepted: only the caller's maintainers decide what
+  its `main` calls. Revisit if the Console exposes a subject prefix with
+  CEL.
 - [The Anthropic routine API changes its beta header] → Every caller's
   `apply` breaks at once, and is fixed in one place. A test runs the
   answer parsing against a recorded answer.
@@ -155,8 +165,5 @@ ontrack. The example caller in the documentation says so in a comment.
 
 ## Open Questions
 
-- Can the federation rule match `job_workflow_ref` as well as `sub`? The
-  answer decides whether one rule per caller can be restricted to ontrack's
-  workflow file.
 - Where does Node come from when a caller has no `.nvmrc`: a fixed version,
   or an input?
