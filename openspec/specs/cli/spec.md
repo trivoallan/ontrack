@@ -35,10 +35,14 @@ The `ontrack` command MUST reject a subcommand it does not know. It writes to st
 - **THEN** standard error names `plann` and mentions `ontrack --help`
 - **AND** the exit code is `1`
 
-### Requirement: Shared exit codes
+### Requirement: Exit codes shared by subcommands
 Every `ontrack` subcommand SHALL exit with one of three codes: `0` when there is nothing to do, `2` when changes are pending, `1` on error. No other code is emitted on purpose.
 
-#### Scenario: Subcommand declared but not implemented yet
-- **WHEN** the user runs `ontrack plan` before the command is implemented
-- **THEN** standard error says that `plan` is not available yet
+#### Scenario: Pending changes
+- **WHEN** the user runs `ontrack plan` in a project where a source revised an imported ADR
+- **THEN** the exit code is `2`
+
+#### Scenario: Error
+- **WHEN** the user runs `ontrack plan` in a directory without a `package.json`
+- **THEN** standard error explains the problem
 - **AND** the exit code is `1`
