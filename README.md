@@ -417,6 +417,21 @@ Node does not run TypeScript from `node_modules`, so the installed package is
 the JavaScript in `dist/`. npm builds it when it installs ontrack from git
 (`prepare`); `dist/` is never committed.
 
+### Secret scanning
+
+A pre-commit hook scans the staged changes with
+[gitleaks](https://github.com/gitleaks/gitleaks) and refuses a commit that
+holds a secret (ADR-0015). Git does not version hooks, so enable it once per
+clone:
+
+```bash
+brew install gitleaks                 # or any other install of the gitleaks binary
+git config core.hooksPath .githooks
+```
+
+Without gitleaks on the `PATH`, the hook refuses the commit rather than skip
+the scan.
+
 ### Documentation site
 
 The pages under `docs/` are published at
