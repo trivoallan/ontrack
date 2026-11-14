@@ -1,10 +1,16 @@
 // Reads the `revision:` of an inherited ADR from files ontrack did not write.
-// No YAML parser: two fences and a column-zero key are all we need.
+// No YAML parser: two fences and a column-zero key are all we need. The
+// values the scanner finds are parsed with the `adrFrontmatter` model.
+
+import type { z } from 'zod';
+import { adrFrontmatter } from './schemas.ts';
 
 export type Comparison = 'up-to-date' | 'stale' | 'undetermined' | 'unreadable';
 
 const FENCE = /^---\s*$/;
-const REVISION = /^revision:\s*(\d+)\s*$/;
+const PAIR = /^([A-Za-z_][\w-]*):\s*(.*?)\s*$/;
+
+type Fields = z.infer<typeof adrFrontmatter>;
 
 // A line that may sit inside a frontmatter. Anything else (a prose line, a
 // code fence) is body, and stops the search for the closing fence: that is
@@ -30,12 +36,21 @@ export function frontmatter(text: string): string[] | null {
   return null;
 }
 
-function revisionOf(lines: string[]): number | null {
+// The value of each top-level `key:` line, in order; null where the model
+// refuses it. A refused value is "no value", never an error.
+function values<K extends keyof Fields>(lines: string[], key: K): (Fields[K] | null)[] {
+  const found: (Fields[K] | null)[] = [];
   for (const line of lines) {
-    const match = REVISION.exec(line);
-    if (match) return Number(match[1]);
+    const pair = PAIR.exec(line);
+    if (pair?.[1] !== key) continue;
+    const parsed = adrFrontmatter.shape[key].safeParse(pair[2]);
+    found.push(parsed.success ? (parsed.data as Fields[K]) : null);
   }
-  return null;
+  return found;
+}
+
+function revisionOf(lines: string[]): number | null {
+  return values(lines, 'revision').find((value) => value !== null) ?? null;
 }
 
 /**
@@ -45,10 +60,8 @@ function revisionOf(lines: string[]): number | null {
 export function readTitle(text: string, name: string): string | null {
   const lines = text.split('\n');
   const fm = frontmatter(text);
-  for (const line of fm ?? []) {
-    const match = /^title:\s*(.*?)\s*$/.exec(line);
-    if (match) return match[1].replace(/^(["'])(.*)\1$/, '$2').trim() || null;
-  }
+  const titles = values(fm ?? [], 'title');
+  if (titles.length) return titles[0];
   const heading = lines.slice(fm ? fm.length + 2 : 0).find((line) => line.startsWith('# '));
   if (!heading) return null;
   const title = heading.slice(2).trim();

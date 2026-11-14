@@ -114,3 +114,20 @@ test('no package.json', () => {
   const root = project({ manifest: false });
   assert.throws(() => discoverSources(root), new RegExp(`${path.join(root, 'package.json')}`));
 });
+
+test('dependencies that are not a string map make the manifest unreadable', () => {
+  const root = project({ manifest: false });
+  const manifest = path.join(root, 'package.json');
+  writeFileSync(manifest, JSON.stringify({ name: 'project', dependencies: ['platform'] }));
+  assert.throws(() => discoverSources(root), { message: `cannot read ${manifest}` });
+});
+
+test('an installed manifest without a name is rejected', () => {
+  const root = project({ deps: { platform: '1' }, installed: { platform: { ontrack: { adr: 'docs/adr' } } } });
+  assert.throws(() => discoverSources(root), /dependency "platform".*"name"/);
+});
+
+test('a namespace that is not a string is undeclared', () => {
+  const root = project({ deps: { platform: '1' }, installed: { platform: { name: 'platform', ontrack: { adr: 'docs/adr', namespace: 3 } } } });
+  assert.equal(discoverSources(root)[0].declaredNamespace, null);
+});
