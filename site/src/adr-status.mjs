@@ -1,10 +1,16 @@
-// How the status of an ADR is shown as a badge, in the sidebar and in its page.
+// How the status of an ADR is shown, in the sidebar and in its page.
 // `rejected` is a full answer, not a failure: it is neutral, never red.
-const variants = { accepted: 'success', proposed: 'caution' };
+const tones = { accepted: 'success', proposed: 'caution' };
 
-/** A Starlight badge for a status: its text, its variant and its class. */
+/** The colour class of a status, shared by the sidebar dot and the page badge. */
+export const statusTone = (status) => tones[status] ?? 'adr-neutral';
+
+/**
+ * A Starlight sidebar badge for a status. `adr-dot` draws it as a dot (see
+ * adr.css); its text stays in the page for screen readers.
+ */
 export const statusBadge = (status) => ({
   text: status,
-  variant: variants[status] ?? 'default',
-  ...(variants[status] ? {} : { class: 'adr-neutral' }),
+  variant: tones[status] ?? 'default',
+  class: tones[status] ? 'adr-dot' : 'adr-dot adr-neutral',
 });
