@@ -2,26 +2,27 @@
 adr: ADR-0012
 slug: delivery
 title: Delivery
-status: proposed
+status: accepted
 revision: 1
-date:
-authors: []
+date: 2026-11-14
+authors: [Tristan Rivoallan]
 supersedes: []
 traits:
   delivery:
-    target:
+    target: package
     environments:
-    release_tool:
-    registry:
+      - { name: github, trigger: tag }
+    release_tool: release-please
+    registry: none
   deployment:
-    manifests:
+    manifests: none
 ---
 
 # Delivery
 
 ## Status
 
-Proposed
+Accepted
 
 > **What is this file?** A question governance asks your repository, with
 > the answer it recommends. While it says `status: proposed`, you may edit
@@ -103,81 +104,30 @@ only half the job (publishes without a changelog) still counts: say
 **Once a pipeline file exists**, the last task of any change checks that it
 passes on the pull request, even when there is no deploy job.
 
-Everything below disappears when you rule, from this sentence up to the
-Consequences heading, which stays.
+`release-please` adopted as recommended. `target: package`: ontrack is an npm package installed as a dev dependency; nothing is deployed and no image is built, hence `registry: none` and `manifests: none`.
 
-**How to rule: five steps, all in this file.** Read all of them before
-doing any, because the last one deletes the other four, and do them in one
-commit.
-
-1. **Write the value of each key** under `traits:` in the frontmatter, or,
-   if you rule `rejected`, **remove the whole `traits:` block**.
-2. **Change `status:`** from `proposed` to `accepted` or `rejected`.
-3. **Fill `date:` and `authors:`**: `date:` as `YYYY-MM-DD`, the day you
-   rule; `authors:`, the names of the people who decided, without email
-   addresses.
-4. **Rewrite the Positive, Negative and Neutral lists under Consequences**
-   for your verdict: what it makes easier, and what it costs.
-5. **Last, delete this block**, from its first sentence up to the
-   Consequences heading, which stays. In its place, write the reason for
-   your decision wherever you depart from the recommendation, or, if you
-   adopt it as is, one line that says so.
-
-The first step is the one people forget: a decision written only in prose
-leaves an agent guessing. This is what the frontmatter looks like once
-filled, and it is the one part of the file an agent reads without
-interpreting it:
-
-```yaml
----
-adr: ADR-0012
-slug: delivery
-title: Delivery
-status: accepted
-revision: 1
-date: 2026-11-14
-authors: [Your Name]
-supersedes: []
-traits:
-  delivery:
-    target: container
-    environments:
-      - { name: staging, trigger: merge }
-      - { name: production, trigger: tag }
-    release_tool: release-please
-    registry: ghcr.io/your-name
-  deployment:
-    manifests: https://github.com/your-name/your-app-manifests
----
-```
-
-The Alternatives Considered below were weighed by governance without
-knowing your context. Weighing them against yours is still to do, and it is
-what makes a decision different from an accepted default.
+**Departure: one environment, `github` on `tag`, instead of staging on merge and production on tag.** A package has one environment, the place it is published to, triggered on `tag`. That place is the GitHub repository: users install `ontrack@git+https://github.com/trivoallan/ontrack.git#vX.Y.Z`, because the `ontrack` name on the npm registry belongs to another project.
 
 ## Consequences
 
 ### Positive
 
-- An agent knows what a merge puts in service and what makes a version,
-  without asking at every change.
-- Production runs named versions, so a rollback has a target and a
-  changelog.
-- The pipeline's jobs follow from these keys (ADR-0011), so they are not
-  invented.
+- Users install a named version, with its changelog, rather than whatever
+  `main` holds that day.
+- Versions follow the commit messages that `commitlint` (ADR-0006) already
+  enforces.
 
 ### Negative
 
-- Deploying production on `tag` adds a step after every merge that should
-  ship.
-- `release-please` ties version history to commit messages: a badly typed
-  merge message produces a wrong version (see ADR-0006 on `commitlint`).
+- At the time of ruling, nothing of this exists: no tag, no release,
+  `package.json` at `0.1.0`, no `release-please` workflow, and the README
+  installs from `main` without a ref. All four have to change.
+- A badly typed squash message (ADR-0009) produces a wrong version.
 
 ### Neutral
 
-- When the repository does not deploy itself (`platform` with the
-  platform's own Git integration, or GitOps elsewhere), what happens after
-  the merge is outside this repository and is not checked here.
+- Publishing to the npm registry would need another package name; it is not
+  decided here.
 
 ## Alternatives Considered
 

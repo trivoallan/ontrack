@@ -165,7 +165,7 @@ test('two decided ADRs, one key: exit 1, both named, empty stdout', async () => 
   });
   const r = await instructions(root);
   assert.equal(r.code, 1);
-  assert.match(r.stderr, /"commits".*local\/ADR-0012-commits.*trivoallan\/ADR-0006-commits.*supersedes/);
+  assert.match(r.stderr, /"commits\.tool".*local\/ADR-0012-commits.*trivoallan\/ADR-0006-commits.*supersedes/);
   assert.equal(r.stdout, '');
 });
 
@@ -175,6 +175,23 @@ test('nested keys with the same name do not conflict', () => {
     'docs/adr/B.md': adr('B', 'status: accepted', 'traits:', '  b:', '    tool: y'),
   });
   assert.equal(buildInstructions(root).decided.length, 2);
+});
+
+test('one top-level key, different subkeys: no conflict (ADR-0003 and ADR-0010)', () => {
+  const root = makeTree({
+    'docs/adr/A.md': adr('A', 'status: accepted', 'traits:', '  architecture:', '    pattern: monolithic'),
+    'docs/adr/B.md': adr('B', 'status: accepted', 'traits:', '  architecture:', '    document: arc42', '    diagrams:', '      - mermaid'),
+  });
+  assert.equal(buildInstructions(root).decided.length, 2);
+});
+
+test('a value where the other ADR nests keys conflicts, in either order', () => {
+  const scalar = adr('S', 'status: accepted', 'traits:', '  architecture: hexagonal');
+  const nested = adr('N', 'status: accepted', 'traits:', '  architecture:', '    document: arc42');
+  for (const [a, b] of [[scalar, nested], [nested, scalar]]) {
+    const root = makeTree({ 'docs/adr/A.md': a, 'docs/adr/B.md': b });
+    assert.throws(() => buildInstructions(root), /trait "architecture" is decided by both local\/A and local\/B/);
+  }
 });
 
 // Output format

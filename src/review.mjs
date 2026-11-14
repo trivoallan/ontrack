@@ -17,6 +17,11 @@ const STEPS = `1. Read its file in full. Do not edit any other ADR.
 7. Once the user agrees: fill the \`traits:\` keys, or remove the block when rejected; set the status; write in the ADR the reason for every departure from the recommendation; then run \`npx ontrack apply\` to update AGENTS.md.
 `;
 
+// Rulings ahead of the repository become tracking items, proposed once the
+// whole review is ruled, since the tracker may be one of the ADRs ruled.
+const TRACKING = `Once every ADR is ruled, list the rulings this repository does not follow yet: a value its code, configuration or tooling does not match, or a tool the ruling names that is not set up. For each one, propose a tracking item: a title, and the ADR it serves. Create in the tracker named by the decided \`tracking\` trait in AGENTS.md (\`tracking.tool\`, in \`tracking.project\`) only the items the user agrees to, asked with a question tool such as \`AskUserQuestion\` when you have one. When no \`tracking\` trait is decided, or \`tracking.tool\` is \`none\`, give the list in your reply and create nothing.
+`;
+
 /** The `proposed` ADRs, in reference order. */
 export function pendingAdrs(root) {
   return sorted(root).filter((a) => a.status === 'proposed');
@@ -49,7 +54,8 @@ export function formatReview(adr) {
 
 It is \`proposed\`: a question this repository has not answered yet, shipped with the answer its source recommends. Propose a ruling; the user decides. Where the ADR itself says how to rule, it prevails over this prompt.
 
-${STEPS}`;
+${STEPS}
+${TRACKING}`;
 }
 
 /** The contract prompt for every pending ADR, ruled one at a time (see README). */
@@ -64,5 +70,6 @@ For each ADR, in turn:
 
 ${STEPS}
 Then take the next ADR in the list. Do not start an ADR before the previous one is ruled.
-`;
+
+${TRACKING}`;
 }

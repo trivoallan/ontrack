@@ -2,21 +2,21 @@
 adr: ADR-0007
 slug: tests
 title: Tests
-status: proposed
+status: accepted
 revision: 1
-date:
-authors: []
+date: 2026-11-14
+authors: [Tristan Rivoallan]
 supersedes: []
 traits:
   tests:
-    coverage_target:
+    coverage_target: 95
 ---
 
 # Tests
 
 ## Status
 
-Proposed
+Accepted
 
 > **What is this file?** A question governance asks your repository, with
 > the answer it recommends. While it says `status: proposed`, you may edit
@@ -64,71 +64,28 @@ languages declares the others in this ADR's body, with their tool. The key
 carries only one, because an agent only needs that one to know where it
 stands.
 
-Everything below disappears when you rule, from this sentence up to the
-Consequences heading, which stays.
-
-**How to rule: five steps, all in this file.** Read all of them before
-doing any, because the last one deletes the other four, and do them in one
-commit.
-
-1. **Write the value of each key** under `traits:` in the frontmatter, or,
-   if you rule `rejected`, **remove the whole `traits:` block**.
-2. **Change `status:`** from `proposed` to `accepted` or `rejected`.
-3. **Fill `date:` and `authors:`**: `date:` as `YYYY-MM-DD`, the day you
-   rule; `authors:`, the names of the people who decided, without email
-   addresses.
-4. **Rewrite the Positive, Negative and Neutral lists under Consequences**
-   for your verdict: what it makes easier, and what it costs.
-5. **Last, delete this block**, from its first sentence up to the
-   Consequences heading, which stays. In its place, write the reason for
-   your decision wherever you depart from the recommendation, or, if you
-   adopt it as is, one line that says so.
-
-The first step is the one people forget: a decision written only in prose
-leaves an agent guessing. This is what the frontmatter looks like once
-filled, and it is the one part of the file an agent reads without
-interpreting it:
-
-```yaml
----
-adr: ADR-0007
-slug: tests
-title: Tests
-status: accepted
-revision: 1
-date: 2026-11-14
-authors: [Your Name]
-supersedes: []
-traits:
-  tests:
-    coverage_target: 90
----
-```
-
-The Alternatives Considered below were weighed by governance without
-knowing your context. Weighing them against yours is still to do, and it is
-what makes a decision different from an accepted default.
+**Departure: `95` instead of `90`.** The repository already holds 95: the `test` script in `package.json` passes `--test-coverage-lines=95` (and branches and functions at 95) with `test/**` excluded, and CI runs it. Writing 90 would lower a bar that is met (100 % lines at the time of ruling). The measure also counts `test/bin.test.mjs`, which spawns the real binary; it only reaches `bin/ontrack.mjs`, a four-line entry point, so the figure stays a unit-test figure in practice.
 
 ## Consequences
 
 ### Positive
 
-- An agent has a number to reach before it proposes a change, instead of
-  testing at random.
-- The bounds make the number mean the same thing in every repository that
-  rules on this ADR.
+- An agent knows it must keep lines, branches and functions at 95 % before
+  it opens a pull request, and `npm test` fails if it does not.
+- The ADR and the enforced threshold say the same number.
 
 ### Negative
 
-- Reaching 90 % on hand-written code takes real test-writing time,
-  especially on code that touches I/O.
+- 95 % leaves little room for code that touches the file system; such code
+  is tested against temporary directories, which takes time to write.
 - A coverage number says nothing about the quality of the assertions;
-  review still has to read the tests.
+  review still reads the tests.
 
 ### Neutral
 
-- The runner, the test command and the coverage tool are not declared here:
-  they belong to the repository.
+- The runner (`node --test`) and its flags live in `package.json`, not here.
+- The Node 20.19 CI job checks behavior only: coverage thresholds need
+  Node 22.8+.
 
 ## Alternatives Considered
 

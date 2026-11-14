@@ -2,22 +2,22 @@
 adr: ADR-0004
 slug: languages
 title: Languages
-status: proposed
+status: accepted
 revision: 1
-date:
-authors: []
+date: 2026-11-14
+authors: [Tristan Rivoallan]
 supersedes: []
 traits:
   languages:
     main:
-      name:
+      name: TypeScript
 ---
 
 # Languages
 
 ## Status
 
-Proposed
+Accepted
 
 > **What is this file?** A question governance asks your repository, with
 > the answer it recommends. While it says `status: proposed`, you may edit
@@ -62,71 +62,27 @@ written, never that it is in the list: refusing a language mechanically
 would make impossible the very case this section allows. Review reads your
 justification, not a command.
 
-Everything below disappears when you rule, from this sentence up to the
-Consequences heading, which stays.
-
-**How to rule: five steps, all in this file.** Read all of them before
-doing any, because the last one deletes the other four, and do them in one
-commit.
-
-1. **Write the value of each key** under `traits:` in the frontmatter, or,
-   if you rule `rejected`, **remove the whole `traits:` block**.
-2. **Change `status:`** from `proposed` to `accepted` or `rejected`.
-3. **Fill `date:` and `authors:`**: `date:` as `YYYY-MM-DD`, the day you
-   rule; `authors:`, the names of the people who decided, without email
-   addresses.
-4. **Rewrite the Positive, Negative and Neutral lists under Consequences**
-   for your verdict: what it makes easier, and what it costs.
-5. **Last, delete this block**, from its first sentence up to the
-   Consequences heading, which stays. In its place, write the reason for
-   your decision wherever you depart from the recommendation, or, if you
-   adopt it as is, one line that says so.
-
-The first step is the one people forget: a decision written only in prose
-leaves an agent guessing. This is what the frontmatter looks like once
-filled, and it is the one part of the file an agent reads without
-interpreting it:
-
-```yaml
----
-adr: ADR-0004
-slug: languages
-title: Languages
-status: accepted
-revision: 1
-date: 2026-11-14
-authors: [Your Name]
-supersedes: []
-traits:
-  languages:
-    main:
-      name: TypeScript
----
-```
-
-The Alternatives Considered below were weighed by governance without
-knowing your context. Weighing them against yours is still to do, and it is
-what makes a decision different from an accepted default.
+Adopted as recommended: TypeScript.
 
 ## Consequences
 
 ### Positive
 
-- An agent writes new code in the right language without inferring it.
+- An agent writes new code in TypeScript without inferring it.
 - Validation (ADR-0005) and coverage (ADR-0007) recommendations apply
-  directly to both recommended languages.
+  directly.
 
 ### Negative
 
-- A repository with a good reason to use Go, Rust or another language has to
-  write that reason down instead of just using it.
-- Two recommended languages still leave a choice to make, and the reasons
-  above only partly settle it.
+- The code is plain JavaScript (`.mjs`) at the time of ruling, shipped as
+  sources from git with no build step and run on Node 20.19, which does not
+  execute `.ts`. Moving to TypeScript needs a build step or committed
+  output, and a migration of `src/`, `bin/` and `test/`.
 
 ### Neutral
 
-- Secondary languages (shell scripts, SQL, configuration) are not declared
-  here and do not change the answer.
+- Secondary languages (shell scripts, YAML, Markdown) are not declared here
+  and do not change the answer.
 
 ## Alternatives Considered
 

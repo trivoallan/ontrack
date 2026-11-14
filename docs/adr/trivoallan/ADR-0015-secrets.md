@@ -2,22 +2,22 @@
 adr: ADR-0015
 slug: secrets
 title: Secrets
-status: proposed
+status: accepted
 revision: 1
-date:
-authors: []
+date: 2026-11-14
+authors: [Tristan Rivoallan]
 supersedes: []
 traits:
   secrets:
-    storage:
-    guard:
+    storage: keychain
+    guard: gitleaks
 ---
 
 # Secrets
 
 ## Status
 
-Proposed
+Accepted
 
 > **What is this file?** A question governance asks your repository, with
 > the answer it recommends. While it says `status: proposed`, you may edit
@@ -109,77 +109,32 @@ between a secret and a push. Install it as a pre-commit hook running:
 gitleaks git --pre-commit --staged --redact
 ```
 
-Everything below disappears when you rule, from this sentence up to the
-Consequences heading, which stays.
-
-**How to rule: five steps, all in this file.** Read all of them before
-doing any, because the last one deletes the other four, and do them in one
-commit.
-
-1. **Write the value of each key** under `traits:` in the frontmatter, or,
-   if you rule `rejected`, **remove the whole `traits:` block**.
-2. **Change `status:`** from `proposed` to `accepted` or `rejected`.
-3. **Fill `date:` and `authors:`**: `date:` as `YYYY-MM-DD`, the day you
-   rule; `authors:`, the names of the people who decided, without email
-   addresses.
-4. **Rewrite the Positive, Negative and Neutral lists under Consequences**
-   for your verdict: what it makes easier, and what it costs.
-5. **Last, delete this block**, from its first sentence up to the
-   Consequences heading, which stays. In its place, write the reason for
-   your decision wherever you depart from the recommendation, or, if you
-   adopt it as is, one line that says so.
-
-The first step is the one people forget: a decision written only in prose
-leaves an agent guessing. This is what the frontmatter looks like once
-filled, and it is the one part of the file an agent reads without
-interpreting it:
-
-```yaml
----
-adr: ADR-0015
-slug: secrets
-title: Secrets
-status: accepted
-revision: 1
-date: 2026-11-14
-authors: [Your Name]
-supersedes: []
-traits:
-  secrets:
-    storage: keychain
-    guard: gitleaks
----
-```
-
-The Alternatives Considered below were weighed by governance without
-knowing your context. Weighing them against yours is still to do, and it is
-what makes a decision different from an accepted default.
+Adopted as recommended: `keychain`, through direnv, and `gitleaks` as a pre-commit hook.
 
 ## Consequences
 
 ### Positive
 
-- An agent can read every file in the repository without a secret value
-  entering its context.
-- A commit carrying a secret is refused before it exists, on every machine
-  where the hook is installed.
-- A leak has one written answer, revocation, instead of a history rewrite
-  improvised under pressure.
+- If ontrack ever needs a secret while you work, its value goes to the macOS
+  keychain and the repository holds only a reference, so an agent reads
+  every file without a value entering its context.
+- A commit carrying a secret is refused before it exists; GitHub push
+  protection, enabled on this repository, refuses it again on push.
+- A leak has one written answer, revocation.
 
 ### Negative
 
-- Moving from a `.env` of clear values to references costs one pass per
-  repository, one secret at a time.
-- `keychain` works on macOS only, and does not follow you to another machine
-  or a container; a second platform means another storage.
-- The hook has to be installed on every clone, and `--no-verify` skips it.
-- References do not stop the active leak: a process that inherits the
-  environment sees the values.
+- At the time of ruling ontrack handles no secret (no `process.env`, no
+  `.env`, no API call): `keychain` is a rule for the future, and direnv is
+  not set up.
+- The `gitleaks` hook is not installed yet, has to be installed on every
+  clone, and `--no-verify` skips it.
+- `keychain` works on macOS only.
 
 ### Neutral
 
-- CI secrets follow ADR-0011; a server-side refusal on push is outside this
-  ADR and outside any governance ADR so far.
+- The token release-please needs (ADR-0012) is a CI secret, kept in the
+  forge under ADR-0011.
 
 ## Alternatives Considered
 

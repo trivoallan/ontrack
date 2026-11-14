@@ -62,12 +62,20 @@ An ADR whose status is `proposed` SHALL be listed as not yet decided, whatever i
 - **THEN** it is listed under "Not yet decided", and its traits are not printed
 
 ### Requirement: Conflicting traits
-A top-level trait key is a line of the traits block that has no indentation once the block is dedented, of the form `<key>:`. When two ADRs carrying decided traits share a top-level key, `ontrack instructions` MUST fail with exit code `1`. Standard error names the key and both ADRs, and says that superseding one of them settles the conflict. Standard output stays empty.
+A trait key is identified by its path: the `<key>:` lines of the dedented traits block, each joined with `.` to the keys it is indented under (for example `architecture.pattern`); list items are not keys. A leaf is a path with no key indented under it. Two ADRs carrying decided traits conflict when a leaf of one is a path of the other: both decide the same key, or one gives a value to a key under which the other nests keys. Sharing a parent key alone is not a conflict. On a conflict, `ontrack instructions` MUST fail with exit code `1`. Standard error names the conflicting path and both ADRs, and says that superseding one of them settles the conflict. Standard output stays empty.
 
 #### Scenario: Two decided ADRs, one key
-- **WHEN** `trivoallan/ADR-0006-commits` and `local/ADR-0012-commits` are both `accepted`, not superseded, and both declare `commits:`
-- **THEN** standard error names `commits`, `local/ADR-0012-commits`, `trivoallan/ADR-0006-commits` and `supersedes`
+- **WHEN** `trivoallan/ADR-0006-commits` and `local/ADR-0012-commits` are both `accepted`, not superseded, and both declare `commits.tool`
+- **THEN** standard error names `commits.tool`, `local/ADR-0012-commits`, `trivoallan/ADR-0006-commits` and `supersedes`
 - **AND** standard output is empty and the exit code is `1`
+
+#### Scenario: One parent key, different subkeys
+- **WHEN** one decided ADR declares `architecture.pattern` and another declares `architecture.document`
+- **THEN** there is no conflict, and both ADRs are printed
+
+#### Scenario: A value where the other nests keys
+- **WHEN** one decided ADR declares `architecture: hexagonal` and another declares `architecture.document`
+- **THEN** the command fails with exit code `1`, and standard error names `architecture`
 
 ### Requirement: Output format
 The output SHALL follow the contract in the README, as lines:

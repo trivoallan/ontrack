@@ -174,6 +174,21 @@ test('prompt: both forms ask for agreement with a question tool when there is on
   }
 });
 
+test('prompt: both forms end with tracking items, proposed after the whole review', () => {
+  const single = formatReview(selectAdr(tree(), 'ADR-0006'));
+  const sequence = formatSequence(pendingAdrs(tree()));
+  const tail = (out) => out.slice(out.indexOf('Once every ADR is ruled'));
+  for (const out of [single, sequence]) {
+    const at = out.indexOf('Once every ADR is ruled');
+    assert.ok(at > out.indexOf('npx ontrack apply'));
+    assert.match(tail(out), /propose a tracking item/);
+    assert.match(tail(out), /`tracking\.tool`, in `tracking\.project`\) only the items the user agrees to/);
+    assert.match(tail(out), /`tracking\.tool` is `none`, give the list in your reply and create nothing\.\n$/);
+  }
+  assert.ok(sequence.indexOf('Then take the next ADR in the list') < sequence.indexOf('Once every ADR is ruled'));
+  assert.equal(tail(single), tail(sequence));
+});
+
 test('prompt: both forms match the README contract', () => {
   const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
   assert.ok(readme.includes(`~~~\n${formatReview(selectAdr(tree(), 'ADR-0006'))}~~~`));

@@ -2,23 +2,23 @@
 adr: ADR-0010
 slug: architecture-documentation
 title: Architecture documentation
-status: proposed
+status: accepted
 revision: 1
-date:
-authors: []
+date: 2026-11-14
+authors: [Tristan Rivoallan]
 supersedes: []
 traits:
   architecture:
-    document:
-    model:
-    diagrams:
+    document: arc42
+    model: likec4
+    diagrams: mermaid
 ---
 
 # Architecture documentation
 
 ## Status
 
-Proposed
+Accepted
 
 > **What is this file?** A question governance asks your repository, with
 > the answer it recommends. While it says `status: proposed`, you may edit
@@ -107,52 +107,7 @@ means the diagrams, if any, are drawn by hand. For
 `architecture.diagrams`, `plantuml` is the other text format, and `none`
 means the section files hold no diagram outside the model's views.
 
-Everything below disappears when you rule, from this sentence up to the
-Consequences heading, which stays.
-
-**How to rule: five steps, all in this file.** Read all of them before
-doing any, because the last one deletes the other four, and do them in one
-commit.
-
-1. **Write the value of each key** under `traits:` in the frontmatter, or,
-   if you rule `rejected`, **remove the whole `traits:` block**.
-2. **Change `status:`** from `proposed` to `accepted` or `rejected`.
-3. **Fill `date:` and `authors:`**: `date:` as `YYYY-MM-DD`, the day you
-   rule; `authors:`, the names of the people who decided, without email
-   addresses.
-4. **Rewrite the Positive, Negative and Neutral lists under Consequences**
-   for your verdict: what it makes easier, and what it costs.
-5. **Last, delete this block**, from its first sentence up to the
-   Consequences heading, which stays. In its place, write the reason for
-   your decision wherever you depart from the recommendation, or, if you
-   adopt it as is, one line that says so.
-
-The first step is the one people forget: a decision written only in prose
-leaves an agent guessing. This is what the frontmatter looks like once
-filled, and it is the one part of the file an agent reads without
-interpreting it:
-
-```yaml
----
-adr: ADR-0010
-slug: architecture-documentation
-title: Architecture documentation
-status: accepted
-revision: 1
-date: 2026-11-14
-authors: [Your Name]
-supersedes: []
-traits:
-  architecture:
-    document: arc42
-    model: likec4
-    diagrams: mermaid
----
-```
-
-The Alternatives Considered below were weighed by governance without
-knowing your context. Weighing them against yours is still to do, and it is
-what makes a decision different from an accepted default.
+Adopted as recommended: `arc42` in `docs/architecture/arc42/`, `likec4` in `docs/architecture/model/`, `mermaid` for what the model does not show.
 
 ## Consequences
 
@@ -160,22 +115,20 @@ what makes a decision different from an accepted default.
 
 - An agent finds the system's context, building blocks and deployment in
   one known file instead of rebuilding them from the code.
-- Fixed section files make a gap visible: an empty Deployment View is a
-  question someone has to answer.
+- Fixed section files make a gap visible.
 - With LikeC4, a change to the architecture and to its diagrams lands in the
   same diff, and the views cannot disagree with each other.
-- Every diagram is text, so an agent can read and change all of them.
 
 ### Negative
 
-- The document has to be kept up to date by hand; nothing flags it when the
-  code moves away from it.
-- Without a shipped template, each repository creates the twelve files by
-  hand from the table above.
-- LikeC4 is one more tool and one more language to learn, and its views need
-  a build step to be seen as images.
-- Two diagram languages, LikeC4 for structure and Mermaid for behaviour, and
-  a rule to keep them from overlapping that only review enforces.
+- At the time of ruling neither `docs/architecture/arc42/` nor
+  `docs/architecture/model/` exists: the twelve files and the model are
+  still to write.
+- For a small monolithic CLI (ADR-0003) much of arc42 (deployment, runtime)
+  will be short; and behaviour is already specified per capability in
+  `openspec/specs/`, which the document links to rather than repeats.
+- LikeC4 is one more tool to learn, and two diagram languages need review
+  to keep them from overlapping.
 
 ### Neutral
 

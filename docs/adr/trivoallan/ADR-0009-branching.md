@@ -2,23 +2,23 @@
 adr: ADR-0009
 slug: branching
 title: Branching
-status: proposed
+status: accepted
 revision: 1
-date:
-authors: []
+date: 2026-11-14
+authors: [Tristan Rivoallan]
 supersedes: []
 traits:
   branching:
-    model:
-    merge:
-    prefixes:
+    model: github-flow
+    merge: squash
+    prefixes: [feat, fix, docs, chore]
 ---
 
 # Branching
 
 ## Status
 
-Proposed
+Accepted
 
 > **What is this file?** A question governance asks your repository, with
 > the answer it recommends. While it says `status: proposed`, you may edit
@@ -65,73 +65,27 @@ usefully name a branch. If you add one, **take it from the eleven**:
 inventing a twelfth prefix here would create a standard that competes with
 the commit one.
 
-Everything below disappears when you rule, from this sentence up to the
-Consequences heading, which stays.
-
-**How to rule: five steps, all in this file.** Read all of them before
-doing any, because the last one deletes the other four, and do them in one
-commit.
-
-1. **Write the value of each key** under `traits:` in the frontmatter, or,
-   if you rule `rejected`, **remove the whole `traits:` block**.
-2. **Change `status:`** from `proposed` to `accepted` or `rejected`.
-3. **Fill `date:` and `authors:`**: `date:` as `YYYY-MM-DD`, the day you
-   rule; `authors:`, the names of the people who decided, without email
-   addresses.
-4. **Rewrite the Positive, Negative and Neutral lists under Consequences**
-   for your verdict: what it makes easier, and what it costs.
-5. **Last, delete this block**, from its first sentence up to the
-   Consequences heading, which stays. In its place, write the reason for
-   your decision wherever you depart from the recommendation, or, if you
-   adopt it as is, one line that says so.
-
-The first step is the one people forget: a decision written only in prose
-leaves an agent guessing. This is what the frontmatter looks like once
-filled, and it is the one part of the file an agent reads without
-interpreting it:
-
-```yaml
----
-adr: ADR-0009
-slug: branching
-title: Branching
-status: accepted
-revision: 1
-date: 2026-11-14
-authors: [Your Name]
-supersedes: []
-traits:
-  branching:
-    model: github-flow
-    merge: squash
-    prefixes: [feat, fix, docs]
----
-```
-
-The Alternatives Considered below were weighed by governance without
-knowing your context. Weighing them against yours is still to do, and it is
-what makes a decision different from an accepted default.
+`github-flow` and `squash` adopted as recommended: every change reaches `main` through a pull request, and squash is the only merge method the GitHub repository allows. **Departure: `chore` added to the prefixes.** It is the most used branch prefix in this repository's pull requests (governance imports, OpenSpec archives, Node engine and licence changes), and it is one of the eleven commit types.
 
 ## Consequences
 
 ### Positive
 
-- The default branch stays shippable, and its history is one commit per
-  change.
-- A branch name tells an agent and a reviewer what the branch carries
-  before anyone opens it.
+- `main` stays shippable, and its history is one commit per pull request.
+- A branch name tells an agent and a reviewer what the branch carries,
+  including maintenance work that is neither a feature nor a fix.
 
 ### Negative
 
-- `squash` loses the detailed history of a branch on the default branch;
-  it survives only in the closed pull request.
-- The merge message has to be written with care, because it is the one that
-  counts.
+- `squash` loses the detailed history of a branch on `main`; it survives
+  only in the closed pull request.
+- The squash message has to carry the type and scope (ADR-0006), since
+  `commitlint` judges that one.
 
 ### Neutral
 
-- Protecting the default branch against direct pushes is a forge setting,
-  not something this ADR enforces.
+- Protecting `main` against direct pushes is a forge setting, not something
+  this ADR enforces.
 
 ## Alternatives Considered
 

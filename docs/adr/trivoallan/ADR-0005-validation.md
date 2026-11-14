@@ -2,22 +2,22 @@
 adr: ADR-0005
 slug: validation
 title: Validation
-status: proposed
+status: accepted
 revision: 1
-date:
-authors: []
+date: 2026-11-14
+authors: [Tristan Rivoallan]
 supersedes: []
 traits:
   validation:
-    boundary:
-    data_files:
+    boundary: zod
+    data_files: json-schema
 ---
 
 # Validation
 
 ## Status
 
-Proposed
+Accepted
 
 > **What is this file?** A question governance asks your repository, with
 > the answer it recommends. While it says `status: proposed`, you may edit
@@ -102,70 +102,29 @@ has no second source to drift from. Where both exist (a file read by a
 model), **the model is authoritative**, and the schema is derived from it or
 aligned by hand in the same pull request.
 
-Everything below disappears when you rule, from this sentence up to the
-Consequences heading, which stays.
-
-**How to rule: five steps, all in this file.** Read all of them before
-doing any, because the last one deletes the other four, and do them in one
-commit.
-
-1. **Write the value of each key** under `traits:` in the frontmatter, or,
-   if you rule `rejected`, **remove the whole `traits:` block**.
-2. **Change `status:`** from `proposed` to `accepted` or `rejected`.
-3. **Fill `date:` and `authors:`**: `date:` as `YYYY-MM-DD`, the day you
-   rule; `authors:`, the names of the people who decided, without email
-   addresses.
-4. **Rewrite the Positive, Negative and Neutral lists under Consequences**
-   for your verdict: what it makes easier, and what it costs.
-5. **Last, delete this block**, from its first sentence up to the
-   Consequences heading, which stays. In its place, write the reason for
-   your decision wherever you depart from the recommendation, or, if you
-   adopt it as is, one line that says so.
-
-The first step is the one people forget: a decision written only in prose
-leaves an agent guessing. This is what the frontmatter looks like once
-filled, and it is the one part of the file an agent reads without
-interpreting it:
-
-```yaml
----
-adr: ADR-0005
-slug: validation
-title: Validation
-status: accepted
-revision: 1
-date: 2026-11-14
-authors: [Your Name]
-supersedes: []
-traits:
-  validation:
-    boundary: zod
-    data_files: json-schema
----
-```
-
-The Alternatives Considered below were weighed by governance without
-knowing your context. Weighing them against yours is still to do, and it is
-what makes a decision different from an accepted default.
+Adopted as recommended: `zod`, which follows from TypeScript (ADR-0004), and `json-schema`.
 
 ## Consequences
 
 ### Positive
 
-- Every entry point validates with the same mechanism, and an added field is
-  validated by adding it to the model.
-- A data file's error shows in the editor of whoever makes it, before
-  review.
+- The boundaries this CLI has (a source's `package.json` and its `ontrack`
+  key, ADR frontmatter, command-line arguments) are validated by one
+  mechanism, and an added field is validated by adding it to the model.
+- A JSON Schema for the `ontrack` key lets a source author see a mistake in
+  their editor before running ontrack.
 
 ### Negative
 
-- One more runtime dependency for `boundary`.
-- A schema attached to nothing guards nothing: each data file has to be
-  linked to its schema, which is a step people forget.
+- At the time of ruling, `src/sources.mjs` checks the `ontrack` key by hand
+  and no schema exists: both have to be written.
+- `zod` becomes a second runtime dependency next to `yargs`.
 
 ### Neutral
 
 - Internal structures stay unvalidated on purpose; the language checks them.
+- ADR frontmatter keeps being checked by governance's `mdschema`
+  (ADR-0001).
 
 ## Alternatives Considered
 

@@ -2,21 +2,18 @@
 adr: ADR-0013
 slug: frontend
 title: Frontend
-status: proposed
+status: rejected
 revision: 1
-date:
-authors: []
+date: 2026-11-14
+authors: [Tristan Rivoallan]
 supersedes: []
-traits:
-  frontend:
-    framework:
 ---
 
 # Frontend
 
 ## Status
 
-Proposed
+Rejected
 
 > **What is this file?** A question governance asks your repository, with
 > the answer it recommends. While it says `status: proposed`, you may edit
@@ -83,73 +80,24 @@ than `astro` says why in this ADR's body.
 
 **Departing from a rule** is declared in your own ADR, with its reason.
 
-Everything below disappears when you rule, from this sentence up to the
-Consequences heading, which stays.
-
-**How to rule: five steps, all in this file.** Read all of them before
-doing any, because the last one deletes the other four, and do them in one
-commit.
-
-1. **Write the value of each key** under `traits:` in the frontmatter, or,
-   if you rule `rejected`, **remove the whole `traits:` block**.
-2. **Change `status:`** from `proposed` to `accepted` or `rejected`.
-3. **Fill `date:` and `authors:`**: `date:` as `YYYY-MM-DD`, the day you
-   rule; `authors:`, the names of the people who decided, without email
-   addresses.
-4. **Rewrite the Positive, Negative and Neutral lists under Consequences**
-   for your verdict: what it makes easier, and what it costs.
-5. **Last, delete this block**, from its first sentence up to the
-   Consequences heading, which stays. In its place, write the reason for
-   your decision wherever you depart from the recommendation, or, if you
-   adopt it as is, one line that says so.
-
-The first step is the one people forget: a decision written only in prose
-leaves an agent guessing. This is what the frontmatter looks like once
-filled, and it is the one part of the file an agent reads without
-interpreting it:
-
-```yaml
----
-adr: ADR-0013
-slug: frontend
-title: Frontend
-status: accepted
-revision: 1
-date: 2026-11-14
-authors: [Your Name]
-supersedes: []
-traits:
-  frontend:
-    framework: astro
----
-```
-
-The Alternatives Considered below were weighed by governance without
-knowing your context. Weighing them against yours is still to do, and it is
-what makes a decision different from an accepted default.
+**Rejected: this repository has no user interface.** ontrack is a command-line tool (`package.json` declares a `bin`, its only runtime dependency is `yargs`). What stands in for a frontend is the commands' terminal output, specified in `openspec/specs/`. The documentation site is governed by [ADR-0008](ADR-0008-documentation.md), not here.
 
 ## Consequences
 
 ### Positive
 
-- An agent sets up the same framework the same way every time, from a
-  pinned generator.
-- Pages ship static HTML unless they need interactivity, which keeps them
-  fast and readable without JavaScript.
-- The documentation site and the application share one toolchain.
+- An agent does not scaffold a frontend framework, nor apply its rules, in a
+  repository that has nothing to render.
 
 ### Negative
 
-- A highly interactive application (a dashboard, an editor) gains little
-  from Astro's static default and is often better served by a
-  single-page framework.
-- Islands in another framework mean two component models in one
-  repository.
+- If ontrack ever grows a user interface, this ADR has to be ruled again
+  before an agent picks a framework.
 
 ### Neutral
 
-- The design system itself is not a trait: name it in this ADR's body if
-  the repository uses one.
+- Starlight (ADR-0008) brings Astro into the repository for documentation
+  only; the rules of this ADR do not apply to it.
 
 ## Alternatives Considered
 
