@@ -1,6 +1,6 @@
 ## 1. Author guide
 
-- [x] 1.1 In `docs/write-your-own-source.md`, step 4 "Publish it", add the registry path next to the git host: remove `"private": true`, add `"keywords": ["ontrack-source"]`, `npm publish`, and the install line `npm i -D platform@npm:<package>`; verify the alias sentence ("must be unscoped") still follows both paths
+- [x] 1.1 In `docs/write-your-own-source.md`, step 4 "Publish it", ask authors to add `"keywords": ["ontrack-source"]` before `npm publish`, with a link to `find-a-source.md`; verify the registry and git paths written in #119 are unchanged
 - [x] 1.2 In the same step, add a short paragraph on the README of a source: number of questions, subjects, which carry a `check`, proposed alias; verify it names no field ontrack would have to read
 - [x] 1.3 In "Go further", link to `find-a-source.md`; verify the frontmatter `description` still matches the page
 

@@ -85,6 +85,11 @@ Only a user with triage rights can add a label, so the label is the
 maintainer saying "I read this body" (ADR-0011 rule 5). The author of the
 issue is not checked.
 
+The `draft` job also requires the issue to be open. The first real runs
+were made on an issue that had been closed in the meantime, and each paid
+for a runner to prepare a proposal nobody had asked for. On a closed issue
+`draft` is skipped; `publish` says so on the issue and removes the label.
+
 The run removes the label when it ends (`if: always()`), so each run is one
 explicit act. Alternative: swap it for a `proposed` label; the pull request
 already shows on the issue through `Refs`, so a second label says nothing
@@ -157,6 +162,11 @@ Dependabot entry for GitHub Actions. The action always receives the token of
 its job, so "no token" is not achievable with it; decision 1 makes that
 token read-only on a public repository, which is the same guarantee.
 
+The model is named in the workflow, `claude-sonnet-5-5`, instead of the
+action's default, which was the most capable and most expensive one. A
+proposal is planning prose checked by a person; the run on issue 105 cost a
+quarter of a dollar for a "no change" verdict.
+
 Alternative: the Claude Code command line as a development dependency,
 called from a `run:` step with no token at all. It installs a native binary
 for every contributor and falls under the dependency rules still being
@@ -191,6 +201,12 @@ In `draft`, so that compromise is hard:
 - `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` keeps the provider credential out of the
   environment of the commands the agent runs; `DO_NOT_TRACK` turns the
   command line's telemetry off.
+- That setting makes those commands run in a sandbox, which needs
+  `bubblewrap`, `socat` and unprivileged user namespaces on the runner. The
+  action installs them only when it is told that people without write
+  access may trigger it, so the job installs them itself. The first run
+  that reached the model showed it: the agent reported that it could run no
+  command.
 - The agent's own settings refuse reads and writes outside the checkout.
   The documentation of its permission modes leaves reads outside the
   working directory ambiguous in a run with nobody to ask.
@@ -219,8 +235,8 @@ maintainer's machine.
 
 ### 9. No stored key: workload identity federation
 
-The agent step gives the action a federation rule, an organization and a
-service account, read from repository variables. The action exchanges the
+The agent step gives the action a federation rule, an organization, a
+service account and a workspace, read from repository variables. The action exchanges the
 job's GitHub OIDC token for a short-lived provider token; `draft` gets
 `id-token: write` for that, and the workflow names no secret.
 
@@ -228,6 +244,20 @@ Why: a static key was the one long-lived credential in reach of an injected
 agent, and the residual risk the security review left open. The identifiers
 are not credentials: what they allow is decided by the rule on the
 provider's side.
+
+The first runs taught two things the action's documentation does not say.
+GitHub sends a subject that carries immutable identifiers,
+`repo:<owner>@<owner id>/<repo>@<repo id>:ref:refs/heads/main`, so a rule
+written for `repo:<owner>/<repo>:` matches nothing. And the workspace is
+required, not optional, when the service account is in several. The
+provider's log of authentication events names the reason of each refusal;
+the run log hides it.
+
+Once the exchange succeeded, the first call to the model still failed, and
+neither the run log nor the authentication events said why: the action
+hides everything the agent prints. The `diagnose` step shows the tool's own
+error when, and only when, the run ended on its first turn at no cost. No
+model text exists then, so nothing shaped by the issue can reach the log.
 
 Alternative: a repository secret `ANTHROPIC_API_KEY` with a low spending
 limit. Simpler to set up; it has to be stored, rotated, and it leaks whole.

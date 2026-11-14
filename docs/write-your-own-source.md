@@ -24,7 +24,6 @@ cd platform-governance
 {
   "name": "platform-governance",
   "version": "0.1.0",
-  "private": true,
   "files": ["adr/"],
   "ontrack": { "adr": "adr", "namespace": "platform" }
 }
@@ -110,52 +109,39 @@ source shows in the next `npx ontrack plan`, with no reinstall.
 
 ## 4. Publish it
 
-Publish the source to the npm registry or to a git host.
-
-### To the npm registry
-
-In `package.json`, remove `"private": true` and add the keyword
-`ontrack-source`. The keyword is how a person
-[finds your source](find-a-source.md) on the registry:
+First add the keyword `ontrack-source` to its `package.json`. On the public
+registry, the keyword is how a person [finds your source](find-a-source.md):
 
 ```json
-{
-  "name": "@<scope>/platform-governance",
-  "version": "0.1.0",
-  "keywords": ["ontrack-source"],
-  "files": ["adr/"],
-  "ontrack": { "adr": "adr", "namespace": "platform" }
-}
+"keywords": ["ontrack-source"]
 ```
 
-Then publish:
+Then publish the source to an npm registry, as you would any package:
 
 ```bash
-npm publish --access public
+npm publish
 ```
 
-A repository installs it by name, under the alias you proposed:
+A repository then installs it under the alias you proposed:
 
 ```bash
-npm i -D platform@npm:@<scope>/platform-governance
+npm i -D platform@npm:platform-governance
 ```
 
-### To a git host
-
-Push the source to a git host. A repository then installs it by URL, under
-the alias you proposed:
-
-```bash
-npm i -D platform@git+https://github.com/<owner>/platform-governance.git
-```
-
-### The alias
+`platform@npm:` is npm's alias syntax: the package keeps its name on the
+registry and is installed as `platform`. A scoped package works the same
+way: `platform@npm:@acme/platform-governance`.
 
 The alias is the namespace: the ADRs land in `docs/adr/platform/`. It must
 be unscoped. A repository may pick another alias than the one you propose.
 
-In the trial repository, replace the `file:` dependency with the published
-one before you commit.
+In the trial repository, replace the `file:` dependency with this one before
+you commit.
+
+A source can also be installed from its git repository, with
+`platform@git+https://github.com/<owner>/platform-governance.git`. npm 12
+fetches no git dependency by default: each repository then needs
+`allow-git=root` in its `.npmrc`.
 
 ### Say what the source asks
 

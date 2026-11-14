@@ -15,6 +15,14 @@ The repository SHALL start one proposal run when the `ontrack:propose` label is 
 - **WHEN** the body of issue 103 is edited while it no longer carries the `ontrack:propose` label
 - **THEN** no proposal run starts
 
+### Requirement: Only an open issue gets a proposal
+A proposal run SHALL start the agent only when the issue is open at the moment the label is added. For a closed issue the run MUST NOT start the agent; it posts one fixed comment saying so and removes the label.
+
+#### Scenario: The label is added to a closed issue
+- **WHEN** a maintainer adds the `ontrack:propose` label to a closed issue
+- **THEN** the agent is not started and no pull request is opened
+- **AND** the issue receives the fixed comment and no longer carries the label
+
 ### Requirement: One proposal per issue
 A proposal run SHALL open at most one pull request for its issue. Runs for the same issue MUST NOT execute at the same time, and a run MUST stop before the agent starts when a branch for that issue already exists.
 
@@ -153,6 +161,17 @@ The run SHALL remove the `ontrack:propose` label from the issue when it ends, wh
 - **WHEN** a step of the run fails
 - **THEN** the issue no longer carries the `ontrack:propose` label
 - **AND** the issue receives a comment that links to the failed run
+
+### Requirement: A failure on the first turn shows its reason
+When the agent ends in error on its first turn at no cost, the run SHALL print the tool's own error in the run log, cut to 800 characters and unable to issue a workflow command. After a longer run the agent's output MUST stay hidden.
+
+#### Scenario: The provider refuses the first call
+- **WHEN** the agent fails on its first turn and the run cost nothing
+- **THEN** the run log shows the error the tool reported
+
+#### Scenario: The agent worked before failing
+- **WHEN** the agent fails after several turns
+- **THEN** the run log shows none of its output
 
 ### Requirement: The workflow follows the forge rules
 The workflow SHALL pin every action by commit SHA and declare its permissions, with none granted at the top level.

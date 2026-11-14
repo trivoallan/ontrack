@@ -1,13 +1,12 @@
 ## Why
 
-A person who wants to install a source written by someone else, or to read one before writing their own, has no way to find it: the documentation links to one source in use and nothing else. The guide for authors also describes publishing to a git host only, while this repository installs its own source from the npm registry. Source: trivoallan/ontrack#127.
+A person who wants to install a source written by someone else, or to read one before writing their own, has no way to find it: the documentation links to one source in use and nothing else. The guide for authors says how to publish to an npm registry (#119), but not how a published source is found. Source: trivoallan/ontrack#127.
 
 ## What Changes
 
 Documentation only. No command, output or file format changes.
 
-- `docs/write-your-own-source.md`, step "Publish it": describe publishing to the npm registry next to the git host, and how a repository installs a registry package under an alias (`npm i -D <alias>@npm:<package>`).
-- Same guide: ask authors to add the keyword `ontrack-source` to the `package.json` of a published source. The keyword `ontrack` is already used on npm by unrelated packages; `ontrack-source` returns nothing today.
+- `docs/write-your-own-source.md`, step "Publish it": ask authors to add the keyword `ontrack-source` to the `package.json` of a published source. The keyword `ontrack` is already used on npm by unrelated packages; `ontrack-source` returns nothing today.
 - Same guide: say what the README of a source tells a person before they install it: how many questions it asks, on which subjects, which ones carry a `check` command, and the alias it proposes.
 - New page `docs/find-a-source.md`: one link to the npm search for `keywords:ontrack-source`, what to read before installing, how to install under an alias, and that a repository takes the whole source and may answer `rejected` to the questions that do not apply to it.
 - `site/astro.config.mjs`: list the new page in the sidebar.

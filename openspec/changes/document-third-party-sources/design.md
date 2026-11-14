@@ -4,7 +4,7 @@ ontrack finds the sources of a repository by reading the `ontrack` key of each i
 
 What exists today:
 
-- `docs/write-your-own-source.md` ends with "Publish it", which describes a git host only.
+- `docs/write-your-own-source.md` ends with "Publish it", which describes publishing to an npm registry and installing under an alias (#119). It says nothing of how the source is found afterwards.
 - This repository installs its own source from the npm registry, as `trivoallan@npm:@trivoallan/ontrack-governance`.
 - The registry cannot search on an arbitrary `package.json` key. It can search on `keywords`.
 - `keywords:ontrack` on npm returns three unrelated packages. `keywords:ontrack-source` returns none.
@@ -60,7 +60,7 @@ The page states the cost of a source in plain terms: every question arrives as `
 
 ### Install from the registry under an alias
 
-The page and the guide give the registry form of the install, `npm i -D <alias>@npm:<package>`, next to the git form already documented. The alias stays unscoped, as the guide already says.
+The new page gives the registry form of the install, `npm i -D <alias>@npm:<package>`, as the guide and the tutorial already do since #119.
 
 ## Risks / Trade-offs
 
@@ -71,4 +71,4 @@ The page and the guide give the registry form of the install, `npm i -D <alias>@
 
 ## Open Questions
 
-- Should the example `package.json` in step 1 of the guide keep `"private": true`? It blocks `npm publish`. The tasks keep it in step 1, where the source is tried locally, and tell the author to remove it in the registry path of step 4.
+None.
