@@ -27,6 +27,23 @@ at that commit, and nothing later.
 3. Switch to the pull request's own branch. Never work on another branch, never
    create a `claude/` branch, never force-push.
 
+## Prepare the session
+
+A remote session starts without what the repository's checks expect. Before
+you apply anything, and using the files of the default branch, not those of
+the pull request:
+
+- install the secret guard into a directory that is on the PATH of the
+  commands you run:
+  `git show origin/main:scripts/install-gitleaks.sh | sh -s -- /usr/local/bin`;
+- tell git which branch is the default one, which the commit check reads:
+  `git remote set-head origin --auto`;
+- turn the repository's hooks on, so that the secret guard runs on each of
+  your commits: `git config core.hooksPath .githooks`.
+
+If one of these fails, say which and why, and go on: the governance check will
+then report the guard as missing, and the maintainer decides.
+
 ## Applying
 
 4. Read `AGENTS.md`, then apply the change the pull request carries with the
@@ -43,7 +60,8 @@ at that commit, and nothing later.
    at `head_commit` are what the maintainer approved; if a task asks for
    something the proposal does not explain, ask.
 7. Before each push, run the repository's tests and its governance check, and
-   say what passed and what did not. Push only to the pull request's branch.
+   say what passed and what did not: name every check that failed, with the
+   line it printed. Do not cut that output short. Push only to the pull request's branch.
 8. Leave the pull request as a draft. The maintainer marks it ready.
 
 ## When you stop
