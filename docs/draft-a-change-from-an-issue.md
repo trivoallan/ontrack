@@ -1,25 +1,34 @@
 ---
 title: Draft a change from a labelled issue
-description: Copy the workflow that turns a label on an issue into a draft pull request carrying a change proposal, written by a coding agent in CI.
+description: Call ontrack's propose and apply workflows from your repository, so that a label on an issue drafts a change proposal and a label on an approved pull request starts its implementation.
 ---
 
-This guide shows how to set up, in your own repository, the workflow ontrack
-uses on itself: a maintainer adds the `ontrack:propose` label to an issue,
-and a draft pull request carrying the change proposal appears.
+This guide sets up, in your own repository, the two labels ontrack uses on
+itself:
 
-**This is an experiment.** It is not part of the `ontrack` package: it is one
-workflow file that you copy and then own. It may change or be removed here,
-and your copy will not follow. It covers the proposal only; implementing the
-proposed change is still done by a person or a session they start.
+- `ontrack:propose` on an issue: a coding agent drafts a change proposal from
+  the issue and opens it as a draft pull request.
+- `ontrack:apply` on that pull request, once a person with write access has
+  approved its last commit: a Claude Code session starts and implements the
+  change with you.
+
+Both are reusable workflows that live in ontrack. Your repository calls them
+by commit SHA, and does not copy them. The security posture stays in ontrack:
+the agent never holds a token that can write, and the job that writes accepts
+only new planning files.
+[ADR-0004](adr/ADR-0004-other-repositories-call-the-propose-and-apply-workflows.md)
+records why.
 
 You need:
 
-- a repository on GitHub that has ruled the `changes` trait with
-  `framework: openspec`, with `openspec` in its `devDependencies` and its
-  lockfile committed. The workflow's prompt names no framework, but its
-  permission rules and its path filter do;
-- the framework's skill for proposing a change, committed under `.claude/`;
-- a `.nvmrc` file;
+- a repository on GitHub with an `AGENTS.md` written by `ontrack apply`, and
+  a `changes` trait. The run checks that the trait names a framework you
+  enabled;
+- for OpenSpec, the framework's skill for proposing a change, committed under
+  `.claude/`. The agent drafts the change with it;
+- `commits` and `branching` traits that accept what the workflow writes: a
+  commit `docs(openspec): propose <name>`, a branch `feat/<issue>-<name>` and
+  a pull request titled `feat: <name>`;
 - an account with the model provider that supports workload identity
   federation, and the right to create a service account in it;
 - admin rights on the repository.
@@ -32,15 +41,20 @@ so.
 
 In the provider's console, register GitHub Actions as an issuer, create a
 service account, and create a federation rule limited to your repository.
-The rule must match the subject GitHub sends, which carries the numeric
-identifiers of the owner and of the repository:
+Use pattern matching, with the subject GitHub sends, which carries the
+numeric identifiers of the owner and of the repository:
 
 ```text
 repo:<owner>@<owner id>/<repo>@<repo id>:ref:refs/heads/main
 ```
 
-A rule written as `repo:<owner>/<repo>:…` matches nothing, and the first run
-fails on its first call.
+`gh api repos/<owner>/<repo> -q '"\(.owner.id) \(.id)"'` prints both
+identifiers. In a called workflow the subject names your repository, not
+ontrack. A rule written as `repo:<owner>/<repo>:…` matches nothing, and the
+first run fails on its first call.
+
+Do not add a `job_workflow_ref` condition. Extra conditions are exact matches,
+and that claim carries the SHA you pin, which changes at every update.
 
 Then set four repository variables (Settings, Secrets and variables,
 Actions, Variables). They are identifiers, not credentials:
@@ -49,7 +63,7 @@ Actions, Variables). They are identifiers, not credentials:
 | --- | --- |
 | `ANTHROPIC_FEDERATION_RULE_ID` | The federation rule |
 | `ANTHROPIC_ORGANIZATION_ID` | The organization |
-| `ANTHROPIC_SERVICE_ACCOUNT_ID` | The service account |
+| `ANTHROPIC_SERVICE_ACCOUNT_ID` | The service account the rule targets |
 | `ANTHROPIC_WORKSPACE_ID` | The workspace. Required as soon as the service account belongs to several: the exchange is refused without it |
 
 ## 2. Let GitHub Actions open pull requests
@@ -59,41 +73,93 @@ Actions to create and approve pull requests". Without it the proposal is
 drafted, the branch is pushed, and the run fails when it opens the pull
 request.
 
-## 3. Create the label
+## 3. Create the labels
 
 ```sh
 gh label create ontrack:propose --description "Draft a change proposal for this issue"
+gh label create ontrack:apply --description "Start the apply session for this approved pull request"
 ```
 
 Whoever can add a label can start a run, and each run costs one agent
-session. On GitHub that means people with triage rights or more.
+session. On GitHub that means people with triage rights or more. You can use
+other names: pass them as `label`.
 
-## 4. Copy the workflow
+## 4. Call `propose`
 
-Copy
-[`.github/workflows/propose.yml`](https://github.com/trivoallan/ontrack/blob/main/.github/workflows/propose.yml)
-to the same path in your repository, and write down the commit you took it
-from: the file was hardened after a security review, and comparing against
-that commit later is how you pick up a fix.
+```yaml
+# .github/workflows/propose.yml
+name: propose
 
-Change these, and nothing else until a first run has passed:
+on:
+  issues:
+    types: [labeled]
 
-| In the file | Why |
+permissions: {}
+
+jobs:
+  propose:
+    # A called workflow can only lower the permissions it is given, so this
+    # job grants what both of ontrack's jobs need. ontrack narrows them: the
+    # job that runs the agent keeps `contents: read` and the identity token,
+    # and the job that writes runs no agent.
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+    uses: trivoallan/ontrack/.github/workflows/propose.yml@<commit sha> # vX.Y.Z
+    with:
+      # Catalog entries, by name: `openspec`, `adr`, or both (the default).
+      frameworks: openspec
+      # label: ontrack:propose
+```
+
+The agent may only write for the entries you enable:
+
+| Entry | The agent may add |
 | --- | --- |
-| The header comment | It cites ADRs of the ontrack repository. Cite your own decision to run an agent in CI |
-| `--model` | The model your account may use |
-| `docs(openspec): propose …`, the commit message | Its scope must be one your `commits` trait allows |
-| `feat/<issue>-<name>` and `feat: <name>`, the branch and the title | They must fit your `branching` trait |
+| `openspec` | A change under `openspec/changes/` |
+| `adr` | A new ADR in the directory the `record-architecture-decisions.directory` trait names, `docs/adr` without it |
 
-Leave the two-job layout, the permission rules of `draft` and the filter of
-`publish` as they are. The issue is text anyone can write and it steers the
-agent: `draft` runs the agent with a token that can write nothing, and
-`publish`, which runs no agent, accepts only new Markdown and YAML files
-under one change and new ADRs without a `check:` command.
-[ADR-0001 of the ontrack repository](adr/ADR-0001-propose-changes-from-labelled-issues.md)
-gives the reasons.
+An ADR that declares a `check:` command is always refused: a person writes
+that command. A framework that is not in the catalog cannot be enabled; to
+add one, open a pull request to ontrack that adds its entry.
 
-## 5. Label an issue
+## 5. Call `apply`
+
+Create a Claude Code routine for your repository, put its identifier in a
+variable and the token that fires it in a secret, and commit a
+`.github/apply-session.md` that tells the session how to work.
+
+```yaml
+# .github/workflows/apply.yml
+name: apply
+
+on:
+  pull_request_target:
+    types: [labeled]
+
+permissions: {}
+
+jobs:
+  apply:
+    permissions:
+      pull-requests: write
+    uses: trivoallan/ontrack/.github/workflows/apply.yml@<commit sha> # vX.Y.Z
+    with:
+      routine_id: ${{ vars.APPLY_ROUTINE_ID }}
+      # label: ontrack:apply
+    secrets:
+      # Name the secret: never `secrets: inherit`.
+      fire_token: ${{ secrets.APPLY_FIRE_TOKEN }}
+```
+
+`pull_request_target` is safe here because ontrack's workflow checks out
+nothing and runs nothing from the pull request. It reads the reviews, and
+starts the session only when a person with write access approved the head
+commit.
+
+## 6. Label an issue
 
 Pick an open issue that says what it asks for, and add the label. The label
 is removed when the run ends, whatever the outcome: adding it again is how
@@ -119,10 +185,18 @@ Open the run linked in the comment.
 
 | Where | What it shows | Likely cause |
 | --- | --- | --- |
-| The agent step fails at once, and the next step prints a provider error | The token exchange was refused | The subject of the federation rule (step 1), or a missing `ANTHROPIC_WORKSPACE_ID` |
+| The `catalog` step | `not in the catalog`, or a trait the run does not enable | `frameworks` names an unknown entry, or your `changes` trait names a framework you did not enable |
+| The agent step fails at once, and the next step prints a provider error | The token exchange was refused | The subject of the federation rule, the service account it targets, or a missing `ANTHROPIC_WORKSPACE_ID` (step 1) |
 | The step after the agent lists `denied:` lines | A tool call the permission rules refused | The agent needed a command or a path outside the rules; the run summary says what stopped it |
-| `refused: <status> <mode> <path>` in `publish` | The agent wrote something other than a new file of the change | Nothing to fix in the workflow: the filter did its job. Label again, or write the proposal by hand |
+| `refused: <status> <mode> <path>` in `publish` | The agent wrote something other than a new file of an enabled entry | Nothing to fix: the filter did its job. Label again, or write the proposal by hand |
 | `publish` fails on `gh pr create` | Actions may not open pull requests | Step 2 |
+
+## Keep it up to date
+
+Pin both calls to a commit SHA, with the tag in a comment, and let
+Dependabot propose the updates (`package-ecosystem: github-actions`). A
+security fix in ontrack then reaches you as a pull request. A change that
+breaks callers comes with a major version of ontrack.
 
 ## Related
 
