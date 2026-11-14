@@ -4,6 +4,7 @@ slug: agent-tooling
 title: Agent tooling
 status: accepted
 revision: 1
+check: npx --no-install governance-check ADR-0017
 date: 2026-11-14
 authors: [Tristan Rivoallan]
 supersedes: []

@@ -4,6 +4,7 @@ slug: forge-and-ci
 title: Forge and continuous integration
 status: accepted
 revision: 1
+check: npx --no-install governance-check ADR-0011
 date: 2026-11-14
 authors: [Tristan Rivoallan]
 supersedes: []

@@ -4,6 +4,7 @@ slug: changes
 title: Changes
 status: accepted
 revision: 1
+check: npx --no-install governance-check ADR-0016
 date: 2026-11-14
 authors: [Tristan Rivoallan]
 supersedes: []

@@ -4,6 +4,7 @@ slug: delivery
 title: Delivery
 status: accepted
 revision: 2
+check: npx --no-install governance-check ADR-0012
 date: 2026-11-14
 authors: [Tristan Rivoallan]
 supersedes: []
