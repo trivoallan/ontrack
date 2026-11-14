@@ -69,6 +69,29 @@ npx ontrack apply
 claude "$(npx ontrack review)"
 ```
 
+### Checking the `ontrack` key in your editor
+
+A source author can have their editor check the `ontrack` key while they
+type. ontrack publishes a JSON Schema for it,
+[`schema/ontrack.schema.json`](schema/ontrack.schema.json), derived from the
+model ontrack itself validates with. It applies to a `package.json` and only
+constrains its `ontrack` property. In VS Code, add it next to the standard
+`package.json` schema, in `.vscode/settings.json`:
+
+```json
+{
+  "json.schemas": [
+    {
+      "fileMatch": ["package.json"],
+      "url": "https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/ontrack.schema.json"
+    }
+  ]
+}
+```
+
+One rule is outside what the schema can state: `adr` must resolve inside the
+package.
+
 ## Usage
 
 ```bash
@@ -387,6 +410,7 @@ node bin/ontrack.ts plan   # the CLI, from the sources
 npm test                   # tests and coverage; fails below 95% lines, branches or functions
 npm run typecheck          # strict type check of bin/, src/ and test/
 npm run build              # compiles bin/ and src/ to dist/, what an install ships
+npm run schema             # regenerates schema/ontrack.schema.json from its model
 ```
 
 Node does not run TypeScript from `node_modules`, so the installed package is
