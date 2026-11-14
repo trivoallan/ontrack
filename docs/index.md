@@ -94,6 +94,9 @@ no file and makes no network call.
 | --- | --- | --- |
 | A template repository or a project generator | Copies the conventions when the repository is created | Nothing links the copy to the original afterwards |
 | A shared configuration (lint rules, presets) | Applies the same values everywhere | A repository that differs has to override or opt out |
+| A rules sync tool, such as Ruler or rulesync | Writes one set of agent rules to the file each coding agent reads | Where the rules come from, and whether they still match what was agreed |
+| A tool that runs ADRs as checks, such as Archgate | Fails CI when the code departs from a decision | An ADR imported from another repository is a copy: nothing tells you when the original changes |
+| A standards platform, such as Packmind | Sends one playbook from a server to every repository and agent | A repository that differs has no place to record its own answer |
 | ontrack | Asks each repository a question and records its answer | The answer itself: that is the repository's call |
 
 ontrack does not replace your linters. An ADR can name the command that
