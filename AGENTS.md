@@ -121,10 +121,27 @@ secrets:
   guard: gitleaks
 ```
 
-### Not yet decided
+### Changes (trivoallan/ADR-0016-changes)
 
-- Changes (trivoallan/ADR-0016-changes)
-- Agent tooling (trivoallan/ADR-0017-agent-tooling)
-- Dependencies (trivoallan/ADR-0018-dependencies)
+```yaml
+changes:
+  framework: openspec
+  schema: spec-driven-with-adr
+```
+
+### Agent tooling (trivoallan/ADR-0017-agent-tooling)
+
+```yaml
+agent:
+  host: claude-code
+```
+
+### Dependencies (trivoallan/ADR-0018-dependencies)
+
+```yaml
+dependencies:
+  updater: dependabot
+  automerge: patch
+```
 
 <!-- ontrack:end -->
