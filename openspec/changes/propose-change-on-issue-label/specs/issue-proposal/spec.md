@@ -162,6 +162,17 @@ The run SHALL remove the `ontrack:propose` label from the issue when it ends, wh
 - **THEN** the issue no longer carries the `ontrack:propose` label
 - **AND** the issue receives a comment that links to the failed run
 
+### Requirement: A failure on the first turn shows its reason
+When the agent ends in error on its first turn at no cost, the run SHALL print the tool's own error in the run log, cut to 800 characters and unable to issue a workflow command. After a longer run the agent's output MUST stay hidden.
+
+#### Scenario: The provider refuses the first call
+- **WHEN** the agent fails on its first turn and the run cost nothing
+- **THEN** the run log shows the error the tool reported
+
+#### Scenario: The agent worked before failing
+- **WHEN** the agent fails after several turns
+- **THEN** the run log shows none of its output
+
 ### Requirement: The workflow follows the forge rules
 The workflow SHALL pin every action by commit SHA and declare its permissions, with none granted at the top level.
 

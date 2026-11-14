@@ -36,6 +36,11 @@
 - [x] 3c.1 Start the agent only when the issue is open; on a closed issue, post the fixed comment and remove the label
 - [x] 3c.2 Test the comment the `publish` job posts for a closed issue, for "no change" and for a failure
 
+## 3d. See why a first call fails
+
+- [x] 3d.1 Print the tool's own error when the agent fails on its first turn at no cost, cut short and unable to issue a workflow command; print nothing of a longer run
+- [x] 3d.2 Test both cases in `test/propose-workflow.test.ts`
+
 ## 4. Verify
 
 - [x] 4.1 Check the file against the `issue-proposal` spec: no secret named, no `${{ github.event.issue.title }}` or `.body` anywhere, no `git` or `gh` in the agent's tools, no agent step in the job that writes
