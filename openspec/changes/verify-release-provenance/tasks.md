@@ -2,8 +2,8 @@
 
 ## 1. Verify the release
 
-- [ ] 1.1 Wait for the next release and note its version; verify with `npm view @trivoallan/ontrack version` that the registry serves it
-- [ ] 1.2 In an empty scratch project, run `npm install @trivoallan/ontrack@<version>` then `npm audit signatures`; verify the output lists the package among those with a verified attestation
+- [x] 1.1 Wait for the next release and note its version; verify with `npm view @trivoallan/ontrack version` that the registry serves it
+- [x] 1.2 In an empty scratch project, run `npm install @trivoallan/ontrack@<version>` then `npm audit signatures`; verify the output lists the package among those with a verified attestation
 
 ## 2. If no attestation is listed
 
