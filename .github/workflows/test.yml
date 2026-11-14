@@ -19,3 +19,15 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+
+  node-20:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20.19'
+          cache: npm
+      - run: npm ci
+      # Coverage thresholds need Node 22.8+; check behavior only.
+      - run: node --test

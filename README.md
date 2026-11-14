@@ -6,7 +6,7 @@ ontrack imports inherited ADRs and OpenSpec schemas into a repository from
 
 ## Installation
 
-Node 24 LTS or later.
+Node 20.19 or later.
 
 ```bash
 npm i -D ontrack@git+https://github.com/trivoallan/ontrack.git
@@ -92,6 +92,9 @@ migration: 5 files docs/adr/ → docs/adr/platform/
 Any change to this format goes through this README first.
 
 ## Development
+
+Development uses Node 24 (see `.nvmrc`): the coverage thresholds of `npm test`
+need Node 22.8 or later. CI also runs the tests on Node 20.19.
 
 ```bash
 npm install
