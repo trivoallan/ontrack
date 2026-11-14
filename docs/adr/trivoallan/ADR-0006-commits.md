@@ -4,6 +4,7 @@ slug: commits
 title: Commits
 status: accepted
 revision: 1
+check: npx --no-install governance-check ADR-0006
 date: 2026-11-14
 authors: [Tristan Rivoallan]
 supersedes: []
