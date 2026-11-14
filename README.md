@@ -1,65 +1,65 @@
 # ontrack
 
-ontrack importe dans un dépôt des ADR hérités et des schémas OpenSpec fournis
-par des **sources**. Une source est une dépendance npm dont le `package.json`
-porte une clé `ontrack`, et son alias npm sert de namespace.
+ontrack imports inherited ADRs and OpenSpec schemas into a repository from
+**sources**. A source is an npm dependency whose `package.json` carries an
+`ontrack` key; its npm alias is its namespace.
 
 ## Installation
 
-Node 24 LTS ou plus récent.
+Node 24 LTS or later.
 
 ```bash
 npm i -D ontrack@git+https://github.com/trivoallan/ontrack.git
 ```
 
-Une source s'ajoute avec npm, sous l'alias de votre choix :
+Add a source with npm, under the alias of your choice:
 
 ```bash
-npm i -D <alias>@git+<url-du-depot-de-la-source>
+npm i -D <alias>@git+<source-repository-url>
 ```
 
 ## Usage
 
 ```bash
-npx ontrack --help      # liste les commandes
+npx ontrack --help      # list commands
 npx ontrack --version
-npx ontrack plan        # ce que l'import des sources changerait (pas encore disponible)
+npx ontrack plan        # what importing the sources would change (not available yet)
 ```
 
-### Codes de sortie
+### Exit codes
 
-Toutes les commandes partagent les mêmes codes de sortie :
+Every command shares the same exit codes:
 
-| Code | Sens |
-|------|------|
-| `0` | Rien à faire |
-| `2` | Des changements sont en attente |
-| `1` | Erreur (commande inconnue, source illisible…) |
+| Code | Meaning |
+|------|---------|
+| `0` | Nothing to do |
+| `2` | Changes pending |
+| `1` | Error (unknown command, unreadable source…) |
 
-Une CI peut donc détecter un dépôt en retard sur `2`, sans analyser la sortie.
+A CI job can detect an out-of-date repository on `2` without parsing the output.
 
-## Contrat de sortie de `ontrack plan`
+## `ontrack plan` output contract
 
-`plan` ne modifie aucun fichier. Sa sortie suit ce format :
+`plan` never modifies a file. Its output follows this format:
 
 ```
-plateforme : 2 révisés, 1 nouveau, 11 inchangés
-  révisé   SDR-0006  revision 1 → 2
-  révisé   SDR-0010  revision 3 → 4
-  nouveau  SDR-0015
-migration : 14 fichiers docs/adr/SDR-*.md → docs/adr/plateforme/
+platform: 2 revised, 1 new, 11 unchanged
+  revised  SDR-0006  revision 1 → 2
+  revised  SDR-0010  revision 3 → 4
+  new      SDR-0015
+migration: 14 files docs/adr/SDR-*.md → docs/adr/platform/
 ```
 
-- Ligne 1, par source : `<alias> : <compte par catégorie>`. Les catégories à zéro sont omises, sauf « inchangés ».
-- Ensuite, indentées, seulement les ADR qui ne sont pas inchangés. Les catégories sont : `nouveau`, `révisé`, `indéterminé`, `retiré`.
-- La migration à plat est toujours affichée, sur sa propre ligne, quand elle existe.
-- Quand il n'y a rien à faire, une seule ligne par source, et le code vaut `0`.
+- Line 1, per source: `<alias>: <count per category>`. Zero counts are omitted, except "unchanged".
+- Then, indented, only the ADRs that are not unchanged. Categories: `new`, `revised`, `undetermined`, `removed`.
+- A flat-layout migration is always shown, on its own line, when there is one.
+- When there is nothing to do, one line per source, and the exit code is `0`.
 
-Toute modification de ce format passe d'abord par ce README.
+Any change to this format goes through this README first.
 
-## Développement
+## Development
 
 ```bash
 npm install
-npm test     # tests et couverture ; échoue sous 95 % de lignes, branches ou fonctions
+npm test     # tests and coverage; fails below 95% lines, branches or functions
 ```

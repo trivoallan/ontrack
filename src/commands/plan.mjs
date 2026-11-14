@@ -1,8 +1,8 @@
-// ponytail: stub — trivoallan/ontrack#4 remplace ce handler par le vrai `plan`.
+// ponytail: stub — trivoallan/ontrack#4 replaces this handler with the real `plan`.
 export const command = 'plan';
-export const describe = "Montre ce que l'import des sources changerait dans le dépôt";
+export const describe = 'Show what importing the sources would change in the repository';
 
 export function handler({ io }) {
-  io.stderr.write("ontrack: `plan` n'est pas encore disponible.\n");
+  io.stderr.write('ontrack: `plan` is not available yet.\n');
   return 1;
 }

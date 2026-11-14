@@ -1,7 +1,7 @@
 {
   "name": "ontrack",
   "version": "0.1.0",
-  "description": "Importe dans un dépôt les ADR hérités (SDR) et les schémas OpenSpec fournis par des sources npm.",
+  "description": "Imports inherited ADRs (SDRs) and OpenSpec schemas provided by npm sources into a repository.",
   "type": "module",
   "bin": {
     "ontrack": "bin/ontrack.mjs"

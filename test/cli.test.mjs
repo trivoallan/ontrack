@@ -21,7 +21,7 @@ async function runWith(commands, argv) {
 const run = (...argv) => runWith(undefined, argv);
 
 for (const args of [['--help'], ['-h'], []]) {
-  test(`aide : ontrack ${args.join(' ') || '(sans argument)'}`, async () => {
+  test(`help: ontrack ${args.join(' ') || '(no argument)'}`, async () => {
     const r = await run(...args);
     assert.equal(r.code, 0);
     assert.match(r.stdout, /ontrack plan/);
@@ -30,14 +30,14 @@ for (const args of [['--help'], ['-h'], []]) {
 }
 
 for (const flag of ['--version', '-v']) {
-  test(`version : ontrack ${flag}`, async () => {
+  test(`version: ontrack ${flag}`, async () => {
     const r = await run(flag);
     assert.equal(r.code, 0);
     assert.equal(r.stdout.trim(), version);
   });
 }
 
-test('commande inconnue : nomme la commande et renvoie vers --help', async () => {
+test('unknown command: names the command and points to --help', async () => {
   const r = await run('plann');
   assert.equal(r.code, 1);
   assert.match(r.stderr, /plann/);
@@ -45,19 +45,19 @@ test('commande inconnue : nomme la commande et renvoie vers --help', async () =>
   assert.equal(r.stdout, '');
 });
 
-test("une sous-commande qui lève une erreur sort avec le code 1", async () => {
+test('a subcommand that throws exits with code 1', async () => {
   const boom = {
     command: 'boom',
     describe: 'test',
-    handler: () => { throw new Error('panne'); },
+    handler: () => { throw new Error('boom'); },
   };
   const r = await runWith([boom], ['boom']);
   assert.equal(r.code, 1);
-  assert.match(r.stderr, /panne/);
+  assert.match(r.stderr, /boom/);
 });
 
-test("plan pas encore disponible : code 1 et message explicite", async () => {
+test('plan not available yet: code 1 and an explicit message', async () => {
   const r = await run('plan');
   assert.equal(r.code, 1);
-  assert.match(r.stderr, /plan.*pas encore disponible/);
+  assert.match(r.stderr, /plan.*not available yet/);
 });

@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const bin = fileURLToPath(new URL('../bin/ontrack.mjs', import.meta.url));
 
-test('le bin installé remonte le vrai code de sortie', () => {
+test('the installed bin reports the real exit code', () => {
   assert.equal(spawnSync(process.execPath, [bin, '--help']).status, 0);
   assert.equal(spawnSync(process.execPath, [bin, 'plann']).status, 1);
 });

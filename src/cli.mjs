@@ -9,18 +9,18 @@ const { version } = JSON.parse(
 const defaultCommands = [plan];
 
 /**
- * Point d'entrée testable : analyse `argv`, écrit sur `io`, renvoie le code
- * de sortie du contrat (0 rien à faire, 2 changements en attente, 1 erreur).
- * `commands` n'est remplacé que par les tests.
+ * Testable entry point: parses `argv`, writes to `io`, returns the contract
+ * exit code (0 nothing to do, 2 changes pending, 1 error).
+ * `commands` is only overridden by tests.
  */
 export async function main(argv, io, commands = defaultCommands) {
   const args = argv.length === 0 ? ['--help'] : argv;
   let usageError;
-  let run; // promesse du handler choisi, attendue ici plutôt que par yargs
+  let run; // promise of the selected handler, awaited here rather than by yargs
 
   const cli = yargs()
     .scriptName('ontrack')
-    .locale('fr')
+    .locale('en')
     .version(version)
     .alias('v', 'version')
     .help()
@@ -45,7 +45,7 @@ export async function main(argv, io, commands = defaultCommands) {
   });
 
   if (usageError !== undefined) {
-    io.stderr.write(`ontrack: ${usageError}\nVoir ontrack --help.\n`);
+    io.stderr.write(`ontrack: ${usageError}\nSee ontrack --help.\n`);
     return 1;
   }
   if (output) io.stdout.write(`${output}\n`);
