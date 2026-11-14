@@ -84,6 +84,19 @@ jobs:
           done
           echo "$tools/node_modules/.bin" >> "$GITHUB_PATH"
 
+      # Keeping the provider token out of the commands the agent runs
+      # (CLAUDE_CODE_SUBPROCESS_ENV_SCRUB below) makes them run in a sandbox,
+      # which needs these two packages and unprivileged user namespaces. The
+      # agent action installs them itself only in another mode; without them
+      # the agent can run no command at all.
+      - if: steps.existing.outputs.exists != 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends bubblewrap socat
+          if [ -f /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          fi
+
       # Title and body as they were when the label was added, from the event
       # itself: an edit made after the label is not read. HTML comments do not
       # show in the issue a maintainer reads, so they are removed. No text of
