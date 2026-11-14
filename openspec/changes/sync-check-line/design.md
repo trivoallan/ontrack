@@ -2,12 +2,12 @@
 
 ## Context
 
-See proposal.md for the motivation. `planSource()` in `src/plan.mjs` reads both
+See proposal.md for the motivation. `planSource()` in `src/plan.ts` reads both
 copies of each shipped ADR and maps `compareRevision()`'s result to a category.
-`planActions()` in `src/apply.mjs` turns categories into actions that are all
+`planActions()` in `src/apply.ts` turns categories into actions that are all
 checked before the first write, `runActions()` executes them in `KINDS` order,
 and `planAfter()` predicts the remaining plan for `--dry-run`.
-`src/revision.mjs` already holds `frontmatter()` and `setRevision()`, which
+`src/revision.ts` already holds `frontmatter()` and `setRevision()`, which
 edits one column-zero line and keeps the file's line endings.
 
 ## Goals / Non-Goals
@@ -52,7 +52,7 @@ assert a verdict. A check line is neither, `plan` shows it, `--dry-run` shows
 it, and `apply` never commits. A flag would mean checks do not flow by
 default, which is the problem this change solves.
 
-**`readCheckLine(text)` and `setCheckLine(text, line)` in `src/revision.mjs`**,
+**`readCheckLine(text)` and `setCheckLine(text, line)` in `src/revision.ts`**,
 next to `setRevision()` and built the same way: find the column-zero line among
 the frontmatter lines, replace it, insert it after `revision:` (an up-to-date
 ADR always has one), or splice it out when `line` is null. `planSource()`

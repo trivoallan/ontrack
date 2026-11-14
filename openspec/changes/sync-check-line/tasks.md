@@ -6,16 +6,16 @@
 
 ## 2. Reading and writing the line
 
-- [x] 2.1 In `src/revision.mjs`, add `readCheckLine(text)` (first column-zero `check:` line of the recognized frontmatter, trailing whitespace removed, or null) and `setCheckLine(text, line)` (replace, insert after `revision:`, or remove when `line` is null, keeping the file's line endings); check in `test/revision.test.mjs` the replaced, inserted, removed, CRLF and body-example cases, and that every other line is byte-identical.
+- [x] 2.1 In `src/revision.ts`, add `readCheckLine(text)` (first column-zero `check:` line of the recognized frontmatter, trailing whitespace removed, or null) and `setCheckLine(text, line)` (replace, insert after `revision:`, or remove when `line` is null, keeping the file's line endings); check in `test/revision.test.ts` the replaced, inserted, removed, CRLF and body-example cases, and that every other line is byte-identical.
 
 ## 3. plan
 
-- [x] 3.1 In `src/plan.mjs`, classify an up-to-date ADR as `check` when its check line differs from the source's, storing both lines, and add `check` to the counts order; check every scenario of the "Classification" requirement in `test/plan.test.mjs`.
+- [x] 3.1 In `src/plan.ts`, classify an up-to-date ADR as `check` when its check line differs from the source's, storing both lines, and add `check` to the counts order; check every scenario of the "Classification" requirement in `test/plan.test.ts`.
 - [x] 3.2 Print the `-`/`+` lines after a `check` ADR's line in `formatPlan()`; check the three new "Output format" scenarios and the "Check only" exit code scenario, and that existing plan tests still pass.
 
 ## 4. apply
 
-- [x] 4.1 In `src/apply.mjs`, emit a `synced` action for each `check` ADR, run it after `moved` and `confirmed`, and print it with its `-`/`+` lines; check every scenario of "Synchronizing checks" in `test/apply.test.mjs`, including the flat-layout copy.
+- [x] 4.1 In `src/apply.ts`, emit a `synced` action for each `check` ADR, run it after `moved` and `confirmed`, and print it with its `-`/`+` lines; check every scenario of "Synchronizing checks" in `test/apply.test.ts`, including the flat-layout copy.
 - [x] 4.2 Check the "Revised ADR does not get the new check", "Only a check to synchronize" and "Dry run of a synchronization" scenarios, and that a second `apply` after a synchronization writes nothing and exits `0`.
 
 ## 5. Verification

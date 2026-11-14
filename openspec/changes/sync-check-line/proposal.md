@@ -46,12 +46,12 @@ None.
 
 ## Impact
 
-- `src/revision.mjs`: read and set the `check:` line of a frontmatter.
-  `src/plan.mjs`: the `check` category and its lines. `src/apply.mjs`: the
+- `src/revision.ts`: read and set the `check:` line of a frontmatter.
+  `src/plan.ts`: the `check` category and its lines. `src/apply.ts`: the
   `synced` action.
 - `README.md`: `plan` output contract, `ontrack apply`, and one sentence of
   the `ontrack check` output contract.
-- `test/revision.test.mjs`, `test/plan.test.mjs`, `test/apply.test.mjs`.
+- `test/revision.test.ts`, `test/plan.test.ts`, `test/apply.test.ts`.
 - No new dependency.
 - Builds on `add-check-command`, which gives the `check:` key its meaning.
   That change should be archived first.
