@@ -29,7 +29,10 @@ Each source ADR SHALL be classified as:
 - `new` when it has no local copy;
 - `revised` when its local copy is `stale` against it (see `adr-revision`);
 - `undetermined` or `unreadable` when the comparison says so;
-- `unchanged` when the local copy is `up-to-date`.
+- `check` when the local copy is `up-to-date` and its check line differs from the source's;
+- `unchanged` when the local copy is `up-to-date` and both check lines are the same.
+
+An ADR's check line SHALL be the first line of its recognized frontmatter (see `adr-revision`) that starts with `check:` at column zero, without its trailing whitespace. An ADR without such a line has no check line. Two check lines are the same when both are absent or both are present and equal.
 
 Each `*.md` file in `docs/adr/<alias>/` that the source no longer ships SHALL be classified as `removed`. Files directly under `docs/adr/` that match no source ADR are the project's own ADRs and SHALL be ignored.
 
@@ -45,6 +48,30 @@ Each `*.md` file in `docs/adr/<alias>/` that the source no longer ships SHALL be
 - **WHEN** `docs/adr/0001-use-postgres.md` exists and no source ships that file
 - **THEN** it appears nowhere in the output
 
+#### Scenario: Check added upstream
+- **WHEN** both copies have `revision: 1`, the local copy is `accepted` with filled-in traits and no `check:` line, and the source ships `check: npx commitlint --last`
+- **THEN** the ADR is `check`
+
+#### Scenario: Check changed upstream
+- **WHEN** both copies have `revision: 1`, the local copy holds `check: exit 0` and the source ships `check: exit 1`
+- **THEN** the ADR is `check`
+
+#### Scenario: Check removed upstream
+- **WHEN** both copies have `revision: 1`, the local copy holds `check: exit 0` and the source ships no `check:` line
+- **THEN** the ADR is `check`
+
+#### Scenario: Same check, different verdict
+- **WHEN** both copies have `revision: 1` and `check: exit 0`, and the local copy has `status: accepted` where the source has `status: proposed`
+- **THEN** the ADR is `unchanged`
+
+#### Scenario: Revised wins over check
+- **WHEN** the local copy has `revision: 1` and no `check:` line, and the source ships `revision: 2` and `check: exit 0`
+- **THEN** the ADR is `revised`, not `check`
+
+#### Scenario: A check line in the body is not one
+- **WHEN** both copies have `revision: 1`, neither frontmatter has a `check:` line, and the source's body shows `check: exit 0` in an example
+- **THEN** the ADR is `unchanged`
+
 ### Requirement: Flat-layout migration
 When at least one source ADR's local copy is a flat-layout file, `plan` SHALL report a migration for that source: one summary line, then one indented line per file, sorted by name.
 
@@ -54,9 +81,10 @@ When at least one source ADR's local copy is a flat-layout file, `plan` SHALL re
 
 ### Requirement: Output format
 The output SHALL follow the contract in the README, per source, sources sorted by alias:
-1. `<alias>: <counts>`, with counts in the order revised, new, removed, undetermined, unreadable, unchanged, zero counts omitted except `unchanged`;
+1. `<alias>: <counts>`, with counts in the order revised, new, removed, undetermined, unreadable, check, unchanged, zero counts omitted except `unchanged`;
 2. one line per ADR that is not `unchanged`, sorted by name: two spaces, the category left-aligned in a 12-character column, two spaces, the file name without `.md`, then two spaces and the ADR's title when it has one (see `adr-revision`); for `revised`, followed by ` (revision <local> → <upstream>)`. The title SHALL be read from the source's copy, or from the local copy for a `removed` ADR;
-3. the migration lines, when there are any: `migration: <n> file(s) docs/adr/ → docs/adr/<alias>/`, then one line per file laid out like an ADR line, with `move` as the category and the full file name.
+3. after a `check` ADR's line: when the local copy has a check line, four spaces, `- ` and that line; then, when the source has a check line, four spaces, `+ ` and that line;
+4. the migration lines, when there are any: `migration: <n> file(s) docs/adr/ → docs/adr/<alias>/`, then one line per file laid out like an ADR line, with `move` as the category and the full file name.
 
 When the project has no source, `plan` SHALL print `no ontrack source found`. After the source lines, `plan` SHALL print the `AGENTS.md` lines described in `agents-file`, when there are any.
 
@@ -90,8 +118,20 @@ When the project has no source, `plan` SHALL print `no ontrack source found`. Af
 - **WHEN** a new ADR has neither a `title:` key nor a `# ` heading
 - **THEN** its line ends with its name, with no trailing spaces
 
+#### Scenario: Check changed upstream
+- **WHEN** source `trivoallan` ships 14 ADRs, 13 unchanged, and `ADR-0006-commits` is `check` with a local line `check: exit 0` and a source line `check: npx commitlint --last`
+- **THEN** the output is `trivoallan: 1 check, 13 unchanged`, then `  check         ADR-0006-commits`, then `    - check: exit 0`, then `    + check: npx commitlint --last`
+
+#### Scenario: Check added upstream
+- **WHEN** a `check` ADR's local copy has no check line and the source ships `check: exit 0`
+- **THEN** its ADR line is followed by `    + check: exit 0` only
+
+#### Scenario: Check removed upstream
+- **WHEN** a `check` ADR's local copy holds `check: exit 0` and the source has no check line
+- **THEN** its ADR line is followed by `    - check: exit 0` only
+
 ### Requirement: Exit code
-`plan` SHALL exit with `2` when any source has a `new`, `revised`, `removed`, `undetermined` or `unreadable` ADR, or a migration, or when the `AGENTS.md` rules block is `missing`, `out of date` or `skipped` (see `agents-file`); with `0` otherwise; and with `1` when sources cannot be discovered or a source's ADR directory cannot be read.
+`plan` SHALL exit with `2` when any source has a `new`, `revised`, `removed`, `undetermined`, `unreadable` or `check` ADR, or a migration, or when the `AGENTS.md` rules block is `missing`, `out of date` or `skipped` (see `agents-file`); with `0` otherwise; and with `1` when sources cannot be discovered or a source's ADR directory cannot be read.
 
 #### Scenario: Undetermined only
 - **WHEN** the only finding is an imported ADR with `revision: 0`
@@ -104,4 +144,8 @@ When the project has no source, `plan` SHALL print `no ontrack source found`. Af
 
 #### Scenario: Only the rules block is stale
 - **WHEN** every ADR is unchanged and the `AGENTS.md` block is out of date
+- **THEN** the exit code is `2`
+
+#### Scenario: Check only
+- **WHEN** the only finding is a `check` ADR
 - **THEN** the exit code is `2`

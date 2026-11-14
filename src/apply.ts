@@ -2,21 +2,25 @@ import { spawnSync } from 'node:child_process';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import type { Link } from './links.ts';
-import { formatPlan, hasPendingChanges, label, row, stem } from './plan.ts';
-import type { Plan, PlannedAdr, SourcePlan } from './plan.ts';
-import { setRevision } from './revision.ts';
+import { checkLines, formatPlan, hasPendingChanges, label, row, stem } from './plan.ts';
+import type { CheckChange, Plan, PlannedAdr, SourcePlan } from './plan.ts';
+import { setCheckLine, setRevision } from './revision.ts';
 
 // An undetermined ADR whose upstream copy carries a revision to adopt.
 type ConfirmableAdr = PlannedAdr & { to: number };
+// An up-to-date ADR whose check line differs from its source's.
+type SyncableAdr = PlannedAdr & { check: CheckChange };
 type Target = { source: SourcePlan; to: string };
 export type Action =
   | (Target & { kind: 'imported'; adr: PlannedAdr; from: string })
   | (Target & { kind: 'moved'; file: string; from: string })
   | (Target & { kind: 'confirmed'; adr: ConfirmableAdr })
+  | (Target & { kind: 'synced'; adr: SyncableAdr })
   | (Target & { kind: 'pruned'; adr: PlannedAdr });
 type Kind = Action['kind'];
 
-const KINDS: Kind[] = ['imported', 'moved', 'confirmed', 'pruned'];
+const KINDS: Kind[] = ['imported', 'moved', 'confirmed', 'synced', 'pruned'];
+const syncable = (adr: PlannedAdr): adr is SyncableAdr => adr.check !== undefined;
 const confirmable = (adr: PlannedAdr): adr is ConfirmableAdr =>
   adr.category === 'undetermined' && typeof adr.to === 'number';
 
@@ -45,6 +49,8 @@ export function planActions(
       } else if (confirmable(adr) && (all || wanted.has(stem(adr.name)))) {
         actions.push({ kind: 'confirmed', source, adr, to: at(adr.name) });
         confirmed.add(stem(adr.name));
+      } else if (syncable(adr)) {
+        actions.push({ kind: 'synced', source, adr, to: at(adr.name) });
       }
     }
     for (const file of source.migration) {
@@ -70,7 +76,7 @@ function insideGitWorkTree(root: string): boolean {
   return r.status === 0 && r.stdout.trim() === 'true';
 }
 
-/** Executes checked actions, in order: import, move, confirm, prune. */
+/** Executes checked actions, in order: import, move, confirm, sync, prune. */
 export function runActions(root: string, actions: Action[]): void {
   const git = insideGitWorkTree(root);
   for (const a of actions) {
@@ -81,13 +87,14 @@ export function runActions(root: string, actions: Action[]): void {
       if (!mv || mv.status !== 0) renameSync(a.from, a.to);
     }
     if (a.kind === 'confirmed') writeFileSync(a.to, setRevision(readFileSync(a.to, 'utf8'), a.adr.to));
+    if (a.kind === 'synced') writeFileSync(a.to, setCheckLine(readFileSync(a.to, 'utf8'), a.adr.check.to));
     if (a.kind === 'pruned') rmSync(a.to);
   }
 }
 
 /** The plan `actions` would leave, without running them (for `--dry-run`). */
 export function planAfter(plan: Plan, actions: Action[]): Plan {
-  const done = new Set(actions.flatMap((a) => (a.kind === 'imported' || a.kind === 'confirmed' ? [a.adr] : [])));
+  const done = new Set(actions.flatMap((a) => (a.kind === 'imported' || a.kind === 'confirmed' || a.kind === 'synced' ? [a.adr] : [])));
   const pruned = new Set(actions.flatMap((a) => (a.kind === 'pruned' ? [a.adr] : [])));
   return plan.map((source) => ({
     ...source,
@@ -124,7 +131,7 @@ export function formatApply({
     const mine = actions.filter((a) => a.source.namespace === namespace);
     const counts = KINDS.map((k): [Kind, number] => [k, mine.filter((a) => a.kind === k).length]).filter(([, n]) => n > 0);
     lines.push(`${namespace}: ${counts.map(([k, n]) => `${n} ${k}`).join(', ')}`);
-    lines.push(...mine.map(actionLine));
+    lines.push(...mine.flatMap((a) => [actionLine(a), ...(a.kind === 'synced' ? checkLines(a.adr) : [])]));
   }
   if (links.length > 0) {
     lines.push('links to update:');
