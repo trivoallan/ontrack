@@ -8,6 +8,7 @@ from sources. Each ADR asks a question and recommends an answer; the
 repository answers it for itself, and the answers are written to `AGENTS.md`
 so that coding agents follow them.
 
+- To see what ontrack does, read the [features](features.md).
 - To install and use ontrack, read the
   [README](https://github.com/trivoallan/ontrack#readme) on GitHub.
 - To see what this repository decided for itself, browse its decision records
