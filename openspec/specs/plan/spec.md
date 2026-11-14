@@ -55,7 +55,7 @@ When at least one source ADR's local copy is a flat-layout file, `plan` SHALL re
 ### Requirement: Output format
 The output SHALL follow the contract in the README, per source, sources sorted by alias:
 1. `<alias>: <counts>`, with counts in the order revised, new, removed, undetermined, unreadable, unchanged, zero counts omitted except `unchanged`;
-2. one line per ADR that is not `unchanged`, sorted by name: two spaces, the category left-aligned in a 12-character column, two spaces, the file name without `.md`; for `revised`, followed by two spaces and `revision <local> → <upstream>`;
+2. one line per ADR that is not `unchanged`, sorted by name: two spaces, the category left-aligned in a 12-character column, two spaces, the file name without `.md`, then two spaces and the ADR's title when it has one (see `adr-revision`); for `revised`, followed by ` (revision <local> → <upstream>)`. The title SHALL be read from the source's copy, or from the local copy for a `removed` ADR;
 3. the migration lines, when there are any: `migration: <n> file(s) docs/adr/ → docs/adr/<alias>/`, then one line per file laid out like an ADR line, with `move` as the category and the full file name.
 
 When the project has no source, `plan` SHALL print `no ontrack source found` and exit with `0`.
@@ -72,6 +72,22 @@ When the project has no source, `plan` SHALL print `no ontrack source found` and
 #### Scenario: No source
 - **WHEN** the project has no dependency carrying an `ontrack` key
 - **THEN** the output is `no ontrack source found` and the exit code is `0`
+
+#### Scenario: New ADR with its title
+- **WHEN** source `trivoallan` ships `ADR-0001.md` whose first heading is `# ADR-0001: Record significant decisions as ADRs`, and the project has no copy
+- **THEN** the ADR line is `  new           ADR-0001  Record significant decisions as ADRs`
+
+#### Scenario: Revised ADR with its title
+- **WHEN** source `platform` ships `SDR-0006.md` with `title: Commits` and `revision: 2`, and the local copy has `revision: 1`
+- **THEN** the ADR line is `  revised       SDR-0006  Commits (revision 1 → 2)`
+
+#### Scenario: Removed ADR keeps a title
+- **WHEN** `docs/adr/platform/SDR-0012.md` has `title: Hosting` and source `platform` no longer ships it
+- **THEN** the ADR line is `  removed       SDR-0012  Hosting`
+
+#### Scenario: ADR without a title
+- **WHEN** a new ADR has neither a `title:` key nor a `# ` heading
+- **THEN** its line ends with its name, with no trailing spaces
 
 ### Requirement: Exit code
 `plan` SHALL exit with `2` when any source has a `new`, `revised`, `removed`, `undetermined` or `unreadable` ADR, or a migration; with `0` otherwise; and with `1` when sources cannot be discovered or a source's ADR directory cannot be read.
