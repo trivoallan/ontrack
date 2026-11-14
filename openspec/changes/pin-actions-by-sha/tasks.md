@@ -2,8 +2,8 @@
 
 ## 1. Pin the actions
 
-- [ ] 1.1 Resolve the commit SHA behind `actions/checkout@v7` and `actions/setup-node@v7` (`gh api repos/actions/checkout/commits/v7 --jq .sha`, same for `setup-node`) and note the exact release tag each SHA carries; verify each SHA is 40 hexadecimal characters
-- [ ] 1.2 Replace the four `uses:` lines of `.github/workflows/test.yml` with `owner/repo@<sha> # <tag>`; verify `grep -En 'uses: .*@v[0-9]' .github/workflows/` prints nothing
+- [x] 1.1 Resolve the commit SHA behind `actions/checkout@v7` and `actions/setup-node@v7` (`gh api repos/actions/checkout/commits/v7 --jq .sha`, same for `setup-node`) and note the exact release tag each SHA carries; verify each SHA is 40 hexadecimal characters
+- [x] 1.2 Replace the four `uses:` lines of `.github/workflows/test.yml` with `owner/repo@<sha> # <tag>`; verify `grep -En 'uses: .*@v[0-9]' .github/workflows/` prints nothing
 
 ## 2. Keep the pins current
 
