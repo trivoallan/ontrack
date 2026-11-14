@@ -221,3 +221,7 @@ need Node 22.8 or later. CI also runs the tests on Node 20.19.
 npm install
 npm test     # tests and coverage; fails below 95% lines, branches or functions
 ```
+
+## License
+
+[Apache License 2.0](LICENSE).

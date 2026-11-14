@@ -2,6 +2,7 @@
   "name": "ontrack",
   "version": "0.1.0",
   "description": "Imports inherited ADRs (SDRs) and OpenSpec schemas provided by npm sources into a repository.",
+  "license": "Apache-2.0",
   "type": "module",
   "bin": {
     "ontrack": "bin/ontrack.mjs"
