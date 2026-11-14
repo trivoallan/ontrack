@@ -1,14 +1,6 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-
-// The part of a package.json ontrack reads. Taken on trust: JSON.parse is
-// untyped, and validating it is the zod change's job.
-type Manifest = {
-  name: string;
-  dependencies?: Record<string, string>;
-  devDependencies?: Record<string, string>;
-  ontrack?: unknown;
-};
+import { ontrackKey, projectManifest, sourceManifest } from './schemas.ts';
 
 /** An installed package that ships ADRs. The npm alias is the namespace. */
 export type Source = {
@@ -18,12 +10,8 @@ export type Source = {
   adrDir: string;
 };
 
-function readJson(file: string): Manifest {
+function readJson(file: string): unknown {
   return JSON.parse(readFileSync(file, 'utf8'));
-}
-
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 /**
@@ -32,33 +20,43 @@ function isObject(value: unknown): value is Record<string, unknown> {
  */
 export function discoverSources(projectRoot: string): Source[] {
   const manifest = path.join(projectRoot, 'package.json');
-  let project: Manifest;
+  let aliases: string[];
   try {
-    project = readJson(manifest);
+    const project = projectManifest.parse(readJson(manifest));
+    aliases = Object.keys({ ...project.dependencies, ...project.devDependencies });
   } catch {
     throw new Error(`cannot read ${manifest}`);
   }
 
-  const aliases = Object.keys({ ...project.dependencies, ...project.devDependencies });
   const sources: Source[] = [];
 
   for (const alias of aliases) {
     const pkgDir = path.join(projectRoot, 'node_modules', alias);
-    let pkg: Manifest;
+    let raw: unknown;
     try {
-      pkg = readJson(path.join(pkgDir, 'package.json'));
+      raw = readJson(path.join(pkgDir, 'package.json'));
     } catch {
       throw new Error(`dependency "${alias}" is not installed; run npm install`);
     }
-    if (!isObject(pkg.ontrack)) continue;
+    const pkg = sourceManifest.safeParse(raw);
+    if (!pkg.success) {
+      const field = pkg.error.issues[0].path.join('.');
+      throw new Error(`dependency "${alias}" has an invalid package.json${field && ` ("${field}")`}`);
+    }
+
+    const key = ontrackKey.safeParse(pkg.data.ontrack);
+    // An issue at the root means `ontrack` is absent or not an object: the
+    // dependency is not a source. Any other issue names a field of the key.
+    if (!key.success && key.error.issues[0].path.length === 0) continue;
 
     if (alias.startsWith('@')) {
       throw new Error(`source "${alias}" must be installed under an unscoped alias`);
     }
-    const { adr, namespace } = pkg.ontrack;
-    if (typeof adr !== 'string') {
-      throw new Error(`source "${alias}" has no "adr" string in its ontrack key`);
+    if (!key.success) {
+      const field = key.error.issues[0].path.join('.');
+      throw new Error(`source "${alias}" has no "${field}" string in its ontrack key`);
     }
+    const { adr, namespace } = key.data;
     const adrDir = path.resolve(pkgDir, adr);
     const inside = path.relative(pkgDir, adrDir);
     if (inside.startsWith('..') || path.isAbsolute(inside)) {
@@ -67,8 +65,8 @@ export function discoverSources(projectRoot: string): Source[] {
 
     sources.push({
       namespace: alias,
-      declaredNamespace: typeof namespace === 'string' ? namespace : null,
-      packageName: pkg.name,
+      declaredNamespace: namespace ?? null,
+      packageName: pkg.data.name,
       adrDir,
     });
   }
