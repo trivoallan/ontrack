@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readRevision, compareRevision, readTitle } from '../src/revision.mjs';
+import { readRevision, compareRevision, readTitle, setRevision } from '../src/revision.mjs';
 
 const adr = (...frontmatter) => ['---', ...frontmatter, '---', '', '# Title', ''].join('\n');
 
@@ -139,4 +139,31 @@ test('the frontmatter example in the body is not a title source', () => {
 
 test('CRLF title', () => {
   assert.equal(readTitle('---\r\ntitle: Commits\r\n---\r\n', 'X'), 'Commits');
+});
+
+// Setting the revision
+
+test('setRevision replaces an existing revision and nothing else', () => {
+  const text = '---\nstatus: accepted\nrevision: 0\nauthors:\n- Jane\n---\n\n# T\n\nrevision: 9\n';
+  assert.equal(setRevision(text, 2), text.replace('revision: 0', 'revision: 2'));
+});
+
+test('setRevision inserts after status, or first', () => {
+  assert.equal(setRevision('---\ntitle: X\nstatus: proposed\n---\nBody\n', 3), '---\ntitle: X\nstatus: proposed\nrevision: 3\n---\nBody\n');
+  assert.equal(setRevision('---\ntitle: X\n---\nBody\n', 3), '---\nrevision: 3\ntitle: X\n---\nBody\n');
+});
+
+test('setRevision never touches a body example', () => {
+  const text = '---\nstatus: proposed\n---\n\n```yaml\n---\nrevision: 5\n---\n```\n';
+  const out = setRevision(text, 1);
+  assert.equal(readRevision(out), 1);
+  assert.match(out, /```yaml\n---\nrevision: 5\n---\n```/);
+});
+
+test('setRevision keeps CRLF line endings', () => {
+  assert.equal(setRevision('---\r\nstatus: x\r\n---\r\n', 4), '---\r\nstatus: x\r\nrevision: 4\r\n---\r\n');
+});
+
+test('setRevision refuses an unreadable frontmatter', () => {
+  assert.throws(() => setRevision('no frontmatter', 1), /frontmatter/);
 });
