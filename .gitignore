@@ -1,0 +1,6 @@
+node_modules/
+
+# Contexte privé (PM, outils locaux) : ne jamais publier
+.nanopm/
+CONTEXT.md
+.claude/

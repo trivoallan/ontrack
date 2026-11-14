@@ -1,0 +1,22 @@
+{
+  "name": "ontrack",
+  "version": "0.1.0",
+  "description": "Importe dans un dépôt les ADR hérités (SDR) et les schémas OpenSpec fournis par des sources npm.",
+  "type": "module",
+  "bin": {
+    "ontrack": "bin/ontrack.mjs"
+  },
+  "files": [
+    "bin/",
+    "src/"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test --experimental-test-coverage --test-coverage-lines=95 --test-coverage-branches=95 --test-coverage-functions=95 --test-coverage-exclude='test/**'"
+  },
+  "dependencies": {
+    "yargs": "^18.2.0"
+  }
+}
