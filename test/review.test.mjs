@@ -2,7 +2,7 @@ import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
-import { formatReview, formatSequence, pendingAdrs, selectAdr } from '../src/review.mjs';
+import { formatReview, formatSequence, formatSupersession, pendingAdrs, selectAdr } from '../src/review.mjs';
 import { main } from '../src/cli.mjs';
 import { cleanup, makeTree } from './helpers/project.mjs';
 
@@ -103,10 +103,33 @@ test('named: ambiguous lists both references', () => {
   );
 });
 
-test('named: already ruled, or without a status', () => {
-  assert.throws(() => selectAdr(tree(), 'ADR-0001'), /trivoallan\/ADR-0001-record-architecture-decisions is accepted/);
+test('named: an accepted ADR in force is selected', () => {
+  assert.equal(selectAdr(tree(), 'ADR-0001').ref, 'trivoallan/ADR-0001-record-architecture-decisions');
+});
+
+test('named: already superseded names both, unless the superseding ADR is only proposed', () => {
+  const files = (status) => ({
+    [COMMITS]: adr('Commits', 'adr: ADR-0006', 'status: accepted'),
+    'docs/adr/ADR-0001-commits.md': adr('Own commits', `status: ${status}`, 'supersedes: [trivoallan/ADR-0006]'),
+  });
+  assert.throws(
+    () => selectAdr(makeTree(files('accepted')), 'ADR-0006'),
+    /trivoallan\/ADR-0006-commits is already superseded by local\/ADR-0001-commits/,
+  );
+  assert.equal(selectAdr(makeTree(files('proposed')), 'ADR-0006').ref, 'trivoallan/ADR-0006-commits');
+});
+
+test('named: rejected, or without a status', () => {
+  const rejected = makeTree({ [COMMITS]: adr('Commits', 'adr: ADR-0006', 'status: rejected') });
+  assert.throws(() => selectAdr(rejected, 'ADR-0006'), /trivoallan\/ADR-0006-commits is rejected/);
   const root = makeTree({ [COMMITS]: adr('Commits', 'adr: ADR-0006') });
   assert.throws(() => selectAdr(root, 'ADR-0006'), /without a status/);
+});
+
+test('named: a trait conflict does not stop a supersession', () => {
+  const decided = (title) => adr(title, 'status: accepted', 'traits:', '  commits:', '    tool: commitlint');
+  const root = makeTree({ [COMMITS]: decided('Commits'), 'docs/adr/ADR-0012-commits.md': decided('Commits again') });
+  assert.equal(selectAdr(root, 'ADR-0006-commits').ref, 'trivoallan/ADR-0006-commits');
 });
 
 // Prompt
@@ -189,10 +212,58 @@ test('prompt: both forms end with tracking items, proposed after the whole revie
   assert.equal(tail(single), tail(sequence));
 });
 
-test('prompt: both forms match the README contract', () => {
+test('prompt: every form matches the README contract', () => {
   const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
   assert.ok(readme.includes(`~~~\n${formatReview(selectAdr(tree(), 'ADR-0006'))}~~~`));
   assert.ok(readme.includes(`~~~\n${formatSequence(pendingAdrs(tree()))}~~~`));
+  assert.ok(readme.includes(`~~~\n${formatSupersession(selectAdr(tree(), 'ADR-0001'))}~~~`));
+});
+
+// Supersession prompt
+
+test('supersession: names one ADR by path, title and reference, and no other', () => {
+  const out = formatSupersession(selectAdr(tree(), 'ADR-0001'));
+  assert.ok(out.includes(`\`${RECORD}\` (Record architecture decisions).`));
+  assert.ok(out.includes('`supersedes: [trivoallan/ADR-0001-record-architecture-decisions]`'));
+  assert.ok(!out.includes(LOCALIZATION));
+  assert.ok(!out.includes(COMMITS));
+  assert.deepEqual(out.match(/^\d\./gm), ['1.', '2.', '3.', '4.', '5.', '6.']);
+});
+
+test('supersession: agreement comes before writing, and apply closes it', () => {
+  const out = formatSupersession(selectAdr(tree(), 'ADR-0001'));
+  const stop = out.indexOf('question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees');
+  const write = out.indexOf('write the new ADR');
+  assert.ok(stop > 0 && stop < write);
+  assert.ok(write < out.indexOf('npx ontrack apply'));
+});
+
+test('supersession: no trait key left out, marking left to the repository rules', () => {
+  const out = formatSupersession(selectAdr(tree(), 'ADR-0001'));
+  assert.match(out, /Leave no key out: a key the new ADR omits is no longer decided/);
+  assert.match(out, /`check:` command, propose to keep it, change it or drop it/);
+  assert.match(out, /Mark the superseded ADR only as the repository's rules spell out; when they do not say what to write in it, leave its file untouched/);
+  assert.ok(!out.includes('status: superseded'));
+});
+
+test('supersession: ends with the tracking items of the review prompt', () => {
+  const tail = (out) => out.slice(out.indexOf('Once every ADR is ruled'));
+  const out = formatSupersession(selectAdr(tree(), 'ADR-0001'));
+  assert.ok(out.indexOf('Once every ADR is ruled') > out.indexOf('npx ontrack apply'));
+  assert.equal(tail(out), tail(formatReview(selectAdr(tree(), 'ADR-0006'))));
+});
+
+test('supersession: same text for every ADR, an own ADR by its local reference', () => {
+  const root = makeTree({
+    [COMMITS]: adr('Commits', 'status: accepted'),
+    [RELEASE]: ['---', 'status: accepted', '---', ''].join('\n'),
+  });
+  const a = selectAdr(root, 'ADR-0006-commits');
+  const b = selectAdr(root, 'ADR-0020-release');
+  const strip = (x) => formatSupersession(x).replace(x.path, '').replace(x.title ? ` (${x.title})` : '', '').replace(x.ref, '');
+  assert.equal(strip(a), strip(b));
+  assert.ok(formatSupersession(b).includes(`\`${RELEASE}\``));
+  assert.ok(formatSupersession(b).includes('`supersedes: [local/ADR-0020-release]`'));
 });
 
 // Command
@@ -223,9 +294,19 @@ test('command: nothing to review exits 0 with an empty stdout', async () => {
   }
 });
 
-test('command: an already ruled name exits 1 with an empty stdout', async () => {
-  const r = await review(tree(), 'ADR-0001');
+test('command: an accepted name prints the supersession prompt, exits 2, leaves the tree unchanged', async () => {
+  const root = tree();
+  const before = snapshot(root);
+  const r = await review(root, 'ADR-0001');
+  assert.equal(r.code, 2);
+  assert.equal(r.stdout, formatSupersession(selectAdr(root, 'ADR-0001')));
+  assert.equal(r.stderr, '');
+  assert.deepEqual(snapshot(root), before);
+});
+
+test('command: a rejected name exits 1 with an empty stdout', async () => {
+  const r = await review(makeTree({ [COMMITS]: adr('Commits', 'adr: ADR-0006', 'status: rejected') }), 'ADR-0006');
   assert.equal(r.code, 1);
   assert.equal(r.stdout, '');
-  assert.match(r.stderr, /accepted/);
+  assert.match(r.stderr, /rejected/);
 });
