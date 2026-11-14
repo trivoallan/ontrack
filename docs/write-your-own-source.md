@@ -110,6 +110,38 @@ source shows in the next `npx ontrack plan`, with no reinstall.
 
 ## 4. Publish it
 
+Publish the source to the npm registry or to a git host.
+
+### To the npm registry
+
+In `package.json`, remove `"private": true` and add the keyword
+`ontrack-source`. The keyword is how a person
+[finds your source](find-a-source.md) on the registry:
+
+```json
+{
+  "name": "@<scope>/platform-governance",
+  "version": "0.1.0",
+  "keywords": ["ontrack-source"],
+  "files": ["adr/"],
+  "ontrack": { "adr": "adr", "namespace": "platform" }
+}
+```
+
+Then publish:
+
+```bash
+npm publish --access public
+```
+
+A repository installs it by name, under the alias you proposed:
+
+```bash
+npm i -D platform@npm:@<scope>/platform-governance
+```
+
+### To a git host
+
 Push the source to a git host. A repository then installs it by URL, under
 the alias you proposed:
 
@@ -117,11 +149,26 @@ the alias you proposed:
 npm i -D platform@git+https://github.com/<owner>/platform-governance.git
 ```
 
+### The alias
+
 The alias is the namespace: the ADRs land in `docs/adr/platform/`. It must
 be unscoped. A repository may pick another alias than the one you propose.
 
-In the trial repository, replace the `file:` dependency with this one before
-you commit.
+In the trial repository, replace the `file:` dependency with the published
+one before you commit.
+
+### Say what the source asks
+
+A repository that installs your source receives every question in it. Write
+a README, which the registry and the git host both show, so that a person
+can judge the source before installing it:
+
+- how many questions it asks, and on which subjects;
+- which questions carry a `check` command, because that command runs in the
+  repository that accepts the ADR;
+- the alias you propose.
+
+ontrack does not read the README.
 
 ## When you change a question
 
@@ -148,5 +195,7 @@ repository that rules again.
   repository that accepted the ADR.
 - Let your editor check the `ontrack` key as you type, with the
   [published JSON Schema](file-formats.md#the-ontrack-key-of-a-source).
+- See how a person [finds a source](find-a-source.md) to install, yours
+  included.
 - Read [trivoallan/governance](https://github.com/trivoallan/governance), a
   source in use.
