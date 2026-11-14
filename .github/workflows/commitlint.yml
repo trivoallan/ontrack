@@ -17,6 +17,8 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+      # npm 12, which runs no dependency's install script: see test.yml.
+      - run: npm install --global npm@12.2.2
       # --ignore-scripts skips `prepare`: linting a title needs no build.
       - run: npm ci --ignore-scripts
       # Through the environment: a title interpolated into the script could inject shell.

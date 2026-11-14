@@ -86,6 +86,11 @@ The code is TypeScript, written so that Node runs it as it is: nothing is
 compiled to work in this repository. Development uses Node 24 (see `.nvmrc`);
 CI also runs the tests on Node 22.18, the lowest supported version.
 
+Install the dependencies with npm 12 (`npm install --global npm@12`), as CI
+does on Node 24. npm 12 runs no dependency's install script unless
+`package.json` names it, and it applies the three-day cooldown of `.npmrc`,
+which npm 10 ignores. It needs Node 22.22.2, 24.15 or 26.
+
 ```bash
 npm install
 node bin/ontrack.ts plan   # the CLI, from the sources

@@ -25,6 +25,8 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: site/package-lock.json
+      # npm 12, which runs no dependency's install script: see test.yml.
+      - run: npm install --global npm@12.2.2
       # The site config imports ../src, which needs the CLI's own runtime
       # dependencies. --ignore-scripts skips `prepare`, which needs dev ones.
       - run: npm ci --omit=dev --ignore-scripts
