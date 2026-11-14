@@ -84,7 +84,15 @@ With `--dry-run`, `apply` SHALL print exactly what it would do with the same opt
 - **THEN** the output names both ADRs as to be confirmed, and every file is byte-identical afterwards
 
 ### Requirement: Output and exit code
-`apply` SHALL print, per source, one line per action (`imported`, `moved`, `confirmed`, `synced`, `pruned`, laid out like `plan` lines), then the links to update, then the `AGENTS.md` lines (see `agents-file`), then the `plan` output of what still needs a human, if anything. A `synced` line SHALL be followed by the same `- ` and `+ ` lines `plan` prints for that ADR. With `--dry-run`, the first line SHALL be `dry run: nothing written`. It SHALL exit with `2` when the plan after the run (or, in a dry run, the plan the run would leave) still has pending changes or the `AGENTS.md` block is `skipped` (or, in a dry run, still to create or update), with `0` otherwise, and with `1` on error. Every check on ADR actions SHALL run before the first write, so that an error never leaves a partly applied repository.
+`apply` SHALL print, per source, one line per action (`imported`, `moved`, `confirmed`, `synced`, `pruned`, laid out like `plan` lines), then the links to update, then the `AGENTS.md` lines (see `agents-file`), then the `plan` output of what still needs a human, if anything. A `synced` line SHALL be followed by the same `- ` and `+ ` lines `plan` prints for that ADR. With `--dry-run`, the first line SHALL be `dry run: nothing written`. It SHALL exit with `2` when the plan after the run (or, in a dry run, the plan the run would leave) still has pending changes or the `AGENTS.md` block is `skipped` (or, in a dry run, still to create or update), with `0` otherwise, and with `1` on error. Every check on ADR actions SHALL run before the first write, so that an error never leaves a partly applied repository. When at least one ADR under `docs/adr/` is `proposed` after the run, `apply` SHALL write the next step to stderr: the count, then `ontrack review` as a shell command and as a prompt for a coding agent; standard output and the exit code SHALL NOT depend on it.
+
+#### Scenario: Next step after an import
+- **WHEN** `apply` imports three `proposed` ADRs
+- **THEN** stderr reads `next: 3 proposed ADRs to rule`, then `  from a shell:  claude "$(npx ontrack review)"`, then ``  as a prompt:   Run `npx ontrack review` and follow its output.``, and standard output and the exit code are what they are without it
+
+#### Scenario: No next step
+- **WHEN** no ADR under `docs/adr/` is `proposed` after the run
+- **THEN** `apply` writes nothing to stderr
 
 #### Scenario: Partly pending
 - **WHEN** a source has one `new` and one `revised` ADR

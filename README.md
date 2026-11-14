@@ -222,6 +222,17 @@ what remains after the run: `0` nothing left, `2` something still needs a
 human, `1` error. Every check runs before the first write, so an error never
 leaves a half-applied repository.
 
+When ADRs are `proposed` in `docs/adr/` after the run (the ones it imported,
+and any left from an earlier run), `apply` names the next step on stderr, as
+a shell command and as a prompt to give a coding agent. Standard output and
+the exit code are unchanged.
+
+```
+next: 3 proposed ADRs to rule
+  from a shell:  claude "$(npx ontrack review)"
+  as a prompt:   Run `npx ontrack review` and follow its output.
+```
+
 ## `ontrack instructions` output contract
 
 Coding agents read `AGENTS.md`, not ADRs. A trivoallan/governance ADR ships
