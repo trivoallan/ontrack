@@ -12,4 +12,4 @@
 ## 3. Verify
 
 - [x] 3.1 Run `npm test`, `npm run typecheck` and `npm run build`; verify all pass and coverage holds at 95 %
-- [ ] 3.2 Verify the pull request's checks pass
+- [x] 3.2 Verify the pull request's checks pass

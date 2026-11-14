@@ -29,14 +29,18 @@ The ADRs read, their status and their supersession SHALL be those of `instructio
 - **THEN** it carries no check
 
 ### Requirement: Unchecked decisions
-An ADR that carries decided traits (see `instructions`) and no check SHALL be reported as `unchecked`. An `accepted` ADR with neither decided traits nor a check SHALL NOT appear in the output.
+An ADR that carries decided traits (see `instructions`) and no check SHALL be reported as `unchecked`. An ADR whose command exits with code `78` SHALL be reported as `unchecked` too: the code is reserved for a command that has nothing to verify. An `accepted` ADR with neither decided traits nor a check SHALL NOT appear in the output.
 
 #### Scenario: Traits without a check
 - **WHEN** `trivoallan/ADR-0001-record-architecture-decisions` is `accepted` with a traits block and no `check:`
 - **THEN** it is reported as `unchecked`
 
+#### Scenario: Nothing to verify
+- **WHEN** an ADR carries the check `echo "commits.tool is none, nothing to check"; exit 78`
+- **THEN** it is reported as `unchecked`, its output is not printed, and it counts as unchecked in the last line
+
 ### Requirement: Running the commands
-`ontrack check` SHALL run each command through the system shell, with the project root as working directory and the caller's environment, one at a time, in the order of the ADR references. It SHALL run every command even after one has failed. A command passes when it exits with code `0`. Any other outcome fails: a non-zero exit code, a termination by signal, or a command that cannot be started. `ontrack check` itself MUST NOT create, modify or delete any file, and MUST NOT make any network call; what the commands do is theirs.
+`ontrack check` SHALL run each command through the system shell, with the project root as working directory, one at a time, in the order of the ADR references. The command's environment SHALL be the caller's, with `ONTRACK_ADR` set to the path of the ADR's file relative to the project root, with forward slashes: the value of the `rule:` line of a `fail`. It SHALL run every command even after one has failed. A command passes when it exits with code `0`, and is unchecked when it exits with code `78`. Any other outcome fails: another non-zero exit code, a termination by signal, or a command that cannot be started. `ontrack check` itself MUST NOT create, modify or delete any file, and MUST NOT make any network call; what the commands do is theirs.
 
 #### Scenario: Passing command
 - **WHEN** an ADR carries the check `true`
@@ -57,6 +61,18 @@ An ADR that carries decided traits (see `instructions`) and no check SHALL be re
 #### Scenario: A failure does not stop the run
 - **WHEN** `local/ADR-0001-a` carries the check `exit 1` and `local/ADR-0002-b` carries the check `true`
 - **THEN** `local/ADR-0001-a` is reported as `fail` and `local/ADR-0002-b` as `pass`
+
+#### Scenario: The command knows its ADR
+- **WHEN** `docs/adr/trivoallan/ADR-0006-commits.md` carries the check `test "$ONTRACK_ADR" = docs/adr/trivoallan/ADR-0006-commits.md`
+- **THEN** it is reported as `pass`
+
+#### Scenario: One path per command
+- **WHEN** `docs/adr/ADR-0001-a.md` and `docs/adr/trivoallan/ADR-0006-commits.md` both carry the check `echo "$ONTRACK_ADR"; exit 1`
+- **THEN** the output lines of each `fail` hold that ADR's own path, equal to its `rule:` line
+
+#### Scenario: The caller's environment is kept
+- **WHEN** the caller's environment holds `ONTRACK_TEST_MARK=kept` and an ADR carries the check `test "$ONTRACK_TEST_MARK" = kept`
+- **THEN** it is reported as `pass`
 
 ### Requirement: Conflicting traits stop the run
 When `instructions` would fail on a trait conflict or on an inline `traits:` value, `ontrack check` MUST fail the same way, with exit code `1` and an empty standard output, without running any command.
@@ -82,7 +98,7 @@ The output of a passing command SHALL NOT be printed. With no ADR to report, the
 - **THEN** the output is exactly `0 failed, 0 passed, 0 unchecked`
 
 ### Requirement: Exit code
-`ontrack check` SHALL exit with code `2` when at least one check failed, and with code `0` otherwise. `unchecked` ADRs do not change the exit code.
+`ontrack check` SHALL exit with code `2` when at least one check failed, and with code `0` otherwise. `unchecked` ADRs do not change the exit code, whether they carry no check or their command exited with `78`.
 
 #### Scenario: A failed check
 - **WHEN** one ADR's check fails and another's passes
@@ -90,4 +106,8 @@ The output of a passing command SHALL NOT be printed. With no ADR to report, the
 
 #### Scenario: Only passes and unchecked
 - **WHEN** one ADR's check passes and another ADR is `unchecked`
+- **THEN** the exit code is `0`
+
+#### Scenario: A command with nothing to verify
+- **WHEN** the only ADR carrying a check has the command `exit 78`
 - **THEN** the exit code is `0`
