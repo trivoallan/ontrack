@@ -21,9 +21,16 @@ asks a question and recommends an answer.
 
 Node 22.18 or later. Installing compiles ontrack once, which npm does on its own.
 
+<!-- x-release-please-start-version -->
+
 ```bash
-npm i -D ontrack@git+https://github.com/trivoallan/ontrack.git
+npm i -D ontrack@git+https://github.com/trivoallan/ontrack.git#v0.1.0
 ```
+
+<!-- x-release-please-end -->
+
+Every version is listed on the
+[releases page](https://github.com/trivoallan/ontrack/releases).
 
 Add a source with npm, under the alias of your choice:
 
@@ -456,6 +463,30 @@ check it as CI does:
 cd site
 npx likec4 serve ../docs/architecture/model      # local preview, reloads on change
 npx likec4 validate ../docs/architecture/model   # fails on an unknown element or a dangling relationship
+```
+
+### Releases
+
+[release-please](https://github.com/googleapis/release-please) keeps a pull
+request titled `chore: release X.Y.Z` open, computed from the commits on
+`main`. Merging it bumps the version, writes `CHANGELOG.md`, tags `vX.Y.Z`
+and creates the GitHub release; it also updates the version in the
+installation command above.
+
+The workflow opens that pull request with the repository secret
+`RELEASE_PLEASE_TOKEN`, a fine-grained token limited to this repository
+(contents and pull requests: read and write). When the token expires, the
+`release` workflow fails on the next push to `main`: renew it and update the
+secret.
+
+The token's value is kept in the macOS keychain (ADR-0015), so renewing the
+secret never shows it:
+
+```bash
+# store the new value (prompts for it; -U replaces the existing entry)
+security add-generic-password -U -a "$USER" -s ontrack-release-please-token -w
+# send it to GitHub
+security find-generic-password -s ontrack-release-please-token -w | gh secret set RELEASE_PLEASE_TOKEN --repo trivoallan/ontrack
 ```
 
 ## License
