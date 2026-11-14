@@ -63,6 +63,17 @@ export default defineConfig({
       logo: { src: '../docs/assets/logo.png' },
       favicon: '/logo.png',
       customCss: ['./src/adr.css'],
+      // Labels a reader understands, not directory names. What ontrack is
+      // for comes first; this repository's own decisions and architecture
+      // stay one click away, collapsed.
+      sidebar: [
+        { slug: 'tutorial' },
+        { slug: 'features' },
+        // ponytail: lists the one imported namespace; make it `adr` once the
+        // repository has ADRs of its own or a second source.
+        { label: 'ontrack on itself', collapsed: true, items: [{ autogenerate: { directory: 'adr/trivoallan' } }] },
+        { label: 'For contributors', collapsed: true, items: [{ autogenerate: { directory: 'architecture/arc42' } }] },
+      ],
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/trivoallan/ontrack' }],
     }),
   ],
