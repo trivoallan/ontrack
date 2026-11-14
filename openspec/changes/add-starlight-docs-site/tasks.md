@@ -22,8 +22,8 @@
 ## 4. Continuous integration and publication
 
 - [x] 4.1 Add `.github/workflows/docs.yml` with the `build` job (pull requests and pushes to `main`) and the `deploy` job (pushes to `main` only); verify the `build` job passes on the pull request and that no deployment ran
-- [ ] 4.2 Ask the repository owner to enable GitHub Pages with "GitHub Actions" as the source; verify in the repository settings before merging
-- [ ] 4.3 After the merge, verify `https://trivoallan.github.io/ontrack/` serves the home page and that a link between two ADRs works there
+- [x] 4.2 Ask the repository owner to enable GitHub Pages with "GitHub Actions" as the source; verify in the repository settings before merging
+- [x] 4.3 After the merge, verify `https://trivoallan.github.io/ontrack/` serves the home page and that a link between two ADRs works there
 
 ## 5. Isolation and documentation
 
