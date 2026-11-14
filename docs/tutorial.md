@@ -154,5 +154,7 @@ agents read.
   question or changes one you answered.
 - Write your own source: a `package.json` with an `ontrack` key that points
   to a directory of ADRs.
+- Read [how ontrack works](how-it-works.md): the pieces, the life of a
+  question, and the cycle.
 - Look up every command, its options and its exit codes in the
   [commands reference](commands.md).

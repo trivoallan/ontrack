@@ -68,7 +68,7 @@ export default defineConfig({
       // stay one click away, collapsed.
       sidebar: [
         { slug: 'tutorial' },
-        { slug: 'features' },
+        { slug: 'how-it-works' },
         { slug: 'commands' },
         // ponytail: lists the one imported namespace; make it `adr` once the
         // repository has ADRs of its own or a second source.
