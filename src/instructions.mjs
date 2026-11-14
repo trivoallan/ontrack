@@ -81,6 +81,25 @@ function readAdr(root, { dir, ns, file }) {
   };
 }
 
+// Dotted paths of the mapping keys in a traits block, and those with no key
+// nested under them. List items are not keys: they belong to their parent.
+function keyPaths(traits) {
+  const stack = [];
+  const paths = new Set();
+  const parents = new Set();
+  for (const line of traits) {
+    const m = /^(\s*)([A-Za-z_][\w-]*)\s*:/.exec(line);
+    if (m === null) continue;
+    const indent = m[1].length;
+    while (stack.length > 0 && stack.at(-1).indent >= indent) stack.pop();
+    if (stack.length > 0) parents.add(stack.at(-1).path);
+    const p = stack.length > 0 ? `${stack.at(-1).path}.${m[2]}` : m[2];
+    stack.push({ indent, path: p });
+    paths.add(p);
+  }
+  return { paths, leaves: new Set([...paths].filter((p) => !parents.has(p))) };
+}
+
 /** Every readable ADR of the repository, unsorted. Reads docs/adr/ only. */
 export function readAdrs(root) {
   return adrFiles(root).map((f) => readAdr(root, f)).filter(Boolean);
@@ -88,8 +107,8 @@ export function readAdrs(root) {
 
 /**
  * { decided, pending }: the ADRs whose traits are in force, and those still
- * `proposed`, each sorted by reference. Throws when two decided ADRs share a
- * top-level trait key. Reads docs/adr/ only.
+ * `proposed`, each sorted by reference. Throws when two decided ADRs decide
+ * the same trait key. Reads docs/adr/ only.
  */
 export function buildInstructions(root) {
   const adrs = readAdrs(root);
@@ -104,19 +123,21 @@ export function buildInstructions(root) {
   }
 
   const decided = adrs.filter((a) => a.traits && !superseded.has(a)).sort(byRef);
-  const owner = new Map();
+  const pathOwner = new Map();
+  const leafOwner = new Map();
   for (const adr of decided) {
-    for (const line of adr.traits) {
-      const key = /^([A-Za-z_][\w-]*)\s*:/.exec(line)?.[1];
-      if (key === undefined) continue;
-      if (owner.has(key)) {
-        throw new Error(
-          `trait "${key}" is decided by both ${owner.get(key)} and ${adr.ref}; ` +
-            'supersede one of them (supersedes:) to settle it',
-        );
-      }
-      owner.set(key, adr.ref);
+    const { paths, leaves } = keyPaths(adr.traits);
+    // A leaf of one ADR clashes with any path of the other: same key, or a
+    // value one sets where the other nests keys.
+    const clash = [...leaves].find((p) => pathOwner.has(p)) ?? [...paths].find((p) => leafOwner.has(p));
+    if (clash !== undefined) {
+      throw new Error(
+        `trait "${clash}" is decided by both ${pathOwner.get(clash)} and ${adr.ref}; ` +
+          'supersede one of them (supersedes:) to settle it',
+      );
     }
+    for (const p of paths) pathOwner.set(p, adr.ref);
+    for (const p of leaves) leafOwner.set(p, adr.ref);
   }
   const pending = adrs.filter((a) => a.status === 'proposed').sort(byRef);
   return { decided, pending };
