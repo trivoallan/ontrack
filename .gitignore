@@ -4,3 +4,4 @@ node_modules/
 .nanopm/
 CONTEXT.md
 .claude/
+.serena/
