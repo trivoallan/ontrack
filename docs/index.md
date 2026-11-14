@@ -88,6 +88,10 @@ platform: 2 revised, 1 new, 3 unchanged
 output, and the repository knows which answers to take again. `plan` changes
 no file and makes no network call.
 
+`plan` reads the source as the repository has installed it. A weekly job
+that updates the source is what tells a repository the question moved:
+[Run ontrack in CI](run-ontrack-in-ci.md) gives it to copy.
+
 ## Next to what you already have
 
 | You have | What it does | What it leaves open |
