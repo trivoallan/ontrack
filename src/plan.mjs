@@ -72,8 +72,11 @@ export function hasPendingChanges(plan) {
 
 export const stem = (file) => file.replace(/\.md$/, '');
 export const row = (category, text) => `  ${category.padEnd(12)}  ${text}`;
-/** An ADR's name, followed by its title when it has one. */
-export const label = (adr) => stem(adr.name) + (adr.title ? `  ${adr.title}` : '');
+/** An ADR's name, followed by its title when the name carries no slug of its own. */
+export const label = (adr) => {
+  const name = stem(adr.name);
+  return name + (adr.title && !/\d-./.test(name) ? `  ${adr.title}` : '');
+};
 
 /** The contract output (see README). */
 export function formatPlan(plan) {

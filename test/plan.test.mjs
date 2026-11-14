@@ -200,6 +200,11 @@ test('ADR without a title ends with its name, no trailing spaces', () => {
   assert.match(formatPlan(buildPlan(root)), /^ {2}new {11}SDR-0020$/m);
 });
 
+test('ADR whose name carries a slug shows no title', () => {
+  const root = makeProject({ sources: { platform: { 'ADR-0006-commits.md': adr(1, 'proposed', 'Commits') } } });
+  assert.match(formatPlan(buildPlan(root)), /^ {2}new {11}ADR-0006-commits$/m);
+});
+
 // Exit code
 
 test('undetermined only gives 2', async () => {

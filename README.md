@@ -44,10 +44,10 @@ npx ontrack plan
 
 ```
 trivoallan: 4 new, 0 unchanged
-  new           ADR-0001-record-architecture-decisions  Record architecture decisions
-  new           ADR-0002-localization  Localization
-  new           ADR-0006-commits  Commits
-  new           ADR-0009-branching  Branching
+  new           ADR-0001-record-architecture-decisions
+  new           ADR-0002-localization
+  new           ADR-0006-commits
+  new           ADR-0009-branching
 ```
 
 ## Usage
@@ -91,7 +91,7 @@ migration: 5 files docs/adr/ → docs/adr/platform/
 ```
 
 - Line 1, per source: `<alias>: <count per category>`, in the order revised, new, removed, undetermined, unreadable, unchanged. Zero counts are omitted, except "unchanged".
-- Then one line per ADR that is not unchanged, sorted by name: two spaces, the category in a 12-character column, two spaces, the file name without `.md`, then two spaces and the ADR's title. A `revised` line ends with `(revision <local> → <upstream>)`.
+- Then one line per ADR that is not unchanged, sorted by name: two spaces, the category in a 12-character column, two spaces, the file name without `.md`, then two spaces and the ADR's title, unless the name already carries a slug (`ADR-0006-commits`). A `revised` line ends with `(revision <local> → <upstream>)`.
 - The title is the frontmatter `title:` key, or else the first `# ` heading, without a leading `<name>: ` that repeats the file name. It comes from the source's copy (the local copy for a `removed` ADR). An ADR without a title shows its name only.
 - Categories: `new` (not imported yet), `revised` (the question moved upstream), `removed` (no longer shipped by the source), `undetermined` (no usable `revision:` to compare), `unreadable` (no recognizable frontmatter).
 - A flat-layout migration (`docs/adr/<file>` that belongs to the source but is not under `docs/adr/<alias>/`) is always shown: `migration: <n> file(s) docs/adr/ → docs/adr/<alias>/`, then one `move` line per file.
