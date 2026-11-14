@@ -7,8 +7,8 @@
 
 ## 2. Keep the pins current
 
-- [ ] 2.1 Add `.github/dependabot.yml` with one `github-actions` entry (directory `/`, weekly, `commit-message.prefix: chore`); verify the file is accepted under the repository's Insights → Dependency graph → Dependabot tab after the push
+- [x] 2.1 Add `.github/dependabot.yml` with one `github-actions` entry (directory `/`, weekly, `commit-message.prefix: chore`); verify the file is accepted under the repository's Insights → Dependency graph → Dependabot tab after the push
 
 ## 3. Verify
 
-- [ ] 3.1 Open the pull request and verify the `test` and `node-20` checks both pass with the pinned actions
+- [x] 3.1 Open the pull request and verify the `test` and `node-20` checks both pass with the pinned actions
