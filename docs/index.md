@@ -129,3 +129,6 @@ ontrack is at version 0.2.0. It is young, and it changes.
 The [tutorial](tutorial.md) takes four commands. On a fresh repository, the
 first three ran in 14 seconds and left an `AGENTS.md` with its first rule. The
 agent then took about a minute to propose its first answer.
+
+To see what ontrack does command by command first, read the
+[features](features.md).
