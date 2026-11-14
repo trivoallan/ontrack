@@ -20,5 +20,5 @@
 
 ## 5. Verify
 
-- [ ] 5.1 Run `npm test`; verify all suites pass and coverage holds at 95 %, and that the pull request's `test` and `node-20` checks pass
-- [ ] 5.2 After merge, verify the `$id` URL returns the committed file
+- [x] 5.1 Run `npm test`; verify all suites pass and coverage holds at 95 %, and that the pull request's `test` and `node-20` checks pass
+- [x] 5.2 After merge, verify the `$id` URL returns the committed file

@@ -12,4 +12,4 @@
 
 ## 3. Verify
 
-- [ ] 3.1 Verify `npm pack --dry-run` does not list `.githooks/`, and that the pull request's checks pass
+- [x] 3.1 Verify `npm pack --dry-run` does not list `.githooks/`, and that the pull request's checks pass

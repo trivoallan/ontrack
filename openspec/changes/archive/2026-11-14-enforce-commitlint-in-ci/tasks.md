@@ -13,5 +13,5 @@
 
 ## 3. Gate
 
-- [ ] 3.1 With the maintainer's go-ahead, add `commitlint` to the required status checks of ruleset `27253716` (other fields unchanged); verify `gh api repos/trivoallan/ontrack/rulesets/27253716 --jq '.rules[].parameters.required_status_checks[].context'` lists it
+- [x] 3.1 With the maintainer's go-ahead, add `commitlint` to the required status checks of ruleset `27253716` (other fields unchanged); verify `gh api repos/trivoallan/ontrack/rulesets/27253716 --jq '.rules[].parameters.required_status_checks[].context'` lists it
 - [x] 3.2 Verify `npm pack --dry-run` lists no commitlint file and `npm test` still passes

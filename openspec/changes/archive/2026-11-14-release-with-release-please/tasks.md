@@ -12,10 +12,10 @@
 
 ## 3. Secret (maintainer)
 
-- [ ] 3.1 Ask the maintainer to create a fine-grained token for `trivoallan/ontrack` (contents and pull requests: read and write) and store it as the repository secret `RELEASE_PLEASE_TOKEN`; verify `gh secret list` shows the name
+- [x] 3.1 Ask the maintainer to create a fine-grained token for `trivoallan/ontrack` (contents and pull requests: read and write) and store it as the repository secret `RELEASE_PLEASE_TOKEN`; verify `gh secret list` shows the name
 
 ## 4. First release
 
-- [ ] 4.1 After merge, verify the `release` workflow run on `main` succeeds and opens a pull request titled `chore: release 0.2.0` whose checks (`test`, `node-20`, and `commitlint` if required by then) run
-- [ ] 4.2 Verify the release pull request's diff sets `0.2.0` in `package.json`, `package-lock.json`, `.release-please-manifest.json` and the README install command, and adds `CHANGELOG.md`
-- [ ] 4.3 With the maintainer's go-ahead, merge it; verify tag `v0.2.0` and its GitHub release exist, and that `npm i -D ontrack@git+https://github.com/trivoallan/ontrack.git#v0.2.0` in a scratch directory installs a working `npx ontrack --version` printing `0.2.0`
+- [x] 4.1 After merge, verify the `release` workflow run on `main` succeeds and opens a pull request titled `chore: release 0.2.0` whose checks (`test`, `node-20`, and `commitlint` if required by then) run
+- [x] 4.2 Verify the release pull request's diff sets `0.2.0` in `package.json`, `package-lock.json`, `.release-please-manifest.json` and the README install command, and adds `CHANGELOG.md`
+- [x] 4.3 With the maintainer's go-ahead, merge it; verify tag `v0.2.0` and its GitHub release exist, and that `npm i -D ontrack@git+https://github.com/trivoallan/ontrack.git#v0.2.0` in a scratch directory installs a working `npx ontrack --version` printing `0.2.0`

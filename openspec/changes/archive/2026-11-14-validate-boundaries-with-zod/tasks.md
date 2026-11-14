@@ -20,4 +20,4 @@
 
 - [x] 4.1 Run `npm test`; verify every suite passes and the three coverage thresholds hold at 95 %
 - [x] 4.2 Verify `git diff main --stat -- test/` shows only added tests (no edited expectation in existing ones), and that `ontrack plan` in this repository prints the same output as on `main`
-- [ ] 4.3 Verify the pull request's `test` and `node-20` checks pass
+- [x] 4.3 Verify the pull request's `test` and `node-20` checks pass
