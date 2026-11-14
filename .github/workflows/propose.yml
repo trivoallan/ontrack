@@ -163,6 +163,29 @@ jobs:
             digits and hyphens, or an empty string. Return `reason`: two or
             three sentences on what you decided.
 
+      # The action hides what the agent printed, the reason of a failure
+      # included. When the run ended in error on its first turn and cost
+      # nothing, the model produced no text: what is left is the tool's own
+      # error (a refused call, a bad option), shown here cut short. After a
+      # longer run nothing is shown, since the text could be the agent's.
+      - id: diagnose
+        if: failure() && steps.agent.conclusion == 'failure'
+        env:
+          EXECUTION_FILE: ${{ steps.agent.outputs.execution_file }}
+        run: |
+          file="${EXECUTION_FILE:-$RUNNER_TEMP/claude-execution-output.json}"
+          if [ ! -s "$file" ]; then
+            echo "The agent left no execution file."
+            exit 0
+          fi
+          jq -rs 'flatten
+            | (map(select(.type == "result")) | last) as $r
+            | if $r == null then "The execution file holds no result."
+              elif ($r.num_turns // 0) > 1 or ($r.total_cost_usd // 0) > 0 then "The agent ran for more than one turn: its output stays hidden."
+              else ($r | del(.usage, .modelUsage, .session_id, .uuid) | tostring)
+              end' "$file" | tr -d '\r' | sed 's/::/: :/g' | head -c 800
+          echo
+
       # The name ends up in a branch name: checked here, and again in the job
       # that uses it. The reasons are the agent's words: cut short and shown
       # as plain text.

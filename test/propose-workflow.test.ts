@@ -216,3 +216,30 @@ test('an open issue is told when no change was opened, and when the run failed',
   assert.match(report({ STATE: 'open', OUTCOME: 'none' }), /--body No change was opened/);
   assert.match(report({ STATE: 'open', OUTCOME: '' }), /--body The proposal run failed/);
 });
+
+/** What the `diagnose` step of `draft` prints for an execution file. */
+function diagnose(messages: unknown[]): string {
+  const root = makeTree({ 'execution.json': JSON.stringify(messages) });
+  const run = spawnSync('bash', ['-e', '-c', stepScript('diagnose')], {
+    cwd: root,
+    encoding: 'utf8',
+    env: { ...process.env, EXECUTION_FILE: path.join(root, 'execution.json'), RUNNER_TEMP: root },
+  });
+  assert.equal(run.status, 0, run.stderr);
+  return run.stdout;
+}
+
+test('an agent that failed on its first turn shows the error of the tool, cut short', () => {
+  const out = diagnose([
+    { type: 'system', subtype: 'init' },
+    { type: 'result', is_error: true, num_turns: 1, total_cost_usd: 0, result: `API Error: 403 ::add-mask::x ${'y'.repeat(2000)}` },
+  ]);
+  assert.match(out, /API Error: 403 : :add-mask: :x/);
+  assert.ok(out.length <= 801);
+});
+
+test('an agent that ran for several turns keeps its output hidden', () => {
+  const out = diagnose([{ type: 'result', is_error: true, num_turns: 4, total_cost_usd: 0.2, result: 'text the issue may have shaped' }]);
+  assert.doesNotMatch(out, /text the issue/);
+  assert.match(out, /stays hidden/);
+});

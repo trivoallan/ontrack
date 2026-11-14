@@ -242,6 +242,12 @@ required, not optional, when the service account is in several. The
 provider's log of authentication events names the reason of each refusal;
 the run log hides it.
 
+Once the exchange succeeded, the first call to the model still failed, and
+neither the run log nor the authentication events said why: the action
+hides everything the agent prints. The `diagnose` step shows the tool's own
+error when, and only when, the run ended on its first turn at no cost. No
+model text exists then, so nothing shaped by the issue can reach the log.
+
 Alternative: a repository secret `ANTHROPIC_API_KEY` with a low spending
 limit. Simpler to set up; it has to be stored, rotated, and it leaks whole.
 
