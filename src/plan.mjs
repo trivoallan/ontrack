@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
-import { compareRevision, readRevision } from './revision.mjs';
+import { compareRevision, readRevision, readTitle } from './revision.mjs';
 import { discoverSources } from './sources.mjs';
 
 const ORDER = ['revised', 'new', 'removed', 'undetermined', 'unreadable', 'unchanged'];
@@ -31,18 +31,19 @@ function planSource(root, source) {
 
   for (const file of shipped) {
     const upstream = readFileSync(path.join(source.adrDir, file), 'utf8');
+    const title = readTitle(upstream, stem(file));
     let localPath = path.join(localDir, file);
     if (!existsSync(localPath)) {
       localPath = path.join(adrRoot, file);
       if (!existsSync(localPath)) {
-        adrs.push({ name: file, category: 'new' });
+        adrs.push({ name: file, category: 'new', title });
         continue;
       }
       migration.push(file);
     }
     const local = readFileSync(localPath, 'utf8');
     const result = compareRevision(local, upstream);
-    const adr = { name: file, category: CATEGORY[result] ?? result };
+    const adr = { name: file, category: CATEGORY[result] ?? result, title };
     if (adr.category === 'revised') {
       adr.from = readRevision(local);
       adr.to = readRevision(upstream);
@@ -51,7 +52,9 @@ function planSource(root, source) {
   }
 
   for (const file of existsSync(localDir) ? markdownFiles(localDir) : []) {
-    if (!shipped.includes(file)) adrs.push({ name: file, category: 'removed' });
+    if (shipped.includes(file)) continue;
+    const title = readTitle(readFileSync(path.join(localDir, file), 'utf8'), stem(file));
+    adrs.push({ name: file, category: 'removed', title });
   }
   adrs.sort((a, b) => a.name.localeCompare(b.name));
   return { namespace: source.namespace, adrs, migration };
@@ -69,6 +72,7 @@ export function hasPendingChanges(plan) {
   );
 }
 
+const stem = (file) => file.replace(/\.md$/, '');
 const row = (category, text) => `  ${category.padEnd(12)}  ${text}`;
 
 /** The contract output (see README). */
@@ -84,9 +88,9 @@ export function formatPlan(plan) {
 
     for (const adr of source.adrs) {
       if (adr.category === 'unchanged') continue;
-      const name = adr.name.replace(/\.md$/, '');
-      const tail = adr.category === 'revised' ? `  revision ${adr.from} → ${adr.to}` : '';
-      lines.push(row(adr.category, name + tail));
+      const title = adr.title ? `  ${adr.title}` : '';
+      const revision = adr.category === 'revised' ? ` (revision ${adr.from} → ${adr.to})` : '';
+      lines.push(row(adr.category, stem(adr.name) + title + revision));
     }
 
     if (source.migration.length > 0) {

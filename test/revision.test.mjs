@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readRevision, compareRevision } from '../src/revision.mjs';
+import { readRevision, compareRevision, readTitle } from '../src/revision.mjs';
 
 const adr = (...frontmatter) => ['---', ...frontmatter, '---', '', '# Title', ''].join('\n');
 
@@ -94,4 +94,49 @@ test('imported revision ahead of upstream: up-to-date', () => {
 
 test('unreadable imported ADR, whatever upstream holds', () => {
   assert.equal(compareRevision('no frontmatter', adr('revision: 9')), 'unreadable');
+});
+
+// Reading the title
+
+test('frontmatter title', () => {
+  assert.equal(readTitle(adr('title: Commits', 'revision: 1'), 'SDR-0006'), 'Commits');
+});
+
+test('quoted frontmatter title', () => {
+  assert.equal(readTitle(adr('title: "Forge and CI"'), 'SDR-0010'), 'Forge and CI');
+});
+
+test('heading repeating the name', () => {
+  const text = '---\nrevision: 1\n---\n\n# ADR-0001: Record significant decisions as ADRs\n';
+  assert.equal(readTitle(text, 'ADR-0001'), 'Record significant decisions as ADRs');
+});
+
+test('plain heading', () => {
+  assert.equal(readTitle('---\nrevision: 1\n---\n# Software Architecture\n', 'SDR-0003'), 'Software Architecture');
+});
+
+test('heading that only starts like another name is kept whole', () => {
+  assert.equal(readTitle('---\n---\n# Commits: a convention\n', 'SDR-0006'), 'Commits: a convention');
+});
+
+test('no title', () => {
+  assert.equal(readTitle('---\nrevision: 1\n---\n\nNo heading here.\n', 'X'), null);
+});
+
+test('empty title falls back to null', () => {
+  assert.equal(readTitle(adr('title: ""'), 'X'), null);
+  assert.equal(readTitle('---\n---\n# X:\n', 'X'), null);
+});
+
+test('unreadable frontmatter still reads the heading', () => {
+  assert.equal(readTitle('# Rules\n\nBody.\n', 'X'), 'Rules');
+});
+
+test('the frontmatter example in the body is not a title source', () => {
+  const text = '---\nrevision: 1\n---\n# Real title\n\n```yaml\n---\ntitle: Example\n---\n```\n';
+  assert.equal(readTitle(text, 'X'), 'Real title');
+});
+
+test('CRLF title', () => {
+  assert.equal(readTitle('---\r\ntitle: Commits\r\n---\r\n', 'X'), 'Commits');
 });

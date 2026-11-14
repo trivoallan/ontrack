@@ -45,6 +45,15 @@ export function makeProject({ sources = {}, local = {} } = {}) {
   return makeTree(files);
 }
 
-/** A minimal ADR with the given revision (omit it for none). */
-export const adr = (revision, status = 'proposed') =>
-  ['---', `status: ${status}`, ...(revision === undefined ? [] : [`revision: ${revision}`]), '---', '', '# ADR', ''].join('\n');
+/** A minimal ADR with the given revision (omit it for none) and optional title. */
+export const adr = (revision, status = 'proposed', title) =>
+  [
+    '---',
+    `status: ${status}`,
+    ...(revision === undefined ? [] : [`revision: ${revision}`]),
+    ...(title === undefined ? [] : [`title: ${title}`]),
+    '---',
+    '',
+    'Body.',
+    '',
+  ].join('\n');
