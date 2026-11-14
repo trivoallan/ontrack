@@ -1,6 +1,6 @@
 ## 1. Prerequisites a person sets on GitHub
 
-- [ ] 1.1 Create the `ontrack:propose` label in `trivoallan/ontrack`
+- [x] 1.1 Create the `ontrack:propose` label in `trivoallan/ontrack`
 - [ ] 1.2 Set the repository secret `ANTHROPIC_API_KEY`
 - [ ] 1.3 Allow GitHub Actions to create pull requests (Settings, Actions, Workflow permissions)
 
