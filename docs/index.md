@@ -156,6 +156,7 @@ read it because a `CLAUDE.md` exists without importing it.
 ### How do I write my own source?
 
 A `package.json` with an `ontrack` key and a directory of ADRs.
+[Write your own source](write-your-own-source.md) takes four steps.
 [trivoallan/governance](https://github.com/trivoallan/governance) is a
 working example to start from.
 
