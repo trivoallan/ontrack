@@ -24,7 +24,7 @@ Node 22.18 or later. Installing compiles ontrack once, which npm does on its own
 <!-- x-release-please-start-version -->
 
 ```bash
-npm i -D ontrack@git+https://github.com/trivoallan/ontrack.git#v0.1.0
+npm i -D ontrack@git+https://github.com/trivoallan/ontrack.git#v0.2.0
 ```
 
 <!-- x-release-please-end -->
