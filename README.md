@@ -525,16 +525,34 @@ security add-generic-password -U -a "$USER" -s ontrack-release-please-token -w
 security find-generic-password -s ontrack-release-please-token -w | gh secret set RELEASE_PLEASE_TOKEN --repo trivoallan/ontrack
 ```
 
-Publishing uses a second repository secret, `NPM_TOKEN`: a granular npm
-access token limited to the `@trivoallan/ontrack` package, read and write.
-Without it, or once it expires, the `publish` job fails after the GitHub
-release is made: renew the token, update the secret and run the job again.
-It is kept and sent the same way:
+Publishing to npm stores no token. The `publish` job uses npm's
+[trusted publishing](https://docs.npmjs.com/trusted-publishers): the
+registry accepts the package because the job proves, by OIDC, that it is the
+`release.yml` workflow of this repository. It is set up once, on npmjs.com,
+in the package's settings, under Trusted Publisher:
+
+| Field | Value |
+| --- | --- |
+| Publisher | GitHub Actions |
+| Organization or user | `trivoallan` |
+| Repository | `ontrack` |
+| Workflow filename | `release.yml` |
+| Environment name | *(empty)* |
+| Allowed actions | `npm publish` |
+
+A new configuration expires unless a publish succeeds within two days, so
+create it right before merging a release pull request. If the settings of
+`@trivoallan/ontrack` cannot be reached because no version exists yet,
+publish the first one by hand from a checkout of its tag, then configure:
 
 ```bash
-security add-generic-password -U -a "$USER" -s ontrack-npm-token -w
-security find-generic-password -s ontrack-npm-token -w | gh secret set NPM_TOKEN --repo trivoallan/ontrack
+npm login
+npm publish
 ```
+
+Once a release has been published by the workflow, set the package's
+publishing access to "Require two-factor authentication and disallow
+tokens": no token can then publish it.
 
 ## License
 
