@@ -7,25 +7,12 @@ import { spawnSync } from 'node:child_process';
 import { chmodSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { cleanup, makeTree } from './helpers/project.ts';
+import { readWorkflow, stepScriptOf } from './helpers/workflow.ts';
 
 after(cleanup);
 
-const workflow = readFileSync(new URL('../.github/workflows/propose.yml', import.meta.url), 'utf8');
-
-/** The `run: |` script of the step declared with `- id: <id>`. */
-function stepScript(id: string): string {
-  const lines = workflow.split('\n');
-  const start = lines.findIndex((l) => l.trim() === `- id: ${id}`);
-  assert.notEqual(start, -1, `no step with id ${id}`);
-  const run = lines.findIndex((l, i) => i > start && l.trim() === 'run: |');
-  const indent = ' '.repeat(lines[run].indexOf('run:') + 2);
-  const body: string[] = [];
-  for (const line of lines.slice(run + 1)) {
-    if (line.trim() !== '' && !line.startsWith(indent)) break;
-    body.push(line.slice(indent.length));
-  }
-  return body.join('\n');
-}
+const workflow = readWorkflow('propose.yml');
+const stepScript = (id: string) => stepScriptOf(workflow, id);
 
 test('the workflow stores no credential and only the agent job may ask for an identity token', () => {
   assert.doesNotMatch(workflow, /secrets\./);

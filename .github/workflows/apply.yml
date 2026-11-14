@@ -1,0 +1,118 @@
+name: apply
+
+# docs/adr/ADR-0003-a-label-on-an-approved-pull-request-starts-its-apply.md:
+# a maintainer adds the `ontrack:apply` label to a pull request that carries a
+# change proposal, and a remote session opens to apply it with them. Nothing
+# is applied here: this workflow is the gate in front of that session, which
+# can be started in no other way.
+#
+# The gate lets a request through only when a person with write access has
+# approved the pull request at its current head commit. An approval given
+# before a push does not count, and a bot's approval never does.
+#
+# `pull_request_target`, so that the workflow and the secret come from the
+# default branch whatever the pull request contains. It is safe here for one
+# reason: nothing of the pull request is checked out or executed (ADR-0011
+# rule 5). Keep it that way.
+on:
+  pull_request_target:
+    types: [labeled]
+
+permissions: {}
+
+# One request at a time per pull request.
+concurrency:
+  group: apply-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    if: github.event.label.name == 'ontrack:apply'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR: ${{ github.event.pull_request.number }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+      STATE: ${{ github.event.pull_request.state }}
+    steps:
+      # Fixed commands, no agent. The reviews are read from the API when the
+      # job runs; the head commit is the one the label was added on.
+      #
+      # A review counts when its author is a person (not a bot) whose
+      # association with the repository is owner, member or collaborator, and
+      # when it is that person's last word: a later request for changes or a
+      # dismissal cancels an approval, a later comment does not.
+      # ponytail: the association is trusted as write access. On a repository
+      # with read-only collaborators, ask the permission endpoint instead.
+      - id: gate
+        run: |
+          verdict() { echo "verdict=$1" >> "$GITHUB_OUTPUT"; echo "$1"; exit 0; }
+          [ "$STATE" = "open" ] || verdict closed
+          [ "$HEAD_REPO" = "$GITHUB_REPOSITORY" ] || verdict fork
+          reviews=$(gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/pulls/${PR}/reviews")
+          last=$(printf '%s' "$reviews" | jq -c '
+            [ .[][]
+              | select(.user.type == "User")
+              | select(.author_association == "OWNER" or .author_association == "MEMBER" or .author_association == "COLLABORATOR")
+              | select(.state == "APPROVED" or .state == "CHANGES_REQUESTED" or .state == "DISMISSED") ]
+            | group_by(.user.login) | map(last)')
+          if [ "$(printf '%s' "$last" | jq 'map(select(.state == "CHANGES_REQUESTED")) | length')" != "0" ]; then
+            verdict changes-requested
+          fi
+          if [ "$(printf '%s' "$last" | jq --arg sha "$HEAD_SHA" 'map(select(.state == "APPROVED" and .commit_id == $sha)) | length')" != "0" ]; then
+            verdict approved
+          fi
+          if [ "$(printf '%s' "$last" | jq 'map(select(.state == "APPROVED")) | length')" != "0" ]; then
+            verdict stale
+          fi
+          verdict not-approved
+
+      # The one call that starts a session. The token can do nothing else. The
+      # text is all the session learns from here: a number and a commit, built
+      # from the event, never from the pull request's own text. No retry: a
+      # second call would open a second session.
+      - id: fire
+        if: steps.gate.outputs.verdict == 'approved'
+        env:
+          ROUTINE_ID: ${{ vars.ONTRACK_APPLY_ROUTINE_ID }}
+          TOKEN: ${{ secrets.ONTRACK_APPLY_FIRE_TOKEN }}
+        run: |
+          body=$(jq -nc --arg repo "$GITHUB_REPOSITORY" --arg pr "$PR" --arg sha "$HEAD_SHA" \
+            '{text: "repository=\($repo) pull_request=\($pr) head_commit=\($sha)"}')
+          curl --silent --show-error --fail-with-body --max-time 60 \
+            -X POST "https://api.anthropic.com/v1/claude_code/routines/${ROUTINE_ID}/fire" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "anthropic-beta: experimental-cc-routine-2026-04-01" \
+            -H "Content-Type: application/json" \
+            -d "$body" > /dev/null
+          echo "started=true" >> "$GITHUB_OUTPUT"
+
+      # Fixed sentences. The link to the session is not posted: its owner
+      # finds it in their own list of sessions.
+      - id: report
+        if: always()
+        env:
+          VERDICT: ${{ steps.gate.outputs.verdict }}
+          STARTED: ${{ steps.fire.outputs.started }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          case "${VERDICT}:${STARTED}" in
+            approved:true) text="An apply session was started for commit ${HEAD_SHA}. Its owner finds it in their Claude Code sessions." ;;
+            approved:*) text="The pull request is approved, but the apply session could not be started. Run: ${RUN}" ;;
+            stale:*) text="Not applied: the approval was given before the last push. Approve commit ${HEAD_SHA}, then add the label again." ;;
+            changes-requested:*) text="Not applied: a reviewer has requested changes." ;;
+            not-approved:*) text="Not applied: a person with write access must approve this pull request first. Approve it, then add the label again." ;;
+            fork:*) text="Not applied: the branch of this pull request is in another repository." ;;
+            closed:*) text="Not applied: this pull request is closed." ;;
+            *) text="The apply request failed. Run: ${RUN}" ;;
+          esac
+          gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body "$text"
+
+      # Consumed whatever the outcome: adding it again is the only way to ask
+      # again.
+      - if: always()
+        run: gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --remove-label 'ontrack:apply'
