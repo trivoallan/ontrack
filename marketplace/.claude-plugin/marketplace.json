@@ -1,0 +1,18 @@
+{
+  "name": "ontrack-tools",
+  "description": "The Claude Code plugins this repository relies on, each pinned to a commit (ADR-0017).",
+  "owner": {
+    "name": "Tristan Rivoallan"
+  },
+  "plugins": [
+    {
+      "name": "arc42-toolkit",
+      "description": "arc42 architecture documentation skills, for the document ADR-0010 rules.",
+      "source": {
+        "source": "github",
+        "repo": "MSiccDev/arc42-toolkit",
+        "sha": "97492c34cdbdb87dc6ea97ae6edbd9673167aed5"
+      }
+    }
+  ]
+}
