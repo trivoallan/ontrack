@@ -188,6 +188,16 @@ test('an existing target aborts before any write', () => {
   assert.throws(() => planActions(root, plan), /docs\/adr\/platform\/A\.md already exists/);
 });
 
+test('a mistyped option writes nothing', async () => {
+  const root = makeProject({ sources: { platform: { 'NEW.md': adr(1) } } });
+  const before = snapshot(root);
+  const r = await run(root, 'apply', '--prunee');
+  assert.equal(r.code, 1);
+  assert.match(r.stderr, /prunee/);
+  assert.equal(r.stdout, '');
+  assert.deepEqual(snapshot(root), before);
+});
+
 // Dry run
 
 test('dry run of confirm all names both ADRs and writes nothing', async () => {

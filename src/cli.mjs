@@ -18,7 +18,10 @@ const defaultCommands = [plan, apply, instructions];
 export async function main(argv, io, commands = defaultCommands) {
   const args = argv.length === 0 ? ['--help'] : argv;
   let usageError;
-  let run; // promise of the selected handler, awaited here rather than by yargs
+  // The selected handler, called here once parsing succeeded. yargs calls a
+  // command's handler even when strict mode then rejects an unknown option,
+  // so the handler must not do its work from inside the parse.
+  let run;
 
   const cli = yargs()
     .scriptName('ontrack')
@@ -37,7 +40,7 @@ export async function main(argv, io, commands = defaultCommands) {
     cli.command({
       ...mod,
       handler: (parsed) => {
-        run = Promise.resolve().then(() => mod.handler({ ...parsed, io }));
+        run = () => mod.handler({ ...parsed, io });
       },
     });
   }
@@ -53,7 +56,7 @@ export async function main(argv, io, commands = defaultCommands) {
   if (output) io.stdout.write(`${output}\n`);
   if (!run) return 0;
   try {
-    return await run;
+    return await run();
   } catch (err) {
     io.stderr.write(`ontrack: ${err.message}\n`);
     return 1;
