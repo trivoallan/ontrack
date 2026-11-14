@@ -5,3 +5,7 @@ node_modules/
 CONTEXT.md
 .claude/
 .serena/
+
+# Documentation site (site/)
+site/dist/
+site/.astro/

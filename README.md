@@ -307,6 +307,21 @@ npm install
 npm test     # tests and coverage; fails below 95% lines, branches or functions
 ```
 
+### Documentation site
+
+The pages under `docs/` are published at
+<https://trivoallan.github.io/ontrack/> by a [Starlight](https://starlight.astro.build/)
+site. It is a separate package in `site/`, built with Node 24, and it reads
+`docs/` in place: to add a page, add a Markdown file with a `title:` under
+`docs/`.
+
+```bash
+cd site
+npm ci
+npm run dev      # local preview, reloads on change
+npm run build    # build into site/dist/, then check every internal link
+```
+
 ## License
 
 [Apache License 2.0](LICENSE).
