@@ -1,0 +1,25 @@
+{
+  "$id": "https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/ontrack.schema.json",
+  "title": "The ontrack key of a source package.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "ontrack": {
+      "type": "object",
+      "properties": {
+        "adr": {
+          "type": "string"
+        },
+        "namespace": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "adr"
+      ],
+      "additionalProperties": {},
+      "description": "Declares this package as an ontrack source. `adr` is the directory holding the ADRs, as a path relative to the package: it must stay inside the package, a rule ontrack enforces and JSON Schema cannot state. `namespace` is the alias the source proposes."
+    }
+  },
+  "additionalProperties": {}
+}

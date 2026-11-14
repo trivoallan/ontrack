@@ -2,17 +2,17 @@
 
 ## 1. Prerequisite
 
-- [ ] 1.1 Verify `validate-boundaries-with-zod` has landed: the `src/schemas` module exports `ontrackKey` and `zod` is in `dependencies`; if not, stop and report rather than hand-writing a schema
+- [x] 1.1 Verify `validate-boundaries-with-zod` has landed: the `src/schemas` module exports `ontrackKey` and `zod` is in `dependencies`; if not, stop and report rather than hand-writing a schema
 
 ## 2. Generate and publish
 
-- [ ] 2.1 Add a function that builds the document-level schema from `ontrackKey` (root object, `ontrack` property, `$schema`, `$id`, descriptions including the "inside the package" rule) and a script, exposed as `npm run schema`, that writes it to `schema/ontrack.schema.json` with a trailing newline; verify running it twice leaves `git status` unchanged after the first run
-- [ ] 2.2 Commit the generated `schema/ontrack.schema.json` and add `schema/` to `files` in `package.json`; verify `npm pack --dry-run` lists `schema/ontrack.schema.json`
+- [x] 2.1 Add a function that builds the document-level schema from `ontrackKey` (root object, `ontrack` property, `$schema`, `$id`, descriptions including the "inside the package" rule) and a script, exposed as `npm run schema`, that writes it to `schema/ontrack.schema.json` with a trailing newline; verify running it twice leaves `git status` unchanged after the first run
+- [x] 2.2 Commit the generated `schema/ontrack.schema.json` and add `schema/` to `files` in `package.json`; verify `npm pack --dry-run` lists `schema/ontrack.schema.json`
 
 ## 3. Tests
 
-- [ ] 3.1 Add a test that derives the schema and compares it with the committed file, failing with a message that names `npm run schema`; verify it passes, and fails with that message after a temporary edit of the committed file
-- [ ] 3.2 Add tests for the spec's scenarios on the derived schema's structure: `ontrack.required` is exactly `["adr"]`, `adr` and `namespace` are of type `string`, additional properties are not forbidden at the root or inside `ontrack`, and the root requires nothing; verify they pass
+- [x] 3.1 Add a test that derives the schema and compares it with the committed file, failing with a message that names `npm run schema`; verify it passes, and fails with that message after a temporary edit of the committed file
+- [x] 3.2 Add tests for the spec's scenarios on the derived schema's structure: `ontrack.required` is exactly `["adr"]`, `adr` and `namespace` are of type `string`, additional properties are not forbidden at the root or inside `ontrack`, and the root requires nothing; verify they pass
 
 ## 4. Documentation
 

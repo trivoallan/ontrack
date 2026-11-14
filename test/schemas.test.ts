@@ -1,6 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { adrFrontmatter, ontrackKey, projectManifest, sourceManifest } from '../src/schemas.ts';
+import { readFileSync } from 'node:fs';
+import {
+  adrFrontmatter,
+  ontrackJsonSchema,
+  ontrackKey,
+  projectManifest,
+  sourceManifest,
+} from '../src/schemas.ts';
 
 const { revision, title } = adrFrontmatter.shape;
 
@@ -54,4 +61,30 @@ test('adrFrontmatter: title loses its quotes and may not be empty', () => {
   assert.equal(title.parse('"Use: PostgreSQL"'), 'Use: PostgreSQL');
   assert.equal(title.parse("'Use PostgreSQL'"), 'Use PostgreSQL');
   for (const value of ['', '""', '"  "']) assert.equal(title.safeParse(value).success, false);
+});
+
+test('ontrackJsonSchema: the published file is the one derived from the model', () => {
+  const published = JSON.parse(
+    readFileSync(new URL('../schema/ontrack.schema.json', import.meta.url), 'utf8'),
+  );
+  assert.deepEqual(
+    published,
+    ontrackJsonSchema(),
+    'schema/ontrack.schema.json is out of date: run `npm run schema`',
+  );
+});
+
+test('ontrackJsonSchema: constrains the ontrack property of a package.json, and nothing else', () => {
+  const schema = ontrackJsonSchema() as any;
+  assert.equal(schema.type, 'object');
+  assert.equal(schema.required, undefined);
+  assert.notEqual(schema.additionalProperties, false);
+  assert.deepEqual(Object.keys(schema.properties), ['ontrack']);
+
+  const key = schema.properties.ontrack;
+  assert.deepEqual(key.required, ['adr']);
+  assert.equal(key.properties.adr.type, 'string');
+  assert.equal(key.properties.namespace.type, 'string');
+  assert.notEqual(key.additionalProperties, false);
+  assert.match(key.description, /inside the package/);
 });
