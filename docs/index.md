@@ -94,6 +94,9 @@ no file and makes no network call.
 | --- | --- | --- |
 | A template repository or a project generator | Copies the conventions when the repository is created | Nothing links the copy to the original afterwards |
 | A shared configuration (lint rules, presets) | Applies the same values everywhere | A repository that differs has to override or opt out |
+| A rules sync tool, such as Ruler or rulesync | Writes one set of agent rules to the file each coding agent reads | Where the rules come from, and whether they still match what was agreed |
+| A tool that runs ADRs as checks, such as Archgate | Fails CI when the code departs from a decision | A shared ADR carries the decision, not a question: a repository that differs keeps an edited copy |
+| A standards platform, such as Packmind | Sends one playbook from a server to every repository and agent | A repository can pin a version or leave a package out, but has no place to record why it differs |
 | ontrack | Asks each repository a question and records its answer | The answer itself: that is the repository's call |
 
 ontrack does not replace your linters. An ADR can name the command that
@@ -156,6 +159,7 @@ read it because a `CLAUDE.md` exists without importing it.
 ### How do I write my own source?
 
 A `package.json` with an `ontrack` key and a directory of ADRs.
+[Write your own source](write-your-own-source.md) takes four steps.
 [trivoallan/governance](https://github.com/trivoallan/governance) is a
 working example to start from.
 
