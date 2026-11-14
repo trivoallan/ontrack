@@ -13,6 +13,9 @@ ontrack has five commands. Only `apply` writes to the repository.
 | [`review`](#ontrack-review-adr) | Prints a prompt asking a coding agent to rule on ADRs | Nothing |
 | [`check`](#ontrack-check) | Runs the check command of each decided ADR | Nothing itself |
 
+The files these commands read and write are described in
+[File formats](file-formats.md).
+
 Every command accepts `-h`, `--help` and `-v`, `--version`.
 
 This page says what each command does. The exact format of each output is a
@@ -98,7 +101,7 @@ What it does, per source:
 A `revised` or `unreadable` ADR is never written to or deleted: a person must
 rule again.
 
-`apply` also writes the [rules block](#the-rules-block-in-agentsmd) of
+`apply` also writes the [rules block](file-formats.md#the-rules-block-in-agentsmd) of
 `AGENTS.md`. Every check runs before the first write, so an error never
 leaves a half-applied repository.
 
@@ -189,22 +192,3 @@ npx ontrack check
 error. `unchecked` ADRs do not change it.
 
 Format: [`ontrack check` output contract](https://github.com/trivoallan/ontrack#ontrack-check-output-contract).
-
-## The rules block in `AGENTS.md`
-
-`apply` keeps the block printed by `instructions` current in the `AGENTS.md`
-at the root of the repository, and `plan` reports its state. The text between
-`<!-- ontrack:begin -->` and `<!-- ontrack:end -->` belongs to ontrack and is
-overwritten. Everything outside the markers is yours and is never touched.
-
-- `apply` replaces the block when the file holds one marker pair, appends it
-  when the file has no marker, and creates `AGENTS.md` when there is none.
-- When the block cannot be written, only this step is skipped: the ADRs are
-  still handled, and both commands print `AGENTS.md: skipped, <reason>` and
-  exit with `2`.
-- Claude Code reads `AGENTS.md` on its own only when the repository has no
-  `CLAUDE.md` and no `CLAUDE.local.md`. When one exists and `CLAUDE.md` holds
-  no line `@AGENTS.md`, both commands print a warning. ontrack never writes
-  `CLAUDE.md`.
-
-Detail: [The rules block in `AGENTS.md`](https://github.com/trivoallan/ontrack#the-rules-block-in-agentsmd).

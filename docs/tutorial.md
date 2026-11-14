@@ -153,7 +153,8 @@ agents read.
 - Run `npx ontrack plan` in CI. It exits with `2` when the source asks a new
   question or changes one you answered.
 - Write your own source: a `package.json` with an `ontrack` key that points
-  to a directory of ADRs.
+  to a directory of ADRs. [File formats](file-formats.md) lists what ontrack
+  reads in both.
 - Read [how ontrack works](how-it-works.md): the pieces, the life of a
   question, and the cycle.
 - Look up every command, its options and its exit codes in the
