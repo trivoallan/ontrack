@@ -41,6 +41,10 @@
 - [x] 3d.1 Print the tool's own error when the agent fails on its first turn at no cost, cut short and unable to issue a workflow command; print nothing of a longer run
 - [x] 3d.2 Test both cases in `test/propose-workflow.test.ts`
 
+## 3f. Choose the model
+
+- [x] 3f.1 Run the agent on `claude-sonnet-5-5` instead of the action's default
+
 ## 4. Verify
 
 - [x] 4.1 Check the file against the `issue-proposal` spec: no secret named, no `${{ github.event.issue.title }}` or `.body` anywhere, no `git` or `gh` in the agent's tools, no agent step in the job that writes
