@@ -107,7 +107,7 @@ means the diagrams, if any, are drawn by hand. For
 `architecture.diagrams`, `plantuml` is the other text format, and `none`
 means the section files hold no diagram outside the model's views.
 
-Adopted as recommended: `arc42` in `docs/architecture/arc42/`, `likec4` in `docs/architecture/model/`, `mermaid` for what the model does not show.
+Adopted as recommended: `arc42` in `docs/architecture/arc42/`, `likec4` in `docs/architecture/model/`, `mermaid` for what the model does not show. Sections 3, 5 and 7 are `.mdx` files rather than `.md`, because each embeds its view of the model as a component.
 
 ## Consequences
 

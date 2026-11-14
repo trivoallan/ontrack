@@ -447,6 +447,17 @@ npm run dev      # local preview, reloads on change
 npm run build    # build into site/dist/, then check every internal link
 ```
 
+The architecture diagrams of `docs/architecture/arc42/` are views of a
+[LikeC4](https://likec4.dev/) model, the `.c4` files in
+`docs/architecture/model/`. To preview the model while editing it, and to
+check it as CI does:
+
+```bash
+cd site
+npx likec4 serve ../docs/architecture/model      # local preview, reloads on change
+npx likec4 validate ../docs/architecture/model   # fails on an unknown element or a dangling relationship
+```
+
 ## License
 
 [Apache License 2.0](LICENSE).

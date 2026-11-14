@@ -9,9 +9,11 @@
   },
   "devDependencies": {
     "@astrojs/markdown-remark": "^7.3.9",
+    "@astrojs/react": "^7.1.9",
     "@astrojs/starlight": "^0.43.1",
     "astro": "^7.4.12",
     "astro-mermaid": "^2.2.0",
+    "likec4": "^1.60.0",
     "mermaid": "^12.3.0"
   }
 }

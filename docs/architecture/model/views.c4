@@ -1,0 +1,45 @@
+// Where ontrack runs, and how the model is shown. Each view is embedded in
+// one arc42 section: context in 03, building-blocks in 05, deployment in 07.
+deployment {
+  developer = machine "Developer machine" {
+    node = runtime "Node.js 22.18 or later" {
+      cli = instanceOf ontrack
+    }
+    tree = instanceOf project {
+      title "Working tree"
+    }
+    packages = instanceOf installed
+  }
+  ci = machine "CI runner" {
+    node = runtime "Node.js 22.18 or later" {
+      cli = instanceOf ontrack
+    }
+    tree = instanceOf project {
+      title "Checkout"
+    }
+    packages = instanceOf installed
+  }
+}
+
+views {
+  view context {
+    title "ontrack: context"
+    description "ontrack and its neighbours"
+    include *
+    autoLayout TopBottom
+  }
+
+  view building-blocks of ontrack {
+    title "ontrack: building blocks"
+    description "The modules of src/ and their imports"
+    include *, commands.*
+    autoLayout TopBottom
+  }
+
+  deployment view deployment {
+    title "ontrack: deployment"
+    description "A dev dependency run by Node on a developer machine and on a CI runner"
+    include developer, ci, developer.**, ci.**
+    autoLayout TopBottom
+  }
+}

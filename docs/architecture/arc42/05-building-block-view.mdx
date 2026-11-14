@@ -2,6 +2,10 @@
 title: Building Block View
 ---
 
+import { LikeC4View } from 'likec4:react';
+
+{/* Structure is drawn from the LikeC4 model, never in Mermaid: behaviour goes to section 6 (ADR-0010). */}
+
 # Building Block View
 
 ontrack is one package ([ADR-0003](../../adr/trivoallan/ADR-0003-architecture.md)).
@@ -105,4 +109,10 @@ The modules that deal with the repository's *own answers* (`instructions`,
 `agents`, `review`, `check`) read the project's files only. Both groups rest
 on `revision` for frontmatter.
 
-The building block diagram comes from the LikeC4 model in `docs/architecture/model/`.
+## Diagram
+
+<LikeC4View viewId="building-blocks" client:only="react" />
+
+This is the `building-blocks` view of the LikeC4 model in
+[`docs/architecture/model/`](https://github.com/trivoallan/ontrack/tree/main/docs/architecture/model). It is drawn on the
+documentation site only; elsewhere, read the model's `.c4` files.
