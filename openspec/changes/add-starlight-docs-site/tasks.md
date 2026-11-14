@@ -12,6 +12,7 @@
 - [x] 2.1 Add `docs/index.md` with a `title:`, a short introduction and a relative `.md` link to at least one ADR; verify `dist/index.html` exists after a build
 - [x] 2.2 Add the remark plugin to `astro.config.mjs`: rewrite relative `.md` links and remove a leading level-one heading; verify on the built ADR-0008 page that the link to ADR-0001 is `../adr-0001-record-architecture-decisions/` and that the page holds exactly one `<h1>`
 - [x] 2.3 Verify a `mermaid` code block renders: add one temporarily to `docs/index.md`, open the page with `npm run preview`, see the diagram, then remove the block
+- [x] 2.4 Prepend the status and the decided traits to each ADR page, read with `readAdrs` from `src/instructions.mjs`; verify the built ADR-0006 page shows "Status: accepted" and its traits, ADR-0013 shows "Status: rejected" and no traits, and the home page shows no status
 
 ## 3. Link check
 
