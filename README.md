@@ -117,7 +117,7 @@ npx ontrack --version
 npx ontrack plan          # what importing the sources would change
 npx ontrack apply         # do it (see below)
 npx ontrack instructions  # the decided traits, as a block for AGENTS.md
-npx ontrack review        # a prompt asking a coding agent to rule the proposed ADRs, or to supersede an accepted one
+npx ontrack review        # a prompt asking a coding agent to rule the proposed ADRs, to rule the revised ones again, or to supersede an accepted one
 npx ontrack check         # run the check command of each decided ADR
 ```
 
@@ -196,7 +196,9 @@ What it does, per source:
 - `synced`: a `check` ADR gets the source's `check:` line, set, replaced or removed; nothing else in the file changes. It needs no option. The `check:` line of an imported ADR belongs to its source: to run a different check, supersede the ADR with one of your own.
 
 A `revised` or `unreadable` ADR is never written to or deleted (only moved by
-a migration): its verdict must be taken again by a person.
+a migration): its verdict must be taken again by a person. For a `revised`
+one, `ontrack review` prints the prompt that asks a coding agent to do it
+with you.
 
 Its output lists the actions, then every Markdown link the migration breaks
 (links to a moved file, and links held by a moved file to a file left in
@@ -232,6 +234,9 @@ next: 3 proposed ADRs to rule
   from a shell:  claude "$(npx ontrack review)"
   as a prompt:   Run `npx ontrack review` and follow its output.
 ```
+
+Once no ADR is `proposed`, the first line counts the ruled ADRs that remain
+`revised` instead: `next: 2 revised ADRs to rule again`.
 
 ## `ontrack instructions` output contract
 
@@ -292,6 +297,7 @@ you agree, and only then does it write.
 claude "$(npx ontrack review)"           # every proposed ADR, in sequence
 claude "$(npx ontrack review ADR-0006)"  # this one alone
 claude "$(npx ontrack review ADR-0001)"  # an accepted one: supersede it
+claude "$(npx ontrack review ADR-0012)"  # a revised one: rule it again
 ```
 
 Without an argument, the prompt lists every `proposed` ADR and gives the
@@ -358,14 +364,67 @@ It is `accepted`: a decision this repository has taken, whose text is frozen. Ch
 Once every ADR is ruled, list the rulings this repository does not follow yet: a value its code, configuration or tooling does not match, or a tool the ruling names that is not set up. For each one, propose a tracking item: a title, and the ADR it serves. Create in the tracker named by the decided `tracking` trait in AGENTS.md (`tracking.tool`, in `tracking.project`) only the items the user agrees to, asked with a question tool such as `AskUserQuestion` when you have one. When no `tracking` trait is decided, or `tracking.tool` is `none`, give the list in your reply and create nothing.
 ~~~
 
+When a source revises a question you already ruled, `plan` reports the ADR
+as `revised`, and the ruling must be taken again. Naming that ADR prints the
+prompt for it: the agent compares your copy with the source's, keeps the
+ruling where the question did not move, and proposes one where it did. It is
+the same text for every ADR, apart from its path, its title, the path of the
+source's copy and the two revisions:
+
+~~~
+Rule again one architecture decision record of this repository: `docs/adr/trivoallan/ADR-0012-delivery.md` (Delivery).
+
+Its source has revised the question: this repository ruled on revision 1, and `node_modules/trivoallan/adr/ADR-0012-delivery.md` asks revision 2. The ruling stands until it is taken again. Propose the new ruling; the user decides. Where the source's copy itself says how to rule, it prevails over this prompt.
+
+1. Read both files in full: the repository's copy, which holds the ruling, and the source's copy, which holds the question as it is asked now. Edit neither the source's copy nor any other ADR.
+2. List what moved in the question between the two: every key under `traits:` added, removed or renamed, every set of allowed values that changed, and every recommendation that changed. Leave out what only the ruling changed. If nothing that moved touches the ruling, say so in one line.
+3. For every trait key that did not move, keep the value this repository ruled, and the reason written for it where it departs from the recommendation.
+4. For every trait key that moved, start from the recommendation the source's copy makes. Look in this repository for evidence that it does not apply here, check every condition it states ("if this repository…"), and propose a value drawn from the repository, with its evidence.
+5. Keep the status, unless what moved settles whether the question applies here. Propose `rejected` only on evidence that it does not, and say what stands in for it.
+6. Present the proposed ruling: the status, one line per trait key with its value, marked kept or changed, the evidence for every change, and every departure from the recommendation with its reason. Then stop and ask for the user's agreement, with a question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees.
+7. Once the user agrees: replace the repository's copy with the source's copy, which carries the new `revision:`; write the ruling in it: the agreed status, the `traits:` keys filled, or the block removed when rejected, and the reason for every departure from the recommendation; then run `npx ontrack apply` to update AGENTS.md.
+
+Once every ADR is ruled, list the rulings this repository does not follow yet: a value its code, configuration or tooling does not match, or a tool the ruling names that is not set up. For each one, propose a tracking item: a title, and the ADR it serves. Create in the tracker named by the decided `tracking` trait in AGENTS.md (`tracking.tool`, in `tracking.project`) only the items the user agrees to, asked with a question tool such as `AskUserQuestion` when you have one. When no `tracking` trait is decided, or `tracking.tool` is `none`, give the list in your reply and create nothing.
+~~~
+
+Without an argument, once no ADR is `proposed`, the prompt lists every
+revised ADR and gives the steps once:
+
+~~~
+Rule again the architecture decision records of this repository whose source has revised the question, one at a time, in this order:
+
+- `docs/adr/trivoallan/ADR-0001-record-architecture-decisions.md` (Record architecture decisions), ruled on revision 1: `node_modules/trivoallan/adr/ADR-0001-record-architecture-decisions.md` asks revision 3
+- `docs/adr/trivoallan/ADR-0012-delivery.md` (Delivery), ruled on revision 1: `node_modules/trivoallan/adr/ADR-0012-delivery.md` asks revision 2
+
+Each holds a ruling of this repository; the file named after it is its source's copy. The ruling stands until it is taken again. Propose the new ruling; the user decides. Where a source's copy itself says how to rule, it prevails over this prompt.
+
+For each ADR, in turn:
+
+1. Read both files in full: the repository's copy, which holds the ruling, and the source's copy, which holds the question as it is asked now. Edit neither the source's copy nor any other ADR.
+2. List what moved in the question between the two: every key under `traits:` added, removed or renamed, every set of allowed values that changed, and every recommendation that changed. Leave out what only the ruling changed. If nothing that moved touches the ruling, say so in one line.
+3. For every trait key that did not move, keep the value this repository ruled, and the reason written for it where it departs from the recommendation.
+4. For every trait key that moved, start from the recommendation the source's copy makes. Look in this repository for evidence that it does not apply here, check every condition it states ("if this repository…"), and propose a value drawn from the repository, with its evidence.
+5. Keep the status, unless what moved settles whether the question applies here. Propose `rejected` only on evidence that it does not, and say what stands in for it.
+6. Present the proposed ruling: the status, one line per trait key with its value, marked kept or changed, the evidence for every change, and every departure from the recommendation with its reason. Then stop and ask for the user's agreement, with a question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees.
+7. Once the user agrees: replace the repository's copy with the source's copy, which carries the new `revision:`; write the ruling in it: the agreed status, the `traits:` keys filled, or the block removed when rejected, and the reason for every departure from the recommendation; then run `npx ontrack apply` to update AGENTS.md.
+
+Then take the next ADR in the list. Do not start an ADR before the previous one is ruled.
+
+Once every ADR is ruled, list the rulings this repository does not follow yet: a value its code, configuration or tooling does not match, or a tool the ruling names that is not set up. For each one, propose a tracking item: a title, and the ADR it serves. Create in the tracker named by the decided `tracking` trait in AGENTS.md (`tracking.tool`, in `tracking.project`) only the items the user agrees to, asked with a question tool such as `AskUserQuestion` when you have one. When no `tracking` trait is decided, or `tracking.tool` is `none`, give the list in your reply and create nothing.
+~~~
+
 - The ADRs read are those of `instructions`. Without an argument, the prompt lists every `proposed` ADR in reference order, the order of "Not yet decided", even when there is only one.
 - An argument with a `/` is a reference (`trivoallan/ADR-0006-commits`). Any other argument is a file name without `.md` (`ADR-0006-commits`) or an `adr:` identifier (`ADR-0006`), looked up in every directory. It must name exactly one ADR, and that ADR must be `proposed`, or `accepted` and not superseded.
+- A revised ADR is one `plan` reports as `revised` and whose copy here is no longer `proposed`, whatever its status: `accepted`, `rejected`, or superseded. Named, it gets the prompt to rule again, not the supersession prompt: rule on the question as it is asked now, then supersede. Without an argument, the revised ADRs come only once no ADR is `proposed`, in reference order.
+- A `proposed` ADR whose source revised the question gets the review prompt, like any other `proposed` one.
+- The revised ADRs are found by reading the sources, as `plan` does. When they cannot be read (no `package.json`, a dependency not installed), `review` sees no revised ADR and says nothing of it: `plan` is the command that says why.
 - An `accepted` ADR gets the supersession prompt only when named: without an argument, `review` never reopens a decision. Supersession is that of `instructions`: an ADR another `accepted` ADR names in `supersedes:` is already superseded, and naming it is an error that says which ADR supersedes it.
 - The supersession prompt does not say how a superseded ADR is marked, nor which sections the new ADR has: those are the repository's rules on recording decisions, which the agent reads. When they say nothing on marking, the superseded file is left untouched.
 - An ADR without a title is named by its path alone.
 - Once the review is ruled, the agent proposes a tracking item for every ruling the repository does not follow yet, and creates only those you agree to, in the tracker your `tracking` trait names. Without one, it lists them.
+- To rule again, the agent replaces your copy with the source's, which carries the new `revision:`, and writes the ruling in it. `plan` then reports the ADR as unchanged.
 - `review` never writes a file and makes no network call. Two decided ADRs sharing a trait key do not stop it.
-- It exits with `2` when it prints a prompt, because a ruling is pending. With no `proposed` ADR it exits with `0`, says so on standard error and prints nothing, so that no agent receives that sentence as a prompt. An unknown or ambiguous name, a `rejected` ADR, or one already superseded, is an error, with `1`.
+- It exits with `2` when it prints a prompt, because a ruling is pending. With no `proposed` and no revised ADR it exits with `0`, says so on standard error and prints nothing, so that no agent receives that sentence as a prompt. An unknown or ambiguous name, a `rejected` ADR, or one already superseded, is an error, with `1`, unless the ADR is revised.
 
 Any change to this prompt goes through this README first.
 

@@ -6,7 +6,7 @@
 ## Requirements
 
 ### Requirement: Read-only and offline
-`ontrack review` MUST NOT create, modify or delete any file, and MUST NOT make any network call. It reads `docs/adr/` only. It needs no `package.json` and no `node_modules`.
+`ontrack review` MUST NOT create, modify or delete any file, and MUST NOT make any network call. It reads `docs/adr/` and, to find the revised ADRs, the sources `plan` reads. It needs no `package.json` and no `node_modules`: when the sources cannot be read, it finds no revised ADR and reports no error.
 
 #### Scenario: Tree unchanged
 - **WHEN** `ontrack review` runs on a project with pending ADRs
@@ -35,9 +35,9 @@ Without an argument, `ontrack review` SHALL select every pending ADR, in referen
 - **THEN** the prompt is the sequence prompt, with a list of one ADR
 
 ### Requirement: Named ADR
-With an argument, `ontrack review` SHALL select the ADR it names. An argument holding a `/` names an ADR by its reference. Any other argument names every ADR, in any directory, whose file name without `.md` or whose identifier equals it. The argument MUST name exactly one ADR. That ADR MUST be either pending, or `accepted` and not superseded; supersession is that of the `instructions` capability: an ADR is superseded when another `accepted` ADR names it in `supersedes:`. Otherwise the command fails with exit code `1`, standard output stays empty, and standard error names the argument and says why: no such ADR, several ADRs (listing their references), the ADR's status, or the reference of the ADR that supersedes it.
+With an argument, `ontrack review` SHALL select the ADR it names. An argument holding a `/` names an ADR by its reference. Any other argument names every ADR, in any directory, whose file name without `.md` or whose identifier equals it. The argument MUST name exactly one ADR. That ADR MUST be either revised (see Revised ADRs), pending, or `accepted` and not superseded; supersession is that of the `instructions` capability: an ADR is superseded when another `accepted` ADR names it in `supersedes:`. Otherwise the command fails with exit code `1`, standard output stays empty, and standard error names the argument and says why: no such ADR, several ADRs (listing their references), the ADR's status, or the reference of the ADR that supersedes it.
 
-A pending ADR yields the review prompt. An `accepted` ADR that is not superseded yields the supersession prompt.
+A revised ADR yields the prompt to rule again, whatever its status and whether or not it is superseded. A pending ADR yields the review prompt. An `accepted` ADR that is neither revised nor superseded yields the supersession prompt.
 
 #### Scenario: By reference
 - **WHEN** the user runs `ontrack review trivoallan/ADR-0006-commits` and that ADR is `proposed`
@@ -175,16 +175,51 @@ After the six steps the prompt SHALL hold the tracking-items text of the review 
 - **WHEN** `ontrack review ADR-0001` prints a supersession prompt
 - **THEN** every file under the project is byte-identical before and after, and no file was added or removed
 
+### Requirement: Revised ADRs
+A revised ADR is one the `plan` capability reports as `revised` and whose copy under `docs/adr/` has a status other than `proposed`. Without an argument, when no ADR is pending, `ontrack review` SHALL select every revised ADR, in reference order. While an ADR is pending, it SHALL select the pending ADRs only. A `proposed` ADR that `plan` reports as `revised` is pending, not revised.
+
+#### Scenario: Revised ADRs once nothing is pending
+- **WHEN** `trivoallan/ADR-0001-record-architecture-decisions` is `accepted` at revision `1` and its source ships revision `3`, `trivoallan/ADR-0012-delivery` is `rejected` at revision `1` and its source ships revision `2`, and no ADR is `proposed`
+- **THEN** `ontrack review` prints the prompt to rule again, listing both ADRs in that order, and exits with `2`
+
+#### Scenario: Pending ADRs first
+- **WHEN** one ADR is revised and another is `proposed`
+- **THEN** `ontrack review` prints the sequence prompt for the `proposed` ADR, and does not name the revised one
+
+#### Scenario: A named revised ADR
+- **WHEN** the user runs `ontrack review ADR-0012-delivery`, and that ADR is `rejected` and revised
+- **THEN** the prompt to rule again is printed for it, and the exit code is `2`
+
+#### Scenario: Sources not installed
+- **WHEN** `ontrack review` runs on a project without `package.json`, whose ADRs are all `accepted`
+- **THEN** standard output is empty and the exit code is `0`
+
+### Requirement: Prompt to rule again
+For revised ADRs, the prompt SHALL follow the contract in the README. It names each ADR by its path relative to the project root, with `/` separators, and by its title when it has one; next to it, the path of the source's copy, relative to the project root, the revision the repository ruled on and the revision the source asks. It SHALL say that the ruling stands until it is taken again, and that the source's copy prevails over the prompt where it says how to rule. It SHALL tell the agent, in this order, to:
+1. read both copies in full, and edit neither the source's copy nor any other ADR;
+2. list what moved in the question: trait keys added, removed or renamed, allowed values changed, recommendations changed;
+3. keep the ruled value of every trait key that did not move, with the reason written for a departure;
+4. for every trait key that moved, start from the recommendation of the source's copy and propose a value drawn from the repository, with its evidence;
+5. keep the status unless what moved settles whether the question applies, and propose `rejected` only on evidence;
+6. present the proposed ruling, each trait value marked kept or changed, then stop and ask for the user's agreement, writing nothing before it;
+7. once the user agrees, replace the repository's copy with the source's copy, write the ruling in it, and run `npx ontrack apply`.
+
+It SHALL end with the tracking paragraph of the review prompt. For a named ADR, the prompt names that ADR alone. Without an argument, it lists every revised ADR and gives the steps once.
+
+#### Scenario: One revised ADR
+- **WHEN** `ontrack review ADR-0012-delivery` selects the revised ADR `trivoallan/ADR-0012-delivery`, titled `Delivery`, ruled on revision `1`, whose source asks revision `2` in `node_modules/trivoallan/adr/ADR-0012-delivery.md`
+- **THEN** the prompt names `docs/adr/trivoallan/ADR-0012-delivery.md` (Delivery), that source path and both revisions, gives seven steps, and names no other ADR
+
 ### Requirement: Exit codes
-`ontrack review` SHALL exit with `2` when it prints a prompt, because a ruling is pending. When no ADR is pending and no argument is given, it SHALL exit with `0`, leave standard output empty, and say on standard error that no ADR is `proposed`. Errors exit with `1`.
+`ontrack review` SHALL exit with `2` when it prints a prompt, because a ruling is pending. When no ADR is pending, none is revised and no argument is given, it SHALL exit with `0`, leave standard output empty, and say on standard error that no ADR is `proposed` or revised. Errors exit with `1`.
 
 #### Scenario: Prompt printed
 - **WHEN** `ontrack review` runs on a project with one `proposed` ADR
 - **THEN** the exit code is `2`
 
 #### Scenario: Nothing to review
-- **WHEN** `ontrack review` runs on a project whose ADRs are all `accepted` or `rejected`
-- **THEN** standard output is empty, standard error says no ADR is `proposed`, and the exit code is `0`
+- **WHEN** `ontrack review` runs on a project whose ADRs are all `accepted` or `rejected`, and none is revised
+- **THEN** standard output is empty, standard error says no ADR is `proposed` or revised, and the exit code is `0`
 
 #### Scenario: No ADR directory
 - **WHEN** `ontrack review` runs in a directory without `docs/adr/`
