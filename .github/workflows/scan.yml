@@ -1,0 +1,41 @@
+name: scan
+
+# Vulnerabilities (ADR-0019): scanner grype, fail_on critical.
+#
+# On every pull request, for what a change brings in, and every week on the
+# default branch, for what the vulnerability database learned since. The
+# weekly run can turn red without any change here: someone has to read it.
+#
+# A finding is fixed by updating the dependency. It is never silenced to turn
+# the check green: an ignore rule names one vulnerability and says why, in
+# .grype.yaml, and a person merges it.
+
+on:
+  pull_request:
+  schedule:
+    - cron: '30 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  grype:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Nothing is installed: Grype reads the two lockfiles, the root's and
+      # the documentation site's.
+      - uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
+        with:
+          path: .
+          # vulnerabilities.fail_on
+          severity-cutoff: critical
+          # Only a vulnerability with a fixed version fails the check: one
+          # without cannot be resolved by a change. It is still reported.
+          only-fixed: true
+          fail-build: true
+          # ponytail: findings are read in the job's log. Upload SARIF to
+          # code scanning if those below the threshold need a place to be
+          # seen.
+          output-format: table
