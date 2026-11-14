@@ -2,9 +2,20 @@
 
 # ontrack
 
-ontrack imports inherited ADRs and OpenSpec schemas into a repository from
-**sources**. A source is an npm dependency whose `package.json` carries an
-`ontrack` key; its npm alias is its namespace.
+ontrack imports shared architecture decision records (ADRs) into a repository
+from **sources**. A source is an npm dependency whose `package.json` carries
+an `ontrack` key; its npm alias is its namespace.
+
+## Why
+
+Teams that share conventions (how to commit, branch, test, deliver) tend to
+copy them from repository to repository, where the copies drift. With ontrack
+the conventions are written once, as ADRs in a source repository. Each ADR
+asks a question and recommends an answer.
+
+- Every repository that depends on the source imports the ADRs and answers them for itself.
+- When a question changes upstream, `ontrack plan` says which answers must be taken again; a CI job can rely on its exit code.
+- The answers are written to `AGENTS.md`, so coding agents follow the rules the repository decided.
 
 ## Installation
 
@@ -25,7 +36,7 @@ npm i -D <alias>@git+<source-repository-url>
 [trivoallan/governance](https://github.com/trivoallan/governance) is a
 minimal source: a `package.json` whose `ontrack` key points to its `adr/`
 directory, and the ADRs in it. Its catalogue grows over time, so the output
-below is a snapshot.
+below is a snapshot, abridged here.
 
 ```json
 {
@@ -43,11 +54,19 @@ npx ontrack plan
 ```
 
 ```
-trivoallan: 4 new, 0 unchanged
+trivoallan: 17 new, 0 unchanged
   new           ADR-0001-record-architecture-decisions
   new           ADR-0002-localization
-  new           ADR-0006-commits
-  new           ADR-0009-branching
+  new           ADR-0003-architecture
+  …
+  new           ADR-0017-agent-tooling
+```
+
+Then import them, and let a coding agent propose a ruling for each:
+
+```bash
+npx ontrack apply
+claude "$(npx ontrack review)"
 ```
 
 ## Usage
