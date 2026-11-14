@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.4.0](https://github.com/trivoallan/ontrack/compare/v0.3.0...v0.4.0) (2026-11-14)
+
+
+### Features
+
+* **apply:** name the next step on stderr while ADRs are proposed ([#79](https://github.com/trivoallan/ontrack/issues/79)) ([17ad58d](https://github.com/trivoallan/ontrack/commit/17ad58d902974f07732ca93f76875db6cde3f048))
+* draft a change for every labelled issue ([#129](https://github.com/trivoallan/ontrack/issues/129)) ([6051ccd](https://github.com/trivoallan/ontrack/commit/6051ccdc63523e975c51784f67cbc35b41c77a2d))
+* gate the apply of a change behind an approved pull request ([#136](https://github.com/trivoallan/ontrack/issues/136)) ([5450a62](https://github.com/trivoallan/ontrack/commit/5450a6202fd0ea2f8bc30a889e3bb8fcd237e1ac))
+* **plan:** list every ADR with its verdict under --all ([#113](https://github.com/trivoallan/ontrack/issues/113)) ([4255764](https://github.com/trivoallan/ontrack/commit/42557646594bca51cde05bbb2c381805fd3f1d1f))
+* **review:** label tracking items ontrack and skip rulings already tracked ([#101](https://github.com/trivoallan/ontrack/issues/101)) ([2e7a459](https://github.com/trivoallan/ontrack/commit/2e7a45990eb1b7dbd89748626ef1d09935cddb3f))
+* **review:** rule again the ADRs whose source revised the question ([#82](https://github.com/trivoallan/ontrack/issues/82)) ([fe52ff1](https://github.com/trivoallan/ontrack/commit/fe52ff100cf5d732bc5ecba7a5002f224efdd6b0))
+* tell the pull request where its apply session is and why it stopped ([#137](https://github.com/trivoallan/ontrack/issues/137)) ([b22219b](https://github.com/trivoallan/ontrack/commit/b22219b8581cbcd0cdb44c31c7cf50c943707aaf))
+
+
+### Bug Fixes
+
+* draft a proposal for an open issue only ([#123](https://github.com/trivoallan/ontrack/issues/123)) ([a2b1cb3](https://github.com/trivoallan/ontrack/commit/a2b1cb33a0db739a529e9b803de9933d92f2304c))
+* find the apply session's address in the answer that starts it ([#138](https://github.com/trivoallan/ontrack/issues/138)) ([ef75999](https://github.com/trivoallan/ontrack/commit/ef75999f897e7e8ca93f36a7461bafe8606004f3))
+* give the propose workflow its workspace ([#122](https://github.com/trivoallan/ontrack/issues/122)) ([4c7b75c](https://github.com/trivoallan/ontrack/commit/4c7b75cbf35135da14c7bb9a0c3e66cfd6304d5e))
+* let the proposal agent run its commands ([#125](https://github.com/trivoallan/ontrack/issues/125)) ([4a3b803](https://github.com/trivoallan/ontrack/commit/4a3b803e0a1504d1f408ac88e57eb840a9dcac56))
+* let the proposal agent write the change ([#133](https://github.com/trivoallan/ontrack/issues/133)) ([b1769f7](https://github.com/trivoallan/ontrack/commit/b1769f7d49780f59d7a19d91c099ba3db01e8ab7))
+* put the framework's command within the proposal agent's reach ([#135](https://github.com/trivoallan/ontrack/issues/135)) ([268e41b](https://github.com/trivoallan/ontrack/commit/268e41bd850f60c77f1360cef6d4a7eb62d01a40))
+* show what stopped the proposal agent ([#132](https://github.com/trivoallan/ontrack/issues/132)) ([e7b33fc](https://github.com/trivoallan/ontrack/commit/e7b33fc8f4472f87742e2b1654e81cc3ef498dda))
+* show why the proposal agent fails on its first turn ([#124](https://github.com/trivoallan/ontrack/issues/124)) ([0b8b87b](https://github.com/trivoallan/ontrack/commit/0b8b87b9e9788d3855feb5b6f8a177bd9f302730))
+
 ## [0.3.0](https://github.com/trivoallan/ontrack/compare/v0.2.0...v0.3.0) (2026-11-14)
 
 
