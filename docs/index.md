@@ -7,6 +7,9 @@ sidebar:
   order: 0
 hero:
   tagline: Write your engineering conventions once, as questions. Each repository answers them for itself, coding agents follow the answers, and CI tells you when an answer is out of date.
+  image:
+    file: ./assets/logo.png
+    alt: ""
   actions:
     - text: Try it on one repository
       link: tutorial/
