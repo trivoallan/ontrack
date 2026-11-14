@@ -136,6 +136,9 @@ platform: 1 revised, 0 unchanged
 Raise it only when the question itself moves. A fixed typo is not a new
 question.
 
+[Revise a question](revise-a-question.md) follows the change through to a
+repository that rules again.
+
 ## Go further
 
 - Have a question name the command that verifies its answer, in a `check`
