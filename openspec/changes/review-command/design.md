@@ -53,7 +53,11 @@ one line when there is none, and for `rejected` only on evidence.
 
 **Writing waits for agreement, in the conversation.**
 The prompt puts "stop, write nothing" before every write instruction. The
-user validates the argument, not only the diff. A pull request as the
+user validates the argument, not only the diff. The agent asks with a
+question tool when it has one: a structured question is a clearer stop than
+a sentence at the end of a long answer, and harder to skip in a sequence.
+The prompt names `AskUserQuestion` as an example only, since ontrack does
+not know which agent reads it. A pull request as the
 validation step would assume branching and forge rules that are themselves
 among the pending ADRs.
 

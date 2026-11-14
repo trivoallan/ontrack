@@ -27,3 +27,7 @@
 - [x] 6.1 Update the README contract: without an argument the prompt covers every pending ADR in sequence, with the full sequence prompt for two ADRs; with an argument, the single-ADR prompt.
 - [x] 6.2 In `src/review.mjs`, add `pendingAdrs(root)` and `formatSequence(adrs)` sharing the seven steps with `formatReview(adr)`, and make `selectAdr` require a name; the command prints the sequence prompt without an argument. Check the "Every pending ADR" scenarios and the "Sequence" and "Agreement after each ADR" scenarios in `test/review.test.mjs`.
 - [x] 6.3 Run `npm test` and `openspec validate review-command --strict`, then check in this repository that `node bin/ontrack.mjs review` lists the 14 pending ADRs and exits `2`.
+
+## 7. Question tool
+
+- [x] 7.1 In step 6 of both prompts, tell the agent to ask for the user's agreement with a question tool such as `AskUserQuestion` when it has one; update the README contract and check the "Question tool" scenario in `test/review.test.mjs`.

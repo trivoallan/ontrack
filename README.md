@@ -228,7 +228,7 @@ For each ADR, in turn:
 3. When a recommendation is conditional ("if this repository…"), check the condition and cite the file or command output that settles it.
 4. For every key under `traits:` that the ADR leaves to the repository, propose a value drawn from the repository, with its evidence.
 5. Propose `rejected` only on evidence that the question does not apply here, and say what stands in for it.
-6. Present the proposed ruling: the status, one line per trait key with its value and evidence, and every departure from the recommendation with its reason. Then stop. Write nothing until the user agrees.
+6. Present the proposed ruling: the status, one line per trait key with its value and evidence, and every departure from the recommendation with its reason. Then stop and ask for the user's agreement, with a question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees.
 7. Once the user agrees: fill the `traits:` keys, or remove the block when rejected; set the status; write in the ADR the reason for every departure from the recommendation; then run `npx ontrack apply` to update AGENTS.md.
 
 Then take the next ADR in the list. Do not start an ADR before the previous one is ruled.
@@ -247,7 +247,7 @@ It is `proposed`: a question this repository has not answered yet, shipped with 
 3. When a recommendation is conditional ("if this repository…"), check the condition and cite the file or command output that settles it.
 4. For every key under `traits:` that the ADR leaves to the repository, propose a value drawn from the repository, with its evidence.
 5. Propose `rejected` only on evidence that the question does not apply here, and say what stands in for it.
-6. Present the proposed ruling: the status, one line per trait key with its value and evidence, and every departure from the recommendation with its reason. Then stop. Write nothing until the user agrees.
+6. Present the proposed ruling: the status, one line per trait key with its value and evidence, and every departure from the recommendation with its reason. Then stop and ask for the user's agreement, with a question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees.
 7. Once the user agrees: fill the `traits:` keys, or remove the block when rejected; set the status; write in the ADR the reason for every departure from the recommendation; then run `npx ontrack apply` to update AGENTS.md.
 ~~~
 

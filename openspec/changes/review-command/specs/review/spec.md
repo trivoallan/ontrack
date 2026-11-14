@@ -69,7 +69,7 @@ The prompt SHALL be printed to standard output and follow the contract in the RE
 3. check the condition of every conditional recommendation, and cite the evidence that settles it;
 4. propose, with its evidence, a value for every trait key the ADR leaves to the repository;
 5. propose `rejected` only on evidence that the question does not apply, and say what stands in for it;
-6. present the proposed ruling, then stop and write nothing until the user agrees;
+6. present the proposed ruling, then stop, ask for the user's agreement with a question tool such as `AskUserQuestion` when the agent has one, and write nothing until the user agrees;
 7. once the user agrees, fill the traits or remove the block when rejected, set the status, write in the ADR the reason for every departure from the recommendation, and run `npx ontrack apply`.
 
 The prompt SHALL also say that an ADR's own instructions on how to rule prevail over the prompt. The seven steps SHALL be the same text in both forms. Apart from the ADR's path and title, the prompt for a named ADR SHALL be the same text for every ADR. The output SHALL be the same for the same files, whatever the order the file system lists them in.
@@ -83,6 +83,10 @@ The prompt SHALL also say that an ADR's own instructions on how to rule prevail 
 - **WHEN** `ontrack review` prints a prompt
 - **THEN** the instruction to write nothing until the user agrees comes before the instruction to set the status
 - **AND** the prompt contains `npx ontrack apply`
+
+#### Scenario: Question tool
+- **WHEN** `ontrack review` prints a prompt, in either form
+- **THEN** it tells the agent to ask for the user's agreement with a question tool when it has one, and names `AskUserQuestion` as an example
 
 #### Scenario: Sequence
 - **WHEN** `ontrack review` runs with two pending ADRs

@@ -168,6 +168,12 @@ test('sequence: same steps as the single prompt, and a list of one', () => {
   assert.ok(sequence.includes('one at a time, in this order'));
 });
 
+test('prompt: both forms ask for agreement with a question tool when there is one', () => {
+  for (const out of [formatReview(selectAdr(tree(), 'ADR-0006')), formatSequence(pendingAdrs(tree()))]) {
+    assert.match(out, /question tool such as `AskUserQuestion` when you have one\. Write nothing/);
+  }
+});
+
 test('prompt: both forms match the README contract', () => {
   const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
   assert.ok(readme.includes(`~~~\n${formatReview(selectAdr(tree(), 'ADR-0006'))}~~~`));
