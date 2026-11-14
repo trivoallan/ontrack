@@ -35,7 +35,7 @@
 
 ## 6. Roll out
 
-- [ ] 6.1 Propose the `record-architecture-decisions.directory` trait of ADR-0001 in `trivoallan/governance`, with `docs/adr` as its default
+- [x] 6.1 Propose the `record-architecture-decisions.directory` trait of ADR-0001 in `trivoallan/governance`, with `docs/adr` as its default (trivoallan/governance#89)
 - [ ] 6.2 After the merge, label one issue of ontrack and one pull request, and confirm both runs behave as before
 - [ ] 6.3 Call `propose` from `governance` with `frameworks: openspec`, label one issue, and confirm a draft pull request with a valid change and no ADR
 - [ ] 6.4 Call both workflows from one open source project and confirm a draft proposal and an apply session
