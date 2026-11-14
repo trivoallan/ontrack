@@ -50,6 +50,16 @@ test('unknown command: names the command and points to --help', async () => {
   assert.equal(r.stdout, '');
 });
 
+test('an unknown option stops the subcommand before it does anything', async () => {
+  let called = false;
+  const spy = { command: 'spy', describe: 'test', handler: () => { called = true; return 0; } };
+  const r = await runWith([spy], ['spy', '--bogus']);
+  assert.equal(called, false);
+  assert.equal(r.code, 1);
+  assert.match(r.stderr, /bogus/);
+  assert.match(r.stderr, /ontrack --help/);
+});
+
 test('a subcommand that throws exits with code 1', async () => {
   const boom = {
     command: 'boom',
