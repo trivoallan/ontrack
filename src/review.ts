@@ -1,9 +1,12 @@
 // Prints the prompt that asks a coding agent to rule `proposed` ADRs: every
-// one in sequence, or a single named one; or, for a named `accepted` ADR, to
-// supersede it. The prompt is fixed text plus paths, titles and references:
+// one in sequence, or a single named one; to rule again the ruled ADRs whose
+// source revised the question; or, for a named `accepted` ADR, to supersede it. The prompt is fixed text plus paths, titles and references:
 // everything specific to a question is in its ADR, which the agent reads.
+import path from 'node:path';
 import { readAdrs, supersededBy } from './instructions.ts';
 import type { Adr } from './instructions.ts';
+import { buildPlan } from './plan.ts';
+import type { Plan } from './plan.ts';
 
 const stem = (adr: Adr) => adr.ref.slice(adr.ns.length + 1);
 const sorted = (root: string) => readAdrs(root).sort((a, b) => a.ref.localeCompare(b.ref));
@@ -34,9 +37,63 @@ const supersedeSteps = (adr: Adr) => `1. Read its file in full. Read the rules o
 6. Once the user agrees: write the new ADR in \`docs/adr/\`, in the format the repository's rules prescribe, with \`status: accepted\`, \`supersedes: [${adr.ref}]\` and the traits; refer to the superseded ADR for context instead of restating it. Mark the superseded ADR only as the repository's rules spell out; when they do not say what to write in it, leave its file untouched. Then run \`npx ontrack apply\` to update AGENTS.md.
 `;
 
+// The ruling is carried over where the question did not move, and taken as
+// for a new question where it did. The source's copy replaces the local one,
+// so the new text and its `revision:` come with it.
+const RULE_AGAIN = `1. Read both files in full: the repository's copy, which holds the ruling, and the source's copy, which holds the question as it is asked now. Edit neither the source's copy nor any other ADR.
+2. List what moved in the question between the two: every key under \`traits:\` added, removed or renamed, every set of allowed values that changed, and every recommendation that changed. Leave out what only the ruling changed. If nothing that moved touches the ruling, say so in one line.
+3. For every trait key that did not move, keep the value this repository ruled, and the reason written for it where it departs from the recommendation.
+4. For every trait key that moved, start from the recommendation the source's copy makes. Look in this repository for evidence that it does not apply here, check every condition it states ("if this repository…"), and propose a value drawn from the repository, with its evidence.
+5. Keep the status, unless what moved settles whether the question applies here. Propose \`rejected\` only on evidence that it does not, and say what stands in for it.
+6. Present the proposed ruling: the status, one line per trait key with its value, marked kept or changed, the evidence for every change, and every departure from the recommendation with its reason. Then stop and ask for the user's agreement, with a question tool such as \`AskUserQuestion\` when you have one. Write nothing until the user agrees.
+7. Once the user agrees: replace the repository's copy with the source's copy, which carries the new \`revision:\`; write the ruling in it: the agreed status, the \`traits:\` keys filled, or the block removed when rejected, and the reason for every departure from the recommendation; then run \`npx ontrack apply\` to update AGENTS.md.
+`;
+
+/** A ruled ADR whose source asks a later revision of the question. */
+export type Revised = { adr: Adr; source: string; from: number; to: number };
+
+/**
+ * The ruled ADRs whose source has revised the question, in reference order.
+ * A `proposed` one is left to the review prompt. Without `plan`, the sources
+ * are read; none when they cannot be: `plan` is the command that says why.
+ */
+export function revisedAdrs(root: string, plan?: Plan): Revised[] {
+  let sources: Plan;
+  try {
+    sources = plan ?? buildPlan(root);
+  } catch {
+    return [];
+  }
+  const adrs = sorted(root);
+  return sources
+    .flatMap((source) =>
+      source.adrs.flatMap((planned): Revised[] => {
+        if (planned.category !== 'revised') return [];
+        const paths = [`docs/adr/${source.namespace}/${planned.name}`, `docs/adr/${planned.name}`];
+        const adr = adrs.find((a) => paths.includes(a.path) && a.status !== 'proposed');
+        if (!adr) return [];
+        const copy = path.relative(root, path.join(source.adrDir, planned.name)).split(path.sep).join('/');
+        return [{ adr, source: copy, from: planned.from as number, to: planned.to as number }];
+      }),
+    )
+    .sort((a, b) => a.adr.ref.localeCompare(b.adr.ref));
+}
+
 /** The `proposed` ADRs, in reference order. */
 export function pendingAdrs(root: string): Adr[] {
   return sorted(root).filter((a) => a.status === 'proposed');
+}
+
+// The one ADR `name` designates. Throws when it matches none, or several.
+function findAdr(adrs: Adr[], name: string): Adr {
+  const matches = name.includes('/')
+    ? adrs.filter((a) => a.ref === name)
+    : adrs.filter((a) => a.id === name || stem(a) === name);
+  if (matches.length === 0) throw new Error(`no ADR named "${name}" under docs/adr/`);
+  if (matches.length > 1) {
+    throw new Error(`"${name}" names several ADRs: ${matches.map((a) => a.ref).join(', ')}; name one by its reference`);
+  }
+  return matches[0];
 }
 
 /**
@@ -46,14 +103,7 @@ export function pendingAdrs(root: string): Adr[] {
  */
 export function selectAdr(root: string, name: string): Adr {
   const adrs = sorted(root);
-  const matches = name.includes('/')
-    ? adrs.filter((a) => a.ref === name)
-    : adrs.filter((a) => a.id === name || stem(a) === name);
-  if (matches.length === 0) throw new Error(`no ADR named "${name}" under docs/adr/`);
-  if (matches.length > 1) {
-    throw new Error(`"${name}" names several ADRs: ${matches.map((a) => a.ref).join(', ')}; name one by its reference`);
-  }
-  const [adr] = matches;
+  const adr = findAdr(adrs, name);
   if (adr.status === 'proposed') return adr;
   if (adr.status !== 'accepted') {
     throw new Error(`${adr.ref} is ${adr.status ?? 'without a status'}, neither proposed nor accepted: nothing to review`);
@@ -71,6 +121,38 @@ It is \`proposed\`: a question this repository has not answered yet, shipped wit
 
 ${STEPS}
 ${TRACKING}`;
+}
+
+/** The contract prompt to rule one revised ADR again (see README). */
+export function formatRevision({ adr, source, from, to }: Revised): string {
+  return `Rule again one architecture decision record of this repository: ${named(adr)}.
+
+Its source has revised the question: this repository ruled on revision ${from}, and \`${source}\` asks revision ${to}. The ruling stands until it is taken again. Propose the new ruling; the user decides. Where the source's copy itself says how to rule, it prevails over this prompt.
+
+${RULE_AGAIN}
+${TRACKING}`;
+}
+
+/** The contract prompt for every revised ADR, ruled again one at a time (see README). */
+export function formatRevisions(revised: Revised[]): string {
+  return `Rule again the architecture decision records of this repository whose source has revised the question, one at a time, in this order:
+
+${revised.map(({ adr, source, from, to }) => `- ${named(adr)}, ruled on revision ${from}: \`${source}\` asks revision ${to}`).join('\n')}
+
+Each holds a ruling of this repository; the file named after it is its source's copy. The ruling stands until it is taken again. Propose the new ruling; the user decides. Where a source's copy itself says how to rule, it prevails over this prompt.
+
+For each ADR, in turn:
+
+${RULE_AGAIN}
+Then take the next ADR in the list. Do not start an ADR before the previous one is ruled.
+
+${TRACKING}`;
+}
+
+/** The revised ADR `name` designates, if it is one. Throws like `selectAdr` on a name that matches none, or several. */
+export function selectRevised(root: string, name: string): Revised | undefined {
+  const { ref } = findAdr(sorted(root), name);
+  return revisedAdrs(root).find((r) => r.adr.ref === ref);
 }
 
 /** The contract prompt to supersede one `accepted` ADR (see README). */

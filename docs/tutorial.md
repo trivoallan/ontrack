@@ -26,10 +26,10 @@ did, and you can discard it.
 ## 1. Install ontrack and a source
 
 ```bash
-npm i -D ontrack@git+https://github.com/trivoallan/ontrack.git#v0.2.0
+npm i -D @trivoallan/ontrack
 ```
 
-Installing compiles ontrack once, which npm does on its own.
+The package is scoped; the command it installs is `ontrack`.
 
 A **source** is an npm dependency that ships ADRs. Its npm alias is its
 namespace. [trivoallan/governance](https://github.com/trivoallan/governance)

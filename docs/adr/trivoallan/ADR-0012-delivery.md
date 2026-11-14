@@ -3,7 +3,7 @@ adr: ADR-0012
 slug: delivery
 title: Delivery
 status: accepted
-revision: 1
+revision: 2
 date: 2026-11-14
 authors: [Tristan Rivoallan]
 supersedes: []
@@ -12,6 +12,7 @@ traits:
     target: package
     environments:
       - { name: github, trigger: tag }
+      - { name: npm, trigger: tag }
     release_tool: release-please
     registry: none
   deployment:
@@ -101,33 +102,61 @@ that publishes a package answers `manual`, never `none`. A tool that does
 only half the job (publishes without a changelog) still counts: say
 "changelog by hand" under Consequences.
 
+**Before 1.0.0, a breaking change gives a minor version.** With
+`release-please`, a repository whose current version is below 1.0.0 sets
+`"bump-minor-pre-major": true` in `release-please-config.json`. Without it,
+the first breaking change in a 0.x repository releases 1.0.0, a promise of
+stability nobody decided. Going to 1.0.0 stays a deliberate act
+(a `Release-As: 1.0.0` footer), after which the option no longer applies. A
+repository already at 1.0.0 or above does not set it.
+
 **Once a pipeline file exists**, the last task of any change checks that it
 passes on the pull request, even when there is no deploy job.
 
-`release-please` adopted as recommended. `target: package`: ontrack is an npm package installed as a dev dependency; nothing is deployed and no image is built, hence `registry: none` and `manifests: none`.
+`release-please` adopted as recommended. `target: package`: ontrack is an npm
+package installed as a dev dependency; nothing is deployed and no image is
+built, hence `registry: none` and `manifests: none`.
 
-**Departure: one environment, `github` on `tag`, instead of staging on merge and production on tag.** A package has one environment, the place it is published to, triggered on `tag`. That place is the GitHub repository: users install `ontrack@git+https://github.com/trivoallan/ontrack.git#vX.Y.Z`, because the `ontrack` name on the npm registry belongs to another project.
+**Departure: two environments, `github` then `npm`, both on `tag`, instead of
+staging on merge and production on tag.** A package has no staging: its
+environments are the places a version is published to. The first is the
+GitHub repository, where a tag makes the release and from which
+`ontrack@git+https://github.com/trivoallan/ontrack.git#vX.Y.Z` installs. The
+second is the npm registry, where the same tag publishes the package as
+`@trivoallan/ontrack`: the unscoped `ontrack` name belongs to another
+project there. The command stays `ontrack`.
+
+The 0.x rule above is already followed: `release-please-config.json` sets
+`"bump-minor-pre-major": true`.
 
 ## Consequences
 
 ### Positive
 
-- Users install a named version, with its changelog, rather than whatever
-  `main` holds that day.
+- Users install a named version from the npm registry, with its changelog,
+  without a git URL or a build on install.
+- Installing from the GitHub repository at a tag stays a decided route, for
+  whoever cannot or will not use the registry.
 - Versions follow the commit messages that `commitlint` (ADR-0006) already
-  enforces.
+  enforces, and a breaking change before 1.0.0 gives a minor version.
 
 ### Negative
 
-- At the time of ruling, nothing of this exists: no tag, no release,
-  `package.json` at `0.1.0`, no `release-please` workflow, and the README
-  installs from `main` without a ref. All four have to change.
+- At the time of ruling, nothing publishes to npm: the release workflow
+  makes the tag and the GitHub release only, `package.json` is named
+  `ontrack`, and the README installs from git. All three have to change.
+- Publishing needs a credential for the npm registry, to keep under
+  ADR-0011 and ADR-0015.
+- Two environments on one tag can disagree: a release whose publish job
+  fails exists on GitHub and not on npm until the job is run again.
 - A badly typed squash message (ADR-0009) produces a wrong version.
 
 ### Neutral
 
-- Publishing to the npm registry would need another package name; it is not
-  decided here.
+- The package is scoped and the command is not: users install
+  `@trivoallan/ontrack` and run `ontrack`.
+- This verdict replaces the one taken at revision 1, which had `github` as
+  the only environment.
 
 ## Alternatives Considered
 
@@ -154,6 +183,7 @@ it is proven on GitHub Actions. governance assumes GitHub only, where
 
 ## References
 
+- Suggested skills: `deploy-checklist` from `engineering@knowledge-work-plugins`.
 - Adapted from surdesrails [SDR-0011](https://github.com/trivoallan/surdesrails/blob/main/resources/docs/adr/SDR-0011-delivery.md), revision 1 (its internal hosting-offer trait `hosting.offer` replaced by `delivery.target`; recommends `release-please` instead of `releaser-pleaser`).
 - [ADR-0001](ADR-0001-record-architecture-decisions.md): how governance ADRs are ruled on.
 - [release-please](https://github.com/googleapis/release-please) and [Semantic Versioning](https://semver.org/).

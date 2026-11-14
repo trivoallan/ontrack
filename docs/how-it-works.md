@@ -62,7 +62,8 @@ the repository. The agent proposes and writes nothing until you agree.
 The source raises it when the question changes. `ontrack plan` compares the
 repository's value with the source's and reports the ADR as `revised`.
 ontrack never rewrites an ADR a repository has decided on: a person rules
-again.
+again. `ontrack review` then asks the agent to prepare that ruling: it keeps
+your ruling where the question did not move, and proposes one where it did.
 
 `plan` reads the source as it is installed in the repository and makes no
 network call. A revision is therefore reported once the repository has

@@ -2,10 +2,19 @@ import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
-import { formatReview, formatSequence, formatSupersession, pendingAdrs, selectAdr } from '../src/review.ts';
+import {
+  formatReview,
+  formatRevision,
+  formatRevisions,
+  formatSequence,
+  formatSupersession,
+  pendingAdrs,
+  revisedAdrs,
+  selectAdr,
+} from '../src/review.ts';
 import { main } from '../src/cli.ts';
 import type { Adr } from '../src/instructions.ts';
-import { cleanup, makeTree } from './helpers/project.ts';
+import { cleanup, makeProject, makeTree } from './helpers/project.ts';
 
 after(cleanup);
 
@@ -218,6 +227,9 @@ test('prompt: every form matches the README contract', () => {
   assert.ok(readme.includes(`~~~\n${formatReview(selectAdr(tree(), 'ADR-0006'))}~~~`));
   assert.ok(readme.includes(`~~~\n${formatSequence(pendingAdrs(tree()))}~~~`));
   assert.ok(readme.includes(`~~~\n${formatSupersession(selectAdr(tree(), 'ADR-0001'))}~~~`));
+  const revised = revisedAdrs(stale());
+  assert.ok(readme.includes(`~~~\n${formatRevision(revised[1])}~~~`));
+  assert.ok(readme.includes(`~~~\n${formatRevisions(revised)}~~~`));
 });
 
 // Supersession prompt
@@ -291,7 +303,7 @@ test('command: nothing to review exits 0 with an empty stdout', async () => {
     const r = await review(root);
     assert.equal(r.code, 0);
     assert.equal(r.stdout, '');
-    assert.match(r.stderr, /no ADR is proposed/);
+    assert.match(r.stderr, /no ADR is proposed or revised/);
   }
 });
 
@@ -310,4 +322,75 @@ test('command: a rejected name exits 1 with an empty stdout', async () => {
   assert.equal(r.code, 1);
   assert.equal(r.stdout, '');
   assert.match(r.stderr, /rejected/);
+});
+
+// Revised ADRs
+
+const DELIVERY = 'docs/adr/trivoallan/ADR-0012-delivery.md';
+const asked = (title: string, revision: number, status = 'proposed') => adr(title, `status: ${status}`, `revision: ${revision}`);
+
+/** A source asking two questions again, and one that never was ruled. */
+const stale = (local: Record<string, string> = {}) =>
+  makeProject({
+    sources: {
+      trivoallan: {
+        'ADR-0001-record-architecture-decisions.md': asked('Record architecture decisions', 3),
+        'ADR-0002-localization.md': asked('Localization', 2),
+        'ADR-0012-delivery.md': asked('Delivery', 2),
+      },
+    },
+    local: {
+      [RECORD]: asked('Record architecture decisions', 1, 'accepted'),
+      [LOCALIZATION]: asked('Localization', 2, 'accepted'),
+      [DELIVERY]: asked('Delivery', 1, 'rejected'),
+      ...local,
+    },
+  });
+
+test('revised: ruled ADRs behind their source, in reference order, with the source copy and both revisions', () => {
+  assert.deepEqual(
+    revisedAdrs(stale()).map(({ adr: a, ...rest }) => ({ ref: a.ref, ...rest })),
+    [
+      { ref: 'trivoallan/ADR-0001-record-architecture-decisions', source: 'node_modules/trivoallan/adr/ADR-0001-record-architecture-decisions.md', from: 1, to: 3 },
+      { ref: 'trivoallan/ADR-0012-delivery', source: 'node_modules/trivoallan/adr/ADR-0012-delivery.md', from: 1, to: 2 },
+    ],
+  );
+});
+
+test('revised: a proposed copy is left to the review prompt, and unreadable sources give none', () => {
+  const root = stale({ [DELIVERY]: asked('Delivery', 1) });
+  assert.deepEqual(refs(revisedAdrs(root).map((r) => r.adr)), ['trivoallan/ADR-0001-record-architecture-decisions']);
+  assert.deepEqual(revisedAdrs(makeTree({ [RECORD]: asked('R', 1, 'accepted') })), []);
+});
+
+test('revised prompt: names both copies and both revisions, seven steps, the tracking paragraph', () => {
+  const [, delivery] = revisedAdrs(stale());
+  const out = formatRevision(delivery);
+  assert.ok(out.startsWith(`Rule again one architecture decision record of this repository: \`${DELIVERY}\` (Delivery).`));
+  assert.ok(out.includes('ruled on revision 1, and `node_modules/trivoallan/adr/ADR-0012-delivery.md` asks revision 2'));
+  assert.ok(!out.includes(RECORD));
+  assert.deepEqual(out.match(/^\d\./gm), ['1.', '2.', '3.', '4.', '5.', '6.', '7.']);
+  assert.ok(out.includes('Once every ADR is ruled'));
+});
+
+test('command: a revised name prints the prompt to rule again, even rejected, and leaves the tree unchanged', async () => {
+  const root = stale();
+  const before = snapshot(root);
+  const [record, delivery] = revisedAdrs(root);
+  assert.deepEqual(await review(root, 'ADR-0001-record-architecture-decisions'), { code: 2, stdout: formatRevision(record), stderr: '' });
+  assert.deepEqual(await review(root, 'trivoallan/ADR-0012-delivery'), { code: 2, stdout: formatRevision(delivery), stderr: '' });
+  assert.deepEqual(snapshot(root), before);
+});
+
+test('command: an accepted name that is not revised still prints the supersession prompt', async () => {
+  const root = stale();
+  const r = await review(root, 'ADR-0002-localization');
+  assert.equal(r.stdout, formatSupersession(selectAdr(root, 'ADR-0002-localization')));
+});
+
+test('command: without an argument, the revised ADRs come once no ADR is proposed', async () => {
+  const root = stale();
+  assert.deepEqual(await review(root), { code: 2, stdout: formatRevisions(revisedAdrs(root)), stderr: '' });
+  const mixed = stale({ [LOCALIZATION]: asked('Localization', 2) });
+  assert.equal((await review(mixed)).stdout, formatSequence(pendingAdrs(mixed)));
 });

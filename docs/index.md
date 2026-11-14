@@ -129,8 +129,8 @@ documented the way those decisions prescribe.
 
 ontrack is at version 0.2.0. It is young, and it changes.
 
-- It is installed from GitHub, by git URL. It is not published to the npm
-  registry.
+- It is published to the npm registry as `@trivoallan/ontrack`, and can
+  also be installed from GitHub, by git URL.
 - It needs Node 22.18 or later.
 - Its command outputs are specified in the
   [README](https://github.com/trivoallan/ontrack#readme).
