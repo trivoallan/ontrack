@@ -18,7 +18,7 @@ function mayBelongToFrontmatter(line) {
 }
 
 // Lines between the fences, or null when the frontmatter is unreadable.
-function frontmatter(text) {
+export function frontmatter(text) {
   const lines = text.split('\n');
   if (!FENCE.test(lines[0])) return null;
   for (let i = 1; i < lines.length; i += 1) {

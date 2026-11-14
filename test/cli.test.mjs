@@ -29,6 +29,7 @@ for (const args of [['--help'], ['-h'], []]) {
     const r = await run(...args);
     assert.equal(r.code, 0);
     assert.match(r.stdout, /ontrack plan/);
+    assert.match(r.stdout, /ontrack instructions/);
     assert.equal(r.stderr, '');
   });
 }

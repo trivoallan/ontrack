@@ -7,7 +7,7 @@ const ORDER = ['revised', 'new', 'removed', 'undetermined', 'unreadable', 'uncha
 const CATEGORY = { stale: 'revised', 'up-to-date': 'unchanged' };
 
 // `*.md` files placed directly in `dir` (subdirectories ignored), sorted.
-function markdownFiles(dir) {
+export function markdownFiles(dir) {
   return readdirSync(dir, { withFileTypes: true })
     .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
     .map((entry) => entry.name)
