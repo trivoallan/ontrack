@@ -32,7 +32,9 @@ good enough to implement from is what the experiment measures.
   no pull request is opened and the issue receives a fixed comment.
 - A repository ADR records the decision to run a coding agent in CI and the
   boundaries it runs within.
-- One new secret, named `ANTHROPIC_API_KEY`; a person sets its value.
+- No new secret: the agent reaches the model provider through workload
+  identity federation. A person sets three identifiers as repository
+  variables and the federation rule on the provider's side.
 
 Out of scope: any change to the `ontrack` CLI or to the governance source,
 any second change framework, the case of an issue edited after it
@@ -55,7 +57,7 @@ None.
   other pinned actions.
 - `docs/adr/ADR-0001-propose-changes-from-labelled-issues.md` (new), the
   first ADR this repository writes for itself.
-- Repository settings, set by a person: the `ANTHROPIC_API_KEY` secret, the
+- Repository settings, set by a person: three `ANTHROPIC_*` variables, the
   `ontrack:propose` label, and the permission for GitHub Actions to create pull
   requests.
 - No change to `src/`, to the published package or to its tests.

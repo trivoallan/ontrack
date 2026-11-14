@@ -27,6 +27,14 @@ function stepScript(id: string): string {
   return body.join('\n');
 }
 
+test('the workflow stores no credential and only the agent job may ask for an identity token', () => {
+  assert.doesNotMatch(workflow, /secrets\./);
+  const [draft, publish] = workflow.split(/^  publish:$/m);
+  assert.match(draft, /^      id-token: write$/m);
+  assert.doesNotMatch(publish, /id-token/);
+  assert.doesNotMatch(publish, /claude-code-action/);
+});
+
 // No signing key, hook or identity of the machine running the tests.
 const gitEnv = {
   ...process.env,

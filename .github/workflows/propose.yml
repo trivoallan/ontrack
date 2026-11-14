@@ -30,13 +30,16 @@ concurrency:
 jobs:
   draft:
     # A label is the maintainer saying the issue was read, which lets a job
-    # with a secret read it too. The agent action also refuses an actor
+    # that can reach the model provider read it too. The agent action also refuses an actor
     # without write access.
     if: github.event.label.name == 'ontrack:propose'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
       contents: read
+      # The agent step exchanges the job's OIDC token for a short-lived
+      # provider token (workload identity federation): no key is stored.
+      id-token: write
     outputs:
       outcome: ${{ steps.outcome.outputs.outcome }}
       name: ${{ steps.outcome.outputs.name }}
@@ -97,7 +100,7 @@ jobs:
       # inside the checkout, and what no rule covers is denied. Seven
       # subcommands of one command line; no `git`, no `gh`. The deny rules
       # repeat what file ownership already enforces, and close the subcommands
-      # that reach the network. The provider key is kept out of the
+      # that reach the network. The provider token is kept out of the
       # environment of the commands the agent runs. The token can write
       # nothing.
       - id: agent
@@ -106,7 +109,12 @@ jobs:
         env:
           CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: '1'
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Identifiers, not credentials: the federation rule on the
+          # provider's side says which workflow may use them. A person sets
+          # them as repository variables.
+          anthropic_federation_rule_id: ${{ vars.ANTHROPIC_FEDERATION_RULE_ID }}
+          anthropic_organization_id: ${{ vars.ANTHROPIC_ORGANIZATION_ID }}
+          anthropic_service_account_id: ${{ vars.ANTHROPIC_SERVICE_ACCOUNT_ID }}
           github_token: ${{ github.token }}
           # Reads and writes outside the checkout are refused by the agent
           # itself, whatever the mode or the rules.

@@ -43,12 +43,13 @@ an issue. This job is added to those ADR-0011 lists, within these
 boundaries:
 
 1. **The label is the request.** Adding it says the maintainer read the
-   issue and asks for a proposal, which is what lets a job holding a secret
+   issue and asks for a proposal, which is what lets a job that can reach the model provider
    read that issue. The text the agent receives is the one the issue had at
    that moment. The label is removed when the run ends.
 2. **The agent cannot write to GitHub, nor rewrite what it runs.** It runs
-   in a job of its own whose token is read-only. It receives the model
-   provider's key and no other secret, and neither `git` nor `gh`. The
+   in a job of its own whose token is read-only. It reaches the model provider with a
+   short-lived token obtained by workload identity federation: no key is
+   stored. It has neither `git` nor `gh`. The
    command line it may run, and the files that steer an agent or a
    workflow, are not writable by it.
 3. **A second job acts on GitHub, with fixed text.** It runs no agent.
@@ -79,11 +80,13 @@ boundaries:
   can be taken away from a workstation and for several issues at once.
 - An injected instruction in an issue can at worst produce Markdown and YAML
   files in a draft pull request that a person reviews.
-- Removing the experiment is deleting one workflow file and one secret.
+- Removing the experiment is deleting one workflow file and one federation
+  rule.
 
 ### Negative
 
-- The repository holds a model provider's key and pays for each run.
+- Each run is paid for, and the agent's job may ask GitHub for an identity
+  token: the federation rule must stay limited to this workflow.
 - The required checks do not run on the proposal commit, because GitHub
   starts no workflow for an event caused by the job token. They run on the
   first push a person makes.

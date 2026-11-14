@@ -1,7 +1,7 @@
 ## 1. Prerequisites a person sets on GitHub
 
 - [x] 1.1 Create the `ontrack:propose` label in `trivoallan/ontrack`
-- [ ] 1.2 Set the repository secret `ANTHROPIC_API_KEY`
+- [ ] 1.2 In the Claude Console, register the GitHub Actions issuer, create a service account and a federation rule limited to this repository (to `propose.yml` on `main` if the rule allows it); set the repository variables `ANTHROPIC_FEDERATION_RULE_ID`, `ANTHROPIC_ORGANIZATION_ID` and `ANTHROPIC_SERVICE_ACCOUNT_ID`
 - [ ] 1.3 Allow GitHub Actions to create pull requests (Settings, Actions, Workflow permissions)
 
 ## 2. Settle the agent step
@@ -26,14 +26,14 @@
 
 - [x] 3b.1 Install the command line outside the checkout from the lockfile, without install scripts, and give it and `.claude`, `.github`, `.githooks` to root before the agent starts
 - [x] 3b.2 Narrow the agent's Bash rules to the subcommands a proposal needs; deny `install`, `feedback`, `config`, `store`, `completion` and edits under the protected directories
-- [x] 3b.3 Keep the provider key out of the environment of the commands the agent runs; turn the command line's telemetry off; write no cache
+- [x] 3b.3 Keep the provider credential out of the environment of the commands the agent runs; turn the command line's telemetry off; write no cache
 - [x] 3b.4 In `publish`, refuse the patch unless every entry adds a regular Markdown or YAML file under the change or a new ADR without `check:`; cap its size; match the change name as a whole string
 - [x] 3b.5 Show the agent's reasons in the run summary as truncated plain text; warn in the pull request description that the proposal comes from text anyone can write
 - [x] 3b.6 Test the `publish` filter and the issue step in `test/propose-workflow.test.ts`, which runs both scripts as taken from the workflow file: a clean proposal is pushed; a modified manifest, hook, ADR or agent file, a new test file or skill, another change, a script, a symbolic link, an executable, an ADR with a command and invalid names are refused
 
 ## 4. Verify
 
-- [x] 4.1 Check the file against the `issue-proposal` spec: one secret named, no `${{ github.event.issue.title }}` or `.body` anywhere, no `git` or `gh` in the agent's tools, no agent step in the job that writes
+- [x] 4.1 Check the file against the `issue-proposal` spec: no secret named, no `${{ github.event.issue.title }}` or `.body` anywhere, no `git` or `gh` in the agent's tools, no agent step in the job that writes
 - [x] 4.2 Run `npx ontrack check` and `npm test` locally
 - [ ] 4.3 After merge, add the label to one issue that moves a behaviour of the CLI and confirm a draft pull request with a valid change and `Refs`
 - [ ] 4.4 Add the label to issue 103 and confirm the "no change" comment and the removed label
@@ -44,4 +44,4 @@
 
 - [ ] 5.1 Write down, before labelling, the maintainer's own verdict (change or no change) for each of issues 103 to 108, then label them
 - [ ] 5.2 Record for each one whether the proposal reached implementation without being rewritten, and whether a "no change" verdict matched the maintainer's
-- [ ] 5.3 Decide: keep, propose it to the governance source, or delete the workflow and the secret
+- [ ] 5.3 Decide: keep, propose it to the governance source, or delete the workflow, the variables and the federation rule

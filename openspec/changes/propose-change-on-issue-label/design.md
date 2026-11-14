@@ -188,7 +188,7 @@ In `draft`, so that compromise is hard:
 - The Bash rules name seven subcommands; `install`, `feedback`, `config`,
   `store` and `completion` are denied, as are edits under those directories.
   `install` downloads and runs a script, `feedback` files an issue elsewhere.
-- `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` keeps the provider key out of the
+- `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` keeps the provider credential out of the
   environment of the commands the agent runs; `DO_NOT_TRACK` turns the
   command line's telemetry off.
 - The agent's own settings refuse reads and writes outside the checkout.
@@ -217,6 +217,21 @@ Alternative: forbid a list of dangerous paths (`package.json`, `.claude/`,
 hooks). A deny-list is one forgotten path away from code running on the
 maintainer's machine.
 
+### 9. No stored key: workload identity federation
+
+The agent step gives the action a federation rule, an organization and a
+service account, read from repository variables. The action exchanges the
+job's GitHub OIDC token for a short-lived provider token; `draft` gets
+`id-token: write` for that, and the workflow names no secret.
+
+Why: a static key was the one long-lived credential in reach of an injected
+agent, and the residual risk the security review left open. The identifiers
+are not credentials: what they allow is decided by the rule on the
+provider's side.
+
+Alternative: a repository secret `ANTHROPIC_API_KEY` with a low spending
+limit. Simpler to set up; it has to be stored, rotated, and it leaks whole.
+
 ## Risks / Trade-offs
 
 - [The experiment's sample opens no change] Issues 103 to 108 all concern
@@ -231,9 +246,14 @@ maintainer's machine.
   agent later follows, with the maintainer's rights. No filter reads prose.
   → The pull request says so in its description; reading the proposal
   before running anything on the branch is the control.
-- [The provider key leaks] The key is in the agent's own process. → It is
-  kept out of the commands the agent runs, and nothing the agent may write
-  can be code. Residual: a dedicated key with a low spending limit.
+- [The provider credential leaks] → There is no stored key (decision 9):
+  the token the agent's process holds expires on its own, is kept out of
+  the commands the agent runs, and nothing the agent may write can be code.
+- [The job can ask for an identity token] `id-token: write` lets `draft`
+  request a GitHub OIDC token for any audience. → It is worth something only
+  where a rule accepts it: the federation rule is limited to this repository
+  and, if the provider allows it, to this workflow on `main`. The action
+  removes the OIDC request variables from the agent's environment.
 - [The file-ownership steps break the agent action] Not verifiable before
   the first run. → Task 4.3.
 - [The agent edits files outside the change] → Refused by `publish`.
@@ -248,10 +268,12 @@ maintainer's machine.
 
 ## Migration Plan
 
-1. A person creates the `ontrack:propose` label, sets `ANTHROPIC_API_KEY`, and
+1. A person creates the `ontrack:propose` label, sets the federation rule
+   and the three `ANTHROPIC_*` repository variables, and
    allows GitHub Actions to create pull requests in the repository settings.
 2. Merge the workflow. Nothing runs until a label is added.
-3. Rollback: delete `.github/workflows/propose.yml` and the secret.
+3. Rollback: delete `.github/workflows/propose.yml`, the variables and the
+   federation rule.
 
 ## Open Questions
 

@@ -62,12 +62,17 @@ The agent SHALL run in a job whose token can write nothing, and without tracker 
 - **THEN** the job that holds write permissions has no step that runs the agent
 - **AND** it receives from the agent's job only a patch and a change name it checks again
 
-#### Scenario: The secret the agent needs
+#### Scenario: No stored credential
 - **WHEN** the workflow is read
-- **THEN** `ANTHROPIC_API_KEY` is the only secret it names, and only the agent step receives it
+- **THEN** it names no secret
+- **AND** the agent reaches the model provider with a short-lived token obtained by workload identity federation, from identifiers held in repository variables
+
+#### Scenario: Who may ask for an identity token
+- **WHEN** the workflow is read
+- **THEN** only the agent's job has the `id-token: write` permission
 
 ### Requirement: The agent cannot rewrite what it runs
-The command line the agent is allowed to run SHALL be installed outside the checkout and MUST NOT be writable by the agent, and neither are the files of the checkout that steer an agent or a workflow. The provider key MUST NOT be in the environment of the commands the agent runs, and the subcommands that reach the network are denied.
+The command line the agent is allowed to run SHALL be installed outside the checkout and MUST NOT be writable by the agent, and neither are the files of the checkout that steer an agent or a workflow. The provider credential MUST NOT be in the environment of the commands the agent runs, and the subcommands that reach the network are denied.
 
 #### Scenario: The command line is out of reach
 - **WHEN** the agent starts
@@ -75,7 +80,7 @@ The command line the agent is allowed to run SHALL be installed outside the chec
 
 #### Scenario: A command run by the agent
 - **WHEN** the agent runs an allowed command
-- **THEN** the environment of that command does not hold the provider key
+- **THEN** the environment of that command does not hold the provider credential
 
 #### Scenario: A subcommand that reaches the network
 - **WHEN** the agent asks to run the command line's `install` or `feedback` subcommand
