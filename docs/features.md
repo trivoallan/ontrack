@@ -9,7 +9,7 @@ copies drift. ontrack turns them into shared architecture decision records
 for itself, and tells you when an answer is out of date.
 
 ```mermaid
-flowchart LR
+flowchart TD
   platform["Source: platform<br/>one copy of each question"]
   security["Source: security<br/>one copy of each question"]
   subgraph repos["Your repositories"]
