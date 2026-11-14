@@ -68,7 +68,7 @@ export default defineConfig({
       // stay one click away, collapsed.
       sidebar: [
         { slug: 'tutorial' },
-        { slug: 'features' },
+        { slug: 'how-it-works' },
         { slug: 'write-your-own-source' },
         { slug: 'commands' },
         { slug: 'file-formats' },

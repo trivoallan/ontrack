@@ -166,5 +166,5 @@ The [tutorial](tutorial.md) takes four commands. On a fresh repository, the
 first three ran in 14 seconds and left an `AGENTS.md` with its first rule. The
 agent then took about a minute to propose its first answer.
 
-To see what ontrack does command by command first, read the
-[features](features.md).
+To understand the model first, read [how ontrack works](how-it-works.md). To
+see what each command does, read the [commands reference](commands.md).
