@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { main } from '../src/cli.mjs';
 import { formatApply, planActions } from '../src/apply.mjs';
 import { buildPlan } from '../src/plan.mjs';
-import { adr, cleanup, makeProject } from './helpers/project.mjs';
+import { adr, cleanup, makeProject, withAgents } from './helpers/project.mjs';
 
 after(cleanup);
 
@@ -41,7 +41,7 @@ function snapshot(root) {
 // Same plan as plan
 
 test('nothing to apply: same output as plan, exit 0', async () => {
-  const root = makeProject({ sources: { platform: { 'A.md': adr(1) } }, local: { 'docs/adr/platform/A.md': adr(1) } });
+  const root = withAgents(makeProject({ sources: { platform: { 'A.md': adr(1) } }, local: { 'docs/adr/platform/A.md': adr(1) } }));
   const before = snapshot(root);
   const r = await run(root, 'apply');
   assert.equal(r.stdout, 'platform: 1 unchanged\n');
@@ -56,7 +56,7 @@ test('new ADR imported byte for byte', async () => {
   const root = makeProject({ sources: { platform: { 'SDR-0015.md': content } } });
   const r = await run(root, 'apply');
   assert.equal(read(root, 'docs/adr/platform/SDR-0015.md'), content);
-  assert.equal(r.stdout, 'platform: 1 imported\n  imported      SDR-0015  Observability\n');
+  assert.equal(r.stdout, 'platform: 1 imported\n  imported      SDR-0015  Observability\nAGENTS.md: rules block created\n');
   assert.equal(r.code, 0);
 });
 
@@ -205,9 +205,10 @@ test('dry run of confirm all names both ADRs and writes nothing', async () => {
     '  moved         B.md',
     '  confirmed     A (revision 2)',
     '  confirmed     B (revision 4)',
+    'AGENTS.md: rules block to create',
     '',
   ].join('\n'));
-  assert.equal(r.code, 0);
+  assert.equal(r.code, 2);
 });
 
 test('the README example is what formatApply prints', () => {

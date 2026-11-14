@@ -1,4 +1,5 @@
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { buildInstructions, formatInstructions } from '../../src/instructions.mjs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -57,3 +58,10 @@ export const adr = (revision, status = 'proposed', title) =>
     'Body.',
     '',
   ].join('\n');
+
+/** Writes a current rules block into the project's AGENTS.md; returns the root. */
+export function withAgents(root, { before = '', after = '' } = {}) {
+  const block = formatInstructions(buildInstructions(root));
+  writeFileSync(path.join(root, 'AGENTS.md'), before + block + after);
+  return root;
+}

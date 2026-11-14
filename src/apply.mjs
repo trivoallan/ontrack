@@ -87,7 +87,7 @@ function actionLine(a) {
 }
 
 /** The `apply` output (see README). */
-export function formatApply({ actions, links, remaining, dryRun }) {
+export function formatApply({ actions, links, agents = [], remaining, dryRun }) {
   const lines = dryRun ? ['dry run: nothing written'] : [];
   const sources = [...new Set(actions.map((a) => a.source.namespace))];
   for (const namespace of sources) {
@@ -100,7 +100,8 @@ export function formatApply({ actions, links, remaining, dryRun }) {
     lines.push('links to update:');
     for (const l of links) lines.push(`  ${l.file}:${l.line}  ${l.old} → ${l.new}`);
   }
-  let out = `${lines.join('\n')}\n`;
+  lines.push(...agents);
+  let out = lines.length > 0 ? `${lines.join('\n')}\n` : '';
   if (hasPendingChanges(remaining)) out += `remaining:\n${formatPlan(remaining)}`;
   return out;
 }

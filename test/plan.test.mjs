@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { buildPlan, formatPlan, hasPendingChanges } from '../src/plan.mjs';
 import { main } from '../src/cli.mjs';
-import { adr, cleanup, makeProject, makeTree } from './helpers/project.mjs';
+import { adr, cleanup, makeProject, makeTree, withAgents } from './helpers/project.mjs';
 
 after(cleanup);
 
@@ -115,7 +115,7 @@ test('nothing to do', async () => {
     sources.platform[`SDR-${i}.md`] = adr(1);
     local[`docs/adr/platform/SDR-${i}.md`] = adr(1);
   }
-  const r = await plan(makeProject({ sources, local }));
+  const r = await plan(withAgents(makeProject({ sources, local })));
   assert.equal(r.stdout, 'platform: 14 unchanged\n');
   assert.equal(r.code, 0);
 });
