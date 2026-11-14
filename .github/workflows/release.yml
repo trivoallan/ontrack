@@ -1,0 +1,21 @@
+name: release
+
+# Keeps a release pull request open; merging it tags vX.Y.Z and creates the
+# GitHub release (ADR-0012). Configuration: release-please-config.json.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          # A pull request opened with the default GITHUB_TOKEN triggers no
+          # workflow, so its required checks would never run.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
