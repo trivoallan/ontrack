@@ -170,19 +170,14 @@ which lists the accepted values of every trait.
 
 ## The rules block in `AGENTS.md`
 
-`apply` keeps the block printed by `instructions` current in the `AGENTS.md`
-at the root of the repository, and `plan` reports its state. The text between
-`<!-- ontrack:begin -->` and `<!-- ontrack:end -->` belongs to ontrack and is
-overwritten. Everything outside the markers is yours and is never touched.
+`ontrack apply` keeps the block printed by `ontrack instructions` current in
+the `AGENTS.md` at the root of the repository, and `ontrack plan` reports its
+state. The text between `<!-- ontrack:begin -->` and `<!-- ontrack:end -->`
+belongs to ontrack and is overwritten; everything outside the markers is
+yours and is never touched.
 
-- `apply` replaces the block when the file holds one marker pair, appends it
-  when the file has no marker, and creates `AGENTS.md` when there is none.
-- When the block cannot be written, only this step is skipped: the ADRs are
-  still handled, and both commands print `AGENTS.md: skipped, <reason>` and
-  exit with `2`.
-- Claude Code reads `AGENTS.md` on its own only when the repository has no
-  `CLAUDE.md` and no `CLAUDE.local.md`. When one exists and `CLAUDE.md` holds
-  no line `@AGENTS.md`, both commands print a warning. ontrack never writes
-  `CLAUDE.md`.
-
-Detail: [The rules block in `AGENTS.md`](https://github.com/trivoallan/ontrack#the-rules-block-in-agentsmd).
+- `apply` replaces the block when the file holds one marker pair, appends it after an empty line when the file has no marker, and creates `AGENTS.md` when there is none. It prints `AGENTS.md: rules block updated` or `AGENTS.md: rules block created`. With `--dry-run` it prints `AGENTS.md: rules block to update` or `AGENTS.md: rules block to create` and writes nothing.
+- `plan` prints `AGENTS.md: rules block missing` or `AGENTS.md: rules block out of date` and exits with `2`, like any other pending change.
+- The block is needed as soon as one ADR is decided or pending. With none, and no marker in `AGENTS.md`, nothing is printed and no file is created.
+- When the block cannot be written (a marker without its pair, more than one pair, or two decided ADRs sharing a trait key), only this step is skipped: the ADRs are still handled, `AGENTS.md` is left untouched, and both commands print `AGENTS.md: skipped, <reason>` and exit with `2`.
+- Claude Code reads `AGENTS.md` on its own only when the repository has no `CLAUDE.md` and no `CLAUDE.local.md`. When one of them exists and `CLAUDE.md` holds no line `@AGENTS.md`, both commands print `AGENTS.md: not read by Claude Code while CLAUDE.md exists; add a line "@AGENTS.md" to CLAUDE.md`. ontrack never writes `CLAUDE.md`; this warning does not change the exit code.

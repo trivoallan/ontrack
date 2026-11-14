@@ -152,9 +152,9 @@ test('no source', async () => {
   assert.equal(r.code, 0);
 });
 
-test('the README example is what formatPlan prints', () => {
-  const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
-  const example = /```\n(platform: [\s\S]*?)```/.exec(readme)?.[1];
+test('the commands reference example is what formatPlan prints', () => {
+  const reference = readFileSync(new URL('../docs/commands.md', import.meta.url), 'utf8');
+  const example = /```\n(platform: [\s\S]*?)```/.exec(reference)?.[1];
   const p: Plan = [{
     namespace: 'platform',
     adrDir: 'node_modules/platform/adr',

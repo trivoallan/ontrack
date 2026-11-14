@@ -137,7 +137,7 @@ npm i -D trivoallan@git+https://github.com/trivoallan/governance.git
 npx ontrack plan
 ```
 
-The [commands reference](commands.md) lists every command, its options and
-its exit codes. The [README](https://github.com/trivoallan/ontrack#readme)
-covers installation, pinning a version, and the full contract of each
-command.
+The [commands reference](commands.md) lists every command, its options, its
+exit codes and the full contract of its output. The
+[README](https://github.com/trivoallan/ontrack#readme) covers installation
+and pinning a version.

@@ -244,9 +244,9 @@ test('dry run of confirm all names both ADRs and writes nothing', async () => {
   assert.equal(r.code, 2);
 });
 
-test('the README example is what formatApply prints', () => {
-  const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
-  const example = /```\n(dry run: [\s\S]*?)```/.exec(readme)?.[1];
+test('the commands reference example is what formatApply prints', () => {
+  const reference = readFileSync(new URL('../docs/commands.md', import.meta.url), 'utf8');
+  const example = /```\n(dry run: [\s\S]*?)```/.exec(reference)?.[1];
   const source: SourcePlan = { namespace: 'platform', adrDir: 'node_modules/platform/adr', adrs: [], migration: [] };
   const unchanged = (name: string): PlannedAdr => ({ name, category: 'unchanged', title: null });
   const to = (name: string) => `docs/adr/platform/${name}`;

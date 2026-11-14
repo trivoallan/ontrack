@@ -22,5 +22,5 @@ state.
 | Risk | Why it is accepted |
 | --- | --- |
 | The frontmatter scanner is not a YAML parser: a frontmatter that is valid YAML but unusual (a key that is not at column zero, a multi-line value) may be read as `unreadable` or `undetermined`. | The outcome is a category a person sees in `plan`, never a silent write. See [Solution Strategy](04-solution-strategy.md). |
-| A `check:` command comes from an imported ADR and runs through the shell with the caller's environment. | It runs only once the repository holds the ADR as `accepted`, which is a reviewed change. The README says to read it as one reads an npm install script. |
+| A `check:` command comes from an imported ADR and runs through the shell with the caller's environment. | It runs only once the repository holds the ADR as `accepted`, which is a reviewed change. The commands reference says to read it as one reads an npm install script. |
 | This document, the LikeC4 model and the code are kept in step by hand. | Each section names the files it was written from, and a change that adds a module or an import includes [Building Block View](05-building-block-view.mdx) and `docs/architecture/model/model.c4`. |

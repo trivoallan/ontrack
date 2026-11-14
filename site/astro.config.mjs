@@ -63,6 +63,10 @@ export default defineConfig({
       logo: { src: '../docs/assets/logo.png' },
       favicon: '/logo.png',
       customCss: ['./src/adr.css'],
+      // The prompts `review` prints are single lines of a thousand characters,
+      // documented as they are in the commands reference: wrap code blocks
+      // rather than scroll them sideways.
+      expressiveCode: { defaultProps: { wrap: true } },
       // Labels a reader understands, not directory names. What ontrack is
       // for comes first; this repository's own decisions and architecture
       // stay one click away, collapsed.
