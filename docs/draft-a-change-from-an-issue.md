@@ -19,6 +19,26 @@ only new planning files.
 [ADR-0004](adr/ADR-0004-other-repositories-call-the-propose-and-apply-workflows.md)
 records why.
 
+```mermaid
+flowchart TD
+  issue["Issue, written by anyone"] -- "a maintainer adds ontrack:propose" --> caller1["Your propose.yml"]
+  caller1 -- "uses: …/propose.yml@sha" --> draft
+  subgraph ontrack_propose["ontrack's propose workflow"]
+    draft["draft job: the agent, read-only token,<br/>writes only what the catalog enables"]
+    publish["publish job: no agent,<br/>accepts only new planning files"]
+    draft -- "patch" --> publish
+  end
+  draft -. "OIDC token exchange" .-> provider["Model provider"]
+  publish -- "pushes the branch" --> pr["Draft pull request"]
+  pr -- "a person with write access<br/>approves the head commit" --> approved["Approved pull request"]
+  approved -- "a maintainer adds ontrack:apply" --> caller2["Your apply.yml"]
+  caller2 -- "uses: …/apply.yml@sha" --> gate
+  subgraph ontrack_apply["ontrack's apply workflow"]
+    gate["gate: checks the approval,<br/>checks out nothing"]
+  end
+  gate -- "fires your routine" --> session["Claude Code session<br/>implements the change with you"]
+```
+
 You need:
 
 - a repository on GitHub with an `AGENTS.md` written by `ontrack apply`, and
