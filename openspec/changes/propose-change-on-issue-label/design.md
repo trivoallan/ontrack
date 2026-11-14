@@ -305,6 +305,25 @@ the issue was told that nothing was left to propose. Two things followed.
 Alternative: `show_full_output: true` on the action. It prints every
 message and every tool result, file contents included.
 
+### 12. What the denied calls showed
+
+With the denied calls listed, the second run on issue 105 explained
+itself. The agent's writing tool was refused for every file of the change,
+inside the checkout: `acceptEdits` did not grant what the design counted
+on. And the agent never called the command line by its name: it looked for
+it under `node_modules/`, where decision 8 no longer puts it, tried
+`npx --no-install`, chained commands after a `cd`, and read files with
+`cat`. Every one of those was refused, as the rules intend.
+
+- Two allow rules let the agent write under `openspec/changes/` and
+  `docs/adr/`, the paths the `publish` filter accepts.
+- The prompt says what the agent can do: read with its file tools, write
+  where changes and ADRs live, call the framework's command line by its
+  bare name, one command per call.
+
+Alternative: allow `npx` and `cd`. A rule for `npx` is a rule for any
+package's binary.
+
 ## Risks / Trade-offs
 
 - [The experiment's sample opens no change] Issues 103 to 108 all concern

@@ -61,6 +61,11 @@
 - [x] 3h.2 Add a `blocked` status to the agent's answer and fail the run on it
 - [x] 3h.3 Test both in `test/propose-workflow.test.ts`
 
+## 3i. Let the agent write the change
+
+- [x] 3i.1 Allow the agent to write under `openspec/changes/` and `docs/adr/`
+- [x] 3i.2 Tell the agent what it can do: file tools to read, the framework's command line by its bare name, one command per call
+
 ## 4. Verify
 
 - [x] 4.1 Check the file against the `issue-proposal` spec: no secret named, no `${{ github.event.issue.title }}` or `.body` anywhere, no `git` or `gh` in the agent's tools, no agent step in the job that writes

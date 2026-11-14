@@ -110,8 +110,9 @@ jobs:
           jq -r '"# " + .issue.title + "\n\n" + (.issue.body // "")' "$GITHUB_EVENT_PATH" \
             | perl -0pe 's/<!--.*?-->//gs; s/<!--.*//s' > .propose/issue.md
 
-      # `acceptEdits` with no Read, Write or Edit rule: the agent edits files
-      # inside the checkout, and what no rule covers is denied. Seven
+      # The agent may write where a change and an ADR live, and nowhere else:
+      # the same paths `publish` accepts. `acceptEdits` alone did not let it
+      # write in the checkout. What no rule covers is denied. Seven
       # subcommands of one command line; no `git`, no `gh`. The deny rules
       # repeat what file ownership already enforces, and close the subcommands
       # that reach the network. The provider token is kept out of the
@@ -139,7 +140,7 @@ jobs:
           claude_args: |
             --model claude-sonnet-5-5
             --permission-mode acceptEdits
-            --allowedTools "Glob,Grep,Skill,Bash(openspec list:*),Bash(openspec context:*),Bash(openspec new change:*),Bash(openspec status:*),Bash(openspec instructions:*),Bash(openspec validate:*),Bash(openspec schemas:*)"
+            --allowedTools "Glob,Grep,Skill,Edit(openspec/changes/**),Edit(docs/adr/**),Bash(openspec --version),Bash(openspec list:*),Bash(openspec context:*),Bash(openspec new change:*),Bash(openspec status:*),Bash(openspec instructions:*),Bash(openspec validate:*),Bash(openspec schemas:*)"
             --disallowedTools "Edit(.claude/**)" "Edit(.github/**)" "Edit(.githooks/**)" "Edit(node_modules/**)" "Bash(openspec install:*)" "Bash(openspec feedback:*)" "Bash(openspec config:*)" "Bash(openspec store:*)" "Bash(openspec completion:*)" "WebFetch" "WebSearch"
             --json-schema '{"type":"object","properties":{"status":{"type":"string","enum":["drafted","nothing_to_propose","blocked"]},"change":{"type":"string"},"reason":{"type":"string"}},"required":["status","change","reason"]}'
           prompt: |
@@ -178,6 +179,18 @@ jobs:
             6. Only add files: the artefacts of the change, and a new ADR
                when the change records one. Modify or delete no existing
                file. Anything else is refused after you finish.
+
+            What you can do in this run, and nothing else:
+            - read and search any file of the repository with your file
+              tools, never with a shell command;
+            - create files with your writing tool where the change
+              framework keeps its changes, and under `docs/adr/`;
+            - run the command line of the change framework. It is
+              installed and on the PATH: call it by its bare name, one
+              command per call, never through `npx`, never chained to
+              another command, never after a `cd`. Only its subcommands
+              that list, describe, create and validate a change are
+              allowed. No other shell command is.
 
             Return `status`: `drafted` when you wrote the change;
             `nothing_to_propose` in the one case of step 2; `blocked` when
