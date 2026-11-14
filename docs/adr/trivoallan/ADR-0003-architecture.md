@@ -2,21 +2,21 @@
 adr: ADR-0003
 slug: architecture
 title: Software architecture
-status: proposed
+status: accepted
 revision: 1
-date:
-authors: []
+date: 2026-11-14
+authors: [Tristan Rivoallan]
 supersedes: []
 traits:
   architecture:
-    pattern:
+    pattern: monolithic
 ---
 
 # Software architecture
 
 ## Status
 
-Proposed
+Accepted
 
 > **What is this file?** A question governance asks your repository, with
 > the answer it recommends. While it says `status: proposed`, you may edit
@@ -60,69 +60,25 @@ application service of moderate size. Under about 500 lines, or for a
 repository that is not a service, `monolithic` is often the honest answer;
 and if the question has no object here, rule `rejected`.
 
-Everything below disappears when you rule, from this sentence up to the
-Consequences heading, which stays.
-
-**How to rule: five steps, all in this file.** Read all of them before
-doing any, because the last one deletes the other four, and do them in one
-commit.
-
-1. **Write the value of each key** under `traits:` in the frontmatter, or,
-   if you rule `rejected`, **remove the whole `traits:` block**.
-2. **Change `status:`** from `proposed` to `accepted` or `rejected`.
-3. **Fill `date:` and `authors:`**: `date:` as `YYYY-MM-DD`, the day you
-   rule; `authors:`, the names of the people who decided, without email
-   addresses.
-4. **Rewrite the Positive, Negative and Neutral lists under Consequences**
-   for your verdict: what it makes easier, and what it costs.
-5. **Last, delete this block**, from its first sentence up to the
-   Consequences heading, which stays. In its place, write the reason for
-   your decision wherever you depart from the recommendation, or, if you
-   adopt it as is, one line that says so.
-
-The first step is the one people forget: a decision written only in prose
-leaves an agent guessing. This is what the frontmatter looks like once
-filled, and it is the one part of the file an agent reads without
-interpreting it:
-
-```yaml
----
-adr: ADR-0003
-slug: architecture
-title: Software architecture
-status: accepted
-revision: 1
-date: 2026-11-14
-authors: [Your Name]
-supersedes: []
-traits:
-  architecture:
-    pattern: hexagonal
----
-```
-
-The Alternatives Considered below were weighed by governance without
-knowing your context. Weighing them against yours is still to do, and it is
-what makes a decision different from an accepted default.
+**Departure: `monolithic` instead of `hexagonal`.** ontrack is a CLI (`package.json` declares a `bin`, no server), not an application service, and its code is about 900 lines. Its modules under `src/` read and write the file system directly; `src/commands/` is a thin yargs layer over them. That is one deployable without strong internal boundaries. Ports and adapters would add indirection this repository does not need, which is the cost this ADR names for small repositories.
 
 ## Consequences
 
 ### Positive
 
-- An agent knows where new code goes and which way dependencies point.
-- Domain rules are tested without a database, a network or a framework.
+- An agent adds a module next to the others in `src/` and wires it from
+  `src/commands/`, without inventing ports or adapters.
+- No indirection to follow: a command reads top to bottom.
 
 ### Negative
 
-- Ports and adapters add indirection that a small repository does not need.
-- Every external dependency needs an adapter, which is more files to write
-  up front.
+- Modules that touch the file system are tested against temporary
+  directories rather than in isolation from I/O.
 
 ### Neutral
 
-- The pattern names the structure; the directory layout, package names and
-  dependency rules are still decided in this repository and described in
-  this ADR's body or in the architecture document.
+- If ontrack grows a service or a second front end, this ADR is revisited
+  and `hexagonal` reconsidered.
 
 ## Alternatives Considered
 
