@@ -23,6 +23,8 @@ jobs:
       - run: npm run build
       # The tests run the sources; this is the check of what an install ships.
       - run: node dist/bin/ontrack.js --help
+      # The repository's own governance: fails when a decided ADR's check does.
+      - run: node dist/bin/ontrack.js check
 
   # The lowest supported Node (engines in package.json).
   node-22:
