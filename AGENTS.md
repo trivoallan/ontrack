@@ -90,6 +90,8 @@ architecture:
 ```yaml
 forge:
   gate: blocking
+  audit: zizmor
+  review: author
 ```
 
 ### Delivery (trivoallan/ADR-0012-delivery)
@@ -101,6 +103,7 @@ delivery:
     - { name: github, trigger: tag }
     - { name: npm, trigger: tag }
   release_tool: release-please
+  release_notes: highlights
   registry: none
 deployment:
   manifests: none
@@ -167,6 +170,35 @@ admission:
 ```yaml
 supply_chain:
   build_level: 2
+```
+
+### Review and merge (trivoallan/ADR-0022-review-and-merge)
+
+```yaml
+review:
+  merge_by: person
+```
+
+### License (trivoallan/ADR-0023-license)
+
+```yaml
+license:
+  spdx: Apache-2.0
+```
+
+### Code scanning (trivoallan/ADR-0024-code-scanning)
+
+```yaml
+code_scanning:
+  tool: codeql
+  fail_on: high
+```
+
+### Tools outside the package manager (trivoallan/ADR-0025-tools)
+
+```yaml
+tools:
+  manager: mise
 ```
 
 <!-- ontrack:end -->
