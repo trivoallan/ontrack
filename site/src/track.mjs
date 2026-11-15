@@ -36,7 +36,11 @@ export const questions = readdirSync(new URL('adr/', root))
     };
   });
 
+// The colour Starlight gives the nth card of a grid, so that a domain's badge
+// matches its card in "What you get", which lists the domains in this order.
+const cardColour = (index) => ['orange', 'purple', 'green', 'red', 'blue', 'purple', 'green', 'red'][index % 8];
+
 // The domains in the README's order, each with its questions in number order.
 export const domains = [...new Set([...domainOf.values(), ...questions.map((q) => q.domain)])]
-  .map((name) => ({ name, questions: questions.filter((q) => q.domain === name) }))
+  .map((name, index) => ({ name, color: cardColour(index), questions: questions.filter((q) => q.domain === name) }))
   .filter((domain) => domain.questions.length);

@@ -17,38 +17,24 @@ ontrack is built with it, and answers every one of its questions in
 <CardGrid>
   <Card title="Agents" icon="laptop">
     The rules you accepted, written into a managed block of `AGENTS.md`, which Claude Code, opencode and Copilot CLI read on every session; plugins pinned; the agent opens the pull request and never approves one; a person merges it, or approves it so the agent can; if you choose, the agent acts under its own GitHub identity.
-
-    **Checked:** each declared host's settings exist and deny `gh pr review`, and `gh pr merge` when a maintainer merges; in CI, the default branch's ruleset matches `review.approvals`.
   </Card>
   <Card title="Architecture" icon="puzzle">
     A hexagonal core by default, where the domain depends on no I/O; the architecture documented in arc42's twelve sections, with C4 diagrams generated from a LikeC4 model kept as code.
-
-    **Checked:** the twelve arc42 section files; the LikeC4 model files, if you chose them.
   </Card>
   <Card title="Code" icon="seti:typescript">
     Validation at every boundary (`zod` or `pydantic`), a test coverage target you set, and your code scanned by CodeQL, its alerts blocking from `high`.
-
-    **Checked:** a scan workflow sends its results to code scanning.
   </Card>
   <Card title="Decisions and docs" icon="document">
     Decisions kept as ADRs, docs in one language under one root.
-
-    **Checked:** each ruled ADR carries its verdict; the docs tool and root exist.
   </Card>
   <Card title="Delivery" icon="rocket">
     A pipeline designed once, with a blocking gate and releases cut from tags, that zizmor audits; a licence others can reuse the code under.
-
-    **Checked:** a workflow exists; zizmor finds nothing it forbids; release-please runs; the manifest declares the ruled licence and a licence file is committed.
   </Card>
   <Card title="Supply chain" icon="seti:lock">
     gitleaks before every commit, dependencies admitted by a person with install scripts ignored, a CycloneDX SBOM scanned by Grype, SLSA Build Level 2 provenance, and the tools outside npm pinned in one place.
-
-    **Checked:** gitleaks finds no secret; Dependabot and its automerge are configured; the publishing workflow emits provenance; mise pins the tools your answers name.
   </Card>
   <Card title="Workflow" icon="approve-check-circle">
     One convention for commits and branch names, refused at the gate instead of argued in review.
-
-    **Checked:** the commits pass commitlint; the branch name has an accepted prefix; OpenSpec uses the schema you chose.
   </Card>
 </CardGrid>
 
@@ -93,7 +79,7 @@ that `ontrack check` runs once you accept it. They are also in
 
 {domains.map((domain) => (
   <>
-    <h3>{domain.name}</h3>
+    <h3><span class="domain-badge" style={`--domain: var(--sl-color-${domain.color}); --domain-low: var(--sl-color-${domain.color}-low)`}>{domain.name}</span></h3>
     <CardGrid>
       {domain.questions.map((q) => (
         <LinkCard title={`${q.adr} ${q.title}`} href={`./${q.id}/`} description={q.checked ? 'Checked by ontrack-engineering-check' : undefined} />

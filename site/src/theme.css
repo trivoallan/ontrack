@@ -35,3 +35,13 @@
   font-size: var(--sl-text-sm);
   font-weight: normal;
 }
+
+/* A domain of the track page: the colours of its card in "What you get". */
+.domain-badge {
+  display: inline-block;
+  border: 1px solid var(--domain);
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  background-color: var(--domain-low);
+  font-size: var(--sl-text-lg);
+}
