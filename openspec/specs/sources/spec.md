@@ -76,3 +76,10 @@ The project SHALL publish a JSON Schema that describes the `ontrack` key of a so
 #### Scenario: Published file out of date
 - **WHEN** the model of the `ontrack` key changes and `schema/ontrack.schema.json` is not regenerated
 - **THEN** the test suite fails and names the command that regenerates the file
+
+### Requirement: The alias local is reserved
+`local` is the namespace of the project's own ADRs. When a dependency that carries an `ontrack` key is declared under the name `local`, discovery SHALL fail with an error that names `local` and asks for another alias.
+
+#### Scenario: A source aliased local
+- **WHEN** the project declares `"local": "npm:adr-catalog@1"` and the installed package carries an `ontrack` key
+- **THEN** discovery fails with an error that names `local` and asks for another alias
