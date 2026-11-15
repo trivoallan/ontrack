@@ -24,9 +24,14 @@ jobs:
           persist-credentials: false
           # Each page shows the date of its last commit: the build reads the history.
           fetch-depth: 0
+      # Node at the version mise.toml pins, checked against mise.lock
+      # (ADR-0025); setup-node, given no version, restores the npm cache.
+      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+        with:
+          version: 2026.11.8
+          install_args: node
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: site/package-lock.json
       # npm 12, which runs no dependency's install script: see test.yml.

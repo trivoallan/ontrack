@@ -22,5 +22,5 @@ gitleaks = "8.30.1"
 # ADR-0011, forge.audit: `ontrack check`, and the zizmor job reads this version.
 zizmor = "1.32.0"
 # ADR-0004, languages: the site build (Astro wants a recent Node) and the CLI.
-# The workflows read .nvmrc; keep this pin on the major it names.
+# The workflows install it from here too.
 node = "24.22.3"

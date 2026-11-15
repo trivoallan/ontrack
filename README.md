@@ -86,7 +86,7 @@ The documentation is at <https://trivoallan.github.io/ontrack/>.
 ## Development
 
 The code is TypeScript, written so that Node runs it as it is: nothing is
-compiled to work in this repository. Development uses Node 24 (see `.nvmrc`);
+compiled to work in this repository. Development uses Node 24 (see `mise.toml`);
 CI also runs the tests on Node 22.18, the lowest supported version.
 
 Install the dependencies with npm 12 (`npm install --global npm@12`), as CI
