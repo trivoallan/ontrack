@@ -64,3 +64,11 @@ A caller of `apply` SHALL pass the routine identifier as an input and the token 
 #### Scenario: The token is missing
 - **WHEN** a repository calls `apply` without the fire token and the pull request is approved at its head commit
 - **THEN** no session starts and the pull request receives the fixed comment that the session could not be started
+
+#### Scenario: The label is added again on the same commit
+- **WHEN** the apply label is added again on a head commit for which the workflow's own comment says a session was started
+- **THEN** no second session starts and the pull request receives the fixed comment that a session was already started for that commit
+
+#### Scenario: The label is added again after a push
+- **WHEN** a new commit was pushed and approved since the last session started
+- **THEN** a new session is started for the new head commit

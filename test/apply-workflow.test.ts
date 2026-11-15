@@ -24,12 +24,20 @@ const review = (login: string, state: string, commit_id = HEAD, extra: Partial<R
   ...extra,
 });
 
-/** Runs one step with `gh api` answering `reviews` and every other call logged. */
-function step(id: string, env: Record<string, string>, reviews: Review[] = []) {
+type Comment = { user: { login: string }; body: string };
+const started = (sha: string, login = 'github-actions[bot]'): Comment => ({
+  user: { login },
+  body: `An apply session was started for commit ${sha}: https://claude.ai/code/session_01. It reports here when it stops.`,
+});
+
+/** Runs one step with `gh api` answering `reviews` and `comments`, and every other call logged. */
+function step(id: string, env: Record<string, string>, reviews: Review[] = [], comments: Comment[] = []) {
   const root = makeTree({
     // `gh api --paginate --slurp` prints an array of pages.
     'reviews.json': JSON.stringify([reviews]),
-    'bin/gh': '#!/bin/sh\nif [ "$1" = api ]; then cat "$REVIEWS"; else echo "gh $*" >> "$CALLS"; fi\n',
+    'comments.json': JSON.stringify([comments]),
+    'bin/gh':
+      '#!/bin/sh\nif [ "$1" = api ]; then case "$*" in *comments*) cat "$COMMENTS" ;; *) cat "$REVIEWS" ;; esac; else echo "gh $*" >> "$CALLS"; fi\n',
     'bin/curl': '#!/bin/sh\necho "curl $*" >> "$CALLS"\nprintf "%s" "$CURL_ANSWER"\n',
   });
   chmodSync(path.join(root, 'bin/gh'), 0o755);
@@ -43,6 +51,7 @@ function step(id: string, env: Record<string, string>, reviews: Review[] = []) {
       ...process.env,
       PATH: `${path.join(root, 'bin')}${path.delimiter}${process.env.PATH}`,
       REVIEWS: path.join(root, 'reviews.json'),
+      COMMENTS: path.join(root, 'comments.json'),
       CALLS: calls,
       GITHUB_OUTPUT: output,
       GITHUB_REPOSITORY: 'o/r',
@@ -61,8 +70,8 @@ function step(id: string, env: Record<string, string>, reviews: Review[] = []) {
   };
 }
 
-const verdict = (reviews: Review[], env: Record<string, string> = {}) => {
-  const r = step('gate', env, reviews);
+const verdict = (reviews: Review[], env: Record<string, string> = {}, comments: Comment[] = []) => {
+  const r = step('gate', env, reviews, comments);
   assert.equal(r.status, 0, r.stderr);
   return r.output.trim();
 };
@@ -92,6 +101,20 @@ for (const [what, [reviews, expected]] of Object.entries(closedGate)) {
     assert.equal(verdict(reviews), `verdict=${expected}`);
   });
 }
+
+test('a second request for a commit that already got a session is refused', () => {
+  assert.equal(verdict([review('tristan', 'APPROVED')], {}, [started(HEAD)]), 'verdict=already-started');
+});
+
+test('a request after a new push starts a new session', () => {
+  assert.equal(verdict([review('tristan', 'APPROVED')], {}, [started(OLD)]), 'verdict=approved');
+});
+
+test('only the workflow\'s own comment counts as a started session', () => {
+  assert.equal(verdict([review('tristan', 'APPROVED')], {}, [started(HEAD, 'mallory')]), 'verdict=approved');
+  const failed = { user: { login: 'github-actions[bot]' }, body: 'The pull request is approved, but the apply session could not be started. Run: x' };
+  assert.equal(verdict([review('tristan', 'APPROVED')], {}, [failed]), 'verdict=approved');
+});
 
 test('a pull request from another repository, or a closed one, is refused whatever its reviews', () => {
   assert.equal(verdict([review('tristan', 'APPROVED')], { HEAD_REPO: 'fork/r' }), 'verdict=fork');
@@ -129,6 +152,7 @@ test('the pull request is told what happened, in fixed words', () => {
   );
   assert.match(said({ VERDICT: 'approved', STARTED: '' }), /could not be started/);
   assert.match(said({ VERDICT: 'stale', STARTED: '' }), /before the last push/);
+  assert.match(said({ VERDICT: 'already-started', STARTED: '' }), /already started for commit a{40}\. Push a new commit/);
   assert.match(said({ VERDICT: 'not-approved', STARTED: '' }), /must approve this pull request first/);
   assert.match(said({ VERDICT: '', STARTED: '' }), /The apply request failed/);
 });
