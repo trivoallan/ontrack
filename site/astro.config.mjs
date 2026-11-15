@@ -6,7 +6,8 @@ import { LikeC4VitePlugin } from 'likec4/vite-plugin';
 import { readAdrs } from '../src/instructions.ts';
 import { statusTone } from './src/adr-status.mjs';
 
-export const base = '/ontrack';
+// docs.yml builds `main` under next/ once a release exists (ADR-0008).
+export const base = process.env.SITE_BASE ?? '/ontrack';
 
 const repository = new URL('..', import.meta.url).pathname;
 

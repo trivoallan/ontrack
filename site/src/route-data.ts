@@ -5,8 +5,16 @@ import { defineRouteMiddleware } from '@astrojs/starlight/route-data';
 // Starlight has both, from the path of the page under site/. That path goes
 // through the symbolic link to docs/, where GitHub has nothing to edit and
 // git no history: so both are set here, from the path of the file in docs/.
+// Rule 5 of ADR-0008: once a release exists, the pages of `main` are served
+// under next/, and point whoever lands there to the released ones. A full
+// URL: the release is outside this build's base, and its link checker.
+const banner = process.env.SITE_CHANNEL === 'next'
+  ? { content: 'These pages document <code>main</code>, ahead of the latest release. <a href="https://trivoallan.github.io/ontrack/">Read the documentation of the latest release</a>.' }
+  : undefined;
+
 export const onRequest = defineRouteMiddleware((context) => {
   const route = context.locals.starlightRoute;
+  if (banner) route.entry.data.banner = banner;
   const file = route.entry.filePath?.replace(/^src\/content\//, '');
   // The home page is not prose to correct. The 404 page is not a file: it
   // takes its path from the missing address, and says `editUrl: false`.
