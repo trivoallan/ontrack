@@ -18,6 +18,12 @@ The files these commands read and write are described in
 
 Every command accepts `-h`, `--help` and `-v`, `--version`.
 
+The commands ontrack prints, in the next step of `apply`, the rules block and
+the `review` prompts, say `npx ontrack`. When the project does not install
+ontrack (there is no `node_modules/.bin/ontrack`), they say
+`npx -p @trivoallan/ontrack ontrack` instead: there, `npx ontrack` would
+download and run the unrelated `ontrack` package from the registry.
+
 This page says what each command does and what it prints. The exact format
 of each output is a contract: scripts, CI jobs and agents rely on it, and it
 changes here before it changes in the code.

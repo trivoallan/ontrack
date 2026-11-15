@@ -13,6 +13,7 @@ import {
   tracksPlan,
 } from '../review.ts';
 import type { Io } from '../cli.ts';
+import { qualify } from '../instructions.ts';
 import type { Argv } from 'yargs';
 
 export const command = 'review [adr]';
@@ -23,14 +24,15 @@ export const builder = (y: Argv) =>
 
 export function handler({ io, adr }: { io: Io; adr?: string }): number {
   const root = io.cwd();
+  const out = (prompt: string) => io.stdout.write(qualify(root, prompt));
   if (adr !== undefined) {
     const revised = selectRevised(root, adr);
     if (revised) {
-      io.stdout.write(formatRevision(revised));
+      out(formatRevision(revised));
       return 2;
     }
     const selected = selectAdr(root, adr);
-    io.stdout.write(selected.status === 'accepted' ? formatSupersession(selected) : formatReview(selected));
+    out(selected.status === 'accepted' ? formatSupersession(selected) : formatReview(selected));
     return 2;
   }
   // Imported first: a new ADR has no copy to rule yet, and `apply` may move
@@ -38,12 +40,12 @@ export function handler({ io, adr }: { io: Io; adr?: string }): number {
   const plan = tracksPlan(root);
   const fresh = newAdrs(root, plan);
   if (fresh.length > 0) {
-    io.stdout.write(formatImport(fresh));
+    out(formatImport(fresh));
     return 2;
   }
   const pending = pendingAdrs(root);
   if (pending.length > 0) {
-    io.stdout.write(formatSequence(pending));
+    out(formatSequence(pending));
     return 2;
   }
   const revised = revisedAdrs(root, plan);
@@ -51,6 +53,6 @@ export function handler({ io, adr }: { io: Io; adr?: string }): number {
     io.stderr.write('ontrack: no ADR is proposed or revised, nothing to review\n');
     return 0;
   }
-  io.stdout.write(formatRevisions(revised));
+  out(formatRevisions(revised));
   return 2;
 }

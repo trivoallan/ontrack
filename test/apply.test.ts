@@ -1,7 +1,7 @@
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { main } from '../src/cli.ts';
@@ -75,6 +75,17 @@ test('next step on stderr while ADRs are proposed, in a shell form and a prompt 
   assert.match(second.stderr, /^next: 1 proposed ADR to rule$/m);
   writeFileSync(path.join(root, 'docs/adr/platform/B.md'), adr(1, 'accepted'));
   assert.equal((await run(root, 'apply')).stderr, '');
+});
+
+test('next step names the package when the project does not install ontrack, since npx would run the unrelated `ontrack`', async () => {
+  const root = makeProject({ tracks: { platform: { 'A.md': adr(1) } } });
+  rmSync(path.join(root, 'node_modules/.bin/ontrack'));
+  const r = await run(root, 'apply');
+  assert.equal(
+    r.stderr,
+    'next: 1 proposed ADR to rule\n  from a shell:  claude "$(npx -p @trivoallan/ontrack ontrack review)"\n  as a prompt:   Run `npx -p @trivoallan/ontrack ontrack review` and follow its output.\n',
+  );
+  assert.ok(read(root, 'AGENTS.md').includes('run `npx -p @trivoallan/ontrack ontrack review [adr]`'));
 });
 
 test('next step once nothing is proposed: the revised ADRs to rule again', async () => {

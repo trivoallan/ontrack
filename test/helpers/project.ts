@@ -1,5 +1,5 @@
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
-import { buildInstructions, formatInstructions } from '../../src/instructions.ts';
+import { buildInstructions, formatInstructions, qualify } from '../../src/instructions.ts';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -13,11 +13,15 @@ export function cleanup(): void {
   for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true });
 }
 
-/** Writes `files` ({ relative path: content }) under a new temporary root. */
+/**
+ * Writes `files` ({ relative path: content }) under a new temporary root,
+ * with the bin npm links when a project installs ontrack, so printed commands
+ * say `npx ontrack`. Delete `node_modules/.bin/ontrack` to test without it.
+ */
 export function makeTree(files: Files): string {
   const root = mkdtempSync(path.join(tmpdir(), 'ontrack-'));
   roots.push(root);
-  for (const [rel, content] of Object.entries(files)) {
+  for (const [rel, content] of Object.entries({ 'node_modules/.bin/ontrack': '', ...files })) {
     const file = path.join(root, rel);
     mkdirSync(path.dirname(file), { recursive: true });
     writeFileSync(file, content);
@@ -67,7 +71,7 @@ export const adr = (revision?: number, status = 'proposed', title?: string) =>
 
 /** Writes a current rules block into the project's AGENTS.md; returns the root. */
 export function withAgents(root: string, { before = '', after = '' }: { before?: string; after?: string } = {}): string {
-  const block = formatInstructions(buildInstructions(root));
+  const block = qualify(root, formatInstructions(buildInstructions(root)));
   writeFileSync(path.join(root, 'AGENTS.md'), before + block + after);
   return root;
 }

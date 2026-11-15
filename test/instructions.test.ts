@@ -1,6 +1,6 @@
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { buildInstructions, formatInstructions, readAdrs, supersededBy, REVIEW_HINT } from '../src/instructions.ts';
 import type { Adr } from '../src/instructions.ts';
@@ -235,6 +235,19 @@ test('an ADR without a title is headed by its reference', () => {
   const out = formatInstructions(buildInstructions(root));
   assert.match(out, /^### local\/A$/m);
   assert.match(out, /^- local\/B$/m);
+});
+
+test('without ontrack installed, the review hint names the package', async () => {
+  const root = makeTree({ 'README.md': '' });
+  rmSync(path.join(root, 'node_modules/.bin/ontrack'));
+  const r = await instructions(root);
+  assert.ok(r.stdout.includes('\n\nWhen asked to review, rule on or supersede an ADR, run `npx -p @trivoallan/ontrack ontrack review [adr]` and follow its output.\n\n'));
+});
+
+test('in the ontrack repository itself, the review hint stays short: npx runs its own bin', async () => {
+  const root = makeTree({ 'package.json': JSON.stringify({ name: '@trivoallan/ontrack' }, null, 2) });
+  rmSync(path.join(root, 'node_modules/.bin/ontrack'));
+  assert.ok((await instructions(root)).stdout.includes(REVIEW_HINT));
 });
 
 test('nothing decided, nothing pending: the block is still printed', async () => {

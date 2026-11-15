@@ -2,7 +2,7 @@
 // between the two markers belongs to ontrack; the rest of the file does not.
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { buildInstructions, formatInstructions } from './instructions.ts';
+import { buildInstructions, formatInstructions, qualify } from './instructions.ts';
 import type { Instructions } from './instructions.ts';
 
 // `text` is the file as read (null when there is none), `block` the lines the
@@ -56,7 +56,7 @@ export function agentsStatus(root: string): AgentsStatus {
   if (!marked && instructions.decided.length + instructions.pending.length === 0) return { state: 'none', warning: null };
 
   const warning = claudeWarning(root);
-  const block = formatInstructions(instructions).trimEnd().split('\n');
+  const block = qualify(root, formatInstructions(instructions)).trimEnd().split('\n');
   if (!marked) return { state: 'missing', file, text, block, warning };
   if (begins.length !== 1 || ends.length !== 1 || ends[0] < begins[0]) {
     return { state: 'skipped', reason: `expected one ${BEGIN} line followed by one ${END} line`, warning };
