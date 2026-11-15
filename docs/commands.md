@@ -423,20 +423,20 @@ None of them has to be ruled now: the repository works with them open, and `npx 
 
 First, when the list holds more than one ADR, survey them, writing nothing. The survey decides which questions the user meets first: those this repository already answers, which the user can check against what they know, come before those that need a discussion.
 
-Read every ADR in the list and look at this repository's files, configuration, CI and history. For each ADR, take every value it asks for (every key under `traits:`) and look for a citation: a file, a configuration entry or a command output in this repository. Label each citation:
+Read every ADR in the list and look at this repository's files, configuration, CI and history. For each ADR, take every value it asks for (every key under `traits:`) and look for a citation: a file, a configuration entry or a command output in this repository. Give a count only when it comes from a command you ran, and name the command. Label each citation with exactly one of these two labels, word for word:
 - `shows the value`: the citation states the value itself. For instance, `"license": "MIT"` in `package.json` shows `license.spdx: MIT`.
-- `next to it`: the citation shows something from which you would infer the value. For instance, a `renovate.json` that extends a preset and has no `automerge` key does not show the automerge setting, which the preset holds; a contributing guide that says releases are published by hand does not show the build provenance, which the registry holds.
+- `next to it`: the citation shows something from which you would infer the value. For instance, a `renovate.json` that extends a preset and has no `automerge` key does not show the automerge setting, which the preset holds; a contributing guide that says releases are published by hand does not show the build provenance, which the registry holds. A citation drawn from history alone, such as scopes read from past commits, is `next to it`.
 
 An absence counts as a citation only when the absence is the value: no workflow that runs an audit tool shows `forge.audit: none`; no agent settings file does not show which agents contributors use.
 
-Put an ADR in the first group only when every one of its values has a citation labelled `shows the value`. Put every other ADR in the second group, including one where a single value is held outside this repository, is inferred, or is drawn from history alone, such as scopes read from past commits.
+Put an ADR in the first group only when every one of its values has a citation labelled `shows the value`. Put every other ADR in the second group, including one where a single value is held outside this repository or is inferred.
 
-Do not put an ADR in the first group on a `next to it` citation, however likely the value seems. Do not leave a value of the second group without saying where it lives: a forge setting, a file outside this repository, a choice people make, or "unknown".
+Do not put an ADR in the first group on a `next to it` citation, however likely the value seems. Do not leave a value you could not show without saying where it lives: a forge setting, a file outside this repository, a choice people make, or "unknown".
 
 Present the survey in this form, the first group first:
 - a heading per group with its number of ADRs, equal to the ADRs listed under it;
 - for the first group, one row per value: ADR, key, value, citation;
-- for the second group, one row per ADR: ADR, the value you could not show, where it lives or "unknown", and any citation you have, with its label.
+- for the second group, one row per value you could not show, and no row for the values you could: ADR, key, where the value lives or "unknown", and any citation you have, with its label.
 
 Then ask the user to agree to that order or give another, with a question tool such as `AskUserQuestion` when you have one.
 
