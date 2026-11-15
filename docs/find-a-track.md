@@ -9,9 +9,9 @@ before you [write your own](write-your-own-track.md).
 
 ## Search the npm registry
 
-Authors mark a published track with the keyword `ontrack-tracks`:
+Authors mark a published track with the keyword `ontracks`:
 
-[Search npm for `keywords:ontrack-tracks`](https://www.npmjs.com/search?q=keywords%3Aontrack-tracks)
+[Search npm for `keywords:ontracks`](https://www.npmjs.com/search?q=keywords%3Aontracks)
 
 The search shows the tracks published to the registry with that keyword. A
 track published by git URL only does not appear in it.

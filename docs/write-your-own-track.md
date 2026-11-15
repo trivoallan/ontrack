@@ -109,11 +109,11 @@ track shows in the next `npx ontrack plan`, with no reinstall.
 
 ## 4. Publish it
 
-First add the keyword `ontrack-tracks` to its `package.json`. On the public
+First add the keyword `ontracks` to its `package.json`. On the public
 registry, the keyword is how a person [finds your track](find-a-track.md):
 
 ```json
-"keywords": ["ontrack-tracks"]
+"keywords": ["ontracks"]
 ```
 
 Then publish the track to an npm registry, as you would any package:
