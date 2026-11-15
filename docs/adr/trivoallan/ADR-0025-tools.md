@@ -4,6 +4,7 @@ slug: tools
 title: Tools outside the package manager
 status: accepted
 revision: 1
+check: npx --no-install ontrack-engineering-check ADR-0025
 date: 2026-11-15
 authors: [Tristan Rivoallan]
 supersedes: []

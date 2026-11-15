@@ -78,6 +78,7 @@ docs:
   tool: starlight
   root: docs/
   audience: public
+  channels: [release, main]
 ```
 
 ### Branching (trivoallan/ADR-0009-branching)
@@ -104,7 +105,6 @@ architecture:
 forge:
   gate: blocking
   audit: zizmor
-  review: author
 ```
 
 ### Delivery (trivoallan/ADR-0012-delivery)
@@ -150,7 +150,7 @@ changes:
 
 ```yaml
 agent:
-  host: claude-code
+  hosts: [claude-code]
 ```
 
 ### Vulnerabilities (trivoallan/ADR-0019-vulnerabilities)
@@ -173,7 +173,8 @@ supply_chain:
 
 ```yaml
 review:
-  merge_by: person
+  by: maintainer
+  approvals: 0
 ```
 
 ### License (trivoallan/ADR-0023-license)
@@ -196,6 +197,13 @@ code_scanning:
 ```yaml
 tools:
   manager: mise
+```
+
+### Agent identity (trivoallan/ADR-0026-agent-identity)
+
+```yaml
+agent:
+  identity: maintainer
 ```
 
 <!-- ontrack:end -->

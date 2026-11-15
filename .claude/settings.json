@@ -8,6 +8,6 @@
     "arc42-toolkit@ontrack-tools": true
   },
   "permissions": {
-    "deny": ["Bash(gh pr merge:*)"]
+    "deny": ["Bash(gh pr merge:*)", "Bash(gh pr review:*)"]
   }
 }
