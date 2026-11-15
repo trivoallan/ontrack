@@ -15,6 +15,10 @@ hero:
       link: tutorial/
       icon: right-arrow
       variant: primary
+    - text: Browse docs
+      link: concepts/
+      icon: open-book
+      variant: secondary
     - text: View on GitHub
       link: https://github.com/trivoallan/ontrack
       icon: external
