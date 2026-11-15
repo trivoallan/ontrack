@@ -16,3 +16,14 @@
   --sl-color-accent: #0b6e82;
   --sl-color-accent-high: #083f4b;
 }
+
+/* Mermaid's dark theme puts each edge label on a grey box. Put it on the
+   page instead: the label still hides the line it sits on. Mermaid scopes
+   its own rule to the diagram's id, hence !important. */
+:root[data-theme='dark'] .mermaid :is(.edgeLabel, .edgeLabel p, .labelBkg) {
+  background-color: var(--sl-color-bg) !important;
+}
+:root[data-theme='dark'] .mermaid .edgeLabel rect {
+  fill: var(--sl-color-bg) !important;
+  opacity: 1 !important;
+}
