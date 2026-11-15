@@ -233,8 +233,8 @@ test('sequence: a survey in two groups, agreed before the first ruling, writing 
   const out = formatSequence(pendingAdrs(tree()));
   const survey = out.indexOf('First, when the list holds more than one ADR, survey them');
   assert.ok(survey > 0 && survey < out.indexOf('1. '));
-  assert.match(out, /writing nothing\. Put each ADR in one of two groups\. The first holds the ADRs this repository already answers: for every value the ADR asks for, you can cite the file, the configuration or the command output in this repository that shows it\./);
-  assert.match(out, /Every other ADR goes to the second group, including one where a single value is held outside this repository, inferred, or drawn from history alone: name that value and say where it lives, or that you don't know\. Present both groups, the first one first, with the citation for every value of a first-group ADR,/);
+  assert.match(out, /writing nothing\. Put each ADR in one of two groups\. The first holds the ADRs this repository already answers: for every value the ADR asks for, you can cite the file, the configuration or the command output in this repository that shows the value itself\. A citation that shows only something next to the value, from which you would infer it, does not count\./);
+  assert.match(out, /Every other ADR goes to the second group, including one where a single value is held outside this repository, inferred, or drawn from history alone: name that value and say where it lives, or that you don't know\. Present both groups, the first one first, with the citation for every value of a first-group ADR, and for each citation in either group say whether it shows the value itself or only something next to it,/);
   assert.match(out, /ask the user to agree to that order or give another, with a question tool such as `AskUserQuestion`/);
 });
 
