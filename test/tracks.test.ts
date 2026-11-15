@@ -117,7 +117,9 @@ test('dependency not installed', () => {
 
 test('no package.json', () => {
   const root = project({ manifest: false });
-  assert.throws(() => discoverTracks(root), new RegExp(`${path.join(root, 'package.json')}`));
+  assert.throws(() => discoverTracks(root), {
+    message: `cannot read ${path.join(root, 'package.json')}; run ontrack from the root of an npm project`,
+  });
 });
 
 test('dependencies that are not a string map make the manifest unreadable', () => {

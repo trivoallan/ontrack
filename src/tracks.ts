@@ -24,8 +24,11 @@ export function discoverTracks(projectRoot: string): Track[] {
   try {
     const project = projectManifest.parse(readJson(manifest));
     aliases = Object.keys({ ...project.dependencies, ...project.devDependencies });
-  } catch {
-    throw new Error(`cannot read ${manifest}`);
+  } catch (err) {
+    // A missing file is a wrong directory far more often than a missing
+    // manifest: say where to run from. Any other cause is the file's content.
+    const missing = (err as NodeJS.ErrnoException).code === 'ENOENT';
+    throw new Error(`cannot read ${manifest}${missing ? '; run ontrack from the root of an npm project' : ''}`);
   }
 
   const tracks: Track[] = [];
