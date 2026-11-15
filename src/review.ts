@@ -212,7 +212,7 @@ Each is a question this repository has not answered yet, shipped with the answer
 
 None of them has to be ruled now: the repository works with them open, and \`npx ontrack check\` runs only the decided ADRs. The user rules as many as they choose.
 
-First, when the list holds more than one ADR, survey them. Read every ADR in the list and look at this repository's files, configuration, CI and history, writing nothing. Put each ADR in one of two groups: those this repository already answers, and those that need a discussion. Present both groups, the first one first, and ask the user to agree to that order or give another, with a question tool such as \`AskUserQuestion\` when you have one.
+First, when the list holds more than one ADR, survey them. Read every ADR in the list and look at this repository's files, configuration, CI and history, writing nothing. Put each ADR in one of two groups: those this repository already answers, where every value the ADR asks for is written in a file of this repository or set in its configuration; and those that need a discussion. An ADR goes to the second group when any of its values is held outside this repository, such as a branch ruleset, a forge or registry setting, or an external preset, or when you would draw it from history alone, such as a scope list read from past commits: name that value and say where it lives. Present both groups, the first one first, and ask the user to agree to that order or give another, with a question tool such as \`AskUserQuestion\` when you have one.
 
 Then, for each ADR, in the agreed order:
 

@@ -125,7 +125,7 @@ A revised ADR yields the prompt to rule again, whatever its status and whether o
 ### Requirement: Prompt
 The prompt SHALL be printed to standard output and follow the contract in the commands reference, `docs/commands.md`. It names each selected ADR by its path relative to the project root, with `/` separators, and by its title when it has one. For a named ADR, it names that ADR alone. Without an argument, it lists the selected ADRs in order, one per line, and SHALL tell the agent:
 - that none of them has to be ruled now: the repository works with them open, and `npx ontrack check` runs only the decided ADRs; the user rules as many as they choose;
-- first, when the list holds more than one ADR, to survey them: read every listed ADR and look at the repository, writing nothing; put each ADR in one of two groups, those the repository's files, configuration, CI and history already answer, and those that need a discussion; present both groups, the first one first, and ask the user to agree to that order or give another, with a question tool such as `AskUserQuestion` when the agent has one;
+- first, when the list holds more than one ADR, to survey them: read every listed ADR and look at the repository, writing nothing; put each ADR in one of two groups, those the repository already answers, where every value the ADR asks for is written in a file of the repository or set in its configuration, and those that need a discussion; send an ADR to the second group when any of its values is held outside the repository (a branch ruleset, a forge or registry setting, an external preset) or would be drawn from history alone (a scope list read from past commits), and name that value and where it lives; present both groups, the first one first, and ask the user to agree to that order or give another, with a question tool such as `AskUserQuestion` when the agent has one;
 - then to rule them one at a time, in the agreed order, and not to start an ADR before the previous one is ruled or skipped;
 - that at step 6 the user can skip the ADR, which leaves its file untouched, or stop the review, after which the agent writes nothing more for the open ADR;
 - when the list is done or the user stops, to give a summary: the ADRs ruled in the session, the ADRs still `proposed` with the group each belongs to, and a sentence saying the repository works with them open. In both forms of the review prompt it SHALL tell the agent, for an ADR and in this order, to:
@@ -238,6 +238,10 @@ The review prompt SHALL also say that an ADR's own instructions on how to rule p
 #### Scenario: Named ADR has no survey
 - **WHEN** `ontrack review ADR-0006` prints the prompt for one pending ADR
 - **THEN** it contains no survey instruction and no summary instruction
+
+#### Scenario: Values held outside the repository
+- **WHEN** `ontrack review` prints the sequence prompt for two pending ADRs
+- **THEN** the survey instruction tells the agent to send an ADR to the second group when any of its values is held outside the repository or would be drawn from history alone, names a branch ruleset, a forge or registry setting, an external preset and a scope list read from past commits as examples, and tells it to name that value and where it lives
 
 ### Requirement: Supersession prompt
 For a named `accepted` ADR that is not superseded, the prompt SHALL be the supersession prompt, printed to standard output and following the contract in the commands reference, `docs/commands.md`. It names the ADR by its path relative to the project root, with `/` separators, by its title when it has one, and by its reference. It names no other ADR. It SHALL say that the ADR is `accepted`, that its text is frozen, and that changing the decision takes a new ADR that supersedes it. It SHALL say that the repository's own rules on recording decisions prevail over the prompt. It SHALL tell the agent, in this order, to:

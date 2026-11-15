@@ -233,7 +233,8 @@ test('sequence: a survey in two groups, agreed before the first ruling, writing 
   const out = formatSequence(pendingAdrs(tree()));
   const survey = out.indexOf('First, when the list holds more than one ADR, survey them');
   assert.ok(survey > 0 && survey < out.indexOf('1. '));
-  assert.match(out, /writing nothing\. Put each ADR in one of two groups: those this repository already answers, and those that need a discussion\./);
+  assert.match(out, /writing nothing\. Put each ADR in one of two groups: those this repository already answers, where every value the ADR asks for is written in a file of this repository or set in its configuration; and those that need a discussion\./);
+  assert.match(out, /An ADR goes to the second group when any of its values is held outside this repository, such as a branch ruleset, a forge or registry setting, or an external preset, or when you would draw it from history alone, such as a scope list read from past commits: name that value and say where it lives\./);
   assert.match(out, /ask the user to agree to that order or give another, with a question tool such as `AskUserQuestion`/);
 });
 
