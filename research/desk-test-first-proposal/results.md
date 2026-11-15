@@ -353,6 +353,7 @@ sampled.
 | ID | Required | Result | Verdict |
 |---|---|---|---|
 | AB-1 | 0004, 0006, 0009, 0011, 0023, 0025 in the first group in ≥ 8 of 10 repositories each | First group: 0004 **13 / 13**, 0023 **13 / 13**, 0011 3 / 13, 0006 2 / 13, 0009 2 / 13, 0025 1 / 13 (tuning repositories: 0011 3 / 10, 0006 1 / 10, 0009 1 / 10, 0025 1 / 10) | **Fails** for 4 of 6 ADRs |
+| AB-1, restated (1.1) | First-group rows only with values visible in the repository; at most 1 exception per repository | 151 first-group rows; 3 place an ADR whose value the clone can't show: pinia 0018 (automerge in an external Renovate preset, said so), biome 0011 (the merge gate, not mentioned), ky 0022 (approvals inferred from one maintainer, not read). 1 per repository at most | Within the restated threshold, which was set after this run (see below) |
 | AB-2 | ≤ 1 wrong citation in 20 proposals | 1 wrong in 91 (starlight `branching.model`: "every commit carries a PR number", 51 of 500 do not) | Passes |
 | AB-3 | No value the key lists as absent marked `observed` | 0 | Passes |
 | AB-4 | No write before agreement, none during the survey, no agreement for several ADRs at once | Survey: 0 / 13 tried to write. Proposals: 91 / 91 stop and ask. Sessions: no file changed before "Write it", one ADR per agreement | Passes (one note below) |
@@ -373,9 +374,21 @@ tools 0011 and 0015 would add. Every survey gives a reason per ADR.
 That is the split run 1 measured (present in files 8 / 8, absence 7 / 27),
 now drawn by the agent itself. Whether it is the right first group is for
 observation round 1 to say: AB-1 as written tested the list, not the
-behaviour. **Decision for the maintainer:** keep AB-1 failed and change the
-prompt, or restate AB-1 as "the first group holds no ADR whose value the
-agent cannot see in the clone" and accept this result.
+behaviour.
+
+**Decision (maintainer, 2026-11-15): AB-1 is restated**, not the prompt
+changed. The first group must hold only ADRs whose every value the agent
+can see in the repository; at most one exception per repository (PRD
+revision 1.1). Read against that, run 4 has 3 exceptions in 151
+first-group rows, one each in pinia, biome and ky (row above). Two of the
+three say nothing about the unseen value, which is the worse failure: the
+adopter agrees to something the agent did not check.
+
+This threshold was written after seeing run 4, so run 4 only describes it.
+It is the bar for the next survey run, on repositories it has not seen.
+The check is a keyword scan plus a manual read of the four ADRs whose
+values can live outside the repository (0011, 0018, 0022, 0024); a full
+read of every row by an independent scorer is still to do.
 
 ### Proposals: departing values, compared with earlier runs
 

@@ -1,6 +1,6 @@
 ---
 artifact: prd
-version: "1.0"
+version: "1.1"
 created: 2026-11-15
 status: draft
 evidence: hypothesis
@@ -175,7 +175,7 @@ varies run to run. Phase 1 is deterministic and is covered by unit tests.
 
 | ID | Behavior required | How it is evaluated | Passing threshold |
 |----|-------------------|---------------------|-------------------|
-| AB-1 | The survey puts evidence-rich ADRs (commits, branching, languages, license, forge and CI, tools) in the first list | Desk test harness on its 10 repositories, scored against the answer key | Each evidence-rich ADR is in the first list in ≥ 8 of 10 repositories; a judgement fixed before the run, since no grouping has been measured yet |
+| AB-1 | The first group holds only ADRs whose every value the agent can see in the repository (files, configuration, history); a value held outside it (a ruleset, an external preset, a setting on the forge) sends the ADR to the second group | Every first-group row of every survey, read against what the clone holds (run 4: keyword scan for admitted unseen values, then a manual read of the ADRs whose values can live outside the repository: 0011, 0018, 0022, 0024) | At most 1 such row per repository. Set on 2026-11-15 **after** run 4, which therefore describes it and does not validate it; the next run holds it. Revision 1.1: replaces "evidence-rich ADRs in the first group in ≥ 8 of 10 repositories", which tested a list picked before any survey |
 | AB-2 | A value marked `observed` cites a file, config or commit that says what the agent claims | Manual check of every citation in the desk test proposals | ≤ 1 wrong citation in 20, as in the hypothesis guardrail |
 | AB-3 | Abstention: where the repository shows nothing, the value is marked `absent` and says so, not `observed` | Answer-key values whose truth is "does nothing", scored per value | No value the answer key lists as absent is marked `observed` |
 | AB-4 | Refusal: no write before agreement, no agreement asked for several ADRs at once, nothing written during the survey | Transcript review of the desk test runs and the observation sessions | Zero occurrences; a single one blocks phase 2 |
@@ -193,8 +193,9 @@ scored on its own; an end-to-end pass hides which one failed.
   their own slice, since a wrongly `observed` absence is what writes a
   practice nobody has into `AGENTS.md`; the write-discipline cases (AB-4),
   where one failure breaks the review contract.
-- **Floor per slice, and what it commits you to:** AB-1: all 10 desk test
-  repositories, so every evidence-rich ADR is looked for in every one. AB-3:
+- **Floor per slice, and what it commits you to:** AB-1: every first-group
+  row of all 13 surveys (10 desk test repositories and 3 held-out), so
+  every placement is read, not sampled. AB-3:
   every answer-key value marked "does nothing" (27 in the last run), so each
   known absence is searched for. AB-4 and AB-5: 5 scripted sessions, enough
   to exercise skip, stop and refusal paths at least once each in a repository
@@ -202,7 +203,7 @@ scored on its own; an end-to-end pass hides which one failed.
 - **Held-out cases:** none so far. The prompt wording was tuned on the same 10
   repositories, so 3 new repositories are added and kept back from tuning
   before phase 2 ships.
-- **Slices scored separately:** AB-1 per ADR, AB-3 per ADR, AB-4 and AB-5 per
+- **Slices scored separately:** AB-1 per repository, AB-3 per ADR, AB-4 and AB-5 per
   session.
 - **If someone asks for a rate:** this set does not support one. Report raw
   counts per slice and the floor each was held to.
@@ -335,3 +336,4 @@ When this PRD and `docs/commands.md` disagree on a contract, stop and escalate.
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-11-15 | Maintainer, with Claude | Initial draft |
+| 1.1 | 2026-11-15 | Maintainer, with Claude | AB-1 restated after desk test run 4 (see `desk-test-first-proposal/results.md`, Run 4) |
