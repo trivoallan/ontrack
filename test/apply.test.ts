@@ -55,10 +55,10 @@ test('nothing to apply: same output as plan, exit 0', async () => {
 
 test('new ADR imported byte for byte', async () => {
   const content = `${adr(1, 'proposed', 'Observability')}\nbinary-ish é text\n`;
-  const root = makeProject({ tracks: { platform: { 'SDR-0015.md': content } } });
+  const root = makeProject({ tracks: { platform: { 'ADR-0015.md': content } } });
   const r = await run(root, 'apply');
-  assert.equal(read(root, 'docs/adr/platform/SDR-0015.md'), content);
-  assert.equal(r.stdout, 'platform: 1 imported\n  imported      SDR-0015  Observability\nAGENTS.md: rules block created\n');
+  assert.equal(read(root, 'docs/adr/platform/ADR-0015.md'), content);
+  assert.equal(r.stdout, 'platform: 1 imported\n  imported      ADR-0015  Observability\nAGENTS.md: rules block created\n');
   assert.equal(r.code, 0);
 });
 
@@ -87,44 +87,44 @@ test('next step once nothing is proposed: the revised ADRs to rule again', async
 // Flat-layout migration
 
 test('outside git: flat files renamed with identical content', async () => {
-  const root = makeProject({ tracks: { platform: { 'SDR-0006.md': adr(1) } }, local: { 'docs/adr/SDR-0006.md': adr(1, 'accepted') } });
+  const root = makeProject({ tracks: { platform: { 'ADR-0006.md': adr(1) } }, local: { 'docs/adr/ADR-0006.md': adr(1, 'accepted') } });
   const r = await run(root, 'apply');
-  assert.equal(existsSync(path.join(root, 'docs/adr/SDR-0006.md')), false);
-  assert.equal(read(root, 'docs/adr/platform/SDR-0006.md'), adr(1, 'accepted'));
-  assert.match(r.stdout, /^ {2}moved {9}SDR-0006\.md$/m);
+  assert.equal(existsSync(path.join(root, 'docs/adr/ADR-0006.md')), false);
+  assert.equal(read(root, 'docs/adr/platform/ADR-0006.md'), adr(1, 'accepted'));
+  assert.match(r.stdout, /^ {2}moved {9}ADR-0006\.md$/m);
   assert.equal(r.code, 0);
 });
 
 test('inside git: flat files moved with git mv', async () => {
-  const root = makeProject({ tracks: { platform: { 'SDR-0006.md': adr(1) } }, local: { 'docs/adr/SDR-0006.md': adr(1, 'accepted') } });
+  const root = makeProject({ tracks: { platform: { 'ADR-0006.md': adr(1) } }, local: { 'docs/adr/ADR-0006.md': adr(1, 'accepted') } });
   const git = (...args: string[]) => spawnSync('git', args, { cwd: root, encoding: 'utf8' });
   git('init', '-q');
   git('add', 'docs');
   const commit = git('-c', 'user.name=t', '-c', 'user.email=t@example.com', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'init');
   assert.equal(commit.status, 0, commit.stderr);
   await run(root, 'apply');
-  assert.match(git('status', '--porcelain').stdout, /^R {2}docs\/adr\/SDR-0006\.md -> docs\/adr\/platform\/SDR-0006\.md$/m);
-  assert.equal(read(root, 'docs/adr/platform/SDR-0006.md'), adr(1, 'accepted'));
+  assert.match(git('status', '--porcelain').stdout, /^R {2}docs\/adr\/ADR-0006\.md -> docs\/adr\/platform\/ADR-0006\.md$/m);
+  assert.equal(read(root, 'docs/adr/platform/ADR-0006.md'), adr(1, 'accepted'));
 });
 
 test('inside git: an untracked flat file falls back to a rename', async () => {
-  const root = makeProject({ tracks: { platform: { 'SDR-0006.md': adr(1) } }, local: { 'docs/adr/SDR-0006.md': adr(1) } });
+  const root = makeProject({ tracks: { platform: { 'ADR-0006.md': adr(1) } }, local: { 'docs/adr/ADR-0006.md': adr(1) } });
   spawnSync('git', ['init', '-q'], { cwd: root });
   await run(root, 'apply');
-  assert.equal(existsSync(path.join(root, 'docs/adr/platform/SDR-0006.md')), true);
-  assert.equal(existsSync(path.join(root, 'docs/adr/SDR-0006.md')), false);
+  assert.equal(existsSync(path.join(root, 'docs/adr/platform/ADR-0006.md')), true);
+  assert.equal(existsSync(path.join(root, 'docs/adr/ADR-0006.md')), false);
 });
 
 // Links
 
 test('links broken by the migration are listed, files untouched', async () => {
-  const arc42 = 'Intro\n'.repeat(11) + 'See [commits](adr/SDR-0006.md#context).\n';
+  const arc42 = 'Intro\n'.repeat(11) + 'See [commits](adr/ADR-0006.md#context).\n';
   const root = makeProject({
-    tracks: { platform: { 'SDR-0006.md': adr(1) } },
-    local: { 'docs/adr/SDR-0006.md': adr(1), 'docs/arc42.md': arc42 },
+    tracks: { platform: { 'ADR-0006.md': adr(1) } },
+    local: { 'docs/adr/ADR-0006.md': adr(1), 'docs/arc42.md': arc42 },
   });
   const r = await run(root, 'apply');
-  assert.match(r.stdout, /^links to update:\n {2}docs\/arc42\.md:12 {2}adr\/SDR-0006\.md → adr\/platform\/SDR-0006\.md$/m);
+  assert.match(r.stdout, /^links to update:\n {2}docs\/arc42\.md:12 {2}adr\/ADR-0006\.md → adr\/platform\/ADR-0006\.md$/m);
   assert.equal(read(root, 'docs/arc42.md'), arc42);
 });
 
@@ -165,12 +165,12 @@ test('removed ADRs stay without --prune and go with it', async () => {
 test('confirm one ADR: only the revision line changes', async () => {
   const local = '---\nstatus: accepted\nrevision: 0\nauthors:\n- Jane\n---\n\nDecision text.\n';
   const root = makeProject({
-    tracks: { platform: { 'SDR-0003.md': adr(2, 'proposed', 'Architecture') } },
-    local: { 'docs/adr/platform/SDR-0003.md': local },
+    tracks: { platform: { 'ADR-0003.md': adr(2, 'proposed', 'Architecture') } },
+    local: { 'docs/adr/platform/ADR-0003.md': local },
   });
-  const r = await run(root, 'apply', '--confirm', 'SDR-0003');
-  assert.equal(read(root, 'docs/adr/platform/SDR-0003.md'), local.replace('revision: 0', 'revision: 2'));
-  assert.match(r.stdout, /^ {2}confirmed {5}SDR-0003 {2}Architecture \(revision 2\)$/m);
+  const r = await run(root, 'apply', '--confirm', 'ADR-0003');
+  assert.equal(read(root, 'docs/adr/platform/ADR-0003.md'), local.replace('revision: 0', 'revision: 2'));
+  assert.match(r.stdout, /^ {2}confirmed {5}ADR-0003 {2}Architecture \(revision 2\)$/m);
   assert.equal(r.code, 0);
 });
 
@@ -182,13 +182,13 @@ test('a flat undetermined ADR is confirmed at its new place', async () => {
 
 test('confirm a name that is not undetermined: code 1, nothing written', async () => {
   const root = makeProject({
-    tracks: { platform: { 'NEW.md': adr(1), 'SDR-0006.md': adr(2) } },
-    local: { 'docs/adr/platform/SDR-0006.md': adr(1) },
+    tracks: { platform: { 'NEW.md': adr(1), 'ADR-0006.md': adr(2) } },
+    local: { 'docs/adr/platform/ADR-0006.md': adr(1) },
   });
   const before = snapshot(root);
-  const r = await run(root, 'apply', '--confirm', 'SDR-0006');
+  const r = await run(root, 'apply', '--confirm', 'ADR-0006');
   assert.equal(r.code, 1);
-  assert.match(r.stderr, /SDR-0006/);
+  assert.match(r.stderr, /ADR-0006/);
   assert.deepEqual(snapshot(root), before);
 });
 
@@ -254,17 +254,17 @@ test('the commands reference example is what formatApply prints', () => {
   const out = formatApply({
     dryRun: true,
     actions: [
-      { kind: 'imported', track, adr: { name: 'SDR-0015.md', category: 'new', title: 'Observability' }, from: 'node_modules/platform/adr/SDR-0015.md', to: to('SDR-0015.md') },
-      { kind: 'moved', track, file: 'SDR-0006.md', from: 'docs/adr/SDR-0006.md', to: to('SDR-0006.md') },
-      { kind: 'moved', track, file: 'SDR-0010.md', from: 'docs/adr/SDR-0010.md', to: to('SDR-0010.md') },
+      { kind: 'imported', track, adr: { name: 'ADR-0015.md', category: 'new', title: 'Observability' }, from: 'node_modules/platform/adr/ADR-0015.md', to: to('ADR-0015.md') },
+      { kind: 'moved', track, file: 'ADR-0006.md', from: 'docs/adr/ADR-0006.md', to: to('ADR-0006.md') },
+      { kind: 'moved', track, file: 'ADR-0010.md', from: 'docs/adr/ADR-0010.md', to: to('ADR-0010.md') },
     ],
-    links: [{ file: 'docs/arc42.md', line: 12, old: 'adr/SDR-0006.md', new: 'adr/platform/SDR-0006.md' }],
+    links: [{ file: 'docs/arc42.md', line: 12, old: 'adr/ADR-0006.md', new: 'adr/platform/ADR-0006.md' }],
     remaining: [{
       ...track,
       adrs: [
-        unchanged('SDR-0006.md'),
-        { name: 'SDR-0010.md', category: 'revised', title: 'Forge and CI', from: 3, to: 4 },
-        unchanged('SDR-0015.md'),
+        unchanged('ADR-0006.md'),
+        { name: 'ADR-0010.md', category: 'revised', title: 'Forge and CI', from: 3, to: 4 },
+        unchanged('ADR-0015.md'),
       ],
     }],
   });
@@ -356,13 +356,13 @@ test('only a check to synchronize: synced with its lines, exit 0; dry run writes
 const git = (root: string, ...args: string[]) => spawnSync('git', args, { cwd: root, encoding: 'utf8' });
 
 test('own ADRs move to docs/adr/local/ with git, links listed, then nothing is left', async () => {
-  const own = adr() + '[commits](platform/SDR-0006.md) [queue](ADR-0002-queue.md)\n';
+  const own = adr() + '[commits](platform/ADR-0006.md) [queue](ADR-0002-queue.md)\n';
   const root = makeProject({
-    tracks: { platform: { 'SDR-0006.md': adr(1, 'accepted') } },
+    tracks: { platform: { 'ADR-0006.md': adr(1, 'accepted') } },
     local: {
       'docs/adr/ADR-0001-cache.md': own,
       'docs/adr/ADR-0002-queue.md': adr(undefined, 'accepted'),
-      'docs/adr/platform/SDR-0006.md': adr(1, 'accepted'),
+      'docs/adr/platform/ADR-0006.md': adr(1, 'accepted'),
       'docs/index.md': 'a\nb\nc\n[cache](adr/ADR-0001-cache.md)\n',
     },
   });
@@ -376,7 +376,7 @@ test('own ADRs move to docs/adr/local/ with git, links listed, then nothing is l
   const r = await run(root, 'apply');
   assert.match(r.stdout, /^local: 2 moved\n  moved         ADR-0001-cache\.md\n  moved         ADR-0002-queue\.md\nlinks to update:\n/);
   assert.match(r.stdout, /  docs\/index\.md:4  adr\/ADR-0001-cache\.md → adr\/local\/ADR-0001-cache\.md\n/);
-  assert.match(r.stdout, /  docs\/adr\/local\/ADR-0001-cache\.md:\d+  platform\/SDR-0006\.md → \.\.\/platform\/SDR-0006\.md\n/);
+  assert.match(r.stdout, /  docs\/adr\/local\/ADR-0001-cache\.md:\d+  platform\/ADR-0006\.md → \.\.\/platform\/ADR-0006\.md\n/);
   assert.doesNotMatch(r.stdout, /ADR-0002-queue\.md →/);
   assert.equal(read(root, 'docs/adr/local/ADR-0001-cache.md'), own);
   assert.match(git(root, 'status', '--short').stdout, /^R  docs\/adr\/ADR-0001-cache\.md -> docs\/adr\/local\/ADR-0001-cache\.md$/m);
@@ -393,11 +393,11 @@ test('own ADRs move without any track', async () => {
 
 test('an own ADR already in docs/adr/local/ stops apply before any write', async () => {
   const root = makeProject({
-    tracks: { platform: { 'SDR-0006.md': adr(1) } },
+    tracks: { platform: { 'ADR-0006.md': adr(1) } },
     local: { 'docs/adr/ADR-0001-cache.md': adr(), 'docs/adr/local/ADR-0001-cache.md': adr() },
   });
   const r = await run(root, 'apply');
   assert.equal(r.code, 1);
   assert.match(r.stderr, /docs\/adr\/local\/ADR-0001-cache\.md already exists, docs\/adr\/ADR-0001-cache\.md cannot move there/);
-  assert.ok(!existsSync(path.join(root, 'docs/adr/platform/SDR-0006.md')));
+  assert.ok(!existsSync(path.join(root, 'docs/adr/platform/ADR-0006.md')));
 });

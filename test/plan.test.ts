@@ -28,8 +28,8 @@ async function plan(root: string, ...options: string[]) {
 
 test('namespaced copy wins over a flat one', () => {
   const root = makeProject({
-    tracks: { platform: { 'SDR-0006.md': adr(2) } },
-    local: { 'docs/adr/platform/SDR-0006.md': adr(2), 'docs/adr/SDR-0006.md': adr(1) },
+    tracks: { platform: { 'ADR-0006.md': adr(2) } },
+    local: { 'docs/adr/platform/ADR-0006.md': adr(2), 'docs/adr/ADR-0006.md': adr(1) },
   });
   const [s] = buildPlan(root);
   assert.equal(s.adrs[0].category, 'unchanged');
@@ -70,16 +70,16 @@ test('new, revised, unchanged, undetermined and unreadable', () => {
 
 test('an ADR shipped no more is removed', () => {
   const root = makeProject({
-    tracks: { platform: { 'SDR-0006.md': adr(1) } },
-    local: { 'docs/adr/platform/SDR-0006.md': adr(1), 'docs/adr/platform/SDR-0012.md': adr(1) },
+    tracks: { platform: { 'ADR-0006.md': adr(1) } },
+    local: { 'docs/adr/platform/ADR-0006.md': adr(1), 'docs/adr/platform/ADR-0012.md': adr(1) },
   });
-  assert.equal(categories(buildPlan(root))['SDR-0012.md'], 'removed');
+  assert.equal(categories(buildPlan(root))['ADR-0012.md'], 'removed');
 });
 
 test("the project's own ADR is ignored", () => {
   const root = makeProject({
-    tracks: { platform: { 'SDR-0006.md': adr(1) } },
-    local: { 'docs/adr/local/0001-use-postgres.md': adr(1), 'docs/adr/platform/SDR-0006.md': adr(1) },
+    tracks: { platform: { 'ADR-0006.md': adr(1) } },
+    local: { 'docs/adr/local/0001-use-postgres.md': adr(1), 'docs/adr/platform/ADR-0006.md': adr(1) },
   });
   const out = formatPlan(buildPlan(root));
   assert.doesNotMatch(out, /postgres/);
@@ -90,11 +90,11 @@ test("the project's own ADR is ignored", () => {
 
 test('own ADRs directly in docs/adr/ are a migration to docs/adr/local/, after the tracks', async () => {
   const root = makeProject({
-    tracks: { platform: { 'SDR-0006.md': adr(1) } },
+    tracks: { platform: { 'ADR-0006.md': adr(1) } },
     local: {
       'docs/adr/ADR-0002-queue.md': adr(),
       'docs/adr/ADR-0001-cache.md': adr(),
-      'docs/adr/platform/SDR-0006.md': adr(1),
+      'docs/adr/platform/ADR-0006.md': adr(1),
     },
   });
   const expected =
@@ -107,8 +107,8 @@ test('own ADRs directly in docs/adr/ are a migration to docs/adr/local/, after t
 
 test('a flat file a track ships is not an own ADR', () => {
   const root = makeProject({
-    tracks: { platform: { 'SDR-0006.md': adr(1) } },
-    local: { 'docs/adr/SDR-0006.md': adr(1), 'docs/adr/platform/SDR-0006.md': adr(1) },
+    tracks: { platform: { 'ADR-0006.md': adr(1) } },
+    local: { 'docs/adr/ADR-0006.md': adr(1), 'docs/adr/platform/ADR-0006.md': adr(1) },
   });
   assert.equal(formatPlan(buildPlan(root)), 'platform: 1 unchanged\n');
 });
@@ -123,15 +123,15 @@ test('own ADRs to move without any track', async () => {
 
 test('historical downstream repository', () => {
   const root = makeProject({
-    tracks: { platform: { 'SDR-0006.md': adr(1), 'SDR-0010.md': adr(1) } },
-    local: { 'docs/adr/SDR-0010.md': adr(1), 'docs/adr/SDR-0006.md': adr(1) },
+    tracks: { platform: { 'ADR-0006.md': adr(1), 'ADR-0010.md': adr(1) } },
+    local: { 'docs/adr/ADR-0010.md': adr(1), 'docs/adr/ADR-0006.md': adr(1) },
   });
   const out = formatPlan(buildPlan(root));
   assert.equal(out, [
     'platform: 2 unchanged',
     'migration: 2 files docs/adr/ → docs/adr/platform/',
-    '  move          SDR-0006.md',
-    '  move          SDR-0010.md',
+    '  move          ADR-0006.md',
+    '  move          ADR-0010.md',
     '',
   ].join('\n'));
 });
@@ -147,8 +147,8 @@ test('nothing to do', async () => {
   const tracks: Record<string, Files> = { platform: {} };
   const local: Files = {};
   for (let i = 1; i <= 14; i += 1) {
-    tracks.platform[`SDR-${i}.md`] = adr(1);
-    local[`docs/adr/platform/SDR-${i}.md`] = adr(1);
+    tracks.platform[`ADR-${i}.md`] = adr(1);
+    local[`docs/adr/platform/ADR-${i}.md`] = adr(1);
   }
   const r = await plan(withAgents(makeProject({ tracks, local })));
   assert.equal(r.stdout, 'platform: 14 unchanged\n');
@@ -192,14 +192,14 @@ test('the commands reference example is what formatPlan prints', () => {
     namespace: 'platform',
     adrDir: 'node_modules/platform/adr',
     adrs: [
-      { name: 'SDR-0001.md', category: 'unchanged', title: null },
-      { name: 'SDR-0003.md', category: 'unchanged', title: null },
-      { name: 'SDR-0006.md', category: 'revised', title: 'Commits', from: 1, to: 2 },
-      { name: 'SDR-0008.md', category: 'unchanged', title: null },
-      { name: 'SDR-0010.md', category: 'revised', title: 'Forge and CI', from: 3, to: 4 },
-      { name: 'SDR-0015.md', category: 'new', title: 'Observability' },
+      { name: 'ADR-0001.md', category: 'unchanged', title: null },
+      { name: 'ADR-0003.md', category: 'unchanged', title: null },
+      { name: 'ADR-0006.md', category: 'revised', title: 'Commits', from: 1, to: 2 },
+      { name: 'ADR-0008.md', category: 'unchanged', title: null },
+      { name: 'ADR-0010.md', category: 'revised', title: 'Forge and CI', from: 3, to: 4 },
+      { name: 'ADR-0015.md', category: 'new', title: 'Observability' },
     ],
-    migration: ['SDR-0001.md', 'SDR-0003.md', 'SDR-0006.md', 'SDR-0008.md', 'SDR-0010.md'],
+    migration: ['ADR-0001.md', 'ADR-0003.md', 'ADR-0006.md', 'ADR-0008.md', 'ADR-0010.md'],
   }];
   assert.equal(formatPlan(p), example);
 });
@@ -217,23 +217,23 @@ test('new ADR with its title, from a heading repeating the name', () => {
 
 test('revised ADR with its title, read from the track copy', () => {
   const root = makeProject({
-    tracks: { platform: { 'SDR-0006.md': adr(2, 'proposed', 'Commits') } },
-    local: { 'docs/adr/platform/SDR-0006.md': adr(1, 'accepted', 'Old commits title') },
+    tracks: { platform: { 'ADR-0006.md': adr(2, 'proposed', 'Commits') } },
+    local: { 'docs/adr/platform/ADR-0006.md': adr(1, 'accepted', 'Old commits title') },
   });
-  assert.match(formatPlan(buildPlan(root)), /^ {2}revised {7}SDR-0006 {2}Commits \(revision 1 → 2\)$/m);
+  assert.match(formatPlan(buildPlan(root)), /^ {2}revised {7}ADR-0006 {2}Commits \(revision 1 → 2\)$/m);
 });
 
 test('removed ADR keeps its local title', () => {
   const root = makeProject({
-    tracks: { platform: { 'SDR-0006.md': adr(1) } },
-    local: { 'docs/adr/platform/SDR-0006.md': adr(1), 'docs/adr/platform/SDR-0012.md': adr(1, 'accepted', 'Hosting') },
+    tracks: { platform: { 'ADR-0006.md': adr(1) } },
+    local: { 'docs/adr/platform/ADR-0006.md': adr(1), 'docs/adr/platform/ADR-0012.md': adr(1, 'accepted', 'Hosting') },
   });
-  assert.match(formatPlan(buildPlan(root)), /^ {2}removed {7}SDR-0012 {2}Hosting$/m);
+  assert.match(formatPlan(buildPlan(root)), /^ {2}removed {7}ADR-0012 {2}Hosting$/m);
 });
 
 test('ADR without a title ends with its name, no trailing spaces', () => {
-  const root = makeProject({ tracks: { platform: { 'SDR-0020.md': adr(1) } } });
-  assert.match(formatPlan(buildPlan(root)), /^ {2}new {11}SDR-0020$/m);
+  const root = makeProject({ tracks: { platform: { 'ADR-0020.md': adr(1) } } });
+  assert.match(formatPlan(buildPlan(root)), /^ {2}new {11}ADR-0020$/m);
 });
 
 test('ADR whose name carries a slug shows no title', () => {
@@ -319,32 +319,32 @@ const at = (file: string) => `docs/adr/platform/${file}`;
 
 test('--all lists the unchanged ADRs with their verdict', () => {
   const out = listing(
-    { 'SDR-0001.md': fm('proposed'), 'SDR-0002.md': fm('proposed') },
-    { [at('SDR-0001.md')]: fm('accepted'), [at('SDR-0002.md')]: fm('accepted') },
+    { 'ADR-0001.md': fm('proposed'), 'ADR-0002.md': fm('proposed') },
+    { [at('ADR-0001.md')]: fm('accepted'), [at('ADR-0002.md')]: fm('accepted') },
   );
-  assert.equal(out, 'platform: 2 unchanged\n  unchanged     accepted    SDR-0001\n  unchanged     accepted    SDR-0002\n');
+  assert.equal(out, 'platform: 2 unchanged\n  unchanged     accepted    ADR-0001\n  unchanged     accepted    ADR-0002\n');
 });
 
 test('--all interleaves the categories by name', () => {
   const out = listing(
-    { 'SDR-0001.md': fm('proposed'), 'SDR-0002.md': fm('proposed', 2), 'SDR-0003.md': fm('proposed') },
-    { [at('SDR-0001.md')]: fm('accepted'), [at('SDR-0002.md')]: fm('accepted'), [at('SDR-0003.md')]: fm('accepted') },
+    { 'ADR-0001.md': fm('proposed'), 'ADR-0002.md': fm('proposed', 2), 'ADR-0003.md': fm('proposed') },
+    { [at('ADR-0001.md')]: fm('accepted'), [at('ADR-0002.md')]: fm('accepted'), [at('ADR-0003.md')]: fm('accepted') },
   );
   assert.deepEqual(out.split('\n').slice(1, 4), [
-    '  unchanged     accepted    SDR-0001',
-    '  revised       accepted    SDR-0002 (revision 1 → 2)',
-    '  unchanged     accepted    SDR-0003',
+    '  unchanged     accepted    ADR-0001',
+    '  revised       accepted    ADR-0002 (revision 1 → 2)',
+    '  unchanged     accepted    ADR-0003',
   ]);
 });
 
 test('without --all: no unchanged line, no verdict column', () => {
   const root = makeProject({
-    tracks: { platform: { 'SDR-0001.md': fm('proposed'), 'SDR-0002.md': fm('proposed', 2), 'SDR-0003.md': fm('proposed') } },
-    local: { [at('SDR-0001.md')]: fm('accepted'), [at('SDR-0002.md')]: fm('accepted') },
+    tracks: { platform: { 'ADR-0001.md': fm('proposed'), 'ADR-0002.md': fm('proposed', 2), 'ADR-0003.md': fm('proposed') } },
+    local: { [at('ADR-0001.md')]: fm('accepted'), [at('ADR-0002.md')]: fm('accepted') },
   });
   assert.equal(
     formatPlan(buildPlan(root)),
-    'platform: 1 revised, 1 new, 1 unchanged\n  revised       SDR-0002 (revision 1 → 2)\n  new           SDR-0003\n',
+    'platform: 1 revised, 1 new, 1 unchanged\n  revised       ADR-0002 (revision 1 → 2)\n  new           ADR-0003\n',
   );
 });
 
@@ -385,8 +385,8 @@ test('--all: an unreadable copy, or one without status, has no verdict', () => {
 });
 
 test('--all: a removed ADR keeps its verdict and title', () => {
-  const out = listing({ 'SDR-0001.md': fm('proposed') }, { [at('SDR-0012.md')]: fm('accepted', 1, 'title: Hosting') });
-  assert.match(out, /^ {2}removed {7}accepted {4}SDR-0012 {2}Hosting$/m);
+  const out = listing({ 'ADR-0001.md': fm('proposed') }, { [at('ADR-0012.md')]: fm('accepted', 1, 'title: Hosting') });
+  assert.match(out, /^ {2}removed {7}accepted {4}ADR-0012 {2}Hosting$/m);
 });
 
 test('--all: the exit code is the one of plan', async () => {

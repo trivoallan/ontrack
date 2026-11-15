@@ -48,7 +48,7 @@ already decided on, except for its `check:` line.
 npx ontrack apply --dry-run          # print what apply would do, write nothing
 npx ontrack apply                    # import new ADRs, move flat files
 npx ontrack apply --prune            # also delete ADRs the track no longer ships
-npx ontrack apply --confirm SDR-0003 # declare an undetermined verdict still holds
+npx ontrack apply --confirm ADR-0003 # declare an undetermined verdict still holds
 npx ontrack apply --confirm all      # same, for every undetermined ADR
 ```
 
@@ -93,14 +93,14 @@ human, in the `plan` format:
 ```
 dry run: nothing written
 platform: 1 imported, 2 moved
-  imported      SDR-0015  Observability
-  moved         SDR-0006.md
-  moved         SDR-0010.md
+  imported      ADR-0015  Observability
+  moved         ADR-0006.md
+  moved         ADR-0010.md
 links to update:
-  docs/arc42.md:12  adr/SDR-0006.md → adr/platform/SDR-0006.md
+  docs/arc42.md:12  adr/ADR-0006.md → adr/platform/ADR-0006.md
 remaining:
 platform: 1 revised, 2 unchanged
-  revised       SDR-0010  Forge and CI (revision 3 → 4)
+  revised       ADR-0010  Forge and CI (revision 3 → 4)
 ```
 
 The first line only appears with `--dry-run`. With nothing to do, `apply`
@@ -218,7 +218,7 @@ npx ontrack instructions
 
 ### `instructions` output contract
 
-Coding agents read `AGENTS.md`, not ADRs. A trivoallan/governance ADR ships
+Coding agents read `AGENTS.md`, not ADRs. A trivoallan/ontrack-engineering ADR ships
 its question as empty **trait** keys. Your repository answers in its own copy:
 it fills the keys and switches `status:` to `accepted`.
 
@@ -321,15 +321,15 @@ this format, one block per track, tracks sorted by alias:
 
 ```
 platform: 2 revised, 1 new, 3 unchanged
-  revised       SDR-0006  Commits (revision 1 → 2)
-  revised       SDR-0010  Forge and CI (revision 3 → 4)
-  new           SDR-0015  Observability
+  revised       ADR-0006  Commits (revision 1 → 2)
+  revised       ADR-0010  Forge and CI (revision 3 → 4)
+  new           ADR-0015  Observability
 migration: 5 files docs/adr/ → docs/adr/platform/
-  move          SDR-0001.md
-  move          SDR-0003.md
-  move          SDR-0006.md
-  move          SDR-0008.md
-  move          SDR-0010.md
+  move          ADR-0001.md
+  move          ADR-0003.md
+  move          ADR-0006.md
+  move          ADR-0008.md
+  move          ADR-0010.md
 ```
 
 - Line 1, per track: `<alias>: <count per category>`, in the order revised, new, removed, undetermined, unreadable, check, unchanged. Zero counts are omitted, except "unchanged".
@@ -520,8 +520,8 @@ one:
 Import the architecture decision records this repository does not hold yet, then review them.
 
 1. Run `npx ontrack apply`. It imports these ADRs as `proposed`, and writes nothing to an ADR this repository has ruled:
-   - `docs/adr/platform/SDR-0002-localization.md` (Localization)
-   - `docs/adr/platform/SDR-0015-observability.md` (Observability)
+   - `docs/adr/platform/ADR-0002-localization.md` (Localization)
+   - `docs/adr/platform/ADR-0015-observability.md` (Observability)
    If `apply` fails, stop and report its error.
 2. Run `npx ontrack review` and follow the prompt it prints. It exits with `2` when it prints a prompt: that is not an error.
 ~~~

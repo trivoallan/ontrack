@@ -117,9 +117,9 @@ test('an empty AGENTS.md receives the block alone', async () => {
 });
 
 test('file created after an import, listing the pending ADR', async () => {
-  const root = makeProject({ tracks: { platform: { 'SDR-0015.md': adr(1, 'proposed', 'Observability') } } });
+  const root = makeProject({ tracks: { platform: { 'ADR-0015.md': adr(1, 'proposed', 'Observability') } } });
   const r = await run(root, 'apply');
-  assert.match(read(root), /### Not yet decided\n\n- Observability \(platform\/SDR-0015\)/);
+  assert.match(read(root), /### Not yet decided\n\n- Observability \(platform\/ADR-0015\)/);
   assert.equal(r.code, 0);
   assert.equal((await run(root, 'plan')).code, 0);
 });

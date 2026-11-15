@@ -18,7 +18,7 @@ A track is an npm package whose `package.json` has an `ontrack` object.
 
 ```json
 {
-  "name": "governance",
+  "name": "@trivoallan/ontrack-engineering",
   "ontrack": { "adr": "adr", "namespace": "trivoallan" }
 }
 ```
@@ -72,7 +72,7 @@ adr: ADR-0006
 title: Commits
 status: proposed
 revision: 1
-check: npx --no-install governance-check ADR-0006
+check: npx --no-install ontrack-engineering-check ADR-0006
 supersedes: []
 traits:
   commits:
@@ -87,7 +87,7 @@ adr: ADR-0006
 title: Commits
 status: accepted
 revision: 1
-check: npx --no-install governance-check ADR-0006
+check: npx --no-install ontrack-engineering-check ADR-0006
 supersedes: []
 traits:
   commits:
@@ -164,9 +164,9 @@ which sets a few rules a YAML parser would not.
 ontrack never checks that an ADR is well formed beyond the keys above. Which
 other keys exist, which sections the body has, and which values a trait
 accepts are the track's to define and to check.
-[trivoallan/governance](https://github.com/trivoallan/governance) does it
+[trivoallan/ontrack-engineering](https://github.com/trivoallan/ontrack-engineering) does it
 with one schema file shipped next to its ADRs,
-[`adr/.mdschema.yml`](https://github.com/trivoallan/governance/blob/main/adr/.mdschema.yml),
+[`adr/.mdschema.yml`](https://github.com/trivoallan/ontrack-engineering/blob/main/adr/.mdschema.yml),
 which lists the accepted values of every trait.
 
 ## The rules block in `AGENTS.md`

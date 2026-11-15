@@ -32,11 +32,11 @@ npm i -D @trivoallan/ontrack
 The package is scoped; the command it installs is `ontrack`.
 
 A **track** is an npm dependency that ships ADRs. Its npm alias is its
-namespace. [trivoallan/governance](https://github.com/trivoallan/governance)
-is a public one, published as `@trivoallan/ontrack-governance`:
+namespace. [trivoallan/ontrack-engineering](https://github.com/trivoallan/ontrack-engineering)
+is a public one, published as `@trivoallan/ontrack-engineering`:
 
 ```bash
-npm i -D trivoallan@npm:@trivoallan/ontrack-governance
+npm i -D trivoallan@npm:@trivoallan/ontrack-engineering
 ```
 
 `trivoallan@npm:` is npm's alias syntax: the package is installed under the

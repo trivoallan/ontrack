@@ -99,11 +99,11 @@ test('unreadable imported ADR, whatever upstream holds', () => {
 // Reading the title
 
 test('frontmatter title', () => {
-  assert.equal(readTitle(adr('title: Commits', 'revision: 1'), 'SDR-0006'), 'Commits');
+  assert.equal(readTitle(adr('title: Commits', 'revision: 1'), 'ADR-0006'), 'Commits');
 });
 
 test('quoted frontmatter title', () => {
-  assert.equal(readTitle(adr('title: "Forge and CI"'), 'SDR-0010'), 'Forge and CI');
+  assert.equal(readTitle(adr('title: "Forge and CI"'), 'ADR-0010'), 'Forge and CI');
 });
 
 test('heading repeating the name', () => {
@@ -112,11 +112,11 @@ test('heading repeating the name', () => {
 });
 
 test('plain heading', () => {
-  assert.equal(readTitle('---\nrevision: 1\n---\n# Software Architecture\n', 'SDR-0003'), 'Software Architecture');
+  assert.equal(readTitle('---\nrevision: 1\n---\n# Software Architecture\n', 'ADR-0003'), 'Software Architecture');
 });
 
 test('heading that only starts like another name is kept whole', () => {
-  assert.equal(readTitle('---\n---\n# Commits: a convention\n', 'SDR-0006'), 'Commits: a convention');
+  assert.equal(readTitle('---\n---\n# Commits: a convention\n', 'ADR-0006'), 'Commits: a convention');
 });
 
 test('no title', () => {
