@@ -27,7 +27,9 @@ npm i -D @trivoallan/ontrack
 ```
 
 The unscoped `ontrack` on the registry is another project: `npx ontrack`
-runs yours only once the package above is installed in the project.
+runs yours only once the package above is installed in the project. Without
+it, run `npx -p @trivoallan/ontrack ontrack`; the commands ontrack prints
+then use that form.
 
 Every version is listed on the
 [releases page](https://github.com/trivoallan/ontrack/releases). To install

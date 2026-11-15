@@ -188,6 +188,14 @@ export const adrsInForce = (root: string) => resolve(root).inForce;
 
 export const heading = (adr: Adr) => (adr.title ? `${adr.title} (${adr.ref})` : adr.ref);
 
+/**
+ * `npx ontrack` runs the project's own bin when it installs ontrack. Without
+ * it, npx fetches the unrelated `ontrack` package from the registry, so the
+ * commands ontrack prints name the package instead.
+ */
+export const qualify = (root: string, text: string) =>
+  existsSync(path.join(root, 'node_modules', '.bin', 'ontrack')) ? text : text.replaceAll('npx ontrack', 'npx -p @trivoallan/ontrack ontrack');
+
 /** Tells the agent which command prepares a ruling, so it does not improvise one. */
 export const REVIEW_HINT = 'When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output.';
 

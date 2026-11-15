@@ -6,6 +6,7 @@ import type { Argv } from 'yargs';
 import { findLinks } from '../links.ts';
 import { buildPlan, formatPlan, hasPendingChanges } from '../plan.ts';
 import type { Plan } from '../plan.ts';
+import { qualify } from '../instructions.ts';
 import { pendingAdrs, revisedAdrs } from '../review.ts';
 
 export const command = 'apply';
@@ -50,11 +51,12 @@ function nextStep(io: Io, root: string, plan: Plan): void {
   const proposed = pendingAdrs(root).length;
   const n = proposed || revisedAdrs(root, plan).length;
   if (n === 0) return;
-  io.stderr.write(
+  io.stderr.write(qualify(
+    root,
     `next: ${n} ${proposed ? 'proposed' : 'revised'} ADR${n > 1 ? 's' : ''} to rule${proposed ? '' : ' again'}\n` +
       '  from a shell:  claude "$(npx ontrack review)"\n' +
       '  as a prompt:   Run `npx ontrack review` and follow its output.\n',
-  );
+  ));
 }
 
 export function handler({

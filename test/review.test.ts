@@ -1,6 +1,6 @@
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import {
   formatImport,
@@ -317,6 +317,16 @@ test('command: prints the sequence prompt, exits 2, leaves the tree unchanged', 
   assert.equal(r.stdout, formatSequence(pendingAdrs(root)));
   assert.equal(r.stderr, '');
   assert.deepEqual(snapshot(root), before);
+});
+
+test('command: without ontrack installed, every command in the prompt names the package', async () => {
+  const root = behind();
+  rmSync(path.join(root, 'node_modules/.bin/ontrack'));
+  const r = await review(root);
+  assert.equal(r.code, 2);
+  assert.equal(r.stdout, formatImport(newAdrs(root)).replaceAll('npx ontrack', 'npx -p @trivoallan/ontrack ontrack'));
+  assert.ok(r.stdout.includes('`npx -p @trivoallan/ontrack ontrack apply`') && r.stdout.includes('`npx -p @trivoallan/ontrack ontrack review`'));
+  assert.doesNotMatch(r.stdout, /npx ontrack/);
 });
 
 test('command: a named ADR', async () => {
