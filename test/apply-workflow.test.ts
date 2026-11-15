@@ -137,5 +137,24 @@ test('the workflow checks out nothing, runs no agent and starts the session only
   assert.match(workflow, /^  pull_request_target:$/m);
   assert.doesNotMatch(workflow, /uses:/);
   assert.match(workflow, /^        if: steps\.gate\.outputs\.verdict == 'approved'$/m);
-  assert.equal(workflow.match(/secrets\./g)?.length, 1);
+  const secretLines = workflow.split('\n').filter((l) => /secrets\.[A-Za-z]/.test(l));
+  assert.deepEqual(secretLines.map((l) => l.trim().split(':')[0]), ['TOKEN']);
+});
+
+test('a caller names its own label, which reaches the scripts only through the environment', () => {
+  assert.match(workflow, /^    if: github\.event\.label\.name == \(inputs\.label \|\| 'ontrack:apply'\)$/m);
+  for (const line of workflow.split('\n').filter((l) => l.includes('inputs.label'))) {
+    assert.match(line, /^\s*(if|LABEL): /, line);
+  }
+  assert.match(workflow, /--remove-label "\$LABEL"$/m);
+});
+
+test('without a token or a routine, no session is started and the run fails', () => {
+  for (const env of [{ ROUTINE_ID: 'trig_01', TOKEN: '' }, { ROUTINE_ID: '', TOKEN: 't' }, { ROUTINE_ID: 'a/../b', TOKEN: 't' }]) {
+    const r = step('fire', env);
+    assert.notEqual(r.status, 0);
+    assert.equal(r.calls, '');
+    assert.doesNotMatch(r.output, /started=true/);
+  }
+  assert.match(step('report', { RUN: 'https://example.test/run', VERDICT: 'approved', STARTED: '' }).calls, /could not be started/);
 });

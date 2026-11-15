@@ -14,9 +14,27 @@ name: apply
 # default branch whatever the pull request contains. It is safe here for one
 # reason: nothing of the pull request is checked out or executed (ADR-0011
 # rule 5). Keep it that way.
+#
+# docs/adr/ADR-0004-other-repositories-call-the-propose-and-apply-workflows.md:
+# other repositories call this workflow by commit SHA, with their own routine
+# and the token that fires it, passed explicitly (never `secrets: inherit`).
 on:
   pull_request_target:
     types: [labeled]
+  workflow_call:
+    inputs:
+      label:
+        description: The label that asks for an apply session.
+        type: string
+        default: 'ontrack:apply'
+      routine_id:
+        description: The Claude Code routine that runs the apply session for this repository.
+        type: string
+        required: true
+    secrets:
+      fire_token:
+        description: The token that fires the routine.
+        required: true
 
 permissions: {}
 
@@ -27,7 +45,7 @@ concurrency:
 
 jobs:
   gate:
-    if: github.event.label.name == 'ontrack:apply'
+    if: github.event.label.name == (inputs.label || 'ontrack:apply')
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -37,6 +55,7 @@ jobs:
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
       STATE: ${{ github.event.pull_request.state }}
+      LABEL: ${{ inputs.label || 'ontrack:apply' }}
     steps:
       # Fixed commands, no agent. The reviews are read from the API when the
       # job runs; the head commit is the one the label was added on.
@@ -78,9 +97,15 @@ jobs:
       - id: fire
         if: steps.gate.outputs.verdict == 'approved'
         env:
-          ROUTINE_ID: ${{ vars.ONTRACK_APPLY_ROUTINE_ID }}
-          TOKEN: ${{ secrets.ONTRACK_APPLY_FIRE_TOKEN }}
+          # A caller passes both; this repository's own trigger falls back to
+          # its variable and secret.
+          ROUTINE_ID: ${{ inputs.routine_id || vars.ONTRACK_APPLY_ROUTINE_ID }}
+          TOKEN: ${{ secrets.fire_token || secrets.ONTRACK_APPLY_FIRE_TOKEN }}
         run: |
+          if [ -z "$TOKEN" ] || [[ ! "$ROUTINE_ID" =~ ^[A-Za-z0-9_-]+$ ]]; then
+            echo "::error::no routine or no token to start the session"
+            exit 1
+          fi
           body=$(jq -nc --arg repo "$GITHUB_REPOSITORY" --arg pr "$PR" --arg sha "$HEAD_SHA" \
             '{text: "repository=\($repo) pull_request=\($pr) head_commit=\($sha)"}')
           response=$(curl --silent --show-error --fail-with-body --max-time 60 \
@@ -131,4 +156,4 @@ jobs:
       # Consumed whatever the outcome: adding it again is the only way to ask
       # again.
       - if: always()
-        run: gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --remove-label 'ontrack:apply'
+        run: gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --remove-label "$LABEL"
