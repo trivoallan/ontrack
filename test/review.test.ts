@@ -1,6 +1,6 @@
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync } from 'node:fs';
+import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import {
   formatImport,
@@ -16,6 +16,7 @@ import {
 } from '../src/review.ts';
 import { main } from '../src/cli.ts';
 import type { Adr } from '../src/instructions.ts';
+import { readAdrs, supersededBy } from '../src/instructions.ts';
 import { cleanup, makeProject, makeTree } from './helpers/project.ts';
 
 after(cleanup);
@@ -264,7 +265,7 @@ test('prompt: every form matches the commands reference contract', () => {
 test('supersession: names one ADR by path, title and reference, and no other', () => {
   const out = formatSupersession(selectAdr(tree(), 'ADR-0001'));
   assert.ok(out.includes(`\`${RECORD}\` (Record architecture decisions).`));
-  assert.ok(out.includes('`supersedes: [trivoallan/ADR-0001-record-architecture-decisions]`'));
+  assert.ok(out.includes('`supersedes: [trivoallan/ADR-0001]`'));
   assert.ok(!out.includes(LOCALIZATION));
   assert.ok(!out.includes(COMMITS));
   assert.deepEqual(out.match(/^\d\./gm), ['1.', '2.', '3.', '4.', '5.', '6.']);
@@ -300,7 +301,7 @@ test('supersession: same text for every ADR, an own ADR by its local reference',
   });
   const a = selectAdr(root, 'ADR-0006-commits');
   const b = selectAdr(root, 'ADR-0020-release');
-  const strip = (x: Adr) => formatSupersession(x).replace(x.path, '').replace(x.title ? ` (${x.title})` : '', '').replace(x.ref, '');
+  const strip = (x: Adr) => formatSupersession(x).replace(x.path, '').replace(x.title ? ` (${x.title})` : '', '').replace(`${x.ns}/${x.id}`, '');
   assert.equal(strip(a), strip(b));
   assert.ok(formatSupersession(b).includes(`\`${RELEASE}\``));
   assert.ok(formatSupersession(b).includes('`supersedes: [local/ADR-0020-release]`'));
@@ -491,4 +492,14 @@ test('command: a named ADR that is not imported is unknown, and a named one igno
   assert.equal(unknown.stdout, '');
   assert.match(unknown.stderr, /ADR-0015/);
   assert.equal((await review(root, 'ADR-0002-localization')).stdout, formatReview(selectAdr(root, 'ADR-0002-localization')));
+});
+
+test('supersession: the reference it gives does supersede the ADR', () => {
+  const root = makeTree({ [COMMITS]: adr('Commits', 'adr: ADR-0006', 'status: accepted') });
+  const old = selectAdr(root, 'ADR-0006-commits');
+  const ref = formatSupersession(old).match(/`supersedes: \[([^\]]+)\]`/)![1];
+  mkdirSync(path.join(root, 'docs/adr/local'), { recursive: true });
+  writeFileSync(path.join(root, 'docs/adr/local/ADR-0001-own.md'), ['---', 'adr: ADR-0001', 'status: accepted', `supersedes: [${ref}]`, '---', ''].join('\n'));
+  const by = supersededBy(readAdrs(root));
+  assert.equal([...by.keys()].find((a) => a.ref === old.ref)?.ref, old.ref);
 });

@@ -3,6 +3,17 @@
 
 When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output.
 
+### The governance track skips the cooldown (local/ADR-0023-the-governance-track-skips-the-cooldown)
+
+```yaml
+dependencies:
+  updater: dependabot
+  automerge: patch
+admission:
+  approver: person
+  install_scripts: ignored
+```
+
 ### Record architecture decisions (trivoallan/ADR-0001-record-architecture-decisions)
 
 ```yaml
@@ -142,14 +153,6 @@ agent:
   host: claude-code
 ```
 
-### Dependencies (trivoallan/ADR-0018-dependencies)
-
-```yaml
-dependencies:
-  updater: dependabot
-  automerge: patch
-```
-
 ### Vulnerabilities (trivoallan/ADR-0019-vulnerabilities)
 
 ```yaml
@@ -157,14 +160,6 @@ vulnerabilities:
   sbom: cyclonedx
   scanner: grype
   fail_on: critical
-```
-
-### Adding a dependency (trivoallan/ADR-0020-adding-dependencies)
-
-```yaml
-admission:
-  approver: person
-  install_scripts: ignored
 ```
 
 ### Build provenance (trivoallan/ADR-0021-build-provenance)
