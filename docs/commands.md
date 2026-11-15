@@ -240,6 +240,8 @@ traits:
 <!-- ontrack:begin -->
 ## Project rules (ontrack)
 
+When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output.
+
 ### Commits (trivoallan/ADR-0006-commits)
 
 ```yaml
@@ -258,6 +260,7 @@ commits:
 - The ADRs read are the repository's: `docs/adr/*.md`, named `local/<file name without .md>`, and `docs/adr/<namespace>/*.md`, named `<namespace>/<file name without .md>`. Tracks in `node_modules` are not read, because a shipped ADR holds a question, not an answer.
 - An ADR carries decided traits when it is `accepted`, is not superseded, and has an indented `traits:` block. The block is copied verbatim, dedented, and its values are never interpreted. `traits: {}` declares nothing, and any other inline value is an error.
 - An `accepted` ADR supersedes the ADRs named in its `supersedes:` key (`[A, B]` or `- A` lines). A plain name matches an ADR's `adr:` value, or its file name, in the same directory. `<namespace>/<name>` and `local/<name>` reach another directory.
+- The line under the heading names [`review`](#ontrack-review-adr), so an agent asked to review an ADR runs it instead of improvising a ruling.
 - `proposed` ADRs are listed under "Not yet decided". Every other status is ignored.
 - Two decided ADRs sharing a top-level trait key are an error that names both. Superseding one of them settles it.
 - Sections are sorted by reference. With nothing decided and nothing pending, the block holds only its heading.

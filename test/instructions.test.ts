@@ -2,7 +2,7 @@ import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
-import { buildInstructions, formatInstructions, readAdrs, supersededBy } from '../src/instructions.ts';
+import { buildInstructions, formatInstructions, readAdrs, supersededBy, REVIEW_HINT } from '../src/instructions.ts';
 import type { Adr } from '../src/instructions.ts';
 import { main } from '../src/cli.ts';
 import { cleanup, makeProject, makeTree } from './helpers/project.ts';
@@ -239,7 +239,7 @@ test('an ADR without a title is headed by its reference', () => {
 
 test('nothing decided, nothing pending: the block is still printed', async () => {
   const r = await instructions(makeTree({ 'README.md': '' }));
-  assert.equal(r.stdout, '<!-- ontrack:begin -->\n## Project rules (ontrack)\n\n<!-- ontrack:end -->\n');
+  assert.equal(r.stdout, `<!-- ontrack:begin -->\n## Project rules (ontrack)\n\n${REVIEW_HINT}\n\n<!-- ontrack:end -->\n`);
   assert.equal(r.code, 0);
 });
 

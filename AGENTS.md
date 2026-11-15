@@ -1,6 +1,8 @@
 <!-- ontrack:begin -->
 ## Project rules (ontrack)
 
+When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output.
+
 ### Record architecture decisions (trivoallan/ADR-0001-record-architecture-decisions)
 
 ```yaml
