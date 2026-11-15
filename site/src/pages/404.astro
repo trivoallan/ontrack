@@ -1,0 +1,22 @@
+---
+// Starlight's own 404 has no sidebar and one sentence: a reader who followed
+// a dead link had nowhere to go but the search. This one keeps the sidebar
+// and names the pages most readers came for. It lives here, not in docs/,
+// which is also read on GitHub, where a 404 page means nothing.
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+---
+
+<StarlightPage frontmatter={{ title: 'Page not found', pagefind: false, tableOfContents: false, editUrl: false }}>
+  <p>
+    No page lives at this address. It may have been renamed, or the link that brought you here
+    has a typo. Search the site from the top of the page, or start from one of these.
+  </p>
+  <ul>
+    <li><a href={base}>Home</a>: what ontrack is for</li>
+    <li><a href={`${base}tutorial/`}>Try ontrack on one repository</a>, in four steps</li>
+    <li><a href={`${base}concepts/`}>Concepts</a>: ADRs, questions, tracks, rulings</li>
+    <li><a href={`${base}commands/`}>Commands</a>, and their options</li>
+  </ul>
+</StarlightPage>

@@ -8,8 +8,9 @@ import { defineRouteMiddleware } from '@astrojs/starlight/route-data';
 export const onRequest = defineRouteMiddleware((context) => {
   const route = context.locals.starlightRoute;
   const file = route.entry.filePath?.replace(/^src\/content\//, '');
-  // The 404 page is not a file; the home page is not prose to correct.
-  if (!file?.startsWith('docs/') || route.entry.data.template === 'splash') return;
+  // The home page is not prose to correct. The 404 page is not a file: it
+  // takes its path from the missing address, and says `editUrl: false`.
+  if (!file?.startsWith('docs/') || route.entry.data.template === 'splash' || route.entry.data.editUrl === false) return;
   // A decided ADR is superseded, not edited, and an imported one is a copy
   // of its track: no edit link on either.
   if (!route.entry.data.adr) route.editUrl = new URL(`https://github.com/trivoallan/ontrack/edit/main/${file}`);
