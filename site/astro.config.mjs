@@ -76,16 +76,14 @@ export default defineConfig({
       // Labels a reader understands, not directory names. What ontrack is
       // for comes first; this repository's own decisions and architecture
       // stay one click away, collapsed.
+      // Grouped by what the reader came to do, and the guides by who they
+      // are: a repository that installs a source, or the author of one. The
+      // model is read right after the tutorial, before either set of guides.
       sidebar: [
-        { slug: 'tutorial' },
-        { slug: 'find-a-source' },
-        { slug: 'how-it-works' },
-        { slug: 'write-your-own-source' },
-        { slug: 'revise-a-question' },
-        { slug: 'run-ontrack-in-ci' },
-        { slug: 'draft-a-change-from-an-issue' },
-        { slug: 'commands' },
-        { slug: 'file-formats' },
+        { label: 'Start here', items: ['tutorial', 'how-it-works'] },
+        { label: 'Use a source', items: ['find-a-source', 'run-ontrack-in-ci', 'draft-a-change-from-an-issue'] },
+        { label: 'Maintain a source', items: ['write-your-own-source', 'revise-a-question'] },
+        { label: 'Reference', items: ['commands', 'file-formats'] },
         // One subgroup per namespace: `local`, the repository's own ADRs,
         // then each imported source.
         { label: 'ontrack on itself', collapsed: true, items: [{ autogenerate: { directory: 'adr', collapsed: true } }] },
