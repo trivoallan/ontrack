@@ -104,6 +104,7 @@ export default defineConfig({
             // because users need its terms too. Its frontmatter hides it from
             // the Architecture group, so it has one entry.
             'architecture/arc42/12-glossary',
+            'error-messages',
             // This repository's own decisions and architecture: how ontrack
             // is made, after what a reader looks up to use it. One subgroup
             // per namespace: `local`, the repository's own ADRs, then each

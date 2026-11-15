@@ -93,3 +93,5 @@ It changes nothing: the checkout is discarded. The failed run is the notice.
 ## Related
 
 - [Commands](commands.md) lists the exit codes of each command.
+- [Error messages](error-messages.md) says what to do about an error, when a
+  job exits with `1`.

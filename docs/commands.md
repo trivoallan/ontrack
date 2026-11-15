@@ -35,6 +35,9 @@ Every command shares the same exit codes.
 A CI job can detect an out-of-date repository on `2` without parsing the
 output.
 
+Every error a command prints on `1` is listed, with what to do about it, in
+[Error messages](error-messages.md).
+
 ## `ontrack apply`
 
 Brings the repository in line with what `plan` reports. It is the only
