@@ -227,11 +227,11 @@ test('prompt: tracking items are labelled ontrack, titled by ruling, and checked
   for (const out of [formatReview(selectAdr(tree(), 'ADR-0006')), formatSequence(pendingAdrs(tree()))].map(tail)) {
     const list = out.indexOf('list the items in that tracker that carry the label `ontrack`, open and closed');
     assert.ok(list > 0 && list < out.indexOf('propose a tracking item'));
-    assert.match(out, /`ADR-0015 secrets\.guard`/);
+    assert.match(out, /`\[trivoallan\/ADR-0015\] secrets\.guard`/);
     assert.match(out, /propose nothing for a ruling whose identifier starts the title of one of those items/);
     assert.match(out, /say in one line which closed items name a ruling this repository still does not follow/);
     assert.match(out, /When you cannot list the tracker's items, propose every ruling and say that duplicates were not checked/);
-    assert.match(out, /its title starts with the ruling's identifier, as in `ADR-0015 secrets\.guard: install gitleaks`/);
+    assert.match(out, /its title starts with the ruling's identifier, as in `\[trivoallan\/ADR-0015\] secrets\.guard: install gitleaks`/);
     assert.match(out, /each with the label `ontrack`, creating the label first when the tracker requires it/);
   }
 });
