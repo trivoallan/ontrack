@@ -29,7 +29,9 @@
 }
 
 /* A group inside a group reads as one more entry of its parent, not as a
-   second heading: Starlight draws it as large as the top-level ones. */
+   second heading: Starlight draws it as large and bold as the top-level
+   ones. Its caret already says it opens. */
 .sidebar-content ul ul .group-label .large {
   font-size: var(--sl-text-sm);
+  font-weight: normal;
 }
