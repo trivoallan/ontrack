@@ -1,0 +1,29 @@
+/* The home page has no sidebar, so its text ran 1080px wide: about 150
+   characters a line. Keep it at the width of the other pages' text. */
+[data-has-hero] .sl-markdown-content {
+  max-width: 45rem;
+}
+
+/* The accent is the teal of the logo, not Starlight's default indigo.
+   Light text on white and white on the button both stay above 4.5:1. */
+:root {
+  --sl-color-accent-low: #0c3640;
+  --sl-color-accent: #1aa3bd;
+  --sl-color-accent-high: #b4e9f3;
+}
+:root[data-theme='light'] {
+  --sl-color-accent-low: #c8eef5;
+  --sl-color-accent: #0b6e82;
+  --sl-color-accent-high: #083f4b;
+}
+
+/* Mermaid's dark theme puts each edge label on a grey box. Put it on the
+   page instead: the label still hides the line it sits on. Mermaid scopes
+   its own rule to the diagram's id, hence !important. */
+:root[data-theme='dark'] .mermaid :is(.edgeLabel, .edgeLabel p, .labelBkg) {
+  background-color: var(--sl-color-bg) !important;
+}
+:root[data-theme='dark'] .mermaid .edgeLabel rect {
+  fill: var(--sl-color-bg) !important;
+  opacity: 1 !important;
+}
