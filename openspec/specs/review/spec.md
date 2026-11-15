@@ -127,16 +127,18 @@ The prompt SHALL be printed to standard output and follow the contract in the co
 1. read its file in full, and edit no other ADR;
 2. start from what the repository does today on the question (its files, configuration, CI and history), say so where it does nothing, describe the repository as it is and not as the other `proposed` ADRs would make it, then compare with the recommendation the ADR makes and name every difference;
 3. check the condition of every conditional recommendation, and cite the evidence that settles it;
-4. propose, with its evidence, a value for every trait key the ADR leaves to the repository, and mark it `observed` when the repository does it today, or `absent` when it does not and the ruling would make it do so;
+4. propose, with its evidence, a value for every trait key the ADR leaves to the repository, and mark it `observed` when the repository does it today, or `absent` when it does not and the ruling would make it do so; when it cannot tell from what it can read, mark it neither way, say what it could not see and where it lives, and ask the user for the value;
 5. propose `rejected` only on evidence that the question does not apply, and say what stands in for it;
-6. present the proposed ruling, each trait value with its mark, then stop, ask for the user's agreement with a question tool such as `AskUserQuestion` when the agent has one, and write nothing until the user agrees;
+6. present the proposed ruling, one line per trait key in the form `trait.key: value (observed|absent): evidence`, then stop, ask for the user's agreement with a question tool such as `AskUserQuestion` when the agent has one, and write nothing until the user agrees;
 7. once the user agrees, fill the traits or remove the block when rejected, set the status, write in the ADR the reason for every departure from the recommendation, and run `npx ontrack apply`.
 
-After the seven steps, and in the sequence form after the instruction to take the next ADR, the prompt SHALL tell the agent, once every ADR is ruled, to list the rulings the repository does not follow yet, and to create in the tracker named by the decided `tracking` trait (`tracking.tool`, in `tracking.project`) only the items the user agrees to; when no `tracking` trait is decided or `tracking.tool` is `none`, to list them in its reply and create nothing. It SHALL identify a ruling by its ADR's reference without the slug, in brackets, and its trait key, as in `[trivoallan/ADR-0015] secrets.guard`, and tell the agent, before proposing:
+After the seven steps, and in the sequence form after the instruction to take the next ADR, the prompt SHALL tell the agent, once every ADR in the review is ruled, to list the rulings the repository does not follow yet, and to create in the tracker named by the decided `tracking` trait (`tracking.tool`, in `tracking.project`) only the items the user agrees to; when no `tracking` trait is decided or `tracking.tool` is `none`, to list them in its reply and create nothing. It SHALL identify a ruling by its ADR's reference without the slug, in brackets, and its trait key, as in `[trivoallan/ADR-0015] secrets.guard`, and tell the agent, before proposing:
 - to list the tracker's items that carry the label `ontrack`, open and closed;
 - to propose nothing for a ruling whose identifier starts the title of one of those items;
 - to say in one line which closed items name a ruling the repository still does not follow;
 - when it cannot list the tracker's items, to propose every ruling and say that duplicates were not checked.
+
+The tracking-items text SHALL give these instructions as a list of `-` bullets, one per line, in the order the agent carries them out: find the tracker, list its existing items, skip duplicates, propose items, create the agreed ones.
 
 Each proposed item SHALL have a title that starts with the ruling's identifier, followed by `: ` and a short description, and name the ADR it serves. Each created item SHALL carry the label `ontrack`, and the prompt SHALL tell the agent to create that label first when the tracker requires it. This text SHALL be the same in both forms.
 
@@ -196,6 +198,19 @@ The review prompt SHALL also say that an ADR's own instructions on how to rule p
 - **WHEN** `ontrack review` prints a prompt, in either form
 - **THEN** step 4 tells the agent to mark every proposed value `observed` or `absent`, and says what each means
 - **AND** step 6 tells it to present each trait line with its mark
+
+#### Scenario: Evidence the agent cannot see
+- **WHEN** `ontrack review` prints a prompt, in either form
+- **THEN** step 4 tells the agent, when it cannot tell a value from what it can read, not to mark it, to say what it could not see and where it lives, and to ask the user for the value
+
+#### Scenario: One line per trait
+- **WHEN** `ontrack review` prints a prompt, in either form
+- **THEN** step 6 gives the line form `trait.key: value (observed|absent): evidence`
+
+#### Scenario: Tracking instructions in order
+- **WHEN** `ontrack review` prints a prompt, in either form
+- **THEN** the tracking-items text opens with "Once every ADR in this review is ruled"
+- **AND** its instructions are `-` bullets, in this order: the tracker, the existing items, the duplicates, the proposed items, the created items
 
 #### Scenario: Own ADR
 - **WHEN** `ontrack review ADR-0020-release` selects `local/ADR-0020-release`

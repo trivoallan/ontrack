@@ -179,8 +179,25 @@ test('prompt: both forms mark every value observed or absent, and present the ma
     assert.ok(choose.includes('mark it `observed` when the repository does it today'));
     assert.ok(choose.includes('`absent` when it does not and the ruling would make it do so'));
     const present = out.match(/^6\. .*$/m)?.[0] ?? '';
-    assert.ok(present.includes('one line per trait key with its value, marked observed or absent, and its evidence'));
+    assert.ok(present.includes('one line per trait key in the form `trait.key: value (observed|absent): evidence`'));
   }
+});
+
+test('prompt: both forms leave a value the agent cannot see unmarked, and ask for it', () => {
+  for (const out of [formatReview(selectAdr(tree(), 'ADR-0006')), formatSequence(pendingAdrs(tree()))]) {
+    const choose = out.match(/^4\. .*$/m)?.[0] ?? '';
+    assert.ok(choose.includes('When you cannot tell from what you can read'));
+    assert.ok(choose.includes('do not mark it: say what you could not see and where it lives, and ask the user for the value.'));
+  }
+});
+
+test('prompt: the tracking instructions are bullets, in the order they are carried out', () => {
+  const tail = formatReview(selectAdr(tree(), 'ADR-0006')).slice(formatReview(selectAdr(tree(), 'ADR-0006')).indexOf('Once every ADR in this review is ruled'));
+  const bullets = tail.split('\n').filter((line) => line.startsWith('- '));
+  assert.equal(bullets.length, 5);
+  const order = ['The tracker is the one named', 'list the items in that tracker', 'Propose nothing for a ruling', 'propose a tracking item', 'Create in the tracker'];
+  order.forEach((phrase, i) => assert.ok(bullets[i].includes(phrase), phrase));
+  assert.ok(!/^\d\./m.test(tail));
 });
 
 test('prompt: an own ADR sits in docs/adr/local/', () => {
@@ -233,25 +250,26 @@ test('prompt: both forms ask for agreement with a question tool when there is on
 test('prompt: both forms end with tracking items, proposed after the whole review', () => {
   const single = formatReview(selectAdr(tree(), 'ADR-0006'));
   const sequence = formatSequence(pendingAdrs(tree()));
-  const tail = (out: string) => out.slice(out.indexOf('Once every ADR is ruled'));
+  const tail = (out: string) => out.slice(out.indexOf('Once every ADR in this review is ruled'));
   for (const out of [single, sequence]) {
-    const at = out.indexOf('Once every ADR is ruled');
+    const at = out.indexOf('Once every ADR in this review is ruled');
     assert.ok(at > out.indexOf('npx ontrack apply'));
     assert.match(tail(out), /propose a tracking item/);
     assert.match(tail(out), /`tracking\.tool`, in `tracking\.project`\) only the items the user agrees to/);
-    assert.match(tail(out), /`tracking\.tool` is `none`, give the list in your reply and create nothing\.\n$/);
+    assert.match(tail(out), /`tracking\.tool` is `none`, give the list in your reply and create nothing\./);
+    assert.match(tail(out), /creating the label first when the tracker requires it\.\n$/);
   }
-  assert.ok(sequence.indexOf('Then take the next ADR in the list') < sequence.indexOf('Once every ADR is ruled'));
+  assert.ok(sequence.indexOf('Then take the next ADR in the list') < sequence.indexOf('Once every ADR in this review is ruled'));
   assert.equal(tail(single), tail(sequence));
 });
 
 test('prompt: tracking items are labelled ontrack, titled by ruling, and checked for duplicates first', () => {
-  const tail = (out: string) => out.slice(out.indexOf('Once every ADR is ruled'));
+  const tail = (out: string) => out.slice(out.indexOf('Once every ADR in this review is ruled'));
   for (const out of [formatReview(selectAdr(tree(), 'ADR-0006')), formatSequence(pendingAdrs(tree()))].map(tail)) {
     const list = out.indexOf('list the items in that tracker that carry the label `ontrack`, open and closed');
     assert.ok(list > 0 && list < out.indexOf('propose a tracking item'));
     assert.match(out, /`\[trivoallan\/ADR-0015\] secrets\.guard`/);
-    assert.match(out, /propose nothing for a ruling whose identifier starts the title of one of those items/);
+    assert.match(out, /Propose nothing for a ruling whose identifier starts the title of one of those items/);
     assert.match(out, /say in one line which closed items name a ruling this repository still does not follow/);
     assert.match(out, /When you cannot list the tracker's items, propose every ruling and say that duplicates were not checked/);
     assert.match(out, /its title starts with the ruling's identifier, as in `\[trivoallan\/ADR-0015\] secrets\.guard: install gitleaks`/);
@@ -308,9 +326,9 @@ test('supersession: no trait key left out, marking left to the repository rules'
 });
 
 test('supersession: ends with the tracking items of the review prompt', () => {
-  const tail = (out: string) => out.slice(out.indexOf('Once every ADR is ruled'));
+  const tail = (out: string) => out.slice(out.indexOf('Once every ADR in this review is ruled'));
   const out = formatSupersession(selectAdr(tree(), 'ADR-0001'));
-  assert.ok(out.indexOf('Once every ADR is ruled') > out.indexOf('npx ontrack apply'));
+  assert.ok(out.indexOf('Once every ADR in this review is ruled') > out.indexOf('npx ontrack apply'));
   assert.equal(tail(out), tail(formatReview(selectAdr(tree(), 'ADR-0006'))));
 });
 
@@ -428,7 +446,7 @@ test('revised prompt: names both copies and both revisions, seven steps, the tra
   assert.ok(out.includes('ruled on revision 1, and `node_modules/trivoallan/adr/ADR-0012-delivery.md` asks revision 2'));
   assert.ok(!out.includes(RECORD));
   assert.deepEqual(out.match(/^\d\./gm), ['1.', '2.', '3.', '4.', '5.', '6.', '7.']);
-  assert.ok(out.includes('Once every ADR is ruled'));
+  assert.ok(out.includes('Once every ADR in this review is ruled'));
 });
 
 test('command: a revised name prints the prompt to rule again, even rejected, and leaves the tree unchanged', async () => {
