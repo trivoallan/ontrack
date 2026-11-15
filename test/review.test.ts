@@ -173,13 +173,13 @@ test('prompt: both forms start from the practice, and compare with the recommend
   }
 });
 
-test('prompt: both forms mark every value observed or adopted, and present the mark', () => {
+test('prompt: both forms mark every value observed or absent, and present the mark', () => {
   for (const out of [formatReview(selectAdr(tree(), 'ADR-0006')), formatSequence(pendingAdrs(tree()))]) {
     const choose = out.match(/^4\. .*$/m)?.[0] ?? '';
     assert.ok(choose.includes('mark it `observed` when the repository does it today'));
-    assert.ok(choose.includes('`adopted` when it does not and the ruling would make it do so'));
+    assert.ok(choose.includes('`absent` when it does not and the ruling would make it do so'));
     const present = out.match(/^6\. .*$/m)?.[0] ?? '';
-    assert.ok(present.includes('one line per trait key with its value, marked observed or adopted, and its evidence'));
+    assert.ok(present.includes('one line per trait key with its value, marked observed or absent, and its evidence'));
   }
 });
 

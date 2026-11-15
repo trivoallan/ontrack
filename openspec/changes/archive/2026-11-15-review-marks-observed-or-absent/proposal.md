@@ -17,7 +17,7 @@ both the same way.
 ## What Changes
 
 - Step 4 of the review prompt tells the agent to mark every proposed value
-  `observed`, when the repository does it today, or `adopted`, when it does
+  `observed`, when the repository does it today, or `absent`, when it does
   not and the ruling would make it do so.
 - Step 6 presents each trait line with its value, its mark and its
   evidence.

@@ -5,7 +5,7 @@ The prompt SHALL be printed to standard output and follow the contract in the co
 1. read its file in full, and edit no other ADR;
 2. start from what the repository does today on the question (its files, configuration, CI and history), say so where it does nothing, describe the repository as it is and not as the other `proposed` ADRs would make it, then compare with the recommendation the ADR makes and name every difference;
 3. check the condition of every conditional recommendation, and cite the evidence that settles it;
-4. propose, with its evidence, a value for every trait key the ADR leaves to the repository, and mark it `observed` when the repository does it today, or `adopted` when it does not and the ruling would make it do so;
+4. propose, with its evidence, a value for every trait key the ADR leaves to the repository, and mark it `observed` when the repository does it today, or `absent` when it does not and the ruling would make it do so;
 5. propose `rejected` only on evidence that the question does not apply, and say what stands in for it;
 6. present the proposed ruling, each trait value with its mark, then stop, ask for the user's agreement with a question tool such as `AskUserQuestion` when the agent has one, and write nothing until the user agrees;
 7. once the user agrees, fill the traits or remove the block when rejected, set the status, write in the ADR the reason for every departure from the recommendation, and run `npx ontrack apply`.
@@ -70,9 +70,9 @@ The review prompt SHALL also say that an ADR's own instructions on how to rule p
 - **AND** it tells the agent not to describe the repository as the other `proposed` ADRs would make it
 - **AND** the comparison with the recommendation comes after the description
 
-#### Scenario: Observed or adopted
+#### Scenario: Observed or absent
 - **WHEN** `ontrack review` prints a prompt, in either form
-- **THEN** step 4 tells the agent to mark every proposed value `observed` or `adopted`, and says what each means
+- **THEN** step 4 tells the agent to mark every proposed value `observed` or `absent`, and says what each means
 - **AND** step 6 tells it to present each trait line with its mark
 
 #### Scenario: Own ADR

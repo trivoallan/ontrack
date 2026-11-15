@@ -182,7 +182,7 @@ below.)
    proposal marks it.
 3. **So the next fix is a field, not a wording.** Each proposed value needs
    to carry where it comes from: **observed** (the repository does it
-   today) or **adopted** (the repository doesn't, and the ruling would change
+   today) or **absent** (the repository doesn't, and the ruling would change
    that). This is the third decision in the hypothesis doc ("which values
    were kept for lack of evidence"), refined by this run. With it, the
    adopter can tell their practice from the track's proposal, and both

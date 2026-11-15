@@ -21,7 +21,7 @@ related: research/problem-statement-backlog-reveal.md
 > does today": 25 of 42 (60%), inconclusive.** "Kept for lack of evidence"
 > fell from 11 to 1. What's left is the agent proposing to *adopt* the
 > recommendation where the repository does nothing (`forge.audit` 0 / 8). The
-> next fix is to mark each proposed value as observed or adopted.
+> next fix is to mark each proposed value as observed or absent.
 
 ## Hypothesis Statement
 

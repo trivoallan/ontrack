@@ -1,6 +1,6 @@
 ## 1. Tests first
 
-- [x] 1.1 In `test/review.test.ts`, assert that both forms of the review prompt tell the agent, in step 4, to mark every value `observed` or `adopted`, defining both, and, in step 6, to present each trait line with its mark
+- [x] 1.1 In `test/review.test.ts`, assert that both forms of the review prompt tell the agent, in step 4, to mark every value `observed` or `absent`, defining both, and, in step 6, to present each trait line with its mark
 - [x] 1.2 Run the tests and see the new assertion fail
 
 ## 2. Prompt
@@ -16,4 +16,4 @@
 ## 4. Verification
 
 - [x] 4.1 Run the full test suite, coverage and typecheck
-- [x] 4.2 Run `openspec validate review-marks-observed-or-adopted --strict`
+- [x] 4.2 Run `openspec validate review-marks-observed-or-absent --strict`

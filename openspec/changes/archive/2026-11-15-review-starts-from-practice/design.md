@@ -12,7 +12,7 @@ copies match.
   none, before it compares with the track.
 
 **Non-Goals:**
-- Marking each proposed value as observed or adopted. The second desk-test
+- Marking each proposed value as observed or absent. The second desk-test
   run shows the agent now sees the absence and sometimes proposes adopting
   the recommendation anyway (`forge.audit`). Marking that is a separate
   change.
