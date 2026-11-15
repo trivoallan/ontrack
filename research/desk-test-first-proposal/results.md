@@ -479,3 +479,54 @@ repositories. Fixing it is a prompt change: have the survey send an ADR
 to the second group when any of its values lives outside the repository
 or is read from history rather than from a file that states it, and say
 which.
+
+## Run 6: the corrected survey on five more unseen repositories
+
+The survey after `review-survey-visible-values`. That change defines the
+first group by values written in a file or set in configuration. It sends
+to the second group any ADR with a value held outside the repository or
+drawn from history alone, and asks the agent to say which value and where
+it lives.
+
+The repositories are zustand, immer, koa, remark and swr, at the commits in
+[run6/repos-at.txt](run6/repos-at.txt); no earlier run used them. Same
+track, same harness, one read-only run each ($8.79). Raw:
+[run6/surveys/](run6/surveys/). A new independent scorer applied run 5's
+strict rule: [run6/score.md](run6/score.md).
+
+| Repository | First-group rows | Values not visible | Left unstated |
+|---|---|---|---|
+| immer | 15 | **2**: 0015 `secrets.storage` (a Coveralls token is committed, so `none` doesn't hold); 0020 `approver` (a people policy no file records) | 0015 |
+| koa | 13 | 1: 0015 `secrets.storage` (CI reads `secrets.CODECOV_TOKEN`) | 0015 |
+| zustand | 11 | 1: 0019 `scanner` (Dependabot alerts are a repository setting) | 0019 |
+| remark | 13 | 0 | |
+| swr | 13 | 1: 0026 `identity` (lives in GitHub accounts) | 0026 |
+| **Total** | **65** | **5** | **4** |
+
+| | Run 5 (before) | Run 6 (after) |
+|---|---|---|
+| Values not visible in the first group | 7 in 56 rows | 5 in 65 rows |
+| Of those, left unstated | 2 | 4 |
+| Repositories over the threshold (> 1) | 2 of 5 (axios 2, undici 3) | 1 of 5 (immer 2) |
+| Scope lists read from history | 4 | 0 |
+| Merge gate, approvals, provenance | 3 | 0 |
+| False evidence | 0 | 0 |
+| Second-group rows naming the unseen value and where it lives | not asked | 60 of 60 (3 in zustand name no place) |
+
+No run tried to write.
+
+**AB-1 restated: fails in 1 of 5 repositories** (immer, 2), against 2 of 5
+before. Both kinds of failure the correction named are gone. What is left
+is a different kind: values the prompt's examples don't cover. Where the
+team keeps its secrets, a security setting of the forge, a policy about
+people, and an agent's identity. And the agent says so less often: 4 of 5
+are unstated, against 2 of 7.
+
+These are counts on 5 repositories each, with different repositories and
+scorers per run: they show which failures moved, not a rate.
+
+**For the maintainer:** the correction worked on what it named, and the
+examples now steer what the agent checks. Listing more examples would
+chase the next kind. The next step could be a general rule instead: an ADR
+goes to the first group only when the agent can cite, for every value, the
+file or command that shows it.
