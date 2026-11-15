@@ -59,12 +59,12 @@ it did, and you can discard it.
    ```
 
    ```
-   trivoallan: 25 new, 0 unchanged
+   trivoallan: 26 new, 0 unchanged
      new           ADR-0001-record-architecture-decisions
      new           ADR-0002-localization
      new           ADR-0003-architecture
      …
-     new           ADR-0025-tools
+     new           ADR-0026-agent-identity
    ```
 
    `plan` wrote nothing. It exited with `2`, which means changes are pending.
@@ -77,13 +77,13 @@ it did, and you can discard it.
    ```
 
    ```
-   trivoallan: 25 imported
+   trivoallan: 26 imported
      imported      ADR-0001-record-architecture-decisions
      imported      ADR-0002-localization
      …
-     imported      ADR-0025-tools
+     imported      ADR-0026-agent-identity
    AGENTS.md: rules block created
-   next: 24 proposed ADRs to rule
+   next: 25 proposed ADRs to rule
      from a shell:  claude "$(npx ontrack review)"
      as a prompt:   Run `npx ontrack review` and follow its output.
    ```
@@ -101,7 +101,7 @@ it did, and you can discard it.
          - ADR-0001-record-architecture-decisions.md
          - ADR-0002-localization.md
          - …
-         - ADR-0025-tools.md
+         - ADR-0026-agent-identity.md
    - package.json
    </FileTree>
 
@@ -124,7 +124,7 @@ it did, and you can discard it.
    - Localization (trivoallan/ADR-0002-localization)
    - Software architecture (trivoallan/ADR-0003-architecture)
    - …
-   - Tools outside the package manager (trivoallan/ADR-0025-tools)
+   - Agent identity (trivoallan/ADR-0026-agent-identity)
 
    <!-- ontrack:end -->
    ````

@@ -156,7 +156,7 @@ export default defineConfig({
         // asks them. It is the only public track; a second one would need
         // its own place decided, here or in its own repository.
         {
-          label: 'ontrack-engineering',
+          label: 'The reference track',
           items: [
             { slug: 'ontrack-engineering', label: 'Overview' },
             { slug: 'ontrack-engineering/use-it', label: 'Use it' },
@@ -164,9 +164,9 @@ export default defineConfig({
             { slug: 'ontrack-engineering/questions', label: questionsLabel },
           ],
         },
-        { label: 'Use a track', items: ['find-a-track', 'upgrade-ontrack'] },
-        { label: 'Maintain a track', items: ['write-your-own-track', 'revise-a-question'] },
-        { label: 'Automate', items: ['run-ontrack-in-ci', 'draft-a-change-from-an-issue', 'why-you-call-ontracks-workflows'] },
+        // Any other track: find one, or write and revise your own.
+        { label: 'Tracks', items: ['find-a-track', 'write-your-own-track', 'revise-a-question'] },
+        { label: 'GitHub Actions', items: ['run-ontrack-in-ci', 'draft-a-change-from-an-issue', 'why-you-call-ontracks-workflows'] },
         {
           label: 'Reference',
           items: [
@@ -175,6 +175,8 @@ export default defineConfig({
             'propose-and-apply-workflows',
             // What each version changed is on the forge, written by the release.
             { label: 'Release notes', link: 'https://github.com/trivoallan/ontrack/releases' },
+            // Upgrading ontrack itself, next to what each version changed.
+            'upgrade-ontrack',
             // The glossary is section 12 of the arc42 document, listed here
             // because users need its terms too. Its frontmatter hides it from
             // the Architecture group, so it has one entry.
