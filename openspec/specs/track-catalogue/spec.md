@@ -48,14 +48,14 @@ imported that question.
 - **AND** it links to `adr/trivoallan/adr-0006-commits/`
 
 ### Requirement: The catalogue is in the navigation
-The navigation SHALL list the track page and, collapsed, the catalogue
-pages, in number order, in a group labelled "Questions (X.Y.Z)", right
-after the track page. A group nested in another is labelled at the size of
-the entries around it.
+The navigation SHALL hold a collapsed group "The ontrack-engineering track"
+listing the track page, as "Overview", then a collapsed subgroup
+"Questions (X.Y.Z)" of the catalogue pages, in number order. A group nested
+in another is labelled at the size of the entries around it.
 
 #### Scenario: Navigation
 - **WHEN** the site is built with 26 questions in the installed track
-- **THEN** the navigation holds the track page and a collapsed group "Questions (0.6.0)" of 26 catalogue pages
+- **THEN** the group "The ontrack-engineering track" holds "Overview" and a subgroup "Questions (0.6.0)" of 26 catalogue pages
 
 ### Requirement: ontrack's decisions are labelled as an example
 The navigation group holding ontrack's own ADRs and its answers to the
