@@ -97,11 +97,11 @@ When the project has no track, `plan` SHALL print `no track found`. After the tr
 - **THEN** the output is exactly `platform: 14 unchanged`
 - **AND** the exit code is `0`
 
-#### Scenario: Mixed source
+#### Scenario: Mixed track
 - **WHEN** track `platform` has 2 revised ADRs, 1 new one and 11 unchanged
 - **THEN** the first line is `platform: 2 revised, 1 new, 11 unchanged`, followed by the three indented ADR lines
 
-#### Scenario: No source
+#### Scenario: No track
 - **WHEN** the project has no dependency carrying an `ontrack` key
 - **THEN** the output starts with `no track found`
 - **AND** the exit code is `0` when the project has no ADR of its own
@@ -232,6 +232,6 @@ When at least one `*.md` file directly under `docs/adr/` matches no track ADR, `
 - **WHEN** every own ADR is in `docs/adr/local/`
 - **THEN** the output holds no migration to `docs/adr/local/`
 
-#### Scenario: No source
+#### Scenario: No track
 - **WHEN** the project has no track and `docs/adr/ADR-0001-cache.md` exists
 - **THEN** the output holds `migration: 1 file docs/adr/ → docs/adr/local/` and `  move          ADR-0001-cache.md`
