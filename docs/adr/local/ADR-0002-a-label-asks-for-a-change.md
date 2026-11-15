@@ -19,7 +19,7 @@ Accepted
 [ADR-0001](ADR-0001-propose-changes-from-labelled-issues.md) decided that a
 workflow runs a coding agent when a maintainer adds the `ontrack:propose`
 label to an issue, and within which boundaries. Its fifth boundary had the
-agent apply the test of [ADR-0016](../trivoallan/ADR-0016-changes.md) first:
+agent apply the test of [ADR-0016](../engineering/ADR-0016-changes.md) first:
 an issue that moves no expected behaviour got no pull request.
 
 The first real runs showed what that meant. Issues 105 and 84, both about
@@ -58,7 +58,7 @@ workflow that answers it stays within these boundaries:
    whose content does not come from the agent or from the issue, except the
    change name, which is checked before it is used. These tracker writes
    are the maintainer's request carried out by a script: rule 2 of
-   [ADR-0014](../trivoallan/ADR-0014-work-tracking.md), which binds an agent
+   [ADR-0014](../engineering/ADR-0014-work-tracking.md), which binds an agent
    with tracker access, is not departed from.
 4. **What the agent's job hands over is untrusted.** The second job accepts
    only new planning files: Markdown and YAML under the change, and new
@@ -77,7 +77,7 @@ workflow that answers it stays within these boundaries:
    filters nothing.
 7. **One issue, one draft pull request.** The proposal and, later, its
    implementation share one branch and are squashed
-   ([ADR-0009](../trivoallan/ADR-0009-branching.md)). The pull request
+   ([ADR-0009](../engineering/ADR-0009-branching.md)). The pull request
    references the issue without closing it.
 
 The label is a request for a proposal, not for the work: nothing is
@@ -129,9 +129,9 @@ implemented by the workflow.
 
 - [ADR-0001](ADR-0001-propose-changes-from-labelled-issues.md), which this
   ADR supersedes: context, first boundaries and alternatives.
-- [ADR-0016](../trivoallan/ADR-0016-changes.md), changes, revision 2.
-- [ADR-0014](../trivoallan/ADR-0014-work-tracking.md), work tracking.
-- [ADR-0011](../trivoallan/ADR-0011-forge-and-ci.md), forge and continuous
+- [ADR-0016](../engineering/ADR-0016-changes.md), changes, revision 2.
+- [ADR-0014](../engineering/ADR-0014-work-tracking.md), work tracking.
+- [ADR-0011](../engineering/ADR-0011-forge-and-ci.md), forge and continuous
   integration.
 - `openspec/specs/issue-proposal/spec.md`, once the change that introduces
   the workflow is archived.

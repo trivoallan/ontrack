@@ -5,7 +5,7 @@ title: The governance track skips the cooldown
 status: accepted
 date: 2026-11-15
 authors: [Tristan Rivoallan]
-supersedes: [trivoallan/ADR-0018, trivoallan/ADR-0020]
+supersedes: [engineering/ADR-0018, engineering/ADR-0020]
 traits:
   dependencies:
     updater: dependabot
@@ -23,8 +23,8 @@ Accepted
 
 ## Context
 
-[ADR-0018](../trivoallan/ADR-0018-dependencies.md) rule 2 and
-[ADR-0020](../trivoallan/ADR-0020-adding-dependencies.md) rule 2 hold every
+[ADR-0018](../engineering/ADR-0018-dependencies.md) rule 2 and
+[ADR-0020](../engineering/ADR-0020-adding-dependencies.md) rule 2 hold every
 update and every addition back until its release is three days old. That
 delay guards against a compromised release of a package someone else
 publishes.
@@ -86,7 +86,7 @@ ADR-0020, so the line ADR-0018 carried could only fail.
 
 ## References
 
-- [ADR-0018](../trivoallan/ADR-0018-dependencies.md) and
-  [ADR-0020](../trivoallan/ADR-0020-adding-dependencies.md), the decisions
+- [ADR-0018](../engineering/ADR-0018-dependencies.md) and
+  [ADR-0020](../engineering/ADR-0020-adding-dependencies.md), the decisions
   this one supersedes.
 - Pull request #144, which let Dependabot propose governance track updates.

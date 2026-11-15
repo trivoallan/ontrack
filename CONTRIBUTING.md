@@ -1,7 +1,7 @@
 # Contributing to ontrack
 
 ontrack is built under its own rules: the decisions cited below are ADRs in
-[`docs/adr/trivoallan/`](docs/adr/trivoallan/), and `AGENTS.md` holds what
+[`docs/adr/engineering/`](docs/adr/engineering/), and `AGENTS.md` holds what
 each one decided.
 
 ## Report a problem, or ask a question
@@ -23,23 +23,23 @@ pages have none: a decided ADR is superseded by a new one, not edited.
 2. Set up the repository as the [Development](README.md#development) section
    of the README describes.
 3. Branch from `main`, with a `feat/`, `fix/`, `docs/` or `chore/` prefix
-   ([ADR-0009](docs/adr/trivoallan/ADR-0009-branching.md)).
+   ([ADR-0009](docs/adr/engineering/ADR-0009-branching.md)).
 4. A change in what a command does starts as an OpenSpec change under
    `openspec/changes/`
-   ([ADR-0016](docs/adr/trivoallan/ADR-0016-changes.md)). The format of what a
+   ([ADR-0016](docs/adr/engineering/ADR-0016-changes.md)). The format of what a
    command prints is a contract: it changes in
    [`docs/commands.md`](docs/commands.md) before it changes in the code.
 5. Run `npm test` and `npm run typecheck`. The tests fail below 95% coverage
-   ([ADR-0007](docs/adr/trivoallan/ADR-0007-tests.md)).
+   ([ADR-0007](docs/adr/engineering/ADR-0007-tests.md)).
 6. Open a pull request. It is merged by squashing, so its title is the commit
    message: a [Conventional Commit](https://www.conventionalcommits.org/),
    with one of the scopes of `commitlint.config.mjs` when it has one
-   ([ADR-0006](docs/adr/trivoallan/ADR-0006-commits.md)). CI checks it.
+   ([ADR-0006](docs/adr/engineering/ADR-0006-commits.md)). CI checks it.
 
 Code, comments, commits and documentation are in English
-([ADR-0002](docs/adr/trivoallan/ADR-0002-localization.md)).
+([ADR-0002](docs/adr/engineering/ADR-0002-localization.md)).
 
 A new dependency is approved by a person before it is added
-([ADR-0020](docs/adr/trivoallan/ADR-0020-adding-dependencies.md)), and a
+([ADR-0020](docs/adr/engineering/ADR-0020-adding-dependencies.md)), and a
 person merges every pull request
-([ADR-0022](docs/adr/trivoallan/ADR-0022-review-and-merge.md)).
+([ADR-0022](docs/adr/engineering/ADR-0022-review-and-merge.md)).

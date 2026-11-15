@@ -5,7 +5,7 @@ title: The engineering track skips the cooldown
 status: accepted
 date: 2026-11-15
 authors: [Tristan Rivoallan]
-supersedes: [local/ADR-0023, trivoallan/ADR-0018, trivoallan/ADR-0020]
+supersedes: [local/ADR-0023, engineering/ADR-0018, engineering/ADR-0020]
 check: npx --no-install ontrack-engineering-check ADR-0018
 traits:
   dependencies:
@@ -26,8 +26,8 @@ Accepted
 
 [ADR-0023](ADR-0023-the-governance-track-skips-the-cooldown.md) exempted the
 track this repository imports from the three-day cooldown of
-[ADR-0018](../trivoallan/ADR-0018-dependencies.md) rule 2 and
-[ADR-0020](../trivoallan/ADR-0020-adding-dependencies.md) rule 2. Read it for
+[ADR-0018](../engineering/ADR-0018-dependencies.md) rule 2 and
+[ADR-0020](../engineering/ADR-0020-adding-dependencies.md) rule 2. Read it for
 the reasons, which stand.
 
 Three things it names have since moved:

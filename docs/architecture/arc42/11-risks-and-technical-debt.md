@@ -7,7 +7,7 @@ title: Risks and Technical Debt
 ## Rulings the repository does not follow yet
 
 Each gap between a ruled ADR and the repository is a tracking issue
-([ADR-0014](../../adr/trivoallan/ADR-0014-work-tracking.md)). The issue says
+([ADR-0014](../../adr/engineering/ADR-0014-work-tracking.md)). The issue says
 what is missing and closes when the gap closes, so this list holds numbers
 and titles only. The
 [open issues](https://github.com/trivoallan/ontrack/issues) are the current
@@ -15,7 +15,7 @@ state.
 
 | Issue | Gap | ADR it serves |
 | --- | --- | --- |
-| [#39](https://github.com/trivoallan/ontrack/issues/39) | Release tagged versions with release-please | [ADR-0012](../../adr/trivoallan/ADR-0012-delivery.md) |
+| [#39](https://github.com/trivoallan/ontrack/issues/39) | Release tagged versions with release-please | [ADR-0012](../../adr/engineering/ADR-0012-delivery.md) |
 
 ## Risks that follow from the design
 

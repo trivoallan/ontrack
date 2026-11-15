@@ -75,5 +75,5 @@ new is written there.
 ## References
 
 - OpenSpec change `local-adr-namespace-folder`.
-- [Record architecture decisions](../trivoallan/ADR-0001-record-architecture-decisions.md),
+- [Record architecture decisions](../engineering/ADR-0001-record-architecture-decisions.md),
   which says own ADRs live in `docs/adr/`, outside the source's directory.

@@ -6,10 +6,10 @@ Publishes the Markdown pages kept under `docs/` as a documentation site, so that
 ## Requirements
 
 ### Requirement: Pages come from docs/
-The documentation site SHALL build one page for every Markdown file under `docs/`, read in place, and one catalogue page for every Markdown file of `node_modules/trivoallan/adr/`, read in place. A file is never copied or moved to become a page, and building the site MUST NOT modify any file under `docs/`.
+The documentation site SHALL build one page for every Markdown file under `docs/`, read in place, and one catalogue page for every Markdown file of `node_modules/engineering/adr/`, read in place. A file is never copied or moved to become a page, and building the site MUST NOT modify any file under `docs/`.
 
 #### Scenario: An ADR becomes a page
-- **WHEN** the site is built while `docs/adr/trivoallan/ADR-0008-documentation.md` exists
+- **WHEN** the site is built while `docs/adr/engineering/ADR-0008-documentation.md` exists
 - **THEN** the built site holds a page with the title "Documentation" and the content of that file
 
 #### Scenario: The build leaves docs/ untouched
@@ -21,7 +21,7 @@ The documentation site SHALL build one page for every Markdown file under `docs/
 - **THEN** the build fails and names that file
 
 #### Scenario: A question of the installed track becomes a page
-- **WHEN** the site is built while `node_modules/trivoallan/adr/ADR-0008-documentation.md` exists
+- **WHEN** the site is built while `node_modules/engineering/adr/ADR-0008-documentation.md` exists
 - **THEN** the built site holds a catalogue page with the title "Documentation" and the content of that file
 
 ### Requirement: Page URLs mirror file paths
@@ -183,7 +183,7 @@ The navigation SHALL list the ADRs of every subdirectory of `docs/adr/`, one gro
 - **THEN** the navigation holds a group `local` and a group `trivoallan`, each listing its ADRs in number order
 
 ### Requirement: Renamed pages redirect
-When a page of `docs/` is renamed, the site SHALL serve a redirect from its former URL to the new one, so that a link published before the rename still arrives. The pages `find-a-source` and `write-your-own-source` SHALL redirect to `find-a-track` and `write-your-own-track`.
+When a page of `docs/` is renamed, the site SHALL serve a redirect from its former URL to the new one, so that a link published before the rename still arrives. The pages `find-a-source` and `write-your-own-source` SHALL redirect to `find-a-track` and `write-your-own-track`. Each page once served under `adr/trivoallan/` SHALL redirect to the page of the same name under `adr/engineering/`.
 
 #### Scenario: A link to the former guide
 - **WHEN** a reader opens `/ontrack/write-your-own-source/`
@@ -192,6 +192,10 @@ When a page of `docs/` is renamed, the site SHALL serve a redirect from its form
 #### Scenario: A link to the former search guide
 - **WHEN** a reader opens `/ontrack/find-a-source/`
 - **THEN** the reader arrives at `/ontrack/find-a-track/`
+
+#### Scenario: A link to an ADR under its former namespace
+- **WHEN** a reader opens `/ontrack/adr/trivoallan/adr-0006-commits/`
+- **THEN** the reader arrives at `/ontrack/adr/engineering/adr-0006-commits/`
 
 ### Requirement: GitHub alerts render as asides
 A blockquote of a Markdown page that opens with a GitHub alert marker SHALL
