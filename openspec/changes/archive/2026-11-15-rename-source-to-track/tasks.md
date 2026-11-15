@@ -38,5 +38,5 @@
 ## 6. After the merge
 
 - [x] 6.1 Commit as `feat!`, with a `BREAKING CHANGE:` footer naming the `plan` line, the error text and the keyword
-- [ ] 6.2 After the archive, delete the empty `openspec/specs/sources/`, and rename the scenarios "Mixed source" and "No source" of `openspec/specs/plan/spec.md` to "Mixed track" and "No track" (a delta cannot rename a scenario)
+- [x] 6.2 After the archive, delete the empty `openspec/specs/sources/`, and rename the scenarios "Mixed source" and "No source" of `openspec/specs/plan/spec.md` to "Mixed track" and "No track" (a delta cannot rename a scenario)
 - [ ] 6.3 Tell the publisher of the governance package installed as `trivoallan` to add the keyword `ontrack-tracks` and to reword its ADRs at their next revision
