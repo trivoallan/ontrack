@@ -147,7 +147,8 @@ export default defineConfig({
       // Grouped by what the reader came to do, and the guides by who they
       // are: a repository that installs a track, or the author of one. The
       // notions, then the model, are read right after the tutorial, before
-      // either set of guides.
+      // either set of guides. Automate is what a repository runs on GitHub
+      // Actions, with or without a track.
       sidebar: [
         { label: 'Start here', items: ['tutorial', 'concepts', 'how-it-works'] },
         {
@@ -166,17 +167,17 @@ export default defineConfig({
                 { label: questionsLabel, collapsed: true, items: questions.map((q) => `ontrack-engineering/${q.id}`) },
               ],
             },
-            'run-ontrack-in-ci',
-            'draft-a-change-from-an-issue',
             'upgrade-ontrack',
           ],
         },
         { label: 'Maintain a track', items: ['write-your-own-track', 'revise-a-question'] },
+        { label: 'Automate', items: ['run-ontrack-in-ci', 'draft-a-change-from-an-issue', 'why-you-call-ontracks-workflows'] },
         {
           label: 'Reference',
           items: [
             'commands',
             'file-formats',
+            'propose-and-apply-workflows',
             // What each version changed is on the forge, written by the release.
             { label: 'Release notes', link: 'https://github.com/trivoallan/ontrack/releases' },
             // The glossary is section 12 of the arc42 document, listed here
