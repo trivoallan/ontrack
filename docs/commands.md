@@ -11,7 +11,7 @@ ontrack has five commands. Only `apply` writes to the repository.
 | [`check`](#ontrack-check) | Runs the check command of each decided ADR | Nothing itself |
 | [`instructions`](#ontrack-instructions) | Prints the decided traits as the rules block of `AGENTS.md` | Nothing |
 | [`plan`](#ontrack-plan) | Shows what importing the tracks would change | Nothing |
-| [`review`](#ontrack-review-adr) | Prints a prompt asking a coding agent to rule on ADRs | Nothing |
+| [`review`](#ontrack-review-adr) | Prints a prompt asking a coding agent to import the new ADRs and rule on them | Nothing |
 
 The files these commands read and write are described in
 [File formats](file-formats.md).
@@ -378,13 +378,14 @@ proposes, you agree, and only then does it write. It never writes a file and
 makes no network call.
 
 ```bash
-claude "$(npx ontrack review)"           # every proposed ADR, in sequence
+claude "$(npx ontrack review)"           # import the new ADRs, then every proposed ADR, in sequence
 claude "$(npx ontrack review ADR-0006)"  # this one alone
 claude "$(npx ontrack review ADR-0001)"  # an accepted one: supersede it
 ```
 
 | Argument | Prompt |
 | --- | --- |
+| None, and the track ships ADRs not imported yet | Run `apply` to import them, then `review` again |
 | None | Rule every `proposed` ADR, one at a time |
 | A `proposed` ADR | Rule that ADR alone |
 | An `accepted` ADR | Write a new ADR that supersedes it |
@@ -394,8 +395,8 @@ without `.md` (`ADR-0006-commits`) or an `adr:` identifier (`ADR-0006`). It
 must name exactly one ADR.
 
 **Exit code.** `2` when it prints a prompt, because a ruling is pending. `0`
-when no ADR is `proposed`: it then says so on standard error and prints
-nothing. `1` for an unknown or ambiguous name, a `rejected` ADR, or one
+when no ADR is new, `proposed` or revised: it then says so on standard error
+and prints nothing. `1` for an unknown or ambiguous name, a `rejected` ADR, or one
 already superseded.
 
 ### `review` prompt contract
@@ -524,7 +525,27 @@ Then take the next ADR in the list. Do not start an ADR before the previous one 
 Once every ADR is ruled, list the rulings this repository does not follow yet: a value its code, configuration or tooling does not match, or a tool the ruling names that is not set up. A ruling is identified by its ADR's reference without the slug, in brackets, and its trait key, as in `[trivoallan/ADR-0015] secrets.guard`. The tracker is the one named by the decided `tracking` trait in AGENTS.md. Before proposing, list the items in that tracker that carry the label `ontrack`, open and closed: propose nothing for a ruling whose identifier starts the title of one of those items, and say in one line which closed items name a ruling this repository still does not follow. When you cannot list the tracker's items, propose every ruling and say that duplicates were not checked. For each ruling left, propose a tracking item: its title starts with the ruling's identifier, as in `[trivoallan/ADR-0015] secrets.guard: install gitleaks`, and it names the ADR it serves. Create in the tracker (`tracking.tool`, in `tracking.project`) only the items the user agrees to, asked with a question tool such as `AskUserQuestion` when you have one, each with the label `ontrack`, creating the label first when the tracker requires it. When no `tracking` trait is decided, or `tracking.tool` is `none`, give the list in your reply and create nothing.
 ~~~
 
-- The ADRs read are those of `instructions`. Without an argument, the prompt lists every `proposed` ADR in reference order, the order of "Not yet decided", even when there is only one.
+When the track ships ADRs this repository has not imported yet, those
+`plan` reports as `new`, `review` without an argument prints the import
+prompt first, whatever else is pending. The agent runs `apply`, then
+`review` again, which prints the sequence prompt for the ADRs just
+imported. You run `plan` then `review`, for a new question as for a revised
+one:
+
+~~~
+Import the architecture decision records this repository does not hold yet, then review them.
+
+1. Run `npx ontrack apply`. It imports these ADRs as `proposed`, and writes nothing to an ADR this repository has ruled:
+   - `docs/adr/platform/SDR-0002-localization.md` (Localization)
+   - `docs/adr/platform/SDR-0015-observability.md` (Observability)
+   If `apply` fails, stop and report its error.
+2. Run `npx ontrack review` and follow the prompt it prints. It exits with `2` when it prints a prompt: that is not an error.
+~~~
+
+- A new ADR is one `plan` reports as `new`: its track ships it and this repository holds no copy. Without an argument, one new ADR is enough for the import prompt, which then names no `proposed` and no revised ADR. It lists each new ADR by the path `apply` gives its copy, `docs/adr/<namespace>/<file name>`, in reference order, with its title when it has one.
+- With an argument, new ADRs are not considered: naming a `proposed` ADR rules it without importing anything, and naming an ADR that is not imported is an error, as for any unknown name.
+- The new ADRs are found by reading the tracks, as `plan` does. When they cannot be read, `review` sees no new ADR and says nothing of it.
+- The ADRs read are those of `instructions`. Without an argument, and once no ADR is new, the prompt lists every `proposed` ADR in reference order, the order of "Not yet decided", even when there is only one.
 - An argument with a `/` is a reference (`trivoallan/ADR-0006-commits`). Any other argument is a file name without `.md` (`ADR-0006-commits`) or an `adr:` identifier (`ADR-0006`), looked up in every directory. It must name exactly one ADR, and that ADR must be `proposed`, or `accepted` and not superseded.
 - A revised ADR is one `plan` reports as `revised` and whose copy here is no longer `proposed`, whatever its status: `accepted`, `rejected`, or superseded. Named, it gets the prompt to rule again, not the supersession prompt: rule on the question as it is asked now, then supersede. Without an argument, the revised ADRs come only once no ADR is `proposed`, in reference order.
 - A `proposed` ADR whose track revised the question gets the review prompt, like any other `proposed` one.
@@ -535,6 +556,6 @@ Once every ADR is ruled, list the rulings this repository does not follow yet: a
 - Once the review is ruled, the agent proposes a tracking item for every ruling the repository does not follow yet, skipping those an item labelled `ontrack` already tracks, and creates only those you agree to, in the tracker your `tracking` trait names, with the label `ontrack` and a title that starts with the ruling (`[trivoallan/ADR-0015] secrets.guard: …`). Without a tracker, it lists them.
 - To rule again, the agent replaces your copy with the track's, which carries the new `revision:`, and writes the ruling in it. `plan` then reports the ADR as unchanged.
 - `review` never writes a file and makes no network call. Two decided ADRs sharing a trait key do not stop it.
-- It exits with `2` when it prints a prompt, because a ruling is pending. With no `proposed` and no revised ADR it exits with `0`, says so on standard error and prints nothing, so that no agent receives that sentence as a prompt. An unknown or ambiguous name, a `rejected` ADR, or one already superseded, is an error, with `1`, unless the ADR is revised.
+- It exits with `2` when it prints a prompt, because a ruling is pending. With no new, no `proposed` and no revised ADR it exits with `0`, says so on standard error and prints nothing, so that no agent receives that sentence as a prompt. An unknown or ambiguous name, a `rejected` ADR, or one already superseded, is an error, with `1`, unless the ADR is revised.
 
 Any change to this prompt goes through this page first.

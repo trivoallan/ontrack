@@ -1,5 +1,6 @@
 // Prints the prompt that asks a coding agent to rule `proposed` ADRs: every
-// one in sequence, or a single named one; to rule again the ruled ADRs whose
+// one in sequence, or a single named one; to import first the ADRs the
+// repository does not hold yet; to rule again the ruled ADRs whose
 // track revised the question; or, for a named `accepted` ADR, to supersede it. The prompt is fixed text plus paths, titles and references:
 // everything specific to a question is in its ADR, which the agent reads.
 import path from 'node:path';
@@ -49,23 +50,55 @@ const RULE_AGAIN = `1. Read both files in full: the repository's copy, which hol
 7. Once the user agrees: replace the repository's copy with the track's copy, which carries the new \`revision:\`; write the ruling in it: the agreed status, the \`traits:\` keys filled, or the block removed when rejected, and the reason for every departure from the recommendation; then run \`npx ontrack apply\` to update AGENTS.md.
 `;
 
+/**
+ * What `plan` reports for the tracks; empty when they cannot be read (no
+ * `package.json`, a dependency not installed): `plan` is the command that
+ * says why.
+ */
+export function tracksPlan(root: string): Plan {
+  try {
+    return buildPlan(root);
+  } catch {
+    return [];
+  }
+}
+
+/** An ADR its track ships and the repository holds no copy of: where `apply` writes it, and its title. */
+export type NewAdr = { path: string; title: string | null };
+
+/** The ADRs `plan` reports as `new`, in reference order. */
+export function newAdrs(root: string, plan: Plan = tracksPlan(root)): NewAdr[] {
+  return plan
+    .flatMap((track) =>
+      track.adrs
+        .filter((planned) => planned.category === 'new')
+        .map((planned) => ({ ref: `${track.namespace}/${planned.name.replace(/\.md$/, '')}`, title: planned.title })),
+    )
+    .sort((a, b) => a.ref.localeCompare(b.ref))
+    .map(({ ref, title }) => ({ path: `docs/adr/${ref}.md`, title }));
+}
+
+/** The contract prompt to import the new ADRs, then review them (see docs/commands.md). */
+export function formatImport(adrs: NewAdr[]): string {
+  return `Import the architecture decision records this repository does not hold yet, then review them.
+
+1. Run \`npx ontrack apply\`. It imports these ADRs as \`proposed\`, and writes nothing to an ADR this repository has ruled:
+${adrs.map(({ path: file, title }) => `   - \`${file}\`${title ? ` (${title})` : ''}`).join('\n')}
+   If \`apply\` fails, stop and report its error.
+2. Run \`npx ontrack review\` and follow the prompt it prints. It exits with \`2\` when it prints a prompt: that is not an error.
+`;
+}
+
 /** A ruled ADR whose track asks a later revision of the question. */
 export type Revised = { adr: Adr; track: string; from: number; to: number };
 
 /**
  * The ruled ADRs whose track has revised the question, in reference order.
- * A `proposed` one is left to the review prompt. Without `plan`, the tracks
- * are read; none when they cannot be: `plan` is the command that says why.
+ * A `proposed` one is left to the review prompt.
  */
-export function revisedAdrs(root: string, plan?: Plan): Revised[] {
-  let tracks: Plan;
-  try {
-    tracks = plan ?? buildPlan(root);
-  } catch {
-    return [];
-  }
+export function revisedAdrs(root: string, plan: Plan = tracksPlan(root)): Revised[] {
   const adrs = sorted(root);
-  return tracks
+  return plan
     .flatMap((track) =>
       track.adrs.flatMap((planned): Revised[] => {
         if (planned.category !== 'revised') return [];

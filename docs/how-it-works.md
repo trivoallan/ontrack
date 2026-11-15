@@ -67,7 +67,9 @@ belongs to the repository.
 **It arrives as `proposed`.** `ontrack apply` copies a new ADR from the
 track into `docs/adr/<namespace>/`, byte for byte. It carries the track's
 recommendation, and it is listed in `AGENTS.md` under "Not yet decided", so
-an agent knows there is no rule yet.
+an agent knows there is no rule yet. You can run `apply` yourself, or leave
+it to `ontrack review`: when a track ships questions the repository has not
+imported, its prompt has the agent run `apply` first.
 
 **A person rules.** The repository follows the recommendation, adapts it, or
 rejects it, and writes down why in its copy. The status becomes `accepted` or
@@ -106,11 +108,16 @@ flowchart TD
   work["Coding agent<br/>works under the rules"]
   check["check<br/>verify the work"]
   plan --> apply --> review
+  plan -.->|"or straight to review: the agent runs apply"| review
   review -->|"AGENTS.md updated"| work
   work --> check
   check -.->|"the track revises a question"| plan
   check -.->|"a decision stops fitting: supersede it"| review
 ```
+
+A person runs `plan`, then `review`. `apply` is the step that writes: the
+agent runs it from the prompt, to import the questions and again after each
+ruling. Run it yourself where there is no agent, in CI for instance.
 
 `check` closes the loop. A decision can name the command that verifies it,
 such as `npx commitlint --from origin/main`, and `ontrack check` runs them
