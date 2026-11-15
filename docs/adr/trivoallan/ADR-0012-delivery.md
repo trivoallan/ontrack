@@ -3,11 +3,11 @@ adr: ADR-0012
 slug: delivery
 title: Delivery
 status: accepted
-revision: 2
-check: npx --no-install governance-check ADR-0012
-date: 2026-11-14
+revision: 3
+date: 2026-11-15
 authors: [Tristan Rivoallan]
 supersedes: []
+check: npx --no-install governance-check ADR-0012
 traits:
   delivery:
     target: package
@@ -15,6 +15,7 @@ traits:
       - { name: github, trigger: tag }
       - { name: npm, trigger: tag }
     release_tool: release-please
+    release_notes: highlights
     registry: none
   deployment:
     manifests: none
@@ -26,15 +27,6 @@ traits:
 
 Accepted
 
-> **What is this file?** A question governance asks your repository, with
-> the answer it recommends. While it says `status: proposed`, you may edit
-> it freely. `revision:` dates the question, not the file: you do not fill
-> it, and it only moves when the question changes. `rejected` is a full
-> answer: when the question does not apply here, rule `rejected`, remove
-> the whole `traits:` block, and say what stands in for it.
-> [ADR-0001](ADR-0001-record-architecture-decisions.md) explains the
-> mechanics.
-
 ## Context
 
 While these keys are empty, an agent finishing a change does not know
@@ -43,7 +35,8 @@ nor what produces a version. Of all the questions governance asks, this is
 the one where a wrong guess reaches people outside the repository.
 
 **Releasing and deploying are two acts.** Releasing makes a named version
-with its changelog (`delivery.release_tool`). Deploying puts something in
+with its changelog (`delivery.release_tool`) and the notes that come with it
+(`delivery.release_notes`). Deploying puts something in
 service (each environment's trigger). A repository can do one without the
 other: a library releases and never deploys; a service can deploy every
 merge without naming versions.
@@ -62,6 +55,7 @@ departure, declared in your own ADR.
 | `delivery.target` | *no recommendation* | it describes what this repository ships, which governance cannot know. It is the trait that changes most what an agent writes: an image job, platform configuration, a publish job, or nothing |
 | `delivery.environments` | staging on `merge`, production on `tag` | staging should mirror the default branch with no extra step; production runs a named version, so a rollback has a target. **The list itself is asked, never guessed** |
 | `delivery.release_tool` | `release-please` | governance assumes GitHub, and it is the most widely used tool there that turns Conventional Commits into a version, a changelog and a release pull request |
+| `delivery.release_notes` | `highlights` | a generated changelog lists commits, for whoever maintains the repository; it does not tell a consumer what the release brings or what they must do. A short text that heads the release does, and only a reader of the whole release can write it |
 | `delivery.registry` | *a form, not a value*: an address such as `ghcr.io/<owner>` | needed as soon as `delivery.target` is `container`; GitHub's registry needs no other account |
 | `deployment.manifests` | *a form, not a value*: a relative path or a URL | the form decides the pipeline (below), and only this repository knows where its manifests live |
 
@@ -103,6 +97,20 @@ that publishes a package answers `manual`, never `none`. A tool that does
 only half the job (publishes without a changelog) still counts: say
 "changelog by hand" under Consequences.
 
+**`delivery.release_notes` says what comes with a version.**
+
+- **`changelog`:** the changelog `delivery.release_tool` generates, alone.
+  Nothing is done when a release is made.
+- **`highlights`:** the changelog, plus a short text for readers that heads
+  the release's notes on the forge: what the release brings, what a
+  consumer must do, and, in a repository that ships ADRs, every ADR it
+  revises. With `release-please`, write it once the tag exists and prepend
+  it to the GitHub release (`gh release edit`): release-please rewrites its
+  release pull request at every merge, so text written there is lost. A
+  release is not finished until its highlights are written.
+- **`none`:** there are no versions. It goes with
+  `delivery.release_tool: none`.
+
 **Before 1.0.0, a breaking change gives a minor version.** With
 `release-please`, a repository whose current version is below 1.0.0 sets
 `"bump-minor-pre-major": true` in `release-please-config.json`. Without it,
@@ -111,8 +119,17 @@ stability nobody decided. Going to 1.0.0 stays a deliberate act
 (a `Release-As: 1.0.0` footer), after which the option no longer applies. A
 repository already at 1.0.0 or above does not set it.
 
-**Once a pipeline file exists**, the last task of any change checks that it
-passes on the pull request, even when there is no deploy job.
+**A change is done in its own pull request.** Its last tasks are:
+
+1. **Once a pipeline file exists**, check that it passes on the pull
+   request, even when there is no deploy job.
+2. **Update the documentation the change makes false**, in the same pull
+   request: a page, the README, an example. Not in a later one, and not at
+   release time.
+
+Whatever a check can verify belongs in a check, so the pipeline catches it
+next time; review covers the rest. Nothing else waits for the release,
+except the highlights when `delivery.release_notes` is `highlights`.
 
 `release-please` adopted as recommended. `target: package`: ontrack is an npm
 package installed as a dev dependency; nothing is deployed and no image is
@@ -130,6 +147,9 @@ project there. The command stays `ontrack`.
 The 0.x rule above is already followed: `release-please-config.json` sets
 `"bump-minor-pre-major": true`.
 
+`release_notes: highlights` adopted as recommended, on 2026-11-15: the
+v0.4.0 release already carries highlights above the generated changelog.
+
 ## Consequences
 
 ### Positive
@@ -140,24 +160,22 @@ The 0.x rule above is already followed: `release-please-config.json` sets
   whoever cannot or will not use the registry.
 - Versions follow the commit messages that `commitlint` (ADR-0006) already
   enforces, and a breaking change before 1.0.0 gives a minor version.
+- Each release opens with what it brings and what a user must do.
 
 ### Negative
 
-- At the time of ruling, nothing publishes to npm: the release workflow
-  makes the tag and the GitHub release only, `package.json` is named
-  `ontrack`, and the README installs from git. All three have to change.
-- Publishing needs a credential for the npm registry, to keep under
-  ADR-0011 and ADR-0015.
 - Two environments on one tag can disagree: a release whose publish job
   fails exists on GitHub and not on npm until the job is run again.
 - A badly typed squash message (ADR-0009) produces a wrong version.
+- A release is not finished when its tag exists: its highlights are still
+  to write, by hand.
 
 ### Neutral
 
 - The package is scoped and the command is not: users install
   `@trivoallan/ontrack` and run `ontrack`.
-- This verdict replaces the one taken at revision 1, which had `github` as
-  the only environment.
+- This verdict was taken again at revision 3, which added
+  `delivery.release_notes`; the other keys are unchanged since revision 2.
 
 ## Alternatives Considered
 
@@ -184,7 +202,7 @@ it is proven on GitHub Actions. governance assumes GitHub only, where
 
 ## References
 
-- Suggested skills: `deploy-checklist` from `engineering@knowledge-work-plugins`.
+- Suggested skills: `deploy-checklist` from `engineering@knowledge-work-plugins`; `verification-before-completion` from `superpowers@superpowers-marketplace`, for the last tasks of a change; `deliver-release-notes` from `pm-skills@product-on-purpose`, for the highlights.
 - Adapted from surdesrails [SDR-0011](https://github.com/trivoallan/surdesrails/blob/main/resources/docs/adr/SDR-0011-delivery.md), revision 1 (its internal hosting-offer trait `hosting.offer` replaced by `delivery.target`; recommends `release-please` instead of `releaser-pleaser`).
 - [ADR-0001](ADR-0001-record-architecture-decisions.md): how governance ADRs are ruled on.
 - [release-please](https://github.com/googleapis/release-please) and [Semantic Versioning](https://semver.org/).
@@ -196,6 +214,7 @@ it is proven on GitHub Actions. governance assumes GitHub only, where
 | `delivery.target` | what leaves the repository | `container`, `platform`, `package`, `none` |
 | `delivery.environments` | the environments a version goes through, in order, each with its trigger | a list of `{ name, trigger }`, `trigger` being `tag`, `merge` or `manual`; `[]` for a repository that deploys nothing |
 | `delivery.release_tool` | what makes a version and its changelog | `release-please`, `releaser-pleaser`, another tool, `manual` or `none` |
+| `delivery.release_notes` | what comes with a version | `changelog`, `highlights` or `none` |
 | `delivery.registry` | where images are pushed | an address, or `none` |
 | `deployment.manifests` | where the deployment manifests live | a relative path, a URL with a scheme, or `none` |
 
@@ -211,7 +230,13 @@ an artifact; it puts nothing in service. A registry is not an environment.
 no image, as in a documentation, schema or configuration repository. It is
 not the same as deploying by hand, which is `manual`.
 
-**All five keys are required**: an empty key is not an answer. This file
+**All six keys are required**: an empty key is not an answer. This file
 decides when, where and what is delivered; the rules a pipeline follows are
 ADR-0011's. The value is written in this file and nowhere else; whoever
 needs it links here. See ADR-0001 for the check command.
+
+**Revisions.** What changed in the question at each revision, and what
+a repository that already ruled must re-answer.
+
+- Revision 2: with `release-please` and a version below 1.0.0, `release-please-config.json` sets `"bump-minor-pre-major": true`. No key changed: if your repository is below 1.0.0, set the option.
+- Revision 3: a new key, `delivery.release_notes` (`changelog`, `highlights` or `none`, recommended `highlights`), and a change's last tasks now include updating the documentation it makes false. Answer `delivery.release_notes`; nothing else to re-answer.

@@ -3,14 +3,16 @@ adr: ADR-0011
 slug: forge-and-ci
 title: Forge and continuous integration
 status: accepted
-revision: 1
-check: npx --no-install governance-check ADR-0011
-date: 2026-11-14
+revision: 3
+date: 2026-11-15
 authors: [Tristan Rivoallan]
 supersedes: []
+check: npx --no-install governance-check ADR-0011
 traits:
   forge:
     gate: blocking
+    audit: zizmor
+    review: author
 ---
 
 # Forge and continuous integration
@@ -18,15 +20,6 @@ traits:
 ## Status
 
 Accepted
-
-> **What is this file?** A question governance asks your repository, with
-> the answer it recommends. While it says `status: proposed`, you may edit
-> it freely. `revision:` dates the question, not the file: you do not fill
-> it, and it only moves when the question changes. `rejected` is a full
-> answer: when the question does not apply here, rule `rejected`, remove
-> the whole `traits:` block, and say what stands in for it.
-> [ADR-0001](ADR-0001-record-architecture-decisions.md) explains the
-> mechanics.
 
 ## Context
 
@@ -45,6 +38,14 @@ required. That setting lives on GitHub, not in a file of the repository, so
 the value written here is a statement of intent that the ruleset makes
 real.
 
+**The workflows are code an agent writes, and nothing reads them.** The
+rules below are written for whoever writes a workflow. Measured on
+governance's own workflows with zizmor 1.32.0, five findings slipped past
+them, among them a template injection and write permissions granted to the
+whole workflow, while every action was correctly pinned. While
+`forge.audit` is empty, an agent does not know whether a tool will read
+what it wrote.
+
 What a pipeline runs on which branch follows from other ADRs: the branching
 model ([ADR-0009](ADR-0009-branching.md)), the delivery
 ([ADR-0012](ADR-0012-delivery.md)), the languages and tests
@@ -57,9 +58,25 @@ model ([ADR-0009](ADR-0009-branching.md)), the delivery
 | Key | Recommended value | Reason |
 | --- | --- | --- |
 | `forge.gate` | `blocking` | a check that prevents nothing is not a check, it is a report. Make it real with a ruleset that requires the pipeline's checks on the default branch |
+| `forge.audit` | `zizmor` | it reads workflows for what this ADR's rules forbid: a movable action reference, `pull_request_target`, a template expanded into `run:`, permissions wider than a job needs. actionlint checks that a workflow parses, not that it is safe |
+| `forge.review` | `peer` | a change its author alone accepted was read by nobody else. `author` is tenable when one person alone has write access: there is no peer to ask. `agent` gives that person a second reader |
 
 `none` is how a repository says it has no pipeline at all: keep `traits:`
 and write `none`. `rejected` has one use only, a forge other than GitHub.
+
+`forge.review` says who can accept a change to this repository: with
+`peer`, a person with write access other than the author; with `author`,
+the author's own review is enough; with `agent`, the review of an agent
+that did not write the change is enough. It concerns this repository's own
+changes, not a change it proposes elsewhere. Who merges is another
+question, which [ADR-0022](ADR-0022-review-and-merge.md) asks.
+
+**What `author` leaves, beside each value of `forge.gate`.** With `none`,
+no control at all: no pipeline runs and nobody else reads the change. With
+`blocking`, the pipeline is the control: what it does not test, nothing
+checks. With `informative`, the pipeline reports and the author alone
+decides what to do with a red. `agent` adds one reader to each of these
+and no person: what the agent's review misses, only the gate can catch.
 
 **What governance fixes, whatever you rule.** Five rules apply to every
 workflow job, not only to deployment:
@@ -81,6 +98,21 @@ workflow job, not only to deployment:
    `pull_request_target` checking out the fork's head. Secret-free CI still
    runs on pull requests from forks: what stops is the secret, not the test.
 
+**What governance fixes when you rule `forge.audit: zizmor`:**
+
+1. **A job runs zizmor on every pull request**, through
+   `zizmorcore/zizmor-action` pinned by SHA (rule 3). In CI it also runs
+   the online audits, with the job's `GITHUB_TOKEN`.
+2. **A finding is silenced only inline**, on its line, with its reason:
+   `# zizmor: ignore[template-injection] the title is only echoed`. The
+   agent proposes it and a person merges it, as
+   [ADR-0019](ADR-0019-vulnerabilities.md) rule 4 has for an ignore rule
+   and [ADR-0022](ADR-0022-review-and-merge.md) for any merge. A
+   `zizmor.yml` that loosens or disables an audit is not a way to silence:
+   the check does not read it.
+3. **Every action is pinned by hash**, GitHub's own (`actions/*`)
+   included. zizmor's default policy already requires it.
+
 **Secrets are named, never given.** An agent produces the list of secret
 *names* a workflow needs; a person sets the values on GitHub. A token, a
 password or a kubeconfig never goes into a change, a commit or a reply to
@@ -95,9 +127,11 @@ silent bypass is not a departure.
 | --- | --- | --- |
 | `lint` | a tracked file (a `package.json` script, a Makefile target, a `pyproject.toml` section) carries a lint command | that command; the workflow cites the file |
 | `test` | the same, for a test command | that command; the failing threshold is `tests.coverage_target` (ADR-0007) |
+| `scan` | `vulnerabilities.scanner` is not `none` (ADR-0019), on pull requests and on a schedule | that scanner; the failing threshold is `vulnerabilities.fail_on` (ADR-0019) |
+| `audit` | `forge.audit` is not `none` | that tool, on the files under `.github/workflows/` |
 | `build` | always | `languages.main.name` (ADR-0004), plus the frontend (ADR-0013) if ruled |
 | `image` | `delivery.target: container` (ADR-0012) | the registry in `delivery.registry` |
-| `release` | `delivery.release_tool` is neither `manual` nor `none` | that tool (ADR-0012) |
+| `release` | `delivery.release_tool` is neither `manual` nor `none` | that tool (ADR-0012), plus the SBOM when `vulnerabilities.sbom` is not `none` (ADR-0019) |
 | `deploy` | `deployment.manifests` is a relative path; one job per entry of `delivery.environments`, in order, each with its own trigger | the manifests in that path |
 | propose elsewhere | `deployment.manifests` is a URL; this replaces `deploy` | that address |
 
@@ -119,29 +153,48 @@ to the job log, with three known causes: a policy refused the manifest (fix
 the manifest, not the policy), a secret is missing (set it, named as
 listed), an image is not found (check it was pushed and matches the pin).
 
-Adopted as recommended: `blocking`. The ruleset "main requires test" is active on the default branch and requires the `test` and `node-22` checks.
+Adopted as recommended: `blocking`. The ruleset "main requires test" is
+active on the default branch and requires the `test`, `node-22` and
+`commitlint` checks.
+
+`forge.audit: zizmor` adopted as recommended, on 2026-11-15. The workflows
+were cleared of its 18 findings first (trivoallan/ontrack#171). Four kinds
+stand, silenced inline with their reason, among them `apply.yml`'s
+`pull_request_target`, which the workflow makes safe: nothing of the pull
+request is checked out or executed. The `zizmor` job of
+`.github/workflows/zizmor.yml` runs it on every pull request, with the
+version `mise.toml` pins ([ADR-0025](ADR-0025-tools.md)).
+
+**Departure: `forge.review: author`, not `peer`.** One person alone has
+write access to this repository, so there is no peer to ask. With
+`forge.gate: blocking`, the pipeline is the control.
 
 ## Consequences
 
 ### Positive
 
-- Nothing merges into `main` while the `test` job is red.
+- Nothing merges into `main` while a required check is red.
 - Which jobs exist is derived from the other ADRs, so two agents write the
   same workflow.
+- A workflow that loosens a pin, a trigger or a permission fails a pull
+  request.
 
 ### Negative
 
-- At the time of ruling the ruleset requires `test` only: the `node-20` job
-  of `.github/workflows/test.yml` reports but does not block.
-- At the time of ruling `test.yml` pins `actions/checkout@v7` and
-  `actions/setup-node@v7` by tag, against rule 3; pinning by SHA makes
-  updates a deliberate chore unless Dependabot proposes them.
+- The `zizmor` job is not a required check unless the ruleset names it:
+  until then its failure shows on a pull request and does not block.
+- A change is read by its author alone: what the pipeline does not test,
+  nothing checks.
+- Pinning actions by SHA makes updates a deliberate chore unless Dependabot
+  proposes them.
 - A flaky pipeline blocks everyone.
 
 ### Neutral
 
-- The ruleset that makes `blocking` real is a GitHub setting, outside the
-  repository, and is not checked by anything here.
+- The ruleset that makes `blocking` real, and who reviews, are GitHub
+  settings, outside the repository, and nothing here checks them.
+- This verdict was taken again at revision 3, which added `forge.audit` and
+  `forge.review`; `forge.gate` is unchanged.
 
 ## Alternatives Considered
 
@@ -160,6 +213,47 @@ that is reported gets ignored.
 No pipeline; review is the only control. Tenable for a repository with no
 executable code.
 
+### `forge.audit: none`
+
+Nothing reads the workflows but review. Tenable when no workflow exists,
+or when a person writes and reads every one of them.
+
+### `forge.review: peer`
+
+Someone other than the author accepts each change. Recommended. It needs
+a second person with write access, and a change waits for them.
+
+### `forge.review: author`
+
+The author's own review is enough. Tenable when one person alone has
+write access. In a team, it removes the one reading a change gets from
+someone who did not write it.
+
+### `forge.review: agent`
+
+An agent that did not write the change reviews it, and its review is
+enough. Tenable when one person alone has write access and wants a second
+reading. No person other than the author reads the change, and an
+agent's review can be wrong with confidence.
+
+### actionlint only
+
+It catches a workflow that does not parse or a wrong expression type. It
+does not flag a movable tag, `pull_request_target` or a secret in a log
+(measured below): it is a linter, not an audit. It is still worth running
+before pushing.
+
+### CodeQL's `actions` language
+
+GitHub's code scanning analyses workflows too. Measured on governance's
+workflows on 2026-11-15, its 17 queries reported nothing where zizmor found
+five issues.
+
+### Honouring the repository's `zizmor.yml`
+
+The usual way to configure zizmor. It lets a file turn an audit off while
+the check still passes, which is the silent bypass the rules above forbid.
+
 ### A forge other than GitHub
 
 Rule `rejected` and name the forge. The five rules then no longer apply
@@ -167,15 +261,19 @@ from here; copy those you keep into your own ADR.
 
 ## References
 
+- Suggested skills: `setup` from `actionlint@melodic-software`, to install and wire actionlint.
 - Adapted from surdesrails [SDR-0010](https://github.com/trivoallan/surdesrails/blob/main/resources/docs/adr/SDR-0010-forge-and-ci.md), revision 2 (GitHub only: `forge.vendor` and the sections for the other forge dropped; the `image` stage follows `delivery.target` instead of `hosting.offer`).
 - [ADR-0001](ADR-0001-record-architecture-decisions.md): how governance ADRs are ruled on.
 - [actionlint](https://github.com/rhysd/actionlint) and [act](https://github.com/nektos/act).
+- zizmor: [audits](https://docs.zizmor.sh/audits/), [usage and ignores](https://docs.zizmor.sh/usage/), [configuration](https://docs.zizmor.sh/configuration/), [zizmorcore/zizmor-action](https://github.com/zizmorcore/zizmor-action). Measured with zizmor 1.32.0 on 2026-11-15.
 
 **The key.**
 
 | Key | What it holds | Allowed values |
 | --- | --- | --- |
 | `forge.gate` | what a red pipeline prevents | `blocking` (nothing merges on red), `informative` (it reports, review decides), `none` (no pipeline) |
+| `forge.audit` | what reads the workflows for what the rules forbid | `zizmor`, another named tool, or `none` |
+| `forge.review` | who can accept a change to this repository | `peer` (a person with write access other than the author), `author` (the author's own review is enough), `agent` (the review of an agent that did not write the change is enough) |
 
 **Testing a workflow before pushing**, in three steps, cheapest first. Install
 `actionlint` and `act` as standalone binaries from their GitHub releases,
@@ -213,6 +311,17 @@ Notes on `act`, measured in surdesrails on 2026-09-20:
   `run:`.
 - **Flagging is not enforcing:** you run it by hand, and it refuses no merge.
 
+Measured with zizmor 1.32.0, offline, without configuration:
+
+- **Flagged:** a movable action tag, GitHub's own included (`unpinned-uses`),
+  `pull_request_target` (`dangerous-triggers`), the pull request title in
+  `run:` (`template-injection`), a checkout that keeps its credentials
+  (`artipacked`), and `contents: write` at workflow level when the workflow
+  has several jobs (`excessive-permissions`).
+- **Not flagged:** `echo ${{ secrets.X }}`, a bare `env`, `curl -u
+  user:pass`, and workflow-level `contents: write` in a single-job
+  workflow. Rule 4 stays with review, as does rule 1.
+
 **Checking rule 1 by hand.** Run
 `grep -rn --include='*.yml' --include='*.yaml' 'environment:' .github/workflows/`,
 then check that each hit is bound to the default branch through `on:` and
@@ -222,6 +331,12 @@ then check that each hit is bound to the default branch through `on:` and
   elsewhere, environment protections and rulesets.
 - A job that publishes Pages, for example, is a false positive.
 
-**An empty key is not an answer**: this one is required. The value is
+**An empty key is not an answer**: all three are required. The value is
 written in this file and nowhere else; whoever needs it links here. See
 ADR-0001 for the check command.
+
+**Revisions.** What changed in the question at each revision, and what
+a repository that already ruled must re-answer.
+
+- Revision 2: a new key, `forge.audit` (`zizmor`, another tool or `none`, recommended `zizmor`), three rules for `zizmor`, and an `audit` stage. Answer `forge.audit`; nothing else to re-answer.
+- Revision 3: a new key, `forge.review` (`peer`, `author` or `agent`, recommended `peer`), which says who can accept a change, and what `author` leaves beside each value of `forge.gate`. Answer `forge.review`; nothing else to re-answer.
