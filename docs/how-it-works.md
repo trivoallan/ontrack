@@ -8,6 +8,24 @@ repository holds, and what happens over time. For what it is for, see the
 [home page](index.md). For each command and its options, see the
 [commands reference](commands.md).
 
+## Why questions, not rules
+
+A shared rule assumes every repository is the same. A repository that
+differs has two ways out: override the rule, or stop importing it. Either
+way the difference is silent. Nothing records that the repository departs
+from the convention, or why. That is how conventions drift.
+
+A question expects that answers differ. A repository that departs from the
+recommendation says so in its own ADR, with the reason, and the departure is
+reviewed in a pull request like any other change. The difference is on
+record, next to the question it answers.
+
+This has a cost. A person rules on every question in every repository, and
+rules again each time the track revises one. And nothing makes two
+repositories give the same answer. When a value must be the same everywhere,
+with no exception, a shared configuration does that better, and ontrack does
+not replace it.
+
 ## The pieces
 
 ontrack has no server and no database. It works on three kinds of files.
