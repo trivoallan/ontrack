@@ -53,7 +53,11 @@ jobs:
       # On a pull request, the branch check (ADR-0009) reads GITHUB_HEAD_REF;
       # the changes check (ADR-0016) finds openspec in node_modules/.bin.
       # release-please's own branch passes it: ADR-0012 rules release-please.
+      # The review check (ADR-0022) reads the default branch's rules through
+      # `gh api`; the job's read-only token is enough.
       - run: node dist/bin/ontrack.js check
+        env:
+          GH_TOKEN: ${{ github.token }}
 
   # The lowest supported Node (engines in package.json).
   node-22:
