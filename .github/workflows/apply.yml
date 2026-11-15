@@ -19,7 +19,7 @@ name: apply
 # other repositories call this workflow by commit SHA, with their own routine
 # and the token that fires it, passed explicitly (never `secrets: inherit`).
 on:
-  pull_request_target:
+  pull_request_target: # zizmor: ignore[dangerous-triggers] nothing of the pull request is checked out or executed, as said above
     types: [labeled]
   workflow_call:
     inputs:

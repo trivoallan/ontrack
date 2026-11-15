@@ -1,0 +1,46 @@
+name: codeql
+
+# Code scanning of ADR-0024 (code_scanning.tool: codeql): CodeQL reads the
+# code this repository writes, its workflows included, and sends its findings
+# to code scanning as SARIF. The advanced setup, in a file, where the default
+# setup was a setting no file recorded (rule 2).
+# A finding blocks through the ruleset rule "Require code scanning results"
+# at high_or_higher (code_scanning.fail_on: high, rule 3), a GitHub setting,
+# not through this job's exit code.
+on:
+  # No paths: filter, and tests are scanned too (rule 4).
+  pull_request:
+  push:
+    branches: [main]
+  # No schedule: with `tools: linked` the queries only change when Dependabot
+  # updates the action, in a pull request that is scanned.
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Writing code scanning results, nothing else; no secret.
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        # The workflows under .github/, and the TypeScript of src/ and the
+        # documentation site. Neither needs a build.
+        language: [actions, javascript-typescript]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          languages: ${{ matrix.language }}
+          # The bundle this version of the action ships, not the one GitHub
+          # recommends at run time: a SHA pin alone does not freeze the queries.
+          tools: linked
+      - uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          category: /language:${{ matrix.language }}

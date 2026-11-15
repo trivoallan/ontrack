@@ -111,16 +111,21 @@ installs ontrack from git (`prepare`); `dist/` is never committed.
 
 A pre-commit hook scans the staged changes with
 [gitleaks](https://github.com/gitleaks/gitleaks) and refuses a commit that
-holds a secret (ADR-0015). Git does not version hooks, so enable it once per
-clone:
+holds a secret (ADR-0015). It runs the gitleaks that `mise.toml` pins, not one
+from the `PATH` (ADR-0025). With [mise](https://mise.jdx.dev/installing-mise.html)
+installed, at `mise.toml`'s `min_version` or later, enable it once per clone:
 
 ```bash
-brew install gitleaks                 # or any other install of the gitleaks binary
+mise trust && mise install --locked   # gitleaks and zizmor, checked against mise.lock
 git config core.hooksPath .githooks
 ```
 
-Without gitleaks on the `PATH`, the hook refuses the commit rather than skip
-the scan.
+Without mise or the pinned gitleaks, the hook refuses the commit rather than
+skip the scan. `ontrack check` also runs zizmor (ADR-0011): run it as
+`mise exec -- npx ontrack check`.
+
+To move a pin, change the version in `mise.toml` and run `mise lock`, in one
+pull request: the checksums in `mise.lock` move with it.
 
 ### Agent tooling
 

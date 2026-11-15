@@ -1,12 +1,22 @@
 #!/bin/sh
 # Refuses a commit that stages a secret (ADR-0015).
 # Enable once per clone: git config core.hooksPath .githooks
-
-if ! command -v gitleaks >/dev/null 2>&1; then
-  echo "pre-commit: gitleaks is not installed, so the staged changes cannot be scanned." >&2
-  echo "pre-commit: install it (brew install gitleaks), then commit again." >&2
+#
+# The gitleaks that runs is the one mise.toml and mise.lock pin (ADR-0025),
+# never one found on the PATH. `mise which` names its binary, and fails when
+# the pinned version is not installed or the repository's mise.toml is not
+# trusted.
+root=$(dirname "$0")/..
+if ! command -v mise >/dev/null 2>&1; then
+  echo "pre-commit: mise is not installed, so the staged changes cannot be scanned." >&2
+  echo "pre-commit: install mise (https://mise.jdx.dev/installing-mise.html), run \`mise trust && mise install --locked\` here, then commit again." >&2
+  exit 1
+fi
+if ! gitleaks=$(mise -C "$root" which gitleaks); then
+  echo "pre-commit: the gitleaks pinned in mise.toml is not installed, so the staged changes cannot be scanned." >&2
+  echo "pre-commit: run \`mise trust && mise install --locked\` here, then commit again." >&2
   exit 1
 fi
 
 # --verbose prints each finding (file, line, rule); --redact hides the secret itself.
-exec gitleaks git --pre-commit --staged --redact --verbose
+exec "$gitleaks" git --pre-commit --staged --redact --verbose
