@@ -65,7 +65,9 @@ export function planActions(
   }
   for (const a of actions) {
     if ((a.kind === 'imported' || a.kind === 'moved') && existsSync(a.to)) {
-      throw new Error(`${path.relative(root, a.to)} already exists; nothing was written`);
+      const rel = (file: string) => path.relative(root, file).split(path.sep).join('/');
+      const moved = a.kind === 'moved' ? `, ${rel(a.from)} cannot move there` : '';
+      throw new Error(`${rel(a.to)} already exists${moved}; nothing was written`);
     }
   }
   return actions.sort((a, b) => KINDS.indexOf(a.kind) - KINDS.indexOf(b.kind));

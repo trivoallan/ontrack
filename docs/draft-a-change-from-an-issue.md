@@ -16,7 +16,7 @@ Both are reusable workflows that live in ontrack. Your repository calls them
 by commit SHA, and does not copy them. The security posture stays in ontrack:
 the agent never holds a token that can write, and the job that writes accepts
 only new planning files.
-[ADR-0004](adr/ADR-0004-other-repositories-call-the-propose-and-apply-workflows.md)
+[ADR-0004](adr/local/ADR-0004-other-repositories-call-the-propose-and-apply-workflows.md)
 records why.
 
 ```mermaid
@@ -139,7 +139,11 @@ The agent may only write for the entries you enable:
 | Entry | The agent may add |
 | --- | --- |
 | `openspec` | A change under `openspec/changes/` |
-| `adr` | A new ADR in `docs/adr` |
+| `adr` | A new ADR in `docs/adr/local` |
+
+A caller pinned to a version of the workflow that wrote new ADRs directly in
+`docs/adr` keeps doing so until it is updated: ontrack still reads them, and
+`ontrack plan` reports them as files to move to `docs/adr/local`.
 
 An ADR that declares a `check:` command is always refused: a person writes
 that command. A framework that is not in the catalog cannot be enabled; to

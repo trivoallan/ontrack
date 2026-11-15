@@ -33,7 +33,8 @@ A source is an npm package whose `package.json` has an `ontrack` object.
   source. ontrack skips it.
 - The namespace in effect is the npm alias the repository installs the source
   under, whatever `namespace` proposes. The alias must be unscoped: a source
-  installed as `@scope/name` is an error.
+  installed as `@scope/name` is an error, and so is one installed as `local`,
+  the namespace of the repository's own ADRs.
 - Every `.md` file directly in the `adr` directory is an ADR. Subdirectories
   are not read.
 

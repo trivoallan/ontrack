@@ -79,11 +79,44 @@ test('an ADR shipped no more is removed', () => {
 test("the project's own ADR is ignored", () => {
   const root = makeProject({
     sources: { platform: { 'SDR-0006.md': adr(1) } },
-    local: { 'docs/adr/0001-use-postgres.md': adr(1), 'docs/adr/platform/SDR-0006.md': adr(1) },
+    local: { 'docs/adr/local/0001-use-postgres.md': adr(1), 'docs/adr/platform/SDR-0006.md': adr(1) },
   });
   const out = formatPlan(buildPlan(root));
   assert.doesNotMatch(out, /postgres/);
   assert.equal(out, 'platform: 1 unchanged\n');
+});
+
+// Own ADRs migration
+
+test('own ADRs directly in docs/adr/ are a migration to docs/adr/local/, after the sources', async () => {
+  const root = makeProject({
+    sources: { platform: { 'SDR-0006.md': adr(1) } },
+    local: {
+      'docs/adr/ADR-0002-queue.md': adr(),
+      'docs/adr/ADR-0001-cache.md': adr(),
+      'docs/adr/platform/SDR-0006.md': adr(1),
+    },
+  });
+  const expected =
+    'platform: 1 unchanged\nmigration: 2 files docs/adr/ → docs/adr/local/\n  move          ADR-0001-cache.md\n  move          ADR-0002-queue.md\n';
+  const r = await plan(withAgents(root));
+  assert.equal(r.stdout, expected);
+  assert.equal(r.code, 2);
+  assert.match(formatPlan(buildPlan(root), { all: true }), /migration: 2 files docs\/adr\/ → docs\/adr\/local\/\n  move          ADR-0001-cache\.md/);
+});
+
+test('a flat file a source ships is not an own ADR', () => {
+  const root = makeProject({
+    sources: { platform: { 'SDR-0006.md': adr(1) } },
+    local: { 'docs/adr/SDR-0006.md': adr(1), 'docs/adr/platform/SDR-0006.md': adr(1) },
+  });
+  assert.equal(formatPlan(buildPlan(root)), 'platform: 1 unchanged\n');
+});
+
+test('own ADRs to move without any source', async () => {
+  const r = await plan(withAgents(makeTree({ 'package.json': '{}', 'docs/adr/ADR-0001-cache.md': adr() })));
+  assert.equal(r.stdout, 'no ontrack source found\nmigration: 1 file docs/adr/ → docs/adr/local/\n  move          ADR-0001-cache.md\n');
+  assert.equal(r.code, 2);
 });
 
 // Flat-layout migration

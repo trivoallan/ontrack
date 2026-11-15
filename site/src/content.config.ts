@@ -14,12 +14,19 @@ export const collections = {
       generateId: ({ entry }) => entry.replace(/\.mdx?$/, '').toLowerCase(),
     }),
     // A page that declares a `status:`, as every ADR does, gets it as a
-    // sidebar badge. The ADRs are imported copies and cannot ask for it.
+    // sidebar badge, and one that declares an `adr:` identifier gets it
+    // before its title in the sidebar, so that a reader holding a number
+    // finds the page. The ADRs are imported copies and cannot ask for it.
     schema: (context) =>
-      docsSchema({ extend: z.object({ status: z.string().optional() }) })(context).transform((page) =>
-        page.status && !page.sidebar.badge
-          ? { ...page, sidebar: { ...page.sidebar, badge: statusBadge(page.status) } }
-          : page,
+      docsSchema({ extend: z.object({ status: z.string().optional(), adr: z.string().optional() }) })(context).transform(
+        (page) => ({
+          ...page,
+          sidebar: {
+            ...page.sidebar,
+            label: page.sidebar.label ?? (page.adr ? `${page.adr} ${page.title}` : undefined),
+            badge: page.sidebar.badge ?? (page.status ? statusBadge(page.status) : undefined),
+          },
+        }),
       ),
   }),
 };

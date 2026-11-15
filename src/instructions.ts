@@ -3,7 +3,7 @@
 // trait "is read without interpretation", and agents read YAML natively.
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
-import { markdownFiles } from './plan.ts';
+import { OWN, markdownFiles } from './plan.ts';
 import { frontmatter, readTitle } from './revision.ts';
 
 type AdrFile = { dir: string; ns: string; file: string };
@@ -27,11 +27,17 @@ const stem = (file: string) => file.replace(/\.md$/, '');
 const byRef = (a: Adr, b: Adr) => a.ref.localeCompare(b.ref);
 const unquote = (v: string) => v.replace(/^(["'])(.*)\1$/, '$2');
 
-// docs/adr/*.md as `local`, docs/adr/<namespace>/*.md as `<namespace>`.
+// docs/adr/<namespace>/*.md as `<namespace>`; the repository's own are in
+// `local`. docs/adr/*.md is their historical layout, still read as `local`.
 function adrFiles(root: string): AdrFile[] {
   const adrRoot = path.join(root, 'docs', 'adr');
   if (!existsSync(adrRoot)) return [];
-  const files = markdownFiles(adrRoot).map((file) => ({ dir: adrRoot, ns: 'local', file }));
+  const files = markdownFiles(adrRoot).map((file) => ({ dir: adrRoot, ns: OWN, file }));
+  for (const { file } of files) {
+    if (existsSync(path.join(adrRoot, OWN, file))) {
+      throw new Error(`docs/adr/${file} and docs/adr/${OWN}/${file} are the same ADR; keep one`);
+    }
+  }
   for (const entry of readdirSync(adrRoot, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
     const dir = path.join(adrRoot, entry.name);

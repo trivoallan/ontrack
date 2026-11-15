@@ -1,6 +1,6 @@
 name: apply
 
-# docs/adr/ADR-0003-a-label-on-an-approved-pull-request-starts-its-apply.md:
+# docs/adr/local/ADR-0003-a-label-on-an-approved-pull-request-starts-its-apply.md:
 # a maintainer adds the `ontrack:apply` label to a pull request that carries a
 # change proposal, and a remote session opens to apply it with them. Nothing
 # is applied here: this workflow is the gate in front of that session, which
@@ -15,7 +15,7 @@ name: apply
 # reason: nothing of the pull request is checked out or executed (ADR-0011
 # rule 5). Keep it that way.
 #
-# docs/adr/ADR-0004-other-repositories-call-the-propose-and-apply-workflows.md:
+# docs/adr/local/ADR-0004-other-repositories-call-the-propose-and-apply-workflows.md:
 # other repositories call this workflow by commit SHA, with their own routine
 # and the token that fires it, passed explicitly (never `secrets: inherit`).
 on:

@@ -55,8 +55,8 @@ Each ADR that is not up to date falls in one category:
 | `unreadable` | No recognizable frontmatter |
 | `check` | Up to date, but the source's `check:` line differs from yours |
 
-`plan` also reports files to move from a flat `docs/adr/` layout to
-`docs/adr/<alias>/`, and the state of the rules block in `AGENTS.md`
+`plan` also reports files to move from a flat `docs/adr/` layout: a source's
+ADRs to `docs/adr/<alias>/`, your own to `docs/adr/local/`. It reports the state of the rules block in `AGENTS.md`
 (`missing` or `out of date`).
 
 **Exit code.** `0` when every ADR is unchanged, or when there is no source at
@@ -114,10 +114,11 @@ migration: 5 files docs/adr/ → docs/adr/platform/
 
   The `check:` line is the first one at column zero in the frontmatter. Only an ADR that is up to date can be `check`: a `revised` ADR gets its check once you have ruled again.
 - A flat-layout migration (`docs/adr/<file>` that belongs to the source but is not under `docs/adr/<alias>/`) is always shown: `migration: <n> file(s) docs/adr/ → docs/adr/<alias>/`, then one `move` line per file.
+- Your own ADRs live in `docs/adr/local/`. Those still placed directly in `docs/adr/` (the root files no source ships) are shown the same way, after the last source: `migration: <n> file(s) docs/adr/ → docs/adr/local/`, then one `move` line per file.
 - With `--all`, the unchanged ADRs get a line too, so every ADR has one, sorted by name whatever its category. Each ADR line then carries a verdict between the category and the name: the category in its 12-character column, two spaces, the verdict in a 10-character column, two spaces, then the name and the rest of the line as above. The summary line, the `- ` and `+ ` lines, the migration lines and the exit code do not change.
 - The verdict is the `status:` of your copy, never the source's: the first `status:` line at column zero in its frontmatter, without a trailing `# comment`. It is `-` when you have no copy yet (a `new` ADR), when the copy has no recognizable frontmatter, or when it states no status.
 - When there is nothing to do, one line per source (`platform: 14 unchanged`), and the exit code is `0`. Any other category, or a migration, gives `2`.
-- With no source at all, `plan` prints `no ontrack source found` and exits with `0`.
+- With no source at all, `plan` prints `no ontrack source found` and exits with `0`, or prints the migration of your own ADRs after that line and exits with `2`.
 
 Any change to this format goes through this page first.
 
@@ -142,7 +143,7 @@ What it does, per source:
 | Action | When | Effect |
 | --- | --- | --- |
 | `imported` | A `new` ADR | Copied, byte for byte, into `docs/adr/<alias>/` |
-| `moved` | A flat-layout file | Moved from `docs/adr/` to `docs/adr/<alias>/` |
+| `moved` | A flat-layout file | Moved from `docs/adr/` to `docs/adr/<alias>/`, or to `docs/adr/local/` for one of your own ADRs |
 | `pruned` | A `removed` ADR, with `--prune` | Deleted |
 | `confirmed` | An `undetermined` ADR, with `--confirm` | Gets the upstream `revision:`; nothing else changes |
 | `synced` | A `check` ADR | Gets the source's `check:` line; nothing else changes |
@@ -177,7 +178,7 @@ npx ontrack apply --confirm all      # same, for every undetermined ADR
 What it does, per source:
 
 - `imported`: a `new` ADR is copied, byte for byte, into `docs/adr/<alias>/`.
-- `moved`: a flat-layout file moves from `docs/adr/` to `docs/adr/<alias>/` (`git mv` in a git repository, a plain rename otherwise).
+- `moved`: a flat-layout file moves from `docs/adr/` to `docs/adr/<alias>/`, and one of your own ADRs to `docs/adr/local/`, under a `local:` line (`git mv` in a git repository, a plain rename otherwise).
 - `pruned`, only with `--prune`: a `removed` ADR is deleted.
 - `confirmed`, only with `--confirm`: an `undetermined` ADR gets the upstream `revision:`; nothing else in the file changes.
 - `synced`: a `check` ADR gets the source's `check:` line, set, replaced or removed; nothing else in the file changes. It needs no option. The `check:` line of an imported ADR belongs to its source: to run a different check, supersede the ADR with one of your own.
@@ -235,8 +236,10 @@ never writes a file and makes no network call.
 npx ontrack instructions
 ```
 
-- It reads the repository's own ADRs, under `docs/adr/` and
-  `docs/adr/<namespace>/`. It does not read the sources in `node_modules`: a
+- It reads the ADRs of every `docs/adr/<namespace>/`: the imported ones, and
+  the repository's own in `docs/adr/local/`. Own ADRs still placed directly
+  in `docs/adr/` are read too, as `local/<name>`; the same file name in both
+  places is an error. It does not read the sources in `node_modules`: a
   shipped ADR holds a question, not an answer.
 - An ADR carries decided traits when it is `accepted`, is not superseded, and
   has a `traits:` block.
@@ -381,7 +384,7 @@ Once every ADR is ruled, list the rulings this repository does not follow yet: a
 ~~~
 
 Naming an `accepted` ADR reopens its decision. Its text is frozen, so the
-prompt asks for a new ADR in `docs/adr/` that supersedes it. It is the same
+prompt asks for a new ADR in `docs/adr/local/` that supersedes it. It is the same
 text for every ADR, apart from its path, title and reference:
 
 ~~~
@@ -393,8 +396,8 @@ It is `accepted`: a decision this repository has taken, whose text is frozen. Ch
 2. Establish what changes in the decision; ask the user when they have not said. Cite the file or command output that supports the change: what moved in this repository since the decision was taken, or what the decision never matched. If you find nothing, say so in one line.
 3. List every key under its `traits:`. For each one, propose the value it keeps or the value it takes, with the evidence for every change. Leave no key out: a key the new ADR omits is no longer decided.
 4. When it has a `check:` command, propose to keep it, change it or drop it, and say why.
-5. Present the proposal: the new ADR's file name, in `docs/adr/` and numbered after the ADRs that sit directly in that directory, from 0001 when there is none; its title; one line per trait key with its value; the check; and the reason for the change. Then stop and ask for the user's agreement, with a question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees.
-6. Once the user agrees: write the new ADR in `docs/adr/`, in the format the repository's rules prescribe, with `status: accepted`, `supersedes: [trivoallan/ADR-0001-record-architecture-decisions]` and the traits; refer to the superseded ADR for context instead of restating it. Mark the superseded ADR only as the repository's rules spell out; when they do not say what to write in it, leave its file untouched. Then run `npx ontrack apply` to update AGENTS.md.
+5. Present the proposal: the new ADR's file name, in `docs/adr/local/` and numbered after the ADRs of that directory and the repository's own ADRs still placed directly in `docs/adr/`, from 0001 when there is none; its title; one line per trait key with its value; the check; and the reason for the change. Then stop and ask for the user's agreement, with a question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees.
+6. Once the user agrees: write the new ADR in `docs/adr/local/`, in the format the repository's rules prescribe, with `status: accepted`, `supersedes: [trivoallan/ADR-0001-record-architecture-decisions]` and the traits; refer to the superseded ADR for context instead of restating it. Mark the superseded ADR only as the repository's rules spell out; when they do not say what to write in it, leave its file untouched. Then run `npx ontrack apply` to update AGENTS.md.
 
 Once every ADR is ruled, list the rulings this repository does not follow yet: a value its code, configuration or tooling does not match, or a tool the ruling names that is not set up. A ruling is identified by its ADR number and trait key, as in `ADR-0015 secrets.guard`. The tracker is the one named by the decided `tracking` trait in AGENTS.md. Before proposing, list the items in that tracker that carry the label `ontrack`, open and closed: propose nothing for a ruling whose identifier starts the title of one of those items, and say in one line which closed items name a ruling this repository still does not follow. When you cannot list the tracker's items, propose every ruling and say that duplicates were not checked. For each ruling left, propose a tracking item: its title starts with the ruling's identifier, as in `ADR-0015 secrets.guard: install gitleaks`, and it names the ADR it serves. Create in the tracker (`tracking.tool`, in `tracking.project`) only the items the user agrees to, asked with a question tool such as `AskUserQuestion` when you have one, each with the label `ontrack`, creating the label first when the tracker requires it. When no `tracking` trait is decided, or `tracking.tool` is `none`, give the list in your reply and create nothing.
 ~~~

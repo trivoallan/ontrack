@@ -1,4 +1,4 @@
-// The apply workflow (docs/adr/ADR-0003) is the gate in front of a remote
+// The apply workflow (docs/adr/local/ADR-0003) is the gate in front of a remote
 // session that writes code. Its steps are run here as the runner would run
 // them, taken from the workflow file, with `gh` and `curl` replaced by stubs.
 import { test, after } from 'node:test';

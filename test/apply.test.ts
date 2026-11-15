@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { main } from '../src/cli.ts';
 import { formatApply, planActions } from '../src/apply.ts';
-import { buildPlan } from '../src/plan.ts';
+import { buildPlan, formatPlan } from '../src/plan.ts';
 import type { PlannedAdr, SourcePlan } from '../src/plan.ts';
 import { adr, cleanup, makeProject, withAgents } from './helpers/project.ts';
 
@@ -26,6 +26,7 @@ async function run(root: string, ...argv: string[]) {
   return { code, stdout, stderr };
 }
 
+const formatPlanOf = (root: string) => formatPlan(buildPlan(root));
 const read = (root: string, rel: string) => readFileSync(path.join(root, rel), 'utf8');
 
 function snapshot(root: string) {
@@ -348,4 +349,55 @@ test('only a check to synchronize: synced with its lines, exit 0; dry run writes
   const r = await run(root, 'apply');
   assert.equal(r.stdout, expected);
   assert.equal(r.code, 0);
+});
+
+// Own ADRs migration
+
+const git = (root: string, ...args: string[]) => spawnSync('git', args, { cwd: root, encoding: 'utf8' });
+
+test('own ADRs move to docs/adr/local/ with git, links listed, then nothing is left', async () => {
+  const own = adr() + '[commits](platform/SDR-0006.md) [queue](ADR-0002-queue.md)\n';
+  const root = makeProject({
+    sources: { platform: { 'SDR-0006.md': adr(1, 'accepted') } },
+    local: {
+      'docs/adr/ADR-0001-cache.md': own,
+      'docs/adr/ADR-0002-queue.md': adr(undefined, 'accepted'),
+      'docs/adr/platform/SDR-0006.md': adr(1, 'accepted'),
+      'docs/index.md': 'a\nb\nc\n[cache](adr/ADR-0001-cache.md)\n',
+    },
+  });
+  git(root, 'init', '-q');
+  git(root, 'add', '.');
+  git(root, '-c', 'user.name=t', '-c', 'user.email=t@example.com', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'init');
+  const dry = await run(root, 'apply', '--dry-run');
+  assert.match(dry.stdout, /^dry run: nothing written\nlocal: 2 moved\n  moved         ADR-0001-cache\.md\n/);
+  assert.ok(existsSync(path.join(root, 'docs/adr/ADR-0001-cache.md')));
+
+  const r = await run(root, 'apply');
+  assert.match(r.stdout, /^local: 2 moved\n  moved         ADR-0001-cache\.md\n  moved         ADR-0002-queue\.md\nlinks to update:\n/);
+  assert.match(r.stdout, /  docs\/index\.md:4  adr\/ADR-0001-cache\.md → adr\/local\/ADR-0001-cache\.md\n/);
+  assert.match(r.stdout, /  docs\/adr\/local\/ADR-0001-cache\.md:\d+  platform\/SDR-0006\.md → \.\.\/platform\/SDR-0006\.md\n/);
+  assert.doesNotMatch(r.stdout, /ADR-0002-queue\.md →/);
+  assert.equal(read(root, 'docs/adr/local/ADR-0001-cache.md'), own);
+  assert.match(git(root, 'status', '--short').stdout, /^R  docs\/adr\/ADR-0001-cache\.md -> docs\/adr\/local\/ADR-0001-cache\.md$/m);
+  assert.doesNotMatch(formatPlanOf(root), /migration/);
+});
+
+test('own ADRs move without any source', async () => {
+  const root = makeProject({ local: { 'docs/adr/ADR-0001-cache.md': adr(undefined, 'accepted') } });
+  const r = await run(root, 'apply');
+  assert.match(r.stdout, /^local: 1 moved\n  moved         ADR-0001-cache\.md\n/);
+  assert.ok(existsSync(path.join(root, 'docs/adr/local/ADR-0001-cache.md')));
+  assert.ok(!existsSync(path.join(root, 'docs/adr/ADR-0001-cache.md')));
+});
+
+test('an own ADR already in docs/adr/local/ stops apply before any write', async () => {
+  const root = makeProject({
+    sources: { platform: { 'SDR-0006.md': adr(1) } },
+    local: { 'docs/adr/ADR-0001-cache.md': adr(), 'docs/adr/local/ADR-0001-cache.md': adr() },
+  });
+  const r = await run(root, 'apply');
+  assert.equal(r.code, 1);
+  assert.match(r.stderr, /docs\/adr\/local\/ADR-0001-cache\.md already exists, docs\/adr\/ADR-0001-cache\.md cannot move there/);
+  assert.ok(!existsSync(path.join(root, 'docs/adr/platform/SDR-0006.md')));
 });

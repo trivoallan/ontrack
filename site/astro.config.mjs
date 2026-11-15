@@ -37,7 +37,13 @@ const pages = () => (tree, file) => {
   if (!adr) return;
   const ruling = [{
     type: 'html',
-    value: `<p><span class="adr-status ${statusTone(adr.status)}">${adr.status}</span></p>`,
+    // The reference is what `ontrack review` takes. The search does not split
+    // it at the slash, so the number is also there on its own, for the search
+    // and for screen readers, and weighted: a reader holding `ADR-0011` gets
+    // this page before the pages that cite it.
+    value:
+      `<p><span class="adr-status ${statusTone(adr.status)}">${adr.status}</span> ` +
+      `<span class="sr-only" data-pagefind-weight="10">${adr.id}</span> <code>${adr.ref}</code></p>`,
   }];
   if (adr.traits) ruling.push({ type: 'code', lang: 'yaml', meta: 'title="Decided traits"', value: adr.traits.join('\n') });
   tree.children.unshift(...ruling);
@@ -80,9 +86,9 @@ export default defineConfig({
         { slug: 'draft-a-change-from-an-issue' },
         { slug: 'commands' },
         { slug: 'file-formats' },
-        // ponytail: lists the one imported namespace; make it `adr` once the
-        // repository has ADRs of its own or a second source.
-        { label: 'ontrack on itself', collapsed: true, items: [{ autogenerate: { directory: 'adr/trivoallan' } }] },
+        // One subgroup per namespace: `local`, the repository's own ADRs,
+        // then each imported source.
+        { label: 'ontrack on itself', collapsed: true, items: [{ autogenerate: { directory: 'adr', collapsed: true } }] },
         { label: 'For contributors', collapsed: true, items: [{ autogenerate: { directory: 'architecture/arc42' } }] },
       ],
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/trivoallan/ontrack' }],
