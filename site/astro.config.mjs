@@ -35,6 +35,13 @@ const pages = () => (tree, file) => {
     const [path, fragment = ''] = node.url.toLowerCase().split(/(?=#)/);
     node.url = up + path.replace(/(^|\/)index\.mdx?$/, '$1').replace(/\.mdx?$/, '/') + fragment;
   });
+  // A status written as code, `accepted`, is shown as the badge the ADR pages
+  // and the sidebar use, in its colour. On GitHub it stays code.
+  walk(tree, (node) => {
+    if (node.type === 'inlineCode' && ['proposed', 'accepted', 'rejected'].includes(node.value)) {
+      Object.assign(node, { type: 'html', value: `<span class="adr-status ${statusTone(node.value)}">${node.value}</span>` });
+    }
+  });
   // GitHub's alerts (`> [!NOTE]`) become Starlight's asides: one syntax that
   // renders on both. Starlight's own directive step runs after this one.
   walk(tree, (node) => {
