@@ -78,7 +78,7 @@ repositories); targets measured in round 2.
 
 ## Next Steps
 
-1. Confirm `plan` and `check` exit `0` with only `proposed` ADRs - maintainer, before feature 1
+1. ~~Confirm `plan` and `check` exit `0` with only `proposed` ADRs~~ - done: they do (see the [PRD](prd-backlog-reveal.md#verified-before-writing))
 2. OpenSpec change for feature 1, with `docs/commands.md` and the tutorial - maintainer, this week
 3. Rerun the desk test with observed/absent marking - maintainer, this week
 4. Observation round 1 on current behaviour - maintainer, next two weeks
