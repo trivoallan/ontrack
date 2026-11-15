@@ -1,6 +1,6 @@
 # usage: python3 last.py <stream-json>... : cost, turns, tool writes attempted, then every assistant text
 import json, sys
-for f in sys.argv[1:]:
+for f in [a for a in sys.argv[1:] if not a.startswith("--")]:
     texts, writes, res = [], [], {}
     for line in open(f):
         try: d = json.loads(line)

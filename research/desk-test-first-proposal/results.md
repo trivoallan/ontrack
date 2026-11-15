@@ -428,3 +428,54 @@ history already uses it (biome).
   ([run4/sessions/](run4/sessions/) `.diff` files).
 - `npx ontrack apply` failed in every session (dependencies not installed in
   the clones); the agents reported it and did not try to install anything.
+
+## Run 5: the restated AB-1 on repositories never seen
+
+The survey alone (`review` without an argument, 25 proposed ADRs), on 5
+public repositories none of the earlier runs used, at the commits in
+[run5/repos-at.txt](run5/repos-at.txt): axios, hono, date-fns, undici,
+msw. Same track (0.6.0), same prompt as run 4, one headless read-only run
+each ($9.36). Raw: [run5/surveys/](run5/surveys/). Every first-group row
+read against the clone by an independent scorer (a subagent that saw
+neither run 4 nor this write-up), who opened each ADR's `traits:` keys and
+checked where each value lives: [run5/score.md](run5/score.md).
+
+Scoring rule, stricter than run 4's keyword scan: a value held by the forge
+(ruleset, required approvals, trusted publishing) fails even when a
+document in the clone describes it; `commits.scopes` is visible only as a
+closed list (`scope-enum`), not as scopes found in `git log`; an absent tool
+is visible.
+
+| Repository | First-group rows | Values not visible | Left unstated by the agent |
+|---|---|---|---|
+| axios | 12 | **2**: 0011 `forge.gate` (branch protection, described in `THREATMODEL.md`); 0006 `commits.scopes` (no `scope-enum`) | 0011, said only in a general caveat at the top |
+| date-fns | 13 | 0 | |
+| hono | 10 | 1: 0012 `release_notes` (GitHub Releases) | |
+| msw | 9 | 1: 0006 `commits.scopes` | |
+| undici | 12 | **3**: 0006 `commits.scopes` (history only); 0021 `build_level` (trusted publishing, not in the clone); 0022 `review.approvals` (ruleset) | 0006, 0022 |
+| **Total** | **56** | **7** | 2 (3 with axios 0011) |
+
+No evidence was false; two claims were slightly overstated (msw branch
+prefixes, axios Dependabot majors). No run tried to write.
+
+**AB-1 restated (at most 1 per repository): fails**, in 2 of 5
+repositories (axios 2, undici 3). Under a looser reading, a forge setting
+documented in the clone and scopes read from history counting as visible,
+axios passes and undici still has 2. So it fails either way.
+
+What fails is narrow and repeats:
+- **`commits.scopes` (4 of 7).** The agent puts Commits in the first group
+  when the history shows scopes, although no file closes the list. Choosing
+  the list is a discussion.
+- **Values the forge holds (3 of 7).** Merge gate, required approvals,
+  provenance: the agent reads them from a document or infers them, and in
+  two rows does not say it could not see them.
+
+Run 4's check was looser (keyword scan, manual read of four ADRs), so its
+3 exceptions in 151 rows are not comparable with these 7 in 56.
+
+**For the maintainer:** the restated AB-1 holds on 3 of 5 unseen
+repositories. Fixing it is a prompt change: have the survey send an ADR
+to the second group when any of its values lives outside the repository
+or is read from history rather than from a file that states it, and say
+which.
