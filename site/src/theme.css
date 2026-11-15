@@ -45,3 +45,17 @@
   background-color: var(--domain-low);
   font-size: var(--sl-text-lg);
 }
+
+/* A domain card of the track page links to its questions: the link covers
+   the card, which keeps the colour Starlight gives it by position. */
+.card:has(.card-link) {
+  position: relative;
+}
+.card:has(.card-link):hover {
+  border-color: var(--sl-color-white);
+}
+.card-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
