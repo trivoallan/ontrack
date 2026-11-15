@@ -18,15 +18,24 @@ jobs:
           # The commits check (ADR-0006) reads the history since origin/HEAD.
           fetch-depth: 0
       - run: git remote set-head origin --auto
+      # mise installs Node, and the two binaries outside npm that `check`
+      # runs (gitleaks for ADR-0015, zizmor for ADR-0011), at the versions
+      # mise.toml pins, checked against mise.lock (ADR-0025; the action
+      # passes --locked when the lockfile is there), and puts them on the
+      # PATH. mise's own version is written here and nothing updates it:
+      # keep it at mise.toml's min_version. setup-node, given no version,
+      # restores the npm cache.
+      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+        with:
+          version: 2026.11.8
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version-file: .nvmrc
           cache: npm
       # Dependencies are installed with npm 12 (ADR-0020,
       # install_scripts: ignored): it runs no dependency's install script
       # unless package.json names it. Node 24 ships npm 11, which runs them.
       # ponytail: the version is written in each workflow that installs, and
-      # nothing updates it. Drop these steps once the Node in .nvmrc ships
+      # nothing updates it. Drop these steps once the Node in mise.toml ships
       # npm 12.
       - run: npm install --global npm@12.2.2 # zizmor: ignore[adhoc-packages] npm itself, exact version, no lockfile can hold it
       - run: npm ci
@@ -40,15 +49,6 @@ jobs:
       # on the pull request that updates the track; track-updates.yml is
       # what notices that an update exists.
       - run: node dist/bin/ontrack.js plan
-      # The secrets check (ADR-0015) runs gitleaks and the workflow audit
-      # (ADR-0011) runs zizmor, two binaries outside npm. mise installs both
-      # at the versions mise.toml pins, checked against mise.lock (ADR-0025;
-      # the action passes --locked when the lockfile is there), and puts them
-      # on the PATH. mise's own version is written here and nothing updates
-      # it: keep it at mise.toml's min_version.
-      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
-        with:
-          version: 2026.11.8
       # And fails when a decided ADR's check does.
       # On a pull request, the branch check (ADR-0009) reads GITHUB_HEAD_REF;
       # the changes check (ADR-0016) finds openspec in node_modules/.bin.
