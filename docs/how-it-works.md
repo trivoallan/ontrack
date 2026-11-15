@@ -30,19 +30,15 @@ not replace it.
 ## The pieces
 
 ontrack has no server and no database. It works on three kinds of files.
+[Concepts](concepts.md) defines each of them; this is how they fit together.
 
-- A **track** is a repository of architecture decision records (ADRs). Each
-  ADR asks one question (how do we commit, branch, test, deliver?) and
-  recommends an answer. A track is an npm package: a `package.json` with an
-  `ontrack` key and a directory of ADRs. You own it, and repositories install
-  it as a dependency. Before ontrack 0.5 a track was called a source.
-- Each repository holds **its own copy of every ADR**, under `docs/adr/`. The
-  copy is where the repository answers. The answer is a status and a few keys
-  in the frontmatter, the **traits**. The track ships the traits empty, as
-  the question. The repository fills them.
-- The **rules block** is a marked section of the repository's `AGENTS.md`.
-  ontrack writes the decided traits there, because coding agents read
-  `AGENTS.md`, not ADRs.
+- A **track**: an npm package of architecture decision records (ADRs). Each
+  one asks a question and recommends an answer. Repositories install it as a
+  dependency.
+- The repository's **own copy of every ADR**, under `docs/adr/`. The
+  repository answers there: a status, and the traits it fills.
+- The **rules block** of the repository's `AGENTS.md`. ontrack writes the
+  decided traits there, where coding agents read them.
 
 ```mermaid
 flowchart TD
