@@ -151,24 +151,20 @@ export default defineConfig({
       // Actions, with or without a track.
       sidebar: [
         { label: 'Start here', items: ['tutorial', 'concepts', 'how-it-works'] },
+        // The reference track, next to the tutorial that installs it: what
+        // it is, how to use it, and its questions as the installed release
+        // asks them. It is the only public track; a second one would need
+        // its own place decided, here or in its own repository.
         {
-          label: 'Use a track',
+          label: 'ontrack-engineering',
           items: [
-            'find-a-track',
-            // The reference track: its page, then its questions as the
-            // installed release asks them, a subsection of the track.
-            {
-              label: 'The ontrack-engineering track',
-              collapsed: true,
-              items: [
-                { slug: 'ontrack-engineering', label: 'Overview' },
-                // One page lists the questions; the sidebar does not.
-                { slug: 'ontrack-engineering/questions', label: questionsLabel },
-              ],
-            },
-            'upgrade-ontrack',
+            { slug: 'ontrack-engineering', label: 'Overview' },
+            { slug: 'ontrack-engineering/use-it', label: 'Use it' },
+            // One page lists the questions; the sidebar does not.
+            { slug: 'ontrack-engineering/questions', label: questionsLabel },
           ],
         },
+        { label: 'Use a track', items: ['find-a-track', 'upgrade-ontrack'] },
         { label: 'Maintain a track', items: ['write-your-own-track', 'revise-a-question'] },
         { label: 'Automate', items: ['run-ontrack-in-ci', 'draft-a-change-from-an-issue', 'why-you-call-ontracks-workflows'] },
         {
