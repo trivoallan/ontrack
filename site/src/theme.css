@@ -3,3 +3,16 @@
 [data-has-hero] .sl-markdown-content {
   max-width: 45rem;
 }
+
+/* The accent is the teal of the logo, not Starlight's default indigo.
+   Light text on white and white on the button both stay above 4.5:1. */
+:root {
+  --sl-color-accent-low: #0c3640;
+  --sl-color-accent: #1aa3bd;
+  --sl-color-accent-high: #b4e9f3;
+}
+:root[data-theme='light'] {
+  --sl-color-accent-low: #c8eef5;
+  --sl-color-accent: #0b6e82;
+  --sl-color-accent-high: #083f4b;
+}
