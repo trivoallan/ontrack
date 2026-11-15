@@ -82,6 +82,14 @@ jobs:
             verdict changes-requested
           fi
           if [ "$(printf '%s' "$last" | jq --arg sha "$HEAD_SHA" 'map(select(.state == "APPROVED" and .commit_id == $sha)) | length')" != "0" ]; then
+            # One session per head commit: this workflow's own comment says
+            # whether one was already started. The concurrency group makes a
+            # second request wait until the first has commented.
+            comments=$(gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/issues/${PR}/comments")
+            if [ "$(printf '%s' "$comments" | jq --arg text "An apply session was started for commit ${HEAD_SHA}" '
+              [ .[][] | select(.user.login == "github-actions[bot]") | select(.body | startswith($text)) ] | length')" != "0" ]; then
+              verdict already-started
+            fi
             verdict approved
           fi
           if [ "$(printf '%s' "$last" | jq 'map(select(.state == "APPROVED")) | length')" != "0" ]; then
@@ -144,6 +152,7 @@ jobs:
           case "${VERDICT}:${STARTED}" in
             approved:true) text="An apply session was started for commit ${HEAD_SHA}: ${SESSION:-its owner finds it in their Claude Code sessions}. It reports here when it stops." ;;
             approved:*) text="The pull request is approved, but the apply session could not be started. Run: ${RUN}" ;;
+            already-started:*) text="Not applied: an apply session was already started for commit ${HEAD_SHA}. Push a new commit and approve it to start another, or delete the comment that announced the first session." ;;
             stale:*) text="Not applied: the approval was given before the last push. Approve commit ${HEAD_SHA}, then add the label again." ;;
             changes-requested:*) text="Not applied: a reviewer has requested changes." ;;
             not-approved:*) text="Not applied: a person with write access must approve this pull request first. Approve it, then add the label again." ;;
