@@ -10,7 +10,7 @@ dependencies whose `package.json` carries an `ontrack` key. Each ADR asks a
 question and recommends an answer; the repository answers it in its own
 copy, and ontrack writes the answers to `AGENTS.md` so that coding agents
 follow them. The
-[documentation site](../../index.md) is the user's guide;
+[documentation site](../../index.mdx) is the user's guide;
 this document describes how the tool is built.
 
 ## Requirements overview

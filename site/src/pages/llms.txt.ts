@@ -3,6 +3,7 @@
 // docs/, which are written to be read as they are, and whose links to each
 // other hold there.
 import { getCollection } from 'astro:content';
+import { version } from '../track.mjs';
 
 const raw = 'https://raw.githubusercontent.com/trivoallan/ontrack/main/';
 
@@ -13,7 +14,11 @@ export async function GET() {
     const { title, description, adr, status } = page.data;
     // An ADR has no description: its number and its status say what it is.
     const about = description ?? (adr && status);
-    return `- [${adr ? `${adr} ` : ''}${title}](${raw}${page.filePath!.replace(/^src\/content\//, '')})${about ? `: ${about}` : ''}`;
+    // A question of the catalogue is a file of the track, at its release.
+    const file = page.filePath!.startsWith('../node_modules/trivoallan/')
+      ? `https://raw.githubusercontent.com/trivoallan/ontrack-engineering/v${version}/${page.filePath!.replace('../node_modules/trivoallan/', '')}`
+      : `${raw}${page.filePath!.replace(/^src\/content\//, '')}`;
+    return `- [${adr ? `${adr} ` : ''}${title}](${file})${about ? `: ${about}` : ''}`;
   };
   // What ontrack is for: every page but this repository's own decisions and
   // architecture, the tutorial first.

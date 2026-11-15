@@ -1,0 +1,93 @@
+---
+title: The ontrack-engineering track
+description: The reference track ontrack is built with, what a repository gets from it, and how to install it.
+---
+
+import { Aside, Card, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import { domains, questions, version } from '../site/src/track.mjs';
+
+export const DomainLink = ({ name }) => {
+  const domain = domains.find((d) => d.name === name);
+  return <a class="card-link" href={`questions/#${domain.slug}`}>{domain.questions.length} questions <span aria-hidden="true">→</span></a>;
+};
+
+[`@trivoallan/ontrack-engineering`](https://www.npmjs.com/package/@trivoallan/ontrack-engineering)
+is the reference track: 26 questions on how a Python or TypeScript
+repository on GitHub is engineered, each with the answer it recommends.
+ontrack is built with it, and answers every one of its questions in
+[its own decisions](adr/trivoallan/ADR-0001-record-architecture-decisions.md).
+
+## What you get
+
+<CardGrid>
+  <Card title="Agents" icon="laptop">
+    The rules you accepted, written into a managed block of `AGENTS.md`, which Claude Code, opencode and Copilot CLI read on every session; plugins pinned; the agent opens the pull request and never approves one; a person merges it, or approves it so the agent can; if you choose, the agent acts under its own GitHub identity.
+
+    <DomainLink name="Agents" />
+  </Card>
+  <Card title="Architecture" icon="puzzle">
+    A hexagonal core by default, where the domain depends on no I/O; the architecture documented in arc42's twelve sections, with C4 diagrams generated from a LikeC4 model kept as code.
+
+    <DomainLink name="Architecture" />
+  </Card>
+  <Card title="Code" icon="seti:typescript">
+    Validation at every boundary (`zod` or `pydantic`), a test coverage target you set, and your code scanned by CodeQL, its alerts blocking from `high`.
+
+    <DomainLink name="Code" />
+  </Card>
+  <Card title="Decisions and docs" icon="document">
+    Decisions kept as ADRs, docs in one language under one root.
+
+    <DomainLink name="Decisions & docs" />
+  </Card>
+  <Card title="Delivery" icon="rocket">
+    A pipeline designed once, with a blocking gate and releases cut from tags, that zizmor audits; a licence others can reuse the code under.
+
+    <DomainLink name="Delivery" />
+  </Card>
+  <Card title="Supply chain" icon="seti:lock">
+    gitleaks before every commit, dependencies admitted by a person with install scripts ignored, a CycloneDX SBOM scanned by Grype, SLSA Build Level 2 provenance, and the tools outside npm pinned in one place.
+
+    <DomainLink name="Supply chain" />
+  </Card>
+  <Card title="Workflow" icon="approve-check-circle">
+    One convention for commits and branch names, refused at the gate instead of argued in review.
+
+    <DomainLink name="Workflow" />
+  </Card>
+</CardGrid>
+
+<Aside type="note">
+A check confirms the wiring is there, not that it is right. Reject any
+question that does not fit your repository: a rejection is a full answer.
+</Aside>
+
+## Install it
+
+<Steps>
+
+1. Install the track under the alias `trivoallan`, its namespace: the
+   questions land in `docs/adr/trivoallan/`.
+
+   ```bash
+   npm i -D trivoallan@npm:@trivoallan/ontrack-engineering
+   ```
+
+2. Check that the package was built by the track's release workflow.
+
+   ```bash
+   npm audit signatures
+   ```
+
+3. List the questions it would import. The [tutorial](tutorial.mdx) goes on
+   from here.
+
+   ```bash
+   npx ontrack plan
+   ```
+
+</Steps>
+
+## Questions
+
+<LinkCard title="Questions" href="questions/" description={`The ${questions.length} questions of ontrack-engineering ${version}, by domain.`} />

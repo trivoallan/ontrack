@@ -24,8 +24,9 @@ may still carry the earlier keyword:
 is the track ontrack uses on itself. Its ADRs are in
 [trivoallan/ontrack-engineering](https://github.com/trivoallan/ontrack-engineering).
 
-ontrack does not review the tracks the search returns. A track is a
-dependency: decide on it as you decide on any other.
+> [!WARNING]
+> ontrack does not review the tracks the search returns. A track is a
+> dependency: decide on it as you decide on any other.
 
 ## Read it before you install it
 
@@ -51,7 +52,7 @@ npx ontrack plan
 ```
 
 `plan` lists the questions and changes no file. `npx ontrack apply` then
-imports them. The [tutorial](tutorial.md) goes through these steps with a
+imports them. The [tutorial](tutorial.mdx) goes through these steps with a
 track.
 
 ## Keep what applies, reject the rest

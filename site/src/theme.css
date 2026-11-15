@@ -27,3 +27,60 @@
   fill: var(--sl-color-bg) !important;
   opacity: 1 !important;
 }
+
+/* A group inside a group reads as one more entry of its parent, not as a
+   second heading: Starlight draws it as large and bold as the top-level
+   ones. Its caret already says it opens. */
+.sidebar-content ul ul .group-label .large {
+  font-size: var(--sl-text-sm);
+  font-weight: normal;
+}
+
+/* A domain of the track page: the colours of its card in "What you get". */
+.domain-badge {
+  display: inline-block;
+  border: 1px solid var(--domain);
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  background-color: var(--domain-low);
+  font-size: var(--sl-text-lg);
+}
+
+/* A domain card of the track page links to its questions: the link covers
+   the card, which keeps the colour Starlight gives it by position. */
+.card:has(.card-link) {
+  position: relative;
+}
+.card:has(.card-link):hover {
+  border-color: var(--sl-color-gray-2);
+}
+/* The look of a LinkCard's affordance, not of a link in prose, at the
+   foot of the card whatever the length of its text. */
+.card:has(.card-link) .body {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+}
+.card .body > .card-link {
+  display: block;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  color: var(--sl-color-gray-2);
+  font-size: var(--sl-text-sm);
+  font-weight: 600;
+  text-align: end;
+  text-decoration: none;
+}
+.card:has(.card-link):hover .card-link {
+  color: var(--sl-color-white);
+}
+.card-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+/* A question card's arrow sits at its foot, as the domain cards' link. */
+.question-cards .sl-link-card .icon {
+  align-self: end;
+}
