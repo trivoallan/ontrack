@@ -17,6 +17,6 @@
 
 ## 3. Evaluation (phase 2)
 
-- [ ] 3.1 Rerun the desk test (`research/desk-test-first-proposal/run-one-v2.sh`) with the new sequence prompt on the 10 repositories plus 3 held-out ones; score AB-1 to AB-3 per ADR as `research/prd-backlog-reveal.md` defines them
-- [ ] 3.2 Run 5 scripted sessions that skip one ADR and stop at the third; check AB-4 and AB-5 (no write to skipped or open ADRs, summary present)
-- [ ] 3.3 Record raw counts per slice in `research/desk-test-first-proposal/results.md`; report any AB-4 or AB-5 failure to the maintainer before merging
+- [x] 3.1 Rerun the desk test (`research/desk-test-first-proposal/run-one-v2.sh`) with the new sequence prompt on the 10 repositories plus 3 held-out ones; score AB-1 to AB-3 per ADR as `research/prd-backlog-reveal.md` defines them
+- [x] 3.2 Run 5 scripted sessions that skip one ADR and stop at the third; check AB-4 and AB-5 (no write to skipped or open ADRs, summary present)
+- [x] 3.3 Record raw counts per slice in `research/desk-test-first-proposal/results.md`; report any AB-4 or AB-5 failure to the maintainer before merging

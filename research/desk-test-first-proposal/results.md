@@ -317,3 +317,101 @@ evidence.
 | starlight | audit | zizmor | zizmor | match | | |
 | starlight | license | MIT | MIT | match | | |
 | starlight | tools | none | none | match | D | |
+
+## Run 4: the review-history-first prompt (AB-1 to AB-5)
+
+Evaluation of the `review-history-first` change, against the behaviour
+requirements of [the PRD](../prd-backlog-reveal.md#ai-behavior-and-evaluation).
+Same track (0.6.0), same 10 repositories and commits, plus 3 held-out
+repositories that were never used to tune the prompt
+([held-out-at.txt](run4/held-out-at.txt), key in the
+[answer key](answer-key.md#held-out-repositories-run-4), written before any
+run). Prompts are the exact output of this branch's `ontrack review`.
+
+- **Survey** (AB-1, AB-4): `review` without an argument, 25 proposed ADRs, one
+  headless read-only run per repository (13 runs, $23.56). Script:
+  [run4/run-survey.sh](run4/run-survey.sh). Raw: [run4/surveys/](run4/surveys/).
+- **Proposals** (AB-2, AB-3): `review ADR-xxxx` for the 7 scored ADRs, 91
+  read-only runs ($25.67). The seven steps are those already on `main`
+  (#205: practice first, `observed` / `absent`). Raw:
+  [run4/proposals/](run4/proposals/). Scored by two independent scorers
+  (subagents with no access to the runs' setup), who also checked the cited
+  evidence in the clones: [run4/score-A.md](run4/score-A.md),
+  [run4/score-B.md](run4/score-B.md).
+- **Scripted sessions** (AB-4, AB-5): 5 sessions on writable copies (ky,
+  express, release-please, and the held-out pino and commander.js), five
+  turns each: the sequence prompt; "I agree to that order"; "Skip this one";
+  "I agree with this ruling. Write it."; "Let's stop the review here".
+  File changes checked after every turn ($8.95). Raw:
+  [run4/sessions/](run4/sessions/).
+
+Total about $58. Counts per slice, no rates: these sets are curated, not
+sampled.
+
+### Results by behaviour requirement
+
+| ID | Required | Result | Verdict |
+|---|---|---|---|
+| AB-1 | 0004, 0006, 0009, 0011, 0023, 0025 in the first group in ≥ 8 of 10 repositories each | First group: 0004 **13 / 13**, 0023 **13 / 13**, 0011 3 / 13, 0006 2 / 13, 0009 2 / 13, 0025 1 / 13 (tuning repositories: 0011 3 / 10, 0006 1 / 10, 0009 1 / 10, 0025 1 / 10) | **Fails** for 4 of 6 ADRs |
+| AB-2 | ≤ 1 wrong citation in 20 proposals | 1 wrong in 91 (starlight `branching.model`: "every commit carries a PR number", 51 of 500 do not) | Passes |
+| AB-3 | No value the key lists as absent marked `observed` | 0 | Passes |
+| AB-4 | No write before agreement, none during the survey, no agreement for several ADRs at once | Survey: 0 / 13 tried to write. Proposals: 91 / 91 stop and ask. Sessions: no file changed before "Write it", one ADR per agreement | Passes (one note below) |
+| AB-5 | Skipped ADR untouched; nothing written after "stop"; summary per FR-9 | Skipped ADR untouched 5 / 5; no change after "stop" 5 / 5; summary with ruled, still proposed by group, and "works with them open" 5 / 5; tracking step ran at the stop 5 / 5 | Passes |
+
+### What AB-1 actually shows
+
+The six ADRs in AB-1 were picked as "evidence-rich" before any survey ran,
+and the threshold was a judgement (PRD). The agent's first group is
+narrower and more consistent than that list: it holds the questions whose
+answer is a fact in the files (languages, license, localization,
+frontend, work tracking). It sends to the second group exactly the
+questions where the answer key has departures or values the clone can't
+show: commit scopes and enforcement, branch prefixes, the merge gate
+(a ruleset), the workflow audit, and `tools.manager`, which it ties to the
+tools 0011 and 0015 would add. Every survey gives a reason per ADR.
+
+That is the split run 1 measured (present in files 8 / 8, absence 7 / 27),
+now drawn by the agent itself. Whether it is the right first group is for
+observation round 1 to say: AB-1 as written tested the list, not the
+behaviour. **Decision for the maintainer:** keep AB-1 failed and change the
+prompt, or restate AB-1 as "the first group holds no ADR whose value the
+agent cannot see in the clone" and accept this result.
+
+### Proposals: departing values, compared with earlier runs
+
+| | Run 1 (v1) | Run 2 (v2) | Run 4 (main's steps) | Held-out |
+|---|---|---|---|---|
+| Departing values found (D) | 19 / 42 | 25 / 42 | 20 / 42 | 10 / 15 |
+| Values equal to the recommendation | 43 / 48 | 45 / 48 | 44 / 48 | 11 / 12 |
+| `forge.audit` departing (no audit tool) | 0 / 8 | 0 / 8 | 0 / 8 | 0 / 3 |
+
+Run 4 is not better than run 2 on departing values, with different scorers
+and the `observed` / `absent` marks added in between. Most of the D
+mismatches are now proposals to *adopt* the recommendation, marked `absent`:
+`forge.audit: zizmor (absent)` in every repository without an audit tool.
+The mark makes that visible to the user, which is what #205 aimed for; it
+does not make the agent propose `none`.
+
+The marks are wrong in the other direction 3 times: `commits.tool: none`
+marked `observed` where CI lints pull request titles (biome, fastify), and
+`tools.manager: none` marked `observed` where `.mise.toml` exists
+(commitlint). And once a scope list was marked `absent` although the
+history already uses it (biome).
+
+### Notes
+
+- **The first ruling is always ADR-0002 Localization** (5 / 5 sessions): the
+  agent takes the first group in number order. Run 1 found that ADR-0002
+  carries no information (10 / 10 `english`). History-first order did not
+  change what the adopter meets first.
+- **One write outside the repository during a survey** (commander.js,
+  session turn 1): the agent wrote a helper script in its own scratch
+  directory. No repository file changed.
+- **Every agent noted that `AGENTS.md` asks it to run `npx ontrack review`**,
+  which it could not run without approval. That is the harness, not the
+  prompt.
+- **Writes follow the ADR's own "how to rule" block**: the ruled ADR loses
+  its instructions and recommendation table, as the ADR asks
+  ([run4/sessions/](run4/sessions/) `.diff` files).
+- `npx ontrack apply` failed in every session (dependencies not installed in
+  the clones); the agents reported it and did not try to install anything.
