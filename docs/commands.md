@@ -416,7 +416,7 @@ Each is a question this repository has not answered yet, shipped with the answer
 For each ADR, in turn:
 
 1. Read its file in full. Do not edit any other ADR.
-2. Start from the recommendation the ADR makes. Look in this repository for evidence that it does not apply here. If you find none, say so in one line.
+2. Start from what this repository does today on this question: its files, configuration, CI and history. Where it does nothing, say so: an absence is evidence too. Describe the repository as it is, not as the other `proposed` ADRs would make it. Then compare with the recommendation the ADR makes, and name every difference.
 3. When a recommendation is conditional ("if this repository…"), check the condition and cite the file or command output that settles it.
 4. For every key under `traits:` that the ADR leaves to the repository, propose a value drawn from the repository, with its evidence.
 5. Propose `rejected` only on evidence that the question does not apply here, and say what stands in for it.
@@ -437,7 +437,7 @@ Review one architecture decision record of this repository: `docs/adr/trivoallan
 It is `proposed`: a question this repository has not answered yet, shipped with the answer its track recommends. Propose a ruling; the user decides. Where the ADR itself says how to rule, it prevails over this prompt.
 
 1. Read its file in full. Do not edit any other ADR.
-2. Start from the recommendation the ADR makes. Look in this repository for evidence that it does not apply here. If you find none, say so in one line.
+2. Start from what this repository does today on this question: its files, configuration, CI and history. Where it does nothing, say so: an absence is evidence too. Describe the repository as it is, not as the other `proposed` ADRs would make it. Then compare with the recommendation the ADR makes, and name every difference.
 3. When a recommendation is conditional ("if this repository…"), check the condition and cite the file or command output that settles it.
 4. For every key under `traits:` that the ADR leaves to the repository, propose a value drawn from the repository, with its evidence.
 5. Propose `rejected` only on evidence that the question does not apply here, and say what stands in for it.

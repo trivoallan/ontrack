@@ -14,7 +14,7 @@ const sorted = (root: string) => readAdrs(root).sort((a, b) => a.ref.localeCompa
 const named = (adr: Adr) => `\`${adr.path}\`${adr.title ? ` (${adr.title})` : ''}`;
 
 const STEPS = `1. Read its file in full. Do not edit any other ADR.
-2. Start from the recommendation the ADR makes. Look in this repository for evidence that it does not apply here. If you find none, say so in one line.
+2. Start from what this repository does today on this question: its files, configuration, CI and history. Where it does nothing, say so: an absence is evidence too. Describe the repository as it is, not as the other \`proposed\` ADRs would make it. Then compare with the recommendation the ADR makes, and name every difference.
 3. When a recommendation is conditional ("if this repository…"), check the condition and cite the file or command output that settles it.
 4. For every key under \`traits:\` that the ADR leaves to the repository, propose a value drawn from the repository, with its evidence.
 5. Propose \`rejected\` only on evidence that the question does not apply here, and say what stands in for it.

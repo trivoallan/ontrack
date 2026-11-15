@@ -163,6 +163,16 @@ test('prompt: agreement comes before writing, and apply closes it', () => {
   assert.deepEqual(out.match(/^\d\./gm), ['1.', '2.', '3.', '4.', '5.', '6.', '7.']);
 });
 
+test('prompt: both forms start from the practice, and compare with the recommendation after', () => {
+  for (const out of [formatReview(selectAdr(tree(), 'ADR-0006')), formatSequence(pendingAdrs(tree()))]) {
+    const step = out.match(/^2\. .*$/m)?.[0] ?? '';
+    assert.ok(step.startsWith('2. Start from what this repository does today'));
+    assert.ok(step.includes('an absence is evidence too'));
+    assert.ok(step.includes('not as the other `proposed` ADRs would make it'));
+    assert.ok(step.indexOf('does today') < step.indexOf('compare with the recommendation'));
+  }
+});
+
 test('prompt: an own ADR sits in docs/adr/local/', () => {
   const root = makeTree({ [RELEASE]: adr('Release', 'status: proposed') });
   assert.ok(formatReview(selectAdr(root, 'ADR-0020-release')).includes(`\`${RELEASE}\``));
