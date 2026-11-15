@@ -18,9 +18,12 @@
 .adr-status.caution {
   --sl-color-border-badge: var(--sl-badge-caution-border);
 }
-/* A question that comes with a check. */
+/* A question that comes with a check. It has no dot to match, and bright
+   purple is unreadable under dark text: Starlight's own tip badge. */
 .adr-status.tip {
   --sl-color-border-badge: var(--sl-badge-tip-border);
+  color: var(--sl-badge-tip-text);
+  background-color: var(--sl-badge-tip-bg);
 }
 /* Starlight has no grey badge: its default variant is the accent colour.
    Grey is dark in the light theme and light in the dark one. */
