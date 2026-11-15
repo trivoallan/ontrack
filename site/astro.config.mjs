@@ -52,6 +52,11 @@ const pages = () => (tree, file) => {
 export default defineConfig({
   site: 'https://trivoallan.github.io',
   base,
+  // Pages renamed when a source became a track: links published before still arrive.
+  redirects: {
+    '/find-a-source': `${base}/find-a-track/`,
+    '/write-your-own-source': `${base}/write-your-own-track/`,
+  },
   // The logo is the favicon too: serve docs/assets as static files.
   publicDir: '../docs/assets',
   markdown: { remarkPlugins: [pages] },
@@ -77,15 +82,15 @@ export default defineConfig({
       // for comes first; this repository's own decisions and architecture
       // stay one click away, collapsed.
       // Grouped by what the reader came to do, and the guides by who they
-      // are: a repository that installs a source, or the author of one. The
+      // are: a repository that installs a track, or the author of one. The
       // model is read right after the tutorial, before either set of guides.
       sidebar: [
         { label: 'Start here', items: ['tutorial', 'how-it-works'] },
-        { label: 'Use a source', items: ['find-a-source', 'run-ontrack-in-ci', 'draft-a-change-from-an-issue'] },
-        { label: 'Maintain a source', items: ['write-your-own-source', 'revise-a-question'] },
+        { label: 'Use a track', items: ['find-a-track', 'run-ontrack-in-ci', 'draft-a-change-from-an-issue'] },
+        { label: 'Maintain a track', items: ['write-your-own-track', 'revise-a-question'] },
         { label: 'Reference', items: ['commands', 'file-formats'] },
         // One subgroup per namespace: `local`, the repository's own ADRs,
-        // then each imported source.
+        // then each imported track.
         { label: 'ontrack on itself', collapsed: true, items: [{ autogenerate: { directory: 'adr', collapsed: true } }] },
         { label: 'For contributors', collapsed: true, items: [{ autogenerate: { directory: 'architecture/arc42' } }] },
       ],

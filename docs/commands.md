@@ -7,7 +7,7 @@ ontrack has five commands. Only `apply` writes to the repository.
 
 | Command | What it does | Writes |
 | --- | --- | --- |
-| [`plan`](#ontrack-plan) | Shows what importing the sources would change | Nothing |
+| [`plan`](#ontrack-plan) | Shows what importing the tracks would change | Nothing |
 | [`apply`](#ontrack-apply) | Imports the ADRs and updates `AGENTS.md`, as `plan` reports | `docs/adr/`, `AGENTS.md` |
 | [`instructions`](#ontrack-instructions) | Prints the decided traits as the rules block of `AGENTS.md` | Nothing |
 | [`review`](#ontrack-review-adr) | Prints a prompt asking a coding agent to rule on ADRs | Nothing |
@@ -30,14 +30,14 @@ Every command shares the same exit codes.
 | --- | --- |
 | `0` | Nothing to do |
 | `2` | Changes pending, or a check failed |
-| `1` | Error (unknown command, unreadable source…) |
+| `1` | Error (unknown command, unreadable track…) |
 
 A CI job can detect an out-of-date repository on `2` without parsing the
 output.
 
 ## `ontrack plan`
 
-Shows what importing the sources would change in the repository. It never
+Shows what importing the tracks would change in the repository. It never
 modifies a file and makes no network call.
 
 ```bash
@@ -50,16 +50,16 @@ Each ADR that is not up to date falls in one category:
 | --- | --- |
 | `new` | Not imported yet |
 | `revised` | The question moved upstream; the line ends with `(revision <local> → <upstream>)` |
-| `removed` | No longer shipped by the source |
+| `removed` | No longer shipped by the track |
 | `undetermined` | No usable `revision:` to compare |
 | `unreadable` | No recognizable frontmatter |
-| `check` | Up to date, but the source's `check:` line differs from yours |
+| `check` | Up to date, but the track's `check:` line differs from yours |
 
-`plan` also reports files to move from a flat `docs/adr/` layout: a source's
+`plan` also reports files to move from a flat `docs/adr/` layout: a track's
 ADRs to `docs/adr/<alias>/`, your own to `docs/adr/local/`. It reports the state of the rules block in `AGENTS.md`
 (`missing` or `out of date`).
 
-**Exit code.** `0` when every ADR is unchanged, or when there is no source at
+**Exit code.** `0` when every ADR is unchanged, or when there is no track at
 all. `2` for any other category, a migration, or a rules block to write.
 
 **Options.**
@@ -84,7 +84,7 @@ The exit code is the same with and without `--all`.
 ### `plan` output contract
 
 `plan` never modifies a file and makes no network call. Its output follows
-this format, one block per source, sources sorted by alias:
+this format, one block per track, tracks sorted by alias:
 
 ```
 platform: 2 revised, 1 new, 3 unchanged
@@ -99,10 +99,10 @@ migration: 5 files docs/adr/ → docs/adr/platform/
   move          SDR-0010.md
 ```
 
-- Line 1, per source: `<alias>: <count per category>`, in the order revised, new, removed, undetermined, unreadable, check, unchanged. Zero counts are omitted, except "unchanged".
+- Line 1, per track: `<alias>: <count per category>`, in the order revised, new, removed, undetermined, unreadable, check, unchanged. Zero counts are omitted, except "unchanged".
 - Then one line per ADR that is not unchanged, sorted by name: two spaces, the category in a 12-character column, two spaces, the file name without `.md`, then two spaces and the ADR's title, unless the name already carries a slug (`ADR-0006-commits`). A `revised` line ends with `(revision <local> → <upstream>)`.
-- The title is the frontmatter `title:` key, or else the first `# ` heading, without a leading `<name>: ` that repeats the file name. It comes from the source's copy (the local copy for a `removed` ADR). An ADR without a title shows its name only.
-- Categories: `new` (not imported yet), `revised` (the question moved upstream), `removed` (no longer shipped by the source), `undetermined` (no usable `revision:` to compare), `unreadable` (no recognizable frontmatter), `check` (up to date, but the source's `check:` line differs from yours).
+- The title is the frontmatter `title:` key, or else the first `# ` heading, without a leading `<name>: ` that repeats the file name. It comes from the track's copy (the local copy for a `removed` ADR). An ADR without a title shows its name only.
+- Categories: `new` (not imported yet), `revised` (the question moved upstream), `removed` (no longer shipped by the track), `undetermined` (no usable `revision:` to compare), `unreadable` (no recognizable frontmatter), `check` (up to date, but the track's `check:` line differs from yours).
 - A `check` line is followed by the `check:` line that would go (four spaces, `- `) and the one that would come (four spaces, `+ `), so you read the command before `apply` writes it:
 
   ```
@@ -113,12 +113,12 @@ migration: 5 files docs/adr/ → docs/adr/platform/
   ```
 
   The `check:` line is the first one at column zero in the frontmatter. Only an ADR that is up to date can be `check`: a `revised` ADR gets its check once you have ruled again.
-- A flat-layout migration (`docs/adr/<file>` that belongs to the source but is not under `docs/adr/<alias>/`) is always shown: `migration: <n> file(s) docs/adr/ → docs/adr/<alias>/`, then one `move` line per file.
-- Your own ADRs live in `docs/adr/local/`. Those still placed directly in `docs/adr/` (the root files no source ships) are shown the same way, after the last source: `migration: <n> file(s) docs/adr/ → docs/adr/local/`, then one `move` line per file.
+- A flat-layout migration (`docs/adr/<file>` that belongs to the track but is not under `docs/adr/<alias>/`) is always shown: `migration: <n> file(s) docs/adr/ → docs/adr/<alias>/`, then one `move` line per file.
+- Your own ADRs live in `docs/adr/local/`. Those still placed directly in `docs/adr/` (the root files no track ships) are shown the same way, after the last track: `migration: <n> file(s) docs/adr/ → docs/adr/local/`, then one `move` line per file.
 - With `--all`, the unchanged ADRs get a line too, so every ADR has one, sorted by name whatever its category. Each ADR line then carries a verdict between the category and the name: the category in its 12-character column, two spaces, the verdict in a 10-character column, two spaces, then the name and the rest of the line as above. The summary line, the `- ` and `+ ` lines, the migration lines and the exit code do not change.
-- The verdict is the `status:` of your copy, never the source's: the first `status:` line at column zero in its frontmatter, without a trailing `# comment`. It is `-` when you have no copy yet (a `new` ADR), when the copy has no recognizable frontmatter, or when it states no status.
-- When there is nothing to do, one line per source (`platform: 14 unchanged`), and the exit code is `0`. Any other category, or a migration, gives `2`.
-- With no source at all, `plan` prints `no ontrack source found` and exits with `0`, or prints the migration of your own ADRs after that line and exits with `2`.
+- The verdict is the `status:` of your copy, never the track's: the first `status:` line at column zero in its frontmatter, without a trailing `# comment`. It is `-` when you have no copy yet (a `new` ADR), when the copy has no recognizable frontmatter, or when it states no status.
+- When there is nothing to do, one line per track (`platform: 14 unchanged`), and the exit code is `0`. Any other category, or a migration, gives `2`.
+- With no track at all, `plan` prints `no track found` and exits with `0`, or prints the migration of your own ADRs after that line and exits with `2`.
 
 Any change to this format goes through this page first.
 
@@ -135,10 +135,10 @@ npx ontrack apply
 | Option | Effect |
 | --- | --- |
 | `--dry-run` | Print what `apply` would do, write nothing |
-| `--prune` | Also delete ADRs the source no longer ships |
+| `--prune` | Also delete ADRs the track no longer ships |
 | `--confirm <name>` | Declare that an `undetermined` verdict still holds; `--confirm all` for every one |
 
-What it does, per source:
+What it does, per track:
 
 | Action | When | Effect |
 | --- | --- | --- |
@@ -146,7 +146,7 @@ What it does, per source:
 | `moved` | A flat-layout file | Moved from `docs/adr/` to `docs/adr/<alias>/`, or to `docs/adr/local/` for one of your own ADRs |
 | `pruned` | A `removed` ADR, with `--prune` | Deleted |
 | `confirmed` | An `undetermined` ADR, with `--confirm` | Gets the upstream `revision:`; nothing else changes |
-| `synced` | A `check` ADR | Gets the source's `check:` line; nothing else changes |
+| `synced` | A `check` ADR | Gets the track's `check:` line; nothing else changes |
 
 A `revised` or `unreadable` ADR is never written to or deleted: a person must
 rule again.
@@ -170,18 +170,18 @@ file: the [rules block](file-formats.md#the-rules-block-in-agentsmd) of
 ```bash
 npx ontrack apply --dry-run          # print what apply would do, write nothing
 npx ontrack apply                    # import new ADRs, move flat files
-npx ontrack apply --prune            # also delete ADRs the source no longer ships
+npx ontrack apply --prune            # also delete ADRs the track no longer ships
 npx ontrack apply --confirm SDR-0003 # declare an undetermined verdict still holds
 npx ontrack apply --confirm all      # same, for every undetermined ADR
 ```
 
-What it does, per source:
+What it does, per track:
 
 - `imported`: a `new` ADR is copied, byte for byte, into `docs/adr/<alias>/`.
 - `moved`: a flat-layout file moves from `docs/adr/` to `docs/adr/<alias>/`, and one of your own ADRs to `docs/adr/local/`, under a `local:` line (`git mv` in a git repository, a plain rename otherwise).
 - `pruned`, only with `--prune`: a `removed` ADR is deleted.
 - `confirmed`, only with `--confirm`: an `undetermined` ADR gets the upstream `revision:`; nothing else in the file changes.
-- `synced`: a `check` ADR gets the source's `check:` line, set, replaced or removed; nothing else in the file changes. It needs no option. The `check:` line of an imported ADR belongs to its source: to run a different check, supersede the ADR with one of your own.
+- `synced`: a `check` ADR gets the track's `check:` line, set, replaced or removed; nothing else in the file changes. It needs no option. The `check:` line of an imported ADR belongs to its track: to run a different check, supersede the ADR with one of your own.
 
 A `revised` or `unreadable` ADR is never written to or deleted (only moved by
 a migration): its verdict must be taken again by a person. For a `revised`
@@ -239,7 +239,7 @@ npx ontrack instructions
 - It reads the ADRs of every `docs/adr/<namespace>/`: the imported ones, and
   the repository's own in `docs/adr/local/`. Own ADRs still placed directly
   in `docs/adr/` are read too, as `local/<name>`; the same file name in both
-  places is an error. It does not read the sources in `node_modules`: a
+  places is an error. It does not read the tracks in `node_modules`: a
   shipped ADR holds a question, not an answer.
 - An ADR carries decided traits when it is `accepted`, is not superseded, and
   has a `traits:` block.
@@ -288,7 +288,7 @@ commits:
 <!-- ontrack:end -->
 ~~~
 
-- The ADRs read are the repository's: `docs/adr/*.md`, named `local/<file name without .md>`, and `docs/adr/<namespace>/*.md`, named `<namespace>/<file name without .md>`. Sources in `node_modules` are not read, because a shipped ADR holds a question, not an answer.
+- The ADRs read are the repository's: `docs/adr/*.md`, named `local/<file name without .md>`, and `docs/adr/<namespace>/*.md`, named `<namespace>/<file name without .md>`. Tracks in `node_modules` are not read, because a shipped ADR holds a question, not an answer.
 - An ADR carries decided traits when it is `accepted`, is not superseded, and has an indented `traits:` block. The block is copied verbatim, dedented, and its values are never interpreted. `traits: {}` declares nothing, and any other inline value is an error.
 - An `accepted` ADR supersedes the ADRs named in its `supersedes:` key (`[A, B]` or `- A` lines). A plain name matches an ADR's `adr:` value, or its file name, in the same directory. `<namespace>/<name>` and `local/<name>` reach another directory.
 - `proposed` ADRs are listed under "Not yet decided". Every other status is ignored.
@@ -347,7 +347,7 @@ Review the architecture decision records of this repository that are still `prop
 - `docs/adr/trivoallan/ADR-0002-localization.md` (Localization)
 - `docs/adr/trivoallan/ADR-0006-commits.md` (Commits)
 
-Each is a question this repository has not answered yet, shipped with the answer its source recommends. Propose a ruling; the user decides. Where an ADR itself says how to rule, it prevails over this prompt.
+Each is a question this repository has not answered yet, shipped with the answer its track recommends. Propose a ruling; the user decides. Where an ADR itself says how to rule, it prevails over this prompt.
 
 For each ADR, in turn:
 
@@ -370,7 +370,7 @@ the same text for every ADR, apart from its path and title:
 ~~~
 Review one architecture decision record of this repository: `docs/adr/trivoallan/ADR-0006-commits.md` (Commits).
 
-It is `proposed`: a question this repository has not answered yet, shipped with the answer its source recommends. Propose a ruling; the user decides. Where the ADR itself says how to rule, it prevails over this prompt.
+It is `proposed`: a question this repository has not answered yet, shipped with the answer its track recommends. Propose a ruling; the user decides. Where the ADR itself says how to rule, it prevails over this prompt.
 
 1. Read its file in full. Do not edit any other ADR.
 2. Start from the recommendation the ADR makes. Look in this repository for evidence that it does not apply here. If you find none, say so in one line.
@@ -402,25 +402,25 @@ It is `accepted`: a decision this repository has taken, whose text is frozen. Ch
 Once every ADR is ruled, list the rulings this repository does not follow yet: a value its code, configuration or tooling does not match, or a tool the ruling names that is not set up. A ruling is identified by its ADR number and trait key, as in `ADR-0015 secrets.guard`. The tracker is the one named by the decided `tracking` trait in AGENTS.md. Before proposing, list the items in that tracker that carry the label `ontrack`, open and closed: propose nothing for a ruling whose identifier starts the title of one of those items, and say in one line which closed items name a ruling this repository still does not follow. When you cannot list the tracker's items, propose every ruling and say that duplicates were not checked. For each ruling left, propose a tracking item: its title starts with the ruling's identifier, as in `ADR-0015 secrets.guard: install gitleaks`, and it names the ADR it serves. Create in the tracker (`tracking.tool`, in `tracking.project`) only the items the user agrees to, asked with a question tool such as `AskUserQuestion` when you have one, each with the label `ontrack`, creating the label first when the tracker requires it. When no `tracking` trait is decided, or `tracking.tool` is `none`, give the list in your reply and create nothing.
 ~~~
 
-When a source revises a question you already ruled, `plan` reports the ADR
+When a track revises a question you already ruled, `plan` reports the ADR
 as `revised`, and the ruling must be taken again. Naming that ADR prints the
-prompt for it: the agent compares your copy with the source's, keeps the
+prompt for it: the agent compares your copy with the track's, keeps the
 ruling where the question did not move, and proposes one where it did. It is
 the same text for every ADR, apart from its path, its title, the path of the
-source's copy and the two revisions:
+track's copy and the two revisions:
 
 ~~~
 Rule again one architecture decision record of this repository: `docs/adr/trivoallan/ADR-0012-delivery.md` (Delivery).
 
-Its source has revised the question: this repository ruled on revision 1, and `node_modules/trivoallan/adr/ADR-0012-delivery.md` asks revision 2. The ruling stands until it is taken again. Propose the new ruling; the user decides. Where the source's copy itself says how to rule, it prevails over this prompt.
+Its track has revised the question: this repository ruled on revision 1, and `node_modules/trivoallan/adr/ADR-0012-delivery.md` asks revision 2. The ruling stands until it is taken again. Propose the new ruling; the user decides. Where the track's copy itself says how to rule, it prevails over this prompt.
 
-1. Read both files in full: the repository's copy, which holds the ruling, and the source's copy, which holds the question as it is asked now. Edit neither the source's copy nor any other ADR.
+1. Read both files in full: the repository's copy, which holds the ruling, and the track's copy, which holds the question as it is asked now. Edit neither the track's copy nor any other ADR.
 2. List what moved in the question between the two: every key under `traits:` added, removed or renamed, every set of allowed values that changed, and every recommendation that changed. Leave out what only the ruling changed. If nothing that moved touches the ruling, say so in one line.
 3. For every trait key that did not move, keep the value this repository ruled, and the reason written for it where it departs from the recommendation.
-4. For every trait key that moved, start from the recommendation the source's copy makes. Look in this repository for evidence that it does not apply here, check every condition it states ("if this repository…"), and propose a value drawn from the repository, with its evidence.
+4. For every trait key that moved, start from the recommendation the track's copy makes. Look in this repository for evidence that it does not apply here, check every condition it states ("if this repository…"), and propose a value drawn from the repository, with its evidence.
 5. Keep the status, unless what moved settles whether the question applies here. Propose `rejected` only on evidence that it does not, and say what stands in for it.
 6. Present the proposed ruling: the status, one line per trait key with its value, marked kept or changed, the evidence for every change, and every departure from the recommendation with its reason. Then stop and ask for the user's agreement, with a question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees.
-7. Once the user agrees: replace the repository's copy with the source's copy, which carries the new `revision:`; write the ruling in it: the agreed status, the `traits:` keys filled, or the block removed when rejected, and the reason for every departure from the recommendation; then run `npx ontrack apply` to update AGENTS.md.
+7. Once the user agrees: replace the repository's copy with the track's copy, which carries the new `revision:`; write the ruling in it: the agreed status, the `traits:` keys filled, or the block removed when rejected, and the reason for every departure from the recommendation; then run `npx ontrack apply` to update AGENTS.md.
 
 Once every ADR is ruled, list the rulings this repository does not follow yet: a value its code, configuration or tooling does not match, or a tool the ruling names that is not set up. A ruling is identified by its ADR number and trait key, as in `ADR-0015 secrets.guard`. The tracker is the one named by the decided `tracking` trait in AGENTS.md. Before proposing, list the items in that tracker that carry the label `ontrack`, open and closed: propose nothing for a ruling whose identifier starts the title of one of those items, and say in one line which closed items name a ruling this repository still does not follow. When you cannot list the tracker's items, propose every ruling and say that duplicates were not checked. For each ruling left, propose a tracking item: its title starts with the ruling's identifier, as in `ADR-0015 secrets.guard: install gitleaks`, and it names the ADR it serves. Create in the tracker (`tracking.tool`, in `tracking.project`) only the items the user agrees to, asked with a question tool such as `AskUserQuestion` when you have one, each with the label `ontrack`, creating the label first when the tracker requires it. When no `tracking` trait is decided, or `tracking.tool` is `none`, give the list in your reply and create nothing.
 ~~~
@@ -429,22 +429,22 @@ Without an argument, once no ADR is `proposed`, the prompt lists every
 revised ADR and gives the steps once:
 
 ~~~
-Rule again the architecture decision records of this repository whose source has revised the question, one at a time, in this order:
+Rule again the architecture decision records of this repository whose track has revised the question, one at a time, in this order:
 
 - `docs/adr/trivoallan/ADR-0001-record-architecture-decisions.md` (Record architecture decisions), ruled on revision 1: `node_modules/trivoallan/adr/ADR-0001-record-architecture-decisions.md` asks revision 3
 - `docs/adr/trivoallan/ADR-0012-delivery.md` (Delivery), ruled on revision 1: `node_modules/trivoallan/adr/ADR-0012-delivery.md` asks revision 2
 
-Each holds a ruling of this repository; the file named after it is its source's copy. The ruling stands until it is taken again. Propose the new ruling; the user decides. Where a source's copy itself says how to rule, it prevails over this prompt.
+Each holds a ruling of this repository; the file named after it is its track's copy. The ruling stands until it is taken again. Propose the new ruling; the user decides. Where a track's copy itself says how to rule, it prevails over this prompt.
 
 For each ADR, in turn:
 
-1. Read both files in full: the repository's copy, which holds the ruling, and the source's copy, which holds the question as it is asked now. Edit neither the source's copy nor any other ADR.
+1. Read both files in full: the repository's copy, which holds the ruling, and the track's copy, which holds the question as it is asked now. Edit neither the track's copy nor any other ADR.
 2. List what moved in the question between the two: every key under `traits:` added, removed or renamed, every set of allowed values that changed, and every recommendation that changed. Leave out what only the ruling changed. If nothing that moved touches the ruling, say so in one line.
 3. For every trait key that did not move, keep the value this repository ruled, and the reason written for it where it departs from the recommendation.
-4. For every trait key that moved, start from the recommendation the source's copy makes. Look in this repository for evidence that it does not apply here, check every condition it states ("if this repository…"), and propose a value drawn from the repository, with its evidence.
+4. For every trait key that moved, start from the recommendation the track's copy makes. Look in this repository for evidence that it does not apply here, check every condition it states ("if this repository…"), and propose a value drawn from the repository, with its evidence.
 5. Keep the status, unless what moved settles whether the question applies here. Propose `rejected` only on evidence that it does not, and say what stands in for it.
 6. Present the proposed ruling: the status, one line per trait key with its value, marked kept or changed, the evidence for every change, and every departure from the recommendation with its reason. Then stop and ask for the user's agreement, with a question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees.
-7. Once the user agrees: replace the repository's copy with the source's copy, which carries the new `revision:`; write the ruling in it: the agreed status, the `traits:` keys filled, or the block removed when rejected, and the reason for every departure from the recommendation; then run `npx ontrack apply` to update AGENTS.md.
+7. Once the user agrees: replace the repository's copy with the track's copy, which carries the new `revision:`; write the ruling in it: the agreed status, the `traits:` keys filled, or the block removed when rejected, and the reason for every departure from the recommendation; then run `npx ontrack apply` to update AGENTS.md.
 
 Then take the next ADR in the list. Do not start an ADR before the previous one is ruled.
 
@@ -454,13 +454,13 @@ Once every ADR is ruled, list the rulings this repository does not follow yet: a
 - The ADRs read are those of `instructions`. Without an argument, the prompt lists every `proposed` ADR in reference order, the order of "Not yet decided", even when there is only one.
 - An argument with a `/` is a reference (`trivoallan/ADR-0006-commits`). Any other argument is a file name without `.md` (`ADR-0006-commits`) or an `adr:` identifier (`ADR-0006`), looked up in every directory. It must name exactly one ADR, and that ADR must be `proposed`, or `accepted` and not superseded.
 - A revised ADR is one `plan` reports as `revised` and whose copy here is no longer `proposed`, whatever its status: `accepted`, `rejected`, or superseded. Named, it gets the prompt to rule again, not the supersession prompt: rule on the question as it is asked now, then supersede. Without an argument, the revised ADRs come only once no ADR is `proposed`, in reference order.
-- A `proposed` ADR whose source revised the question gets the review prompt, like any other `proposed` one.
-- The revised ADRs are found by reading the sources, as `plan` does. When they cannot be read (no `package.json`, a dependency not installed), `review` sees no revised ADR and says nothing of it: `plan` is the command that says why.
+- A `proposed` ADR whose track revised the question gets the review prompt, like any other `proposed` one.
+- The revised ADRs are found by reading the tracks, as `plan` does. When they cannot be read (no `package.json`, a dependency not installed), `review` sees no revised ADR and says nothing of it: `plan` is the command that says why.
 - An `accepted` ADR gets the supersession prompt only when named: without an argument, `review` never reopens a decision. Supersession is that of `instructions`: an ADR another `accepted` ADR names in `supersedes:` is already superseded, and naming it is an error that says which ADR supersedes it.
 - The supersession prompt does not say how a superseded ADR is marked, nor which sections the new ADR has: those are the repository's rules on recording decisions, which the agent reads. When they say nothing on marking, the superseded file is left untouched.
 - An ADR without a title is named by its path alone.
 - Once the review is ruled, the agent proposes a tracking item for every ruling the repository does not follow yet, skipping those an item labelled `ontrack` already tracks, and creates only those you agree to, in the tracker your `tracking` trait names, with the label `ontrack` and a title that starts with the ruling (`ADR-0015 secrets.guard: …`). Without a tracker, it lists them.
-- To rule again, the agent replaces your copy with the source's, which carries the new `revision:`, and writes the ruling in it. `plan` then reports the ADR as unchanged.
+- To rule again, the agent replaces your copy with the track's, which carries the new `revision:`, and writes the ruling in it. `plan` then reports the ADR as unchanged.
 - `review` never writes a file and makes no network call. Two decided ADRs sharing a trait key do not stop it.
 - It exits with `2` when it prints a prompt, because a ruling is pending. With no `proposed` and no revised ADR it exits with `0`, says so on standard error and prints nothing, so that no agent receives that sentence as a prompt. An unknown or ambiguous name, a `rejected` ADR, or one already superseded, is an error, with `1`, unless the ADR is revised.
 
@@ -489,7 +489,7 @@ npx ontrack check
 - Each command gets `ONTRACK_ADR`: the path of its ADR's file, relative to
   the project root.
 - Only ADRs committed under `docs/adr/` are read, never `node_modules`. A
-  source's command runs only once `apply` has written it into your copy and
+  track's command runs only once `apply` has written it into your copy and
   your repository holds the ADR as `accepted`.
 
 **Exit code.** `2` when at least one check failed, `0` otherwise, `1` on an
@@ -526,7 +526,7 @@ pass       Branching (trivoallan/ADR-0009-branching)
 1 failed, 1 passed, 1 unchecked
 ```
 
-- The ADRs read, their status and their supersession are those of `instructions`. An ADR carries a check when it is `accepted`, is not superseded, and has a non-empty `check:` value. A local ADR that supersedes a source's ADR silences its check and may carry its own.
+- The ADRs read, their status and their supersession are those of `instructions`. An ADR carries a check when it is `accepted`, is not superseded, and has a non-empty `check:` value. A local ADR that supersedes a track's ADR silences its check and may carry its own.
 - The command is the rest of the `check:` line. A trailing ` # comment` is removed, and so is one pair of matching quotes around the whole value. Lines below are not part of it: put a longer command in a script.
 - Commands run through the shell, from the project root, with your environment, one at a time, in reference order. A failure does not stop the run.
 - Each command also gets `ONTRACK_ADR`: the path of its ADR's file, relative to the project root, with forward slashes, the value of the `rule:` line. A script that reads the ruled traits opens that file instead of searching for it.
@@ -535,6 +535,6 @@ pass       Branching (trivoallan/ADR-0009-branching)
 - Lines are sorted by reference. The last line counts each status, and is the only line when there is nothing to report.
 - Conflicting traits are an error, as in `instructions`, and no command runs.
 - `check` exits with `2` when at least one check failed, `0` otherwise, `1` on an error. `unchecked` ADRs do not change the exit code.
-- Only ADRs committed under `docs/adr/` are read, never `node_modules`. A source's command therefore runs only once `apply` has written it into your copy and your repository holds the ADR as `accepted`. `apply` keeps that line in step with the source, so updating a source can change what runs here: `plan` prints the old and new lines first. Read them as you would an npm install script.
+- Only ADRs committed under `docs/adr/` are read, never `node_modules`. A track's command therefore runs only once `apply` has written it into your copy and your repository holds the ADR as `accepted`. `apply` keeps that line in step with the track, so updating a track can change what runs here: `plan` prints the old and new lines first. Read them as you would an npm install script.
 
 Any change to this format goes through this page first.

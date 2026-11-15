@@ -3,14 +3,14 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, 
 import path from 'node:path';
 import type { Link } from './links.ts';
 import { checkLines, formatPlan, hasPendingChanges, label, row, stem } from './plan.ts';
-import type { CheckChange, Plan, PlannedAdr, SourcePlan } from './plan.ts';
+import type { CheckChange, Plan, PlannedAdr, TrackPlan } from './plan.ts';
 import { setCheckLine, setRevision } from './revision.ts';
 
 // An undetermined ADR whose upstream copy carries a revision to adopt.
 type ConfirmableAdr = PlannedAdr & { to: number };
-// An up-to-date ADR whose check line differs from its source's.
+// An up-to-date ADR whose check line differs from its track's.
 type SyncableAdr = PlannedAdr & { check: CheckChange };
-type Target = { source: SourcePlan; to: string };
+type Target = { track: TrackPlan; to: string };
 export type Action =
   | (Target & { kind: 'imported'; adr: PlannedAdr; from: string })
   | (Target & { kind: 'moved'; file: string; from: string })
@@ -38,23 +38,23 @@ export function planActions(
   const confirmed = new Set<string>();
   const actions: Action[] = [];
 
-  for (const source of plan) {
-    const dir = path.join(root, 'docs', 'adr', source.namespace);
+  for (const track of plan) {
+    const dir = path.join(root, 'docs', 'adr', track.namespace);
     const at = (name: string) => path.join(dir, name);
-    for (const adr of source.adrs) {
+    for (const adr of track.adrs) {
       if (adr.category === 'new') {
-        actions.push({ kind: 'imported', source, adr, from: path.join(source.adrDir, adr.name), to: at(adr.name) });
+        actions.push({ kind: 'imported', track, adr, from: path.join(track.adrDir, adr.name), to: at(adr.name) });
       } else if (adr.category === 'removed' && prune) {
-        actions.push({ kind: 'pruned', source, adr, to: at(adr.name) });
+        actions.push({ kind: 'pruned', track, adr, to: at(adr.name) });
       } else if (confirmable(adr) && (all || wanted.has(stem(adr.name)))) {
-        actions.push({ kind: 'confirmed', source, adr, to: at(adr.name) });
+        actions.push({ kind: 'confirmed', track, adr, to: at(adr.name) });
         confirmed.add(stem(adr.name));
       } else if (syncable(adr)) {
-        actions.push({ kind: 'synced', source, adr, to: at(adr.name) });
+        actions.push({ kind: 'synced', track, adr, to: at(adr.name) });
       }
     }
-    for (const file of source.migration) {
-      actions.push({ kind: 'moved', source, file, from: path.join(root, 'docs', 'adr', file), to: at(file) });
+    for (const file of track.migration) {
+      actions.push({ kind: 'moved', track, file, from: path.join(root, 'docs', 'adr', file), to: at(file) });
     }
   }
 
@@ -98,9 +98,9 @@ export function runActions(root: string, actions: Action[]): void {
 export function planAfter(plan: Plan, actions: Action[]): Plan {
   const done = new Set(actions.flatMap((a) => (a.kind === 'imported' || a.kind === 'confirmed' || a.kind === 'synced' ? [a.adr] : [])));
   const pruned = new Set(actions.flatMap((a) => (a.kind === 'pruned' ? [a.adr] : [])));
-  return plan.map((source) => ({
-    ...source,
-    adrs: source.adrs
+  return plan.map((track) => ({
+    ...track,
+    adrs: track.adrs
       .filter((adr) => !pruned.has(adr))
       .map((adr): PlannedAdr => (done.has(adr) ? { ...adr, category: 'unchanged' } : adr)),
     migration: [],
@@ -128,9 +128,9 @@ export function formatApply({
   dryRun?: boolean;
 }): string {
   const lines = dryRun ? ['dry run: nothing written'] : [];
-  const sources = [...new Set(actions.map((a) => a.source.namespace))];
-  for (const namespace of sources) {
-    const mine = actions.filter((a) => a.source.namespace === namespace);
+  const tracks = [...new Set(actions.map((a) => a.track.namespace))];
+  for (const namespace of tracks) {
+    const mine = actions.filter((a) => a.track.namespace === namespace);
     const counts = KINDS.map((k): [Kind, number] => [k, mine.filter((a) => a.kind === k).length]).filter(([, n]) => n > 0);
     lines.push(`${namespace}: ${counts.map(([k, n]) => `${n} ${k}`).join(', ')}`);
     lines.push(...mine.flatMap((a) => [actionLine(a), ...(a.kind === 'synced' ? checkLines(a.adr) : [])]));

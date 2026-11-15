@@ -1,6 +1,6 @@
 ---
 title: How ontrack works
-description: The pieces ontrack is made of, what happens to a question from the source to a repository, and the cycle that keeps answers current.
+description: The pieces ontrack is made of, what happens to a question from the track to a repository, and the cycle that keeps answers current.
 ---
 
 This page explains the model behind ontrack: what you run, what each
@@ -12,14 +12,14 @@ repository holds, and what happens over time. For what it is for, see the
 
 ontrack has no server and no database. It works on three kinds of files.
 
-- A **source** is a repository of architecture decision records (ADRs). Each
+- A **track** is a repository of architecture decision records (ADRs). Each
   ADR asks one question (how do we commit, branch, test, deliver?) and
-  recommends an answer. A source is an npm package: a `package.json` with an
+  recommends an answer. A track is an npm package: a `package.json` with an
   `ontrack` key and a directory of ADRs. You own it, and repositories install
-  it as a dependency.
+  it as a dependency. Before ontrack 0.5 a track was called a source.
 - Each repository holds **its own copy of every ADR**, under `docs/adr/`. The
   copy is where the repository answers. The answer is a status and a few keys
-  in the frontmatter, the **traits**. The source ships the traits empty, as
+  in the frontmatter, the **traits**. The track ships the traits empty, as
   the question. The repository fills them.
 - The **rules block** is a marked section of the repository's `AGENTS.md`.
   ontrack writes the decided traits there, because coding agents read
@@ -27,12 +27,12 @@ ontrack has no server and no database. It works on three kinds of files.
 
 ```mermaid
 flowchart TD
-  source["Source<br/>ADRs as questions"]
+  track["Track<br/>ADRs as questions"]
   adr["docs/adr/<br/>the repository's answers"]
   agents["AGENTS.md<br/>rules block"]
   agent["Coding agent"]
   work["The work<br/>consistent with the decisions"]
-  source -->|"plan, apply"| adr
+  track -->|"plan, apply"| adr
   adr -->|"apply"| agents
   agents -->|"read by"| agent
   agent ==>|"produces"| work
@@ -47,7 +47,7 @@ belongs to the repository.
 ## The life of one question
 
 **It arrives as `proposed`.** `ontrack apply` copies a new ADR from the
-source into `docs/adr/<namespace>/`, byte for byte. It carries the source's
+track into `docs/adr/<namespace>/`, byte for byte. It carries the track's
 recommendation, and it is listed in `AGENTS.md` under "Not yet decided", so
 an agent knows there is no rule yet.
 
@@ -58,14 +58,14 @@ question does not apply here, and the ADR says what stands in for it.
 `ontrack review` has a coding agent prepare the ruling from the evidence in
 the repository. The agent proposes and writes nothing until you agree.
 
-**The source revises the question.** Each ADR carries an integer `revision`.
-The source raises it when the question changes. `ontrack plan` compares the
-repository's value with the source's and reports the ADR as `revised`.
+**The track revises the question.** Each ADR carries an integer `revision`.
+The track raises it when the question changes. `ontrack plan` compares the
+repository's value with the track's and reports the ADR as `revised`.
 ontrack never rewrites an ADR a repository has decided on: a person rules
 again. `ontrack review` then asks the agent to prepare that ruling: it keeps
 your ruling where the question did not move, and proposes one where it did.
 
-`plan` reads the source as it is installed in the repository and makes no
+`plan` reads the track as it is installed in the repository and makes no
 network call. A revision is therefore reported once the repository has
 updated the dependency, not before.
 
@@ -77,7 +77,7 @@ stays as the record of what was decided before.
 ## The cycle
 
 Governance is a cycle, not a one-off import. It turns again every time a
-source revises a question, and whenever a decision stops fitting the
+track revises a question, and whenever a decision stops fitting the
 repository.
 
 ```mermaid
@@ -90,28 +90,28 @@ flowchart TD
   plan --> apply --> review
   review -->|"AGENTS.md updated"| work
   work --> check
-  check -.->|"the source revises a question"| plan
+  check -.->|"the track revises a question"| plan
   check -.->|"a decision stops fitting: supersede it"| review
 ```
 
 `check` closes the loop. A decision can name the command that verifies it,
 such as `npx commitlint --from origin/main`, and `ontrack check` runs them
-all. ontrack judges nothing itself. A source can ship a check with its ADR.
+all. ontrack judges nothing itself. A track can ship a check with its ADR.
 It only runs once the repository holds that ADR as `accepted`.
 
-## Several sources
+## Several tracks
 
-A repository can import more than one source: one from the platform team,
-another from security. The npm alias a source is installed under is its
-**namespace**. Its ADRs live in `docs/adr/<namespace>/`, so sources sit side
+A repository can import more than one track: one from the platform team,
+another from security. The npm alias a track is installed under is its
+**namespace**. Its ADRs live in `docs/adr/<namespace>/`, so tracks sit side
 by side without colliding. The ADRs a repository writes for itself live the
-same way, in `docs/adr/local/`: `local` is their namespace, and no source
+same way, in `docs/adr/local/`: `local` is their namespace, and no track
 can be installed under that alias.
 
 ```mermaid
 flowchart TD
-  platform["Source: platform governance<br/>one copy of each question"]
-  security["Source: security governance<br/>one copy of each question"]
+  platform["Track: platform governance<br/>one copy of each question"]
+  security["Track: security governance<br/>one copy of each question"]
   subgraph repos["Your repositories"]
     a["Repository A<br/>its own answers"]
     b["Repository B<br/>its own answers"]
@@ -121,7 +121,7 @@ flowchart TD
   security -->|"npm dependency"| b & c
 ```
 
-Because a source is a dependency, each repository installs, pins and updates
+Because a track is a dependency, each repository installs, pins and updates
 it with the tools it already uses.
 
 ## What ontrack guarantees

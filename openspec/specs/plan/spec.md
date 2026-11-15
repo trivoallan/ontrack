@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`ontrack plan` tells a downstream repository, per source, which inherited ADRs need a human (new, revised, removed, undetermined, unreadable, or waiting to move out of a flat layout), without modifying anything.
+`ontrack plan` tells a downstream repository, per track, which inherited ADRs need a human (new, revised, removed, undetermined, unreadable, or waiting to move out of a flat layout), without modifying anything.
 
 ## Requirements
 
@@ -13,35 +13,35 @@
 - **WHEN** `ontrack plan` runs on a project with revised, new and flat-layout ADRs
 - **THEN** every file under the project is byte-identical before and after, and no file was added or removed
 
-### Requirement: Source ADRs and their local copy
-For each source, the source's ADRs SHALL be the `*.md` files placed directly in its ADR directory. An ADR is identified by its file name. Its local copy SHALL be `docs/adr/<alias>/<file>` when it exists, otherwise `docs/adr/<file>` (historical flat layout) when that exists, otherwise there is none.
+### Requirement: Track ADRs and their local copy
+For each track, the track's ADRs SHALL be the `*.md` files placed directly in its ADR directory. An ADR is identified by its file name. Its local copy SHALL be `docs/adr/<alias>/<file>` when it exists, otherwise `docs/adr/<file>` (historical flat layout) when that exists, otherwise there is none.
 
 #### Scenario: Namespaced copy wins over a flat one
-- **WHEN** both `docs/adr/platform/SDR-0006.md` and `docs/adr/SDR-0006.md` exist for source `platform`
+- **WHEN** both `docs/adr/platform/SDR-0006.md` and `docs/adr/SDR-0006.md` exist for track `platform`
 - **THEN** the namespaced copy is compared, and `SDR-0006.md` is not part of a migration
 
 #### Scenario: Subdirectories are ignored
-- **WHEN** the source's ADR directory holds `templates/example.md`
-- **THEN** `example` is not a source ADR
+- **WHEN** the track's ADR directory holds `templates/example.md`
+- **THEN** `example` is not a track ADR
 
 ### Requirement: Classification
-Each source ADR SHALL be classified as:
+Each track ADR SHALL be classified as:
 - `new` when it has no local copy;
 - `revised` when its local copy is `stale` against it (see `adr-revision`);
 - `undetermined` or `unreadable` when the comparison says so;
-- `check` when the local copy is `up-to-date` and its check line differs from the source's;
+- `check` when the local copy is `up-to-date` and its check line differs from the track's;
 - `unchanged` when the local copy is `up-to-date` and both check lines are the same.
 
 An ADR's check line SHALL be the first line of its recognized frontmatter (see `adr-revision`) that starts with `check:` at column zero, without its trailing whitespace. An ADR without such a line has no check line. Two check lines are the same when both are absent or both are present and equal.
 
-Each `*.md` file in `docs/adr/<alias>/` that the source no longer ships SHALL be classified as `removed`. The `*.md` files of `docs/adr/local/` are the project's own ADRs and SHALL be ignored. Files directly under `docs/adr/` that match no source ADR are own ADRs in a historical layout: they SHALL NOT be classified, and are reported as a migration (see Own ADRs migration).
+Each `*.md` file in `docs/adr/<alias>/` that the track no longer ships SHALL be classified as `removed`. The `*.md` files of `docs/adr/local/` are the project's own ADRs and SHALL be ignored. Files directly under `docs/adr/` that match no track ADR are own ADRs in a historical layout: they SHALL NOT be classified, and are reported as a migration (see Own ADRs migration).
 
 #### Scenario: Revised upstream
-- **WHEN** the local copy has `revision: 1` and the source ships `revision: 2`
+- **WHEN** the local copy has `revision: 1` and the track ships `revision: 2`
 - **THEN** the ADR is `revised`
 
 #### Scenario: Shipped no more
-- **WHEN** `docs/adr/platform/SDR-0012.md` exists and source `platform` no longer ships it
+- **WHEN** `docs/adr/platform/SDR-0012.md` exists and track `platform` no longer ships it
 - **THEN** `SDR-0012` is `removed`
 
 #### Scenario: Project's own ADR
@@ -49,73 +49,73 @@ Each `*.md` file in `docs/adr/<alias>/` that the source no longer ships SHALL be
 - **THEN** it appears nowhere in the output
 
 #### Scenario: Own ADR in the historical layout
-- **WHEN** `docs/adr/0001-use-postgres.md` exists and no source ships that file
+- **WHEN** `docs/adr/0001-use-postgres.md` exists and no track ships that file
 - **THEN** it carries no category and appears only in the migration to `docs/adr/local/`
 
 #### Scenario: Check added upstream
-- **WHEN** both copies have `revision: 1`, the local copy is `accepted` with filled-in traits and no `check:` line, and the source ships `check: npx commitlint --last`
+- **WHEN** both copies have `revision: 1`, the local copy is `accepted` with filled-in traits and no `check:` line, and the track ships `check: npx commitlint --last`
 - **THEN** the ADR is `check`
 
 #### Scenario: Check changed upstream
-- **WHEN** both copies have `revision: 1`, the local copy holds `check: exit 0` and the source ships `check: exit 1`
+- **WHEN** both copies have `revision: 1`, the local copy holds `check: exit 0` and the track ships `check: exit 1`
 - **THEN** the ADR is `check`
 
 #### Scenario: Check removed upstream
-- **WHEN** both copies have `revision: 1`, the local copy holds `check: exit 0` and the source ships no `check:` line
+- **WHEN** both copies have `revision: 1`, the local copy holds `check: exit 0` and the track ships no `check:` line
 - **THEN** the ADR is `check`
 
 #### Scenario: Same check, different verdict
-- **WHEN** both copies have `revision: 1` and `check: exit 0`, and the local copy has `status: accepted` where the source has `status: proposed`
+- **WHEN** both copies have `revision: 1` and `check: exit 0`, and the local copy has `status: accepted` where the track has `status: proposed`
 - **THEN** the ADR is `unchanged`
 
 #### Scenario: Revised wins over check
-- **WHEN** the local copy has `revision: 1` and no `check:` line, and the source ships `revision: 2` and `check: exit 0`
+- **WHEN** the local copy has `revision: 1` and no `check:` line, and the track ships `revision: 2` and `check: exit 0`
 - **THEN** the ADR is `revised`, not `check`
 
 #### Scenario: A check line in the body is not one
-- **WHEN** both copies have `revision: 1`, neither frontmatter has a `check:` line, and the source's body shows `check: exit 0` in an example
+- **WHEN** both copies have `revision: 1`, neither frontmatter has a `check:` line, and the track's body shows `check: exit 0` in an example
 - **THEN** the ADR is `unchanged`
 
 ### Requirement: Flat-layout migration
-When at least one source ADR's local copy is a flat-layout file, `plan` SHALL report a migration for that source: one summary line, then one indented line per file, sorted by name.
+When at least one track ADR's local copy is a flat-layout file, `plan` SHALL report a migration for that track: one summary line, then one indented line per file, sorted by name.
 
 #### Scenario: Historical downstream repository
-- **WHEN** `docs/adr/SDR-0006.md` and `docs/adr/SDR-0010.md` match ADRs shipped by source `platform`, and `docs/adr/platform/` does not exist
+- **WHEN** `docs/adr/SDR-0006.md` and `docs/adr/SDR-0010.md` match ADRs shipped by track `platform`, and `docs/adr/platform/` does not exist
 - **THEN** the output holds `migration: 2 files docs/adr/ → docs/adr/platform/`, then `  move          SDR-0006.md` and `  move          SDR-0010.md`
 
 ### Requirement: Output format
-The output SHALL follow the contract in the commands reference, `docs/commands.md`, per source, sources sorted by alias:
+The output SHALL follow the contract in the commands reference, `docs/commands.md`, per track, tracks sorted by alias:
 1. `<alias>: <counts>`, with counts in the order revised, new, removed, undetermined, unreadable, check, unchanged, zero counts omitted except `unchanged`;
-2. one line per ADR that is not `unchanged`, sorted by name: two spaces, the category left-aligned in a 12-character column, two spaces, the file name without `.md`, then two spaces and the ADR's title when it has one (see `adr-revision`); for `revised`, followed by ` (revision <local> → <upstream>)`. The title SHALL be read from the source's copy, or from the local copy for a `removed` ADR;
-3. after a `check` ADR's line: when the local copy has a check line, four spaces, `- ` and that line; then, when the source has a check line, four spaces, `+ ` and that line;
+2. one line per ADR that is not `unchanged`, sorted by name: two spaces, the category left-aligned in a 12-character column, two spaces, the file name without `.md`, then two spaces and the ADR's title when it has one (see `adr-revision`); for `revised`, followed by ` (revision <local> → <upstream>)`. The title SHALL be read from the track's copy, or from the local copy for a `removed` ADR;
+3. after a `check` ADR's line: when the local copy has a check line, four spaces, `- ` and that line; then, when the track has a check line, four spaces, `+ ` and that line;
 4. the migration lines, when there are any: `migration: <n> file(s) docs/adr/ → docs/adr/<alias>/`, then one line per file laid out like an ADR line, with `move` as the category and the full file name.
 
-When the project has no source, `plan` SHALL print `no ontrack source found`. After the source lines, `plan` SHALL print the `AGENTS.md` lines described in `agents-file`, when there are any.
+When the project has no track, `plan` SHALL print `no track found`. After the track lines, `plan` SHALL print the `AGENTS.md` lines described in `agents-file`, when there are any.
 
 #### Scenario: Nothing to do
-- **WHEN** every ADR of source `platform` is up to date, nothing needs to move, and the `AGENTS.md` rules block is current
+- **WHEN** every ADR of track `platform` is up to date, nothing needs to move, and the `AGENTS.md` rules block is current
 - **THEN** the output is exactly `platform: 14 unchanged`
 - **AND** the exit code is `0`
 
 #### Scenario: Mixed source
-- **WHEN** source `platform` has 2 revised ADRs, 1 new one and 11 unchanged
+- **WHEN** track `platform` has 2 revised ADRs, 1 new one and 11 unchanged
 - **THEN** the first line is `platform: 2 revised, 1 new, 11 unchanged`, followed by the three indented ADR lines
 
 #### Scenario: No source
 - **WHEN** the project has no dependency carrying an `ontrack` key
-- **THEN** the output starts with `no ontrack source found`
+- **THEN** the output starts with `no track found`
 - **AND** the exit code is `0` when the project has no ADR of its own
 
 #### Scenario: New ADR with its title
-- **WHEN** source `trivoallan` ships `ADR-0001.md` whose first heading is `# ADR-0001: Record significant decisions as ADRs`, and the project has no copy
+- **WHEN** track `trivoallan` ships `ADR-0001.md` whose first heading is `# ADR-0001: Record significant decisions as ADRs`, and the project has no copy
 - **THEN** the ADR line is `  new           ADR-0001  Record significant decisions as ADRs`
 
 #### Scenario: Revised ADR with its title
-- **WHEN** source `platform` ships `SDR-0006.md` with `title: Commits` and `revision: 2`, and the local copy has `revision: 1`
+- **WHEN** track `platform` ships `SDR-0006.md` with `title: Commits` and `revision: 2`, and the local copy has `revision: 1`
 - **THEN** the ADR line is `  revised       SDR-0006  Commits (revision 1 → 2)`
 
 #### Scenario: Removed ADR keeps a title
-- **WHEN** `docs/adr/platform/SDR-0012.md` has `title: Hosting` and source `platform` no longer ships it
+- **WHEN** `docs/adr/platform/SDR-0012.md` has `title: Hosting` and track `platform` no longer ships it
 - **THEN** the ADR line is `  removed       SDR-0012  Hosting`
 
 #### Scenario: ADR without a title
@@ -123,27 +123,27 @@ When the project has no source, `plan` SHALL print `no ontrack source found`. Af
 - **THEN** its line ends with its name, with no trailing spaces
 
 #### Scenario: Check changed upstream
-- **WHEN** source `trivoallan` ships 14 ADRs, 13 unchanged, and `ADR-0006-commits` is `check` with a local line `check: exit 0` and a source line `check: npx commitlint --last`
+- **WHEN** track `trivoallan` ships 14 ADRs, 13 unchanged, and `ADR-0006-commits` is `check` with a local line `check: exit 0` and a track line `check: npx commitlint --last`
 - **THEN** the output is `trivoallan: 1 check, 13 unchanged`, then `  check         ADR-0006-commits`, then `    - check: exit 0`, then `    + check: npx commitlint --last`
 
 #### Scenario: Check added upstream
-- **WHEN** a `check` ADR's local copy has no check line and the source ships `check: exit 0`
+- **WHEN** a `check` ADR's local copy has no check line and the track ships `check: exit 0`
 - **THEN** its ADR line is followed by `    + check: exit 0` only
 
 #### Scenario: Check removed upstream
-- **WHEN** a `check` ADR's local copy holds `check: exit 0` and the source has no check line
+- **WHEN** a `check` ADR's local copy holds `check: exit 0` and the track has no check line
 - **THEN** its ADR line is followed by `    - check: exit 0` only
 
 ### Requirement: Exit code
-`plan` SHALL exit with `2` when any source has a `new`, `revised`, `removed`, `undetermined`, `unreadable` or `check` ADR, or a migration, or when the `AGENTS.md` rules block is `missing`, `out of date` or `skipped` (see `agents-file`); with `0` otherwise; and with `1` when sources cannot be discovered or a source's ADR directory cannot be read.
+`plan` SHALL exit with `2` when any track has a `new`, `revised`, `removed`, `undetermined`, `unreadable` or `check` ADR, or a migration, or when the `AGENTS.md` rules block is `missing`, `out of date` or `skipped` (see `agents-file`); with `0` otherwise; and with `1` when tracks cannot be discovered or a track's ADR directory cannot be read.
 
 #### Scenario: Undetermined only
 - **WHEN** the only finding is an imported ADR with `revision: 0`
 - **THEN** the exit code is `2`
 
-#### Scenario: Missing source ADR directory
-- **WHEN** a source declares `"adr": "docs/adr"` but that directory does not exist in the installed package
-- **THEN** standard error names the source and the directory
+#### Scenario: Missing track ADR directory
+- **WHEN** a track declares `"adr": "docs/adr"` but that directory does not exist in the installed package
+- **THEN** standard error names the track and the directory
 - **AND** the exit code is `1`
 
 #### Scenario: Only the rules block is stale
@@ -157,13 +157,13 @@ When the project has no source, `plan` SHALL print `no ontrack source found`. Af
 ### Requirement: Full listing
 `ontrack plan` SHALL accept an `--all` option. Without it, the output SHALL be exactly what the `Output format` requirement describes. With it, the output SHALL differ in two ways only:
 
-1. each `unchanged` ADR gets a line too, so that every ADR of a source has one, sorted by name whatever its category;
+1. each `unchanged` ADR gets a line too, so that every ADR of a track has one, sorted by name whatever its category;
 2. every ADR line carries a verdict column between the category and the file name: two spaces, the category left-aligned in a 12-character column, two spaces, the verdict left-aligned in a 10-character column, two spaces, then the file name and what follows it as in `Output format`.
 
 The summary line, the `- ` and `+ ` lines under a `check` ADR, the migration lines and the `AGENTS.md` lines SHALL be the same with and without `--all`. A line SHALL NOT end with spaces.
 
 #### Scenario: Unchanged ADRs are listed
-- **WHEN** source `platform` ships `SDR-0001.md` and `SDR-0002.md`, both unchanged and `accepted` in the repository, and `ontrack plan --all` runs
+- **WHEN** track `platform` ships `SDR-0001.md` and `SDR-0002.md`, both unchanged and `accepted` in the repository, and `ontrack plan --all` runs
 - **THEN** the output is `platform: 2 unchanged`, then `  unchanged     accepted    SDR-0001` and `  unchanged     accepted    SDR-0002`, each followed by the ADR's title when it has one
 
 #### Scenario: Categories are interleaved by name
@@ -172,7 +172,7 @@ The summary line, the `- ` and `+ ` lines under a `check` ADR, the migration lin
 - **AND** the `SDR-0002` line starts with `  revised       accepted    SDR-0002` and ends with `(revision 1 → 2)`
 
 #### Scenario: Output without the option is untouched
-- **WHEN** `ontrack plan` runs without `--all` on a source with revised, new and unchanged ADRs
+- **WHEN** `ontrack plan` runs without `--all` on a track with revised, new and unchanged ADRs
 - **THEN** the output has no line for an unchanged ADR and no verdict column
 
 #### Scenario: Check lines keep their place
@@ -180,14 +180,14 @@ The summary line, the `- ` and `+ ` lines under a `check` ADR, the migration lin
 - **THEN** its line is `  check         accepted    ADR-0006-commits`, followed by the same `- ` and `+ ` lines as without `--all`
 
 ### Requirement: Verdict of an ADR
-The verdict of an ADR SHALL be the value of the first column-zero `status:` line in the recognized frontmatter (see `adr-revision`) of the repository's copy, without surrounding whitespace and without a trailing ` # comment`. The source's copy SHALL NOT be read for it. The verdict SHALL be `-` when the ADR has no local copy, when the copy's frontmatter is not recognized, or when it has no `status:` line or an empty one.
+The verdict of an ADR SHALL be the value of the first column-zero `status:` line in the recognized frontmatter (see `adr-revision`) of the repository's copy, without surrounding whitespace and without a trailing ` # comment`. The track's copy SHALL NOT be read for it. The verdict SHALL be `-` when the ADR has no local copy, when the copy's frontmatter is not recognized, or when it has no `status:` line or an empty one.
 
 #### Scenario: Rejected ADR
 - **WHEN** `docs/adr/trivoallan/ADR-0013-frontend.md` has `status: rejected` and is unchanged, and `ontrack plan --all` runs
 - **THEN** its line is `  unchanged     rejected    ADR-0013-frontend`
 
-#### Scenario: Local verdict, not the source's
-- **WHEN** the local copy has `status: accepted` and the source ships the same ADR with `status: proposed`
+#### Scenario: Local verdict, not the track's
+- **WHEN** the local copy has `status: accepted` and the track ships the same ADR with `status: proposed`
 - **THEN** the verdict is `accepted`
 
 #### Scenario: Trailing comment
@@ -195,7 +195,7 @@ The verdict of an ADR SHALL be the value of the first column-zero `status:` line
 - **THEN** the verdict is `accepted`
 
 #### Scenario: New ADR has no verdict
-- **WHEN** a source ships an ADR the repository has no copy of, and `ontrack plan --all` runs
+- **WHEN** a track ships an ADR the repository has no copy of, and `ontrack plan --all` runs
 - **THEN** its line starts with `  new           -           `
 
 #### Scenario: Unreadable copy has no verdict
@@ -203,7 +203,7 @@ The verdict of an ADR SHALL be the value of the first column-zero `status:` line
 - **THEN** the ADR is `unreadable` and its verdict is `-`
 
 #### Scenario: Removed ADR keeps its verdict
-- **WHEN** `docs/adr/platform/SDR-0012.md` has `status: accepted` and source `platform` no longer ships it
+- **WHEN** `docs/adr/platform/SDR-0012.md` has `status: accepted` and track `platform` no longer ships it
 - **THEN** its line starts with `  removed       accepted    SDR-0012`
 
 ### Requirement: Exit code is independent of the listing
@@ -222,10 +222,10 @@ The exit code of `ontrack plan --all` SHALL be the one `ontrack plan` returns on
 - **THEN** the exit code is `2`
 
 ### Requirement: Own ADRs migration
-When at least one `*.md` file directly under `docs/adr/` matches no source ADR, `plan` SHALL report a migration of the project's own ADRs: after the lines of every source, the line `migration: <n> file(s) docs/adr/ → docs/adr/local/`, then one line per file laid out like the lines of a source's migration, sorted by name. This migration SHALL be reported when the project has no source too, after the line that says so. It SHALL count toward the exit code as a source's flat-layout migration does. `plan --all` SHALL report it the same way.
+When at least one `*.md` file directly under `docs/adr/` matches no track ADR, `plan` SHALL report a migration of the project's own ADRs: after the lines of every track, the line `migration: <n> file(s) docs/adr/ → docs/adr/local/`, then one line per file laid out like the lines of a track's migration, sorted by name. This migration SHALL be reported when the project has no track too, after the line that says so. It SHALL count toward the exit code as a track's flat-layout migration does. `plan --all` SHALL report it the same way.
 
 #### Scenario: Own ADRs to move
-- **WHEN** `docs/adr/ADR-0001-cache.md` and `docs/adr/ADR-0002-queue.md` match no source ADR
+- **WHEN** `docs/adr/ADR-0001-cache.md` and `docs/adr/ADR-0002-queue.md` match no track ADR
 - **THEN** the output ends with `migration: 2 files docs/adr/ → docs/adr/local/`, then `  move          ADR-0001-cache.md` and `  move          ADR-0002-queue.md`
 
 #### Scenario: Own ADRs already in place
@@ -233,5 +233,5 @@ When at least one `*.md` file directly under `docs/adr/` matches no source ADR, 
 - **THEN** the output holds no migration to `docs/adr/local/`
 
 #### Scenario: No source
-- **WHEN** the project has no source and `docs/adr/ADR-0001-cache.md` exists
+- **WHEN** the project has no track and `docs/adr/ADR-0001-cache.md` exists
 - **THEN** the output holds `migration: 1 file docs/adr/ → docs/adr/local/` and `  move          ADR-0001-cache.md`

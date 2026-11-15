@@ -10,7 +10,7 @@ authors: [Tristan Rivoallan]
 supersedes: []
 traits:
   commits:
-    scopes: [apply, check, cli, governance, instructions, openspec, plan, review, revision, sources]
+    scopes: [apply, check, cli, governance, instructions, openspec, plan, review, revision, tracks]
     tool: commitlint
 ---
 
@@ -72,6 +72,8 @@ full answer**: a single-area repository has nothing to name, and a list
 invented on adoption ages worse than no list.
 
 Adopted as recommended: `commitlint` in CI. Its premise does not hold yet (versions are set by hand: no tags, `package.json` at `0.1.0`), and it is kept anyway so that the scope list is enforced rather than remembered. The scopes are the ones the history already uses, matching the subcommands and modules in `src/`, plus `openspec` and `governance` for their chores.
+
+The scope `sources` became `tracks` on 2026-11-15, when the module was renamed ([A package of questions is called a track](../local/ADR-0022-a-package-of-questions-is-called-a-track.md)). The list still matches the modules in `src/`.
 
 ## Consequences
 

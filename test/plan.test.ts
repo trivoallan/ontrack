@@ -24,11 +24,11 @@ async function plan(root: string, ...options: string[]) {
   return { code, stdout, stderr };
 }
 
-// Source ADRs and their local copy
+// Track ADRs and their local copy
 
 test('namespaced copy wins over a flat one', () => {
   const root = makeProject({
-    sources: { platform: { 'SDR-0006.md': adr(2) } },
+    tracks: { platform: { 'SDR-0006.md': adr(2) } },
     local: { 'docs/adr/platform/SDR-0006.md': adr(2), 'docs/adr/SDR-0006.md': adr(1) },
   });
   const [s] = buildPlan(root);
@@ -36,8 +36,8 @@ test('namespaced copy wins over a flat one', () => {
   assert.deepEqual(s.migration, []);
 });
 
-test('subdirectories of the source ADR directory are ignored', () => {
-  const root = makeProject({ sources: { platform: { 'templates/example.md': adr(1) } } });
+test('subdirectories of the track ADR directory are ignored', () => {
+  const root = makeProject({ tracks: { platform: { 'templates/example.md': adr(1) } } });
   assert.deepEqual(buildPlan(root)[0].adrs, []);
 });
 
@@ -45,7 +45,7 @@ test('subdirectories of the source ADR directory are ignored', () => {
 
 test('new, revised, unchanged, undetermined and unreadable', () => {
   const root = makeProject({
-    sources: {
+    tracks: {
       platform: {
         'A.md': adr(1),
         'B.md': adr(2),
@@ -70,7 +70,7 @@ test('new, revised, unchanged, undetermined and unreadable', () => {
 
 test('an ADR shipped no more is removed', () => {
   const root = makeProject({
-    sources: { platform: { 'SDR-0006.md': adr(1) } },
+    tracks: { platform: { 'SDR-0006.md': adr(1) } },
     local: { 'docs/adr/platform/SDR-0006.md': adr(1), 'docs/adr/platform/SDR-0012.md': adr(1) },
   });
   assert.equal(categories(buildPlan(root))['SDR-0012.md'], 'removed');
@@ -78,7 +78,7 @@ test('an ADR shipped no more is removed', () => {
 
 test("the project's own ADR is ignored", () => {
   const root = makeProject({
-    sources: { platform: { 'SDR-0006.md': adr(1) } },
+    tracks: { platform: { 'SDR-0006.md': adr(1) } },
     local: { 'docs/adr/local/0001-use-postgres.md': adr(1), 'docs/adr/platform/SDR-0006.md': adr(1) },
   });
   const out = formatPlan(buildPlan(root));
@@ -88,9 +88,9 @@ test("the project's own ADR is ignored", () => {
 
 // Own ADRs migration
 
-test('own ADRs directly in docs/adr/ are a migration to docs/adr/local/, after the sources', async () => {
+test('own ADRs directly in docs/adr/ are a migration to docs/adr/local/, after the tracks', async () => {
   const root = makeProject({
-    sources: { platform: { 'SDR-0006.md': adr(1) } },
+    tracks: { platform: { 'SDR-0006.md': adr(1) } },
     local: {
       'docs/adr/ADR-0002-queue.md': adr(),
       'docs/adr/ADR-0001-cache.md': adr(),
@@ -105,17 +105,17 @@ test('own ADRs directly in docs/adr/ are a migration to docs/adr/local/, after t
   assert.match(formatPlan(buildPlan(root), { all: true }), /migration: 2 files docs\/adr\/ → docs\/adr\/local\/\n  move          ADR-0001-cache\.md/);
 });
 
-test('a flat file a source ships is not an own ADR', () => {
+test('a flat file a track ships is not an own ADR', () => {
   const root = makeProject({
-    sources: { platform: { 'SDR-0006.md': adr(1) } },
+    tracks: { platform: { 'SDR-0006.md': adr(1) } },
     local: { 'docs/adr/SDR-0006.md': adr(1), 'docs/adr/platform/SDR-0006.md': adr(1) },
   });
   assert.equal(formatPlan(buildPlan(root)), 'platform: 1 unchanged\n');
 });
 
-test('own ADRs to move without any source', async () => {
+test('own ADRs to move without any track', async () => {
   const r = await plan(withAgents(makeTree({ 'package.json': '{}', 'docs/adr/ADR-0001-cache.md': adr() })));
-  assert.equal(r.stdout, 'no ontrack source found\nmigration: 1 file docs/adr/ → docs/adr/local/\n  move          ADR-0001-cache.md\n');
+  assert.equal(r.stdout, 'no track found\nmigration: 1 file docs/adr/ → docs/adr/local/\n  move          ADR-0001-cache.md\n');
   assert.equal(r.code, 2);
 });
 
@@ -123,7 +123,7 @@ test('own ADRs to move without any source', async () => {
 
 test('historical downstream repository', () => {
   const root = makeProject({
-    sources: { platform: { 'SDR-0006.md': adr(1), 'SDR-0010.md': adr(1) } },
+    tracks: { platform: { 'SDR-0006.md': adr(1), 'SDR-0010.md': adr(1) } },
     local: { 'docs/adr/SDR-0010.md': adr(1), 'docs/adr/SDR-0006.md': adr(1) },
   });
   const out = formatPlan(buildPlan(root));
@@ -137,32 +137,32 @@ test('historical downstream repository', () => {
 });
 
 test('a single migrated file is singular', () => {
-  const root = makeProject({ sources: { platform: { 'A.md': adr(1) } }, local: { 'docs/adr/A.md': adr(1) } });
+  const root = makeProject({ tracks: { platform: { 'A.md': adr(1) } }, local: { 'docs/adr/A.md': adr(1) } });
   assert.match(formatPlan(buildPlan(root)), /^migration: 1 file docs\/adr\//m);
 });
 
 // Output format
 
 test('nothing to do', async () => {
-  const sources: Record<string, Files> = { platform: {} };
+  const tracks: Record<string, Files> = { platform: {} };
   const local: Files = {};
   for (let i = 1; i <= 14; i += 1) {
-    sources.platform[`SDR-${i}.md`] = adr(1);
+    tracks.platform[`SDR-${i}.md`] = adr(1);
     local[`docs/adr/platform/SDR-${i}.md`] = adr(1);
   }
-  const r = await plan(withAgents(makeProject({ sources, local })));
+  const r = await plan(withAgents(makeProject({ tracks, local })));
   assert.equal(r.stdout, 'platform: 14 unchanged\n');
   assert.equal(r.code, 0);
 });
 
-test('mixed source: counts in contract order', () => {
-  const sources: Record<string, Files> = { platform: { 'N.md': adr(1), 'R1.md': adr(2), 'R2.md': adr(2) } };
+test('mixed track: counts in contract order', () => {
+  const tracks: Record<string, Files> = { platform: { 'N.md': adr(1), 'R1.md': adr(2), 'R2.md': adr(2) } };
   const local: Files = { 'docs/adr/platform/R1.md': adr(1), 'docs/adr/platform/R2.md': adr(1) };
   for (let i = 1; i <= 11; i += 1) {
-    sources.platform[`U${i}.md`] = adr(1);
+    tracks.platform[`U${i}.md`] = adr(1);
     local[`docs/adr/platform/U${i}.md`] = adr(1);
   }
-  const lines = formatPlan(buildPlan(makeProject({ sources, local }))).split('\n');
+  const lines = formatPlan(buildPlan(makeProject({ tracks, local }))).split('\n');
   assert.equal(lines[0], 'platform: 2 revised, 1 new, 11 unchanged');
   assert.deepEqual(lines.slice(1, 4), [
     '  new           N',
@@ -171,17 +171,17 @@ test('mixed source: counts in contract order', () => {
   ]);
 });
 
-test('sources are sorted by alias', () => {
+test('tracks are sorted by alias', () => {
   const root = makeProject({
-    sources: { zeta: { 'A.md': adr(1) }, alpha: { 'A.md': adr(1) } },
+    tracks: { zeta: { 'A.md': adr(1) }, alpha: { 'A.md': adr(1) } },
     local: { 'docs/adr/zeta/A.md': adr(1), 'docs/adr/alpha/A.md': adr(1) },
   });
   assert.equal(formatPlan(buildPlan(root)), 'alpha: 1 unchanged\nzeta: 1 unchanged\n');
 });
 
-test('no source', async () => {
+test('no track', async () => {
   const r = await plan(makeTree({ 'package.json': '{}' }));
-  assert.equal(r.stdout, 'no ontrack source found\n');
+  assert.equal(r.stdout, 'no track found\n');
   assert.equal(r.code, 0);
 });
 
@@ -208,16 +208,16 @@ test('the commands reference example is what formatPlan prints', () => {
 
 test('new ADR with its title, from a heading repeating the name', () => {
   const root = makeProject({
-    sources: {
+    tracks: {
       trivoallan: { 'ADR-0001.md': '---\nrevision: 1\n---\n\n# ADR-0001: Record significant decisions as ADRs\n' },
     },
   });
   assert.match(formatPlan(buildPlan(root)), /^ {2}new {11}ADR-0001 {2}Record significant decisions as ADRs$/m);
 });
 
-test('revised ADR with its title, read from the source copy', () => {
+test('revised ADR with its title, read from the track copy', () => {
   const root = makeProject({
-    sources: { platform: { 'SDR-0006.md': adr(2, 'proposed', 'Commits') } },
+    tracks: { platform: { 'SDR-0006.md': adr(2, 'proposed', 'Commits') } },
     local: { 'docs/adr/platform/SDR-0006.md': adr(1, 'accepted', 'Old commits title') },
   });
   assert.match(formatPlan(buildPlan(root)), /^ {2}revised {7}SDR-0006 {2}Commits \(revision 1 → 2\)$/m);
@@ -225,19 +225,19 @@ test('revised ADR with its title, read from the source copy', () => {
 
 test('removed ADR keeps its local title', () => {
   const root = makeProject({
-    sources: { platform: { 'SDR-0006.md': adr(1) } },
+    tracks: { platform: { 'SDR-0006.md': adr(1) } },
     local: { 'docs/adr/platform/SDR-0006.md': adr(1), 'docs/adr/platform/SDR-0012.md': adr(1, 'accepted', 'Hosting') },
   });
   assert.match(formatPlan(buildPlan(root)), /^ {2}removed {7}SDR-0012 {2}Hosting$/m);
 });
 
 test('ADR without a title ends with its name, no trailing spaces', () => {
-  const root = makeProject({ sources: { platform: { 'SDR-0020.md': adr(1) } } });
+  const root = makeProject({ tracks: { platform: { 'SDR-0020.md': adr(1) } } });
   assert.match(formatPlan(buildPlan(root)), /^ {2}new {11}SDR-0020$/m);
 });
 
 test('ADR whose name carries a slug shows no title', () => {
-  const root = makeProject({ sources: { platform: { 'ADR-0006-commits.md': adr(1, 'proposed', 'Commits') } } });
+  const root = makeProject({ tracks: { platform: { 'ADR-0006-commits.md': adr(1, 'proposed', 'Commits') } } });
   assert.match(formatPlan(buildPlan(root)), /^ {2}new {11}ADR-0006-commits$/m);
 });
 
@@ -245,7 +245,7 @@ test('ADR whose name carries a slug shows no title', () => {
 
 test('undetermined only gives 2', async () => {
   const root = makeProject({
-    sources: { platform: { 'A.md': adr(0) } },
+    tracks: { platform: { 'A.md': adr(0) } },
     local: { 'docs/adr/platform/A.md': adr(0) },
   });
   assert.equal((await plan(root)).code, 2);
@@ -256,7 +256,7 @@ test('removed only counts as pending', () => {
   assert.equal(hasPendingChanges([{ adrs: [{ category: 'unchanged' }], migration: [] }]), false);
 });
 
-test('missing source ADR directory gives 1 and names the source', async () => {
+test('missing track ADR directory gives 1 and names the track', async () => {
   const root = makeTree({
     'package.json': JSON.stringify({ devDependencies: { platform: '1' } }),
     'node_modules/platform/package.json': JSON.stringify({ name: 'platform', ontrack: { adr: 'docs/adr' } }),
@@ -271,7 +271,7 @@ test('missing source ADR directory gives 1 and names the source', async () => {
 const ruled = (...extra: string[]) => ['---', 'status: accepted', 'revision: 1', ...extra, 'traits:', '  commits:', '    tool: commitlint', '---', '', 'Body.', ''].join('\n');
 const shipped = (revision: number, ...extra: string[]) => ['---', 'status: proposed', `revision: ${revision}`, ...extra, 'traits:', '  commits:', '    tool:', '---', '', 'Body.', 'check: exit 0', ''].join('\n');
 const one = (local: string, upstream: string) =>
-  makeProject({ sources: { trivoallan: { 'ADR-0006-commits.md': upstream } }, local: { 'docs/adr/trivoallan/ADR-0006-commits.md': local } });
+  makeProject({ tracks: { trivoallan: { 'ADR-0006-commits.md': upstream } }, local: { 'docs/adr/trivoallan/ADR-0006-commits.md': local } });
 
 test('check added, changed or removed upstream: check', () => {
   for (const [local, upstream] of [
@@ -296,7 +296,7 @@ test('revised wins over check', () => {
 
 test('check output: counts, then the - and + lines; exit 2', async () => {
   const root = withAgents(makeProject({
-    sources: { trivoallan: { 'ADR-0001-a.md': adr(1), 'ADR-0006-commits.md': shipped(1, 'check: npx commitlint --last') } },
+    tracks: { trivoallan: { 'ADR-0001-a.md': adr(1), 'ADR-0006-commits.md': shipped(1, 'check: npx commitlint --last') } },
     local: { 'docs/adr/trivoallan/ADR-0001-a.md': adr(1), 'docs/adr/trivoallan/ADR-0006-commits.md': ruled('check: exit 0') },
   }));
   const r = await plan(root);
@@ -313,8 +313,8 @@ test('check output: added shows + only, removed shows - only', () => {
 
 const fm = (status: string | null, revision = 1, ...extra: string[]) =>
   ['---', ...(status === null ? [] : [`status: ${status}`]), `revision: ${revision}`, ...extra, '---', '', 'Body.', ''].join('\n');
-const listing = (sources: Files, local: Files) =>
-  formatPlan(buildPlan(makeProject({ sources: { platform: sources }, local })), { all: true });
+const listing = (tracks: Files, local: Files) =>
+  formatPlan(buildPlan(makeProject({ tracks: { platform: tracks }, local })), { all: true });
 const at = (file: string) => `docs/adr/platform/${file}`;
 
 test('--all lists the unchanged ADRs with their verdict', () => {
@@ -339,7 +339,7 @@ test('--all interleaves the categories by name', () => {
 
 test('without --all: no unchanged line, no verdict column', () => {
   const root = makeProject({
-    sources: { platform: { 'SDR-0001.md': fm('proposed'), 'SDR-0002.md': fm('proposed', 2), 'SDR-0003.md': fm('proposed') } },
+    tracks: { platform: { 'SDR-0001.md': fm('proposed'), 'SDR-0002.md': fm('proposed', 2), 'SDR-0003.md': fm('proposed') } },
     local: { [at('SDR-0001.md')]: fm('accepted'), [at('SDR-0002.md')]: fm('accepted') },
   });
   assert.equal(
@@ -358,8 +358,8 @@ test('--all: a rejected ADR', () => {
   assert.match(out, /^ {2}unchanged {5}rejected {4}ADR-0013-frontend$/m);
 });
 
-test('the verdict is the local one, not the source\'s', () => {
-  const root = makeProject({ sources: { platform: { 'A.md': fm('proposed') } }, local: { [at('A.md')]: fm('accepted') } });
+test('the verdict is the local one, not the track\'s', () => {
+  const root = makeProject({ tracks: { platform: { 'A.md': fm('proposed') } }, local: { [at('A.md')]: fm('accepted') } });
   assert.equal(buildPlan(root)[0].adrs[0].status, 'accepted');
 });
 
@@ -391,7 +391,7 @@ test('--all: a removed ADR keeps its verdict and title', () => {
 
 test('--all: the exit code is the one of plan', async () => {
   const done = withAgents(makeProject({
-    sources: { platform: { 'A.md': fm('proposed'), 'B.md': fm('proposed') } },
+    tracks: { platform: { 'A.md': fm('proposed'), 'B.md': fm('proposed') } },
     local: { [at('A.md')]: fm('accepted'), [at('B.md')]: fm('rejected') },
   }));
   assert.equal((await plan(done)).code, 0);
@@ -399,7 +399,7 @@ test('--all: the exit code is the one of plan', async () => {
   assert.equal(all.code, 0);
   assert.match(all.stdout, /^ {2}unchanged {5}rejected {4}B$/m);
 
-  const pending = makeProject({ sources: { platform: { 'A.md': fm('proposed', 2) } }, local: { [at('A.md')]: fm('accepted') } });
+  const pending = makeProject({ tracks: { platform: { 'A.md': fm('proposed', 2) } }, local: { [at('A.md')]: fm('accepted') } });
   assert.equal((await plan(pending)).code, 2);
   assert.equal((await plan(pending, '--all')).code, 2);
 });

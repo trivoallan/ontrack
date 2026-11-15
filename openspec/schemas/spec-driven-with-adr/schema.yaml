@@ -168,7 +168,7 @@ artifacts:
       Before writing, list every ADR-NNNN-slug.md file in the
       subdirectories of docs/adr/. docs/adr/local/ holds the repository's
       own ADRs; every other subdirectory holds the ADRs imported from a
-      governance source (docs/adr/trivoallan/), which count like the
+      governance track (docs/adr/trivoallan/), which count like the
       repository's own. Read each file's frontmatter: an ADR is in force when
       its `status:` is `accepted` and no other accepted ADR lists it in
       `supersedes:`. A `proposed` ADR is an open question, a `rejected` one
@@ -222,7 +222,7 @@ artifacts:
       across changes. The ADRs this repository writes for itself are the
       files of docs/adr/local/, with their own numbering. Each other
       subdirectory (docs/adr/trivoallan/) holds the ADRs imported from a
-      governance source: read them, never create or edit a file there. If
+      governance track: read them, never create or edit a file there. If
       this change introduces a new durable architectural decision, create
       docs/adr/local/ADR-NNNN-slug.md and reference it from
       openspec/changes/<change>/adr.md. Do not duplicate the full ADR content

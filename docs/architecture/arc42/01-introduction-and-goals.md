@@ -5,7 +5,7 @@ title: Introduction and Goals
 # Introduction and Goals
 
 ontrack is a command-line tool that imports shared architecture decision
-records (ADRs) into a repository. The ADRs come from *sources*: npm
+records (ADRs) into a repository. The ADRs come from *tracks*: npm
 dependencies whose `package.json` carries an `ontrack` key. Each ADR asks a
 question and recommends an answer; the repository answers it in its own
 copy, and ontrack writes the answers to `AGENTS.md` so that coding agents
@@ -22,7 +22,7 @@ and does not repeat them.
 
 | Command | What it is for | Specification |
 | --- | --- | --- |
-| `ontrack plan` | say what importing the sources would change, without writing | [plan](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/plan/spec.md), [sources](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/sources/spec.md), [adr-revision](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/adr-revision/spec.md) |
+| `ontrack plan` | say what importing the tracks would change, without writing | [plan](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/plan/spec.md), [tracks](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/tracks/spec.md), [adr-revision](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/adr-revision/spec.md) |
 | `ontrack apply` | do what `plan` reports, and keep the rules block of `AGENTS.md` current | [apply](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/apply/spec.md), [agents-file](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/agents-file/spec.md) |
 | `ontrack instructions` | print the decided traits as the rules block | [instructions](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/instructions/spec.md) |
 | `ontrack review` | print a prompt asking a coding agent to rule proposed ADRs, or to supersede an accepted one | [review](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/review/spec.md) |
@@ -47,5 +47,5 @@ scenarios.
 | Who | What they expect from ontrack |
 | --- | --- |
 | Repository maintainer | to see which shared ADRs are new or need a ruling again, to import them in one command, and to rely on an exit code in CI |
-| Source author | that a source is a plain npm package with an `ontrack` key, and that raising an ADR's `revision:` reaches every repository that depends on it |
+| Track author | that a track is a plain npm package with an `ontrack` key, and that raising an ADR's `revision:` reaches every repository that depends on it |
 | Coding agent | to read the repository's decided rules in `AGENTS.md`, and to receive a prompt that says how to propose a ruling |

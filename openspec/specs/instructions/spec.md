@@ -29,7 +29,7 @@ The ADRs SHALL be the `*.md` files placed directly in each subdirectory `docs/ad
 - **THEN** standard error names both paths and the exit code is `1`
 
 #### Scenario: Shipped ADRs are not read
-- **WHEN** source `trivoallan` ships `ADR-0006-commits.md` in `node_modules` and the project has no copy of it
+- **WHEN** track `trivoallan` ships `ADR-0006-commits.md` in `node_modules` and the project has no copy of it
 - **THEN** that ADR appears nowhere in the output
 
 ### Requirement: Status and supersession

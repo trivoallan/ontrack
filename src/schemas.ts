@@ -11,7 +11,7 @@ export const projectManifest = z.looseObject({
 });
 
 /**
- * The `ontrack` key of a source's package.json. Unknown keys are kept, and a
+ * The `ontrack` key of a track's package.json. Unknown keys are kept, and a
  * `namespace` that is not a string counts as undeclared rather than refused.
  */
 export const ontrackKey = z.looseObject({
@@ -21,10 +21,10 @@ export const ontrackKey = z.looseObject({
 
 /**
  * An installed dependency's package.json. `ontrack` stays unknown here:
- * whether it is an object decides if the dependency is a source at all, and
+ * whether it is an object decides if the dependency is a track at all, and
  * only then is it parsed with `ontrackKey`.
  */
-export const sourceManifest = z.looseObject({
+export const trackManifest = z.looseObject({
   name: z.string(),
   ontrack: z.unknown().optional(),
 });
@@ -47,18 +47,18 @@ export const adrFrontmatter = z.object({
 });
 
 /**
- * The JSON Schema published for source authors (schema/ontrack.schema.json),
+ * The JSON Schema published for track authors (schema/ontrack.schema.json),
  * derived from `ontrackKey` so the two cannot disagree. It applies to a whole
  * package.json, the file an editor can attach a schema to, and constrains its
  * `ontrack` property only.
  */
 export function ontrackJsonSchema(): Record<string, unknown> {
   const key = ontrackKey.describe(
-    'Declares this package as an ontrack source. `adr` is the directory holding the ADRs, as a path relative to the package: it must stay inside the package, a rule ontrack enforces and JSON Schema cannot state. `namespace` is the alias the source proposes.',
+    'Declares this package as a track. `adr` is the directory holding the ADRs, as a path relative to the package: it must stay inside the package, a rule ontrack enforces and JSON Schema cannot state. `namespace` is the alias the track proposes.',
   );
   return {
     $id: 'https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/ontrack.schema.json',
-    title: 'The ontrack key of a source package.json',
+    title: 'The ontrack key of a track package.json',
     ...z.toJSONSchema(z.looseObject({ ontrack: key.optional() })),
   };
 }

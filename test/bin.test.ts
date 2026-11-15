@@ -30,7 +30,7 @@ function snapshot(root: string) {
 
 test('plan is read-only: the tree is byte-identical afterwards', () => {
   const root = makeProject({
-    sources: { platform: { 'NEW.md': adr(1), 'REV.md': adr(2), 'FLAT.md': adr(1) } },
+    tracks: { platform: { 'NEW.md': adr(1), 'REV.md': adr(2), 'FLAT.md': adr(1) } },
     local: { 'docs/adr/platform/REV.md': adr(1, 'accepted'), 'docs/adr/FLAT.md': adr(1) },
   });
   const before = snapshot(root);

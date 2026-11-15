@@ -29,7 +29,7 @@ The block state SHALL be one of: `current` (the text between and including the m
 - **THEN** the state is `skipped`, with the same message `ontrack instructions` prints
 
 ### Requirement: plan reports the block
-After its source lines, `plan` SHALL print one line when the state is not `current`: `AGENTS.md: rules block missing`, `AGENTS.md: rules block out of date`, or `AGENTS.md: skipped, <reason>`. It SHALL print nothing about the block when it is `current` or not needed. `plan` MUST NOT write `AGENTS.md`.
+After its track lines, `plan` SHALL print one line when the state is not `current`: `AGENTS.md: rules block missing`, `AGENTS.md: rules block out of date`, or `AGENTS.md: skipped, <reason>`. It SHALL print nothing about the block when it is `current` or not needed. `plan` MUST NOT write `AGENTS.md`.
 
 #### Scenario: Missing block reported
 - **WHEN** an ADR is decided and the project has no `AGENTS.md`
@@ -51,7 +51,7 @@ After its ADR actions, `apply` SHALL compute the rules block on the resulting tr
 - **THEN** `AGENTS.md` exists and lists that ADR under `Not yet decided`
 
 #### Scenario: Skipped does not stop the ADR actions
-- **WHEN** `AGENTS.md` holds two marker pairs and a source ships a new ADR
+- **WHEN** `AGENTS.md` holds two marker pairs and a track ships a new ADR
 - **THEN** `apply` imports the ADR, leaves `AGENTS.md` byte-identical, prints `AGENTS.md: skipped, ` followed by the reason, and exits with `2`
 
 #### Scenario: CRLF kept

@@ -1,13 +1,13 @@
-name: source-updates
+name: track-updates
 
-# `ontrack plan` reads the source as installed: it cannot see a question
+# `ontrack plan` reads the track as installed: it cannot see a question
 # revised upstream until the dependency is updated. This job updates it in a
 # throwaway checkout, once a week, and fails when `plan` then has something
-# to report. The failure is the notice: someone updates the source for real,
+# to report. The failure is the notice: someone updates the track for real,
 # then runs `apply` and `review`.
 #
 # ponytail: a failed run is the only trace, and it repeats each week until
-# the source is updated. Open a pull request with the lockfile change if the
+# the track is updated. Open a pull request with the lockfile change if the
 # notice needs to carry the work.
 
 on:
@@ -31,7 +31,7 @@ jobs:
       - run: npm install --global npm@12.2.2
       # Installing builds ontrack (the `prepare` script).
       - run: npm ci
-      # The alias of each source this repository imports.
+      # The alias of each track this repository imports.
       - run: npm update trivoallan
       # Exits with 2, and fails the job, when an ADR is new or revised.
       - run: node dist/bin/ontrack.js plan

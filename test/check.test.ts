@@ -50,7 +50,7 @@ test('superseded ADR: its command does not run', async () => {
 });
 
 test('shipped ADRs are not read', async () => {
-  const root = makeProject({ sources: { trivoallan: { 'ADR-0001-a.md': adr('A', 'status: accepted', 'check: exit 1') } } });
+  const root = makeProject({ tracks: { trivoallan: { 'ADR-0001-a.md': adr('A', 'status: accepted', 'check: exit 1') } } });
   const r = await check(root);
   assert.equal(r.stdout, '0 failed, 0 passed, 0 unchecked\n');
 });

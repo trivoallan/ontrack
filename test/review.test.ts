@@ -343,10 +343,10 @@ test('command: a rejected name exits 1 with an empty stdout', async () => {
 const DELIVERY = 'docs/adr/trivoallan/ADR-0012-delivery.md';
 const asked = (title: string, revision: number, status = 'proposed') => adr(title, `status: ${status}`, `revision: ${revision}`);
 
-/** A source asking two questions again, and one that never was ruled. */
+/** A track asking two questions again, and one that never was ruled. */
 const stale = (local: Record<string, string> = {}) =>
   makeProject({
-    sources: {
+    tracks: {
       trivoallan: {
         'ADR-0001-record-architecture-decisions.md': asked('Record architecture decisions', 3),
         'ADR-0002-localization.md': asked('Localization', 2),
@@ -361,17 +361,17 @@ const stale = (local: Record<string, string> = {}) =>
     },
   });
 
-test('revised: ruled ADRs behind their source, in reference order, with the source copy and both revisions', () => {
+test('revised: ruled ADRs behind their track, in reference order, with the track copy and both revisions', () => {
   assert.deepEqual(
     revisedAdrs(stale()).map(({ adr: a, ...rest }) => ({ ref: a.ref, ...rest })),
     [
-      { ref: 'trivoallan/ADR-0001-record-architecture-decisions', source: 'node_modules/trivoallan/adr/ADR-0001-record-architecture-decisions.md', from: 1, to: 3 },
-      { ref: 'trivoallan/ADR-0012-delivery', source: 'node_modules/trivoallan/adr/ADR-0012-delivery.md', from: 1, to: 2 },
+      { ref: 'trivoallan/ADR-0001-record-architecture-decisions', track: 'node_modules/trivoallan/adr/ADR-0001-record-architecture-decisions.md', from: 1, to: 3 },
+      { ref: 'trivoallan/ADR-0012-delivery', track: 'node_modules/trivoallan/adr/ADR-0012-delivery.md', from: 1, to: 2 },
     ],
   );
 });
 
-test('revised: a proposed copy is left to the review prompt, and unreadable sources give none', () => {
+test('revised: a proposed copy is left to the review prompt, and unreadable tracks give none', () => {
   const root = stale({ [DELIVERY]: asked('Delivery', 1) });
   assert.deepEqual(refs(revisedAdrs(root).map((r) => r.adr)), ['trivoallan/ADR-0001-record-architecture-decisions']);
   assert.deepEqual(revisedAdrs(makeTree({ [RECORD]: asked('R', 1, 'accepted') })), []);
