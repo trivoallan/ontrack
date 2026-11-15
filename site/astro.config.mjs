@@ -80,7 +80,7 @@ export default defineConfig({
       expressiveCode: { defaultProps: { wrap: true } },
       // Labels a reader understands, not directory names. What ontrack is
       // for comes first; this repository's own decisions and architecture
-      // stay one click away, collapsed.
+      // stay one click away, collapsed at the end of the reference.
       // Grouped by what the reader came to do, and the guides by who they
       // are: a repository that installs a track, or the author of one. The
       // model is read right after the tutorial, before either set of guides.
@@ -88,11 +88,23 @@ export default defineConfig({
         { label: 'Start here', items: ['tutorial', 'how-it-works'] },
         { label: 'Use a track', items: ['find-a-track', 'run-ontrack-in-ci', 'draft-a-change-from-an-issue'] },
         { label: 'Maintain a track', items: ['write-your-own-track', 'revise-a-question'] },
-        { label: 'Reference', items: ['commands', 'file-formats'] },
-        // One subgroup per namespace: `local`, the repository's own ADRs,
-        // then each imported track.
-        { label: 'ontrack on itself', collapsed: true, items: [{ autogenerate: { directory: 'adr', collapsed: true } }] },
-        { label: 'For contributors', collapsed: true, items: [{ autogenerate: { directory: 'architecture/arc42' } }] },
+        {
+          label: 'Reference',
+          items: [
+            'commands',
+            'file-formats',
+            // The glossary is section 12 of the arc42 document, listed here
+            // because users need its terms too. Its frontmatter hides it from
+            // the Architecture group, so it has one entry.
+            'architecture/arc42/12-glossary',
+            // This repository's own decisions and architecture: how ontrack
+            // is made, after what a reader looks up to use it. One subgroup
+            // per namespace: `local`, the repository's own ADRs, then each
+            // imported track.
+            { label: 'Decisions', collapsed: true, items: [{ autogenerate: { directory: 'adr', collapsed: true } }] },
+            { label: 'Architecture', collapsed: true, items: [{ autogenerate: { directory: 'architecture/arc42' } }] },
+          ],
+        },
       ],
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/trivoallan/ontrack' }],
     }),
