@@ -72,7 +72,7 @@ adr: ADR-0006
 title: Commits
 status: proposed
 revision: 1
-check: npx --no-install governance-check ADR-0006
+check: npx --no-install ontrack-engineering-check ADR-0006
 supersedes: []
 traits:
   commits:
@@ -87,7 +87,7 @@ adr: ADR-0006
 title: Commits
 status: accepted
 revision: 1
-check: npx --no-install governance-check ADR-0006
+check: npx --no-install ontrack-engineering-check ADR-0006
 supersedes: []
 traits:
   commits:
