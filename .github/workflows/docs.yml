@@ -1,55 +1,89 @@
 name: docs
 
+# The site publishes two channels (ADR-0008, docs.channels: [release, main]):
+# the latest release at the root, `main` under next/. GitHub Pages holds one
+# site and each deploy replaces all of it, so every push run, of `main` or of
+# a release tag, builds both channels and deploys them as one artifact.
+# release-please pushes its tags with RELEASE_PLEASE_TOKEN, not GITHUB_TOKEN,
+# so a tag push does trigger this workflow.
 on:
   pull_request:
   push:
     branches: [main]
+    tags: ['v*']
 
 permissions:
   contents: read
 
 concurrency:
-  group: docs-${{ github.ref }}
+  # One group for every push, whatever its ref: a later run rebuilds both
+  # channels, so cancelling an earlier one loses nothing.
+  group: docs-${{ github.event_name == 'push' && 'pages' || github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: site
     steps:
+      # `main`, or the pull request, at the root of the workspace: a tag push
+      # still checks out `main` here. Each page shows the date of its last
+      # commit: the build reads the history, and the tags, to find the latest
+      # release.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          # Each page shows the date of its last commit: the build reads the history.
           fetch-depth: 0
+          ref: ${{ github.event_name == 'push' && 'main' || '' }}
+      # The latest release tag, on a push only; empty until a first release
+      # exists, and then `main` alone is served, at the root.
+      - id: release
+        if: github.event_name == 'push'
+        run: echo "tag=$(git tag --list 'v*' --sort=-v:refname | head -n 1)" >> "$GITHUB_OUTPUT"
+      # The release channel builds from its own checkout: a site imports the
+      # code it documents, so the pages of a commit build against its code.
+      - if: steps.release.outputs.tag != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: ${{ steps.release.outputs.tag }}
+          path: .release
       # Node at the version mise.toml pins, checked against mise.lock
-      # (ADR-0025); setup-node, given no version, restores the npm cache.
+      # (ADR-0025), for both channels. No cache: this job publishes the site,
+      # and nothing restored from an earlier run may end up in it.
       - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
         with:
           version: 2026.11.8
           install_args: node
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          cache: npm
-          cache-dependency-path: site/package-lock.json
+          cache: false
       # npm 12, which runs no dependency's install script: see test.yml.
       - run: npm install --global npm@12.2.2 # zizmor: ignore[adhoc-packages] npm itself, exact version, no lockfile can hold it
-      # The site config imports ../src, which needs the CLI's own runtime
-      # dependencies. --ignore-scripts skips `prepare`, which needs dev ones.
-      - run: npm ci --omit=dev --ignore-scripts
-        working-directory: .
-      - run: npm ci
-      # The build fails on an invalid architecture model too; this step says
-      # which file and line.
-      - run: npx likec4 validate ../docs/architecture/model
-      # Builds the site, then fails on a broken internal link.
-      - run: npm run build
+      # For each channel, from its checkout: the site config imports ../src,
+      # which needs the CLI's own runtime dependencies (--ignore-scripts skips
+      # `prepare`, which needs dev ones); the model is validated so that a
+      # failure names its file and line; the build fails on a broken internal
+      # link. With a release, `main` is built under next/ with a banner that
+      # points to the released pages; the release builds with its own
+      # config, at the site root.
+      - name: Build
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          build() {
+            (cd "$1" && npm ci --omit=dev --ignore-scripts && cd site && npm ci && npx likec4 validate ../docs/architecture/model && npm run build)
+          }
+          if [ -n "$TAG" ]; then
+            SITE_BASE=/ontrack/next SITE_CHANNEL=next build .
+            build .release
+            mkdir -p pages && cp -R .release/site/dist/. pages/ && cp -R site/dist pages/next
+          else
+            build .
+            cp -R site/dist pages
+          fi
       - if: github.event_name == 'push'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
-          path: site/dist
+          path: pages
 
   deploy:
     if: github.event_name == 'push'

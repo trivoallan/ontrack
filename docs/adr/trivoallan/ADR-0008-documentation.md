@@ -185,7 +185,6 @@ Ruled again on revision 3, which adds `docs.channels`: `[release, main]` as reco
 
 - The language of the documentation is decided by
   [ADR-0002](ADR-0002-localization.md), not here.
-- Until `docs.yml` deploys both channels on pushes to `main` and `v*` tags, the site serves `main` at its root and the ADR-0008 check fails.
 
 ## Alternatives Considered
 
