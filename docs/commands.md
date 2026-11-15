@@ -114,17 +114,19 @@ prints the same output as `plan`.
 
 When ADRs are `proposed` in `docs/adr/` after the run (the ones it imported,
 and any left from an earlier run), `apply` names the next step on stderr, as
-a shell command and as a prompt to give a coding agent. Standard output and
-the exit code are unchanged.
+a shell command and as a prompt to give a coding agent. `proposed` ADRs
+make neither `plan` nor `check` fail, so the hint says the repository works
+with them open. Standard output and the exit code are unchanged.
 
 ```
-next: 3 proposed ADRs to rule
+next: 3 proposed ADRs, ruled when you choose: the repository works as it is
+  check runs only the decided ADRs. Start with a few:
   from a shell:  claude "$(npx ontrack review)"
   as a prompt:   Run `npx ontrack review` and follow its output.
 ```
 
 Once no ADR is `proposed`, the first line counts the ruled ADRs that remain
-`revised` instead: `next: 2 revised ADRs to rule again`.
+`revised` instead, without the `check` line: `next: 2 revised ADRs to rule again`.
 
 ## `ontrack check`
 

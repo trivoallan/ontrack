@@ -1,9 +1,9 @@
 ## 1. Phase 1: the apply hint
 
-- [ ] 1.1 In `nextStep` (`src/commands/apply.ts`), for proposed ADRs, print `next: N proposed ADR(s), ruled when you choose: the repository works as it is`, then `  check runs only the decided ADRs. Start with a few:`, then the two existing `review` lines; leave the revised hint unchanged
-- [ ] 1.2 Update `test/apply.test.ts`: the three-ADR and one-ADR scenarios, the revised scenario without the `check runs` line, and stdout and exit codes unchanged
-- [ ] 1.3 Update the quoted hint in `docs/commands.md` (apply section) and `docs/tutorial.mdx` (the `next: 25 proposed ADRs to rule` line)
-- [ ] 1.4 Run the test suite and coverage; commit as `feat(apply): …`
+- [x] 1.1 In `nextStep` (`src/commands/apply.ts`), for proposed ADRs, print `next: N proposed ADR(s), ruled when you choose: the repository works as it is`, then `  check runs only the decided ADRs. Start with a few:`, then the two existing `review` lines; leave the revised hint unchanged
+- [x] 1.2 Update `test/apply.test.ts`: the three-ADR and one-ADR scenarios, the revised scenario without the `check runs` line, and stdout and exit codes unchanged
+- [x] 1.3 Update the quoted hint in `docs/commands.md` (apply section) and `docs/tutorial.mdx` (the `next: 25 proposed ADRs to rule` line)
+- [x] 1.4 Run the test suite and coverage; commit as `feat(apply): …`
 
 ## 2. Phase 2: the sequence prompt (after the go/no-go on observation round 1)
 

@@ -67,12 +67,12 @@ test('next step on stderr while ADRs are proposed, in a shell form and a prompt 
   const first = await run(root, 'apply');
   assert.equal(
     first.stderr,
-    'next: 2 proposed ADRs to rule\n  from a shell:  claude "$(npx ontrack review)"\n  as a prompt:   Run `npx ontrack review` and follow its output.\n',
+    'next: 2 proposed ADRs, ruled when you choose: the repository works as it is\n  check runs only the decided ADRs. Start with a few:\n  from a shell:  claude "$(npx ontrack review)"\n  as a prompt:   Run `npx ontrack review` and follow its output.\n',
   );
   assert.doesNotMatch(first.stdout, /next:/);
   writeFileSync(path.join(root, 'docs/adr/platform/A.md'), adr(1, 'accepted'));
   const second = await run(root, 'apply');
-  assert.match(second.stderr, /^next: 1 proposed ADR to rule$/m);
+  assert.match(second.stderr, /^next: 1 proposed ADR, ruled when you choose: the repository works as it is$/m);
   writeFileSync(path.join(root, 'docs/adr/platform/B.md'), adr(1, 'accepted'));
   assert.equal((await run(root, 'apply')).stderr, '');
 });
@@ -83,14 +83,14 @@ test('next step names the package when the project does not install ontrack, sin
   const r = await run(root, 'apply');
   assert.equal(
     r.stderr,
-    'next: 1 proposed ADR to rule\n  from a shell:  claude "$(npx -p @trivoallan/ontrack ontrack review)"\n  as a prompt:   Run `npx -p @trivoallan/ontrack ontrack review` and follow its output.\n',
+    'next: 1 proposed ADR, ruled when you choose: the repository works as it is\n  check runs only the decided ADRs. Start with a few:\n  from a shell:  claude "$(npx -p @trivoallan/ontrack ontrack review)"\n  as a prompt:   Run `npx -p @trivoallan/ontrack ontrack review` and follow its output.\n',
   );
   assert.ok(read(root, 'AGENTS.md').includes('run `npx -p @trivoallan/ontrack ontrack review [adr]`'));
 });
 
 test('next step once nothing is proposed: the revised ADRs to rule again', async () => {
   const root = withAgents(makeProject({ tracks: { platform: { 'A.md': adr(2), 'B.md': adr(1) } }, local: { 'docs/adr/platform/A.md': adr(1, 'accepted') } }));
-  assert.match((await run(root, 'apply')).stderr, /^next: 1 proposed ADR to rule$/m);
+  assert.match((await run(root, 'apply')).stderr, /^next: 1 proposed ADR, ruled when you choose: the repository works as it is$/m);
   writeFileSync(path.join(root, 'docs/adr/platform/B.md'), adr(1, 'accepted'));
   assert.match((await run(root, 'apply')).stderr, /^next: 1 revised ADR to rule again\n {2}from a shell: /);
 });
