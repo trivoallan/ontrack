@@ -38,7 +38,7 @@ test('nothing to keep: no ADR, no AGENTS.md', async () => {
 });
 
 test('current, out of date and missing', () => {
-  const files = { 'package.json': '{}', 'docs/adr/0001.md': decided() };
+  const files = { 'package.json': '{}', 'docs/adr/local/0001.md': decided() };
   assert.equal(agentsStatus(makeTree(files)).state, 'missing');
   assert.equal(agentsStatus(makeTree({ ...files, 'AGENTS.md': '# Mine\n' })).state, 'missing');
   assert.equal(agentsStatus(withAgents(makeTree(files))).state, 'current');
@@ -57,14 +57,14 @@ for (const [name, text] of [
   ['end before begin', '<!-- ontrack:end -->\n<!-- ontrack:begin -->\n'],
 ]) {
   test(`malformed markers are skipped: ${name}`, () => {
-    const s = agentsStatus(makeTree({ 'package.json': '{}', 'docs/adr/0001.md': decided(), 'AGENTS.md': text }));
+    const s = agentsStatus(makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'AGENTS.md': text }));
     assert.equal(s.state, 'skipped');
     assert.match(s.reason, /ontrack:begin.*ontrack:end/);
   });
 }
 
 test('trait conflict is skipped with the instructions message', async () => {
-  const root = makeTree({ 'package.json': '{}', 'docs/adr/0001.md': decided(), 'docs/adr/0002.md': decided() });
+  const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'docs/adr/local/0002.md': decided() });
   const s = agentsStatus(root);
   assert.equal(s.state, 'skipped');
   const direct = await run(root, 'instructions');
@@ -77,7 +77,7 @@ test('trait conflict is skipped with the instructions message', async () => {
 // plan reports the block
 
 test('plan reports a missing block and exits 2, without writing', async () => {
-  const root = makeTree({ 'package.json': '{}', 'docs/adr/0001.md': decided() });
+  const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided() });
   const r = await run(root, 'plan');
   assert.equal(r.stdout, 'no ontrack source found\nAGENTS.md: rules block missing\n');
   assert.equal(r.code, 2);
@@ -94,7 +94,7 @@ test('plan: only the rules block is stale gives 2', async () => {
 // apply writes the block
 
 test('block replaced, the rest untouched', async () => {
-  const root = makeTree({ 'package.json': '{}', 'docs/adr/0001.md': decided(), 'AGENTS.md': '# Mine\n\n<!-- ontrack:begin -->\nold\n<!-- ontrack:end -->\n\nMore of mine.\n' });
+  const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'AGENTS.md': '# Mine\n\n<!-- ontrack:begin -->\nold\n<!-- ontrack:end -->\n\nMore of mine.\n' });
   const r = await run(root, 'apply');
   assert.equal(read(root), `# Mine\n\n${block(root)}\nMore of mine.\n`);
   assert.equal(r.stdout, 'AGENTS.md: rules block updated\n');
@@ -103,7 +103,7 @@ test('block replaced, the rest untouched', async () => {
 
 test('block appended after an empty line, with or without a final newline', async () => {
   for (const mine of ['# Mine\n', '# Mine']) {
-    const root = makeTree({ 'package.json': '{}', 'docs/adr/0001.md': decided(), 'AGENTS.md': mine });
+    const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'AGENTS.md': mine });
     const r = await run(root, 'apply');
     assert.equal(read(root), `# Mine\n\n${block(root)}`);
     assert.equal(r.stdout, 'AGENTS.md: rules block created\n');
@@ -111,7 +111,7 @@ test('block appended after an empty line, with or without a final newline', asyn
 });
 
 test('an empty AGENTS.md receives the block alone', async () => {
-  const root = makeTree({ 'package.json': '{}', 'docs/adr/0001.md': decided(), 'AGENTS.md': '' });
+  const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'AGENTS.md': '' });
   await run(root, 'apply');
   assert.equal(read(root), block(root));
 });
@@ -135,7 +135,7 @@ test('skipped does not stop the ADR actions', async () => {
 });
 
 test('CRLF kept on every line, block included', async () => {
-  const root = makeTree({ 'package.json': '{}', 'docs/adr/0001.md': decided(), 'AGENTS.md': '# Mine\r\n<!-- ontrack:begin -->\r\nold\r\n<!-- ontrack:end -->\r\nEnd\r\n' });
+  const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'AGENTS.md': '# Mine\r\n<!-- ontrack:begin -->\r\nold\r\n<!-- ontrack:end -->\r\nEnd\r\n' });
   await run(root, 'apply');
   const text = read(root);
   assert.equal(text.replace(/\r\n/g, '').includes('\n'), false);
@@ -144,13 +144,13 @@ test('CRLF kept on every line, block included', async () => {
 });
 
 test('CRLF file without markers gets a CRLF block', async () => {
-  const root = makeTree({ 'package.json': '{}', 'docs/adr/0001.md': decided(), 'AGENTS.md': '# Mine\r\n' });
+  const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'AGENTS.md': '# Mine\r\n' });
   await run(root, 'apply');
   assert.equal(read(root).replace(/\r\n/g, '').includes('\n'), false);
 });
 
 test('a block ending the file without a newline stays that way', () => {
-  const root = makeTree({ 'package.json': '{}', 'docs/adr/0001.md': decided(), 'AGENTS.md': '<!-- ontrack:begin -->\nold\n<!-- ontrack:end -->' });
+  const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'AGENTS.md': '<!-- ontrack:begin -->\nold\n<!-- ontrack:end -->' });
   const status = agentsStatus(root);
   assert.ok(status.state === 'out of date');
   assert.equal(writeAgents(status), 'updated');
@@ -180,14 +180,14 @@ test('dry run with an import announces an update and writes nothing', async () =
 });
 
 test('dry run with only a stale block', async () => {
-  const root = makeTree({ 'package.json': '{}', 'docs/adr/0001.md': decided(), 'AGENTS.md': '<!-- ontrack:begin -->\nold\n<!-- ontrack:end -->\n' });
+  const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'AGENTS.md': '<!-- ontrack:begin -->\nold\n<!-- ontrack:end -->\n' });
   const r = await run(root, 'apply', '--dry-run');
   assert.equal(r.stdout, 'dry run: nothing written\nAGENTS.md: rules block to update\n');
   assert.equal(read(root), '<!-- ontrack:begin -->\nold\n<!-- ontrack:end -->\n');
 });
 
 test('dry run reports a skipped block as plan does', async () => {
-  const root = makeTree({ 'package.json': '{}', 'docs/adr/0001.md': decided(), 'AGENTS.md': '<!-- ontrack:begin -->\n' });
+  const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'AGENTS.md': '<!-- ontrack:begin -->\n' });
   const r = await run(root, 'apply', '--dry-run');
   assert.equal(r.stdout, (await run(root, 'plan')).stdout);
   assert.equal(r.code, 2);
@@ -196,28 +196,28 @@ test('dry run reports a skipped block as plan does', async () => {
 // Claude Code warning
 
 test('CLAUDE.md without the import: warning, exit code unchanged', async () => {
-  const root = withAgents(makeTree({ 'package.json': '{}', 'docs/adr/0001.md': decided(), 'CLAUDE.md': '# Claude\n' }));
+  const root = withAgents(makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'CLAUDE.md': '# Claude\n' }));
   const r = await run(root, 'plan');
   assert.equal(r.stdout, `no ontrack source found\n${WARNING}\n`);
   assert.equal(r.code, 0);
 });
 
 test('CLAUDE.md with the import: no warning', async () => {
-  const root = withAgents(makeTree({ 'package.json': '{}', 'docs/adr/0001.md': decided(), 'CLAUDE.md': '  @AGENTS.md\n\n# Claude\n' }));
+  const root = withAgents(makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'CLAUDE.md': '  @AGENTS.md\n\n# Claude\n' }));
   assert.equal(agentsStatus(root).warning, null);
 });
 
 test('CLAUDE.local.md alone also triggers the warning', () => {
-  const root = makeTree({ 'package.json': '{}', 'docs/adr/0001.md': decided(), 'CLAUDE.local.md': 'x' });
+  const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'CLAUDE.local.md': 'x' });
   assert.equal(agentsStatus(root).warning, WARNING);
 });
 
 test('apply prints the warning after writing, and never writes CLAUDE.md', async () => {
-  const root = makeTree({ 'package.json': '{}', 'docs/adr/0001.md': decided(), 'CLAUDE.md': '# Claude\n' });
+  const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'CLAUDE.md': '# Claude\n' });
   const r = await run(root, 'apply');
   assert.equal(r.stdout, `AGENTS.md: rules block created\n${WARNING}\n`);
   assert.equal(read(root, 'CLAUDE.md'), '# Claude\n');
-  const dry = await run(makeTree({ 'package.json': '{}', 'docs/adr/0001.md': decided(), 'CLAUDE.md': 'x' }), 'apply', '--dry-run');
+  const dry = await run(makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'CLAUDE.md': 'x' }), 'apply', '--dry-run');
   assert.ok(dry.stdout.includes(WARNING));
 });
 
@@ -226,6 +226,6 @@ test('no warning when the block is not needed', () => {
 });
 
 test('skipped by a trait conflict still carries the warning', () => {
-  const root = makeTree({ 'package.json': '{}', 'docs/adr/0001.md': decided(), 'docs/adr/0002.md': decided(), 'CLAUDE.md': 'x' });
+  const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'docs/adr/local/0002.md': decided(), 'CLAUDE.md': 'x' });
   assert.equal(agentsStatus(root).warning, WARNING);
 });

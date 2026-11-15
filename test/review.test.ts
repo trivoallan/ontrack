@@ -25,7 +25,7 @@ const adr = (title: string | null, ...frontmatter: string[]) =>
 const COMMITS = 'docs/adr/trivoallan/ADR-0006-commits.md';
 const LOCALIZATION = 'docs/adr/trivoallan/ADR-0002-localization.md';
 const RECORD = 'docs/adr/trivoallan/ADR-0001-record-architecture-decisions.md';
-const RELEASE = 'docs/adr/ADR-0020-release.md';
+const RELEASE = 'docs/adr/local/ADR-0020-release.md';
 
 const tree = () =>
   makeTree({
@@ -160,7 +160,7 @@ test('prompt: agreement comes before writing, and apply closes it', () => {
   assert.deepEqual(out.match(/^\d\./gm), ['1.', '2.', '3.', '4.', '5.', '6.', '7.']);
 });
 
-test('prompt: an own ADR sits directly in docs/adr/', () => {
+test('prompt: an own ADR sits in docs/adr/local/', () => {
   const root = makeTree({ [RELEASE]: adr('Release', 'status: proposed') });
   assert.ok(formatReview(selectAdr(root, 'ADR-0020-release')).includes(`\`${RELEASE}\``));
 });

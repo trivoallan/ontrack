@@ -1,6 +1,6 @@
 name: propose
 
-# docs/adr/ADR-0002-a-label-asks-for-a-change.md: a maintainer adds
+# docs/adr/local/ADR-0002-a-label-asks-for-a-change.md: a maintainer adds
 # the `ontrack:propose` label to an issue, and a draft pull request carrying
 # the change proposal appears. An experiment; deleting this file ends it.
 #
@@ -18,7 +18,7 @@ name: propose
 # `publish` do name it: a filter that knows no path filters nothing. They come
 # from a closed catalog, below.
 #
-# docs/adr/ADR-0004-other-repositories-call-the-propose-and-apply-workflows.md:
+# docs/adr/local/ADR-0004-other-repositories-call-the-propose-and-apply-workflows.md:
 # other repositories call this workflow by commit SHA. They choose catalog
 # entries by name and never pass a path, a pattern or a tool rule.
 on:
@@ -71,8 +71,8 @@ jobs:
       # The catalog: the only frameworks the agent may write for, and what
       # each one allows. A caller picks entries by name; anything else fails
       # here, before anything that costs. The `changes` trait of AGENTS.md
-      # must name an enabled entry. ADRs live in `docs/adr`, as ADR-0001 of
-      # the governance source states and ontrack assumes.
+      # must name an enabled entry. A repository's own ADRs live in
+      # `docs/adr/local`, where ontrack reads and writes them.
       - id: catalog
         env:
           FRAMEWORKS: ${{ inputs.frameworks || 'openspec,adr' }}
@@ -117,8 +117,8 @@ jobs:
             writes+=("\`openspec/changes/\`")
           fi
           if [ "$adr" = true ]; then
-            allowed="$allowed,Edit(docs/adr/**)"
-            writes+=("\`docs/adr/\`")
+            allowed="$allowed,Edit(docs/adr/local/**)"
+            writes+=("\`docs/adr/local/\`")
           fi
           {
             echo "openspec=$openspec"
@@ -412,7 +412,7 @@ jobs:
           frameworks="${FRAMEWORKS:-openspec,adr}"
           parts=()
           [[ ",${frameworks//[[:space:]]/}," == *,openspec,* ]] && parts+=("openspec/changes/${NAME}/[A-Za-z0-9._/-]+\.(md|yaml)")
-          [[ ",${frameworks//[[:space:]]/}," == *,adr,* ]] && parts+=("docs/adr/ADR-[0-9]{4}-[a-z0-9-]+\.md")
+          [[ ",${frameworks//[[:space:]]/}," == *,adr,* ]] && parts+=("docs/adr/local/ADR-[0-9]{4}-[a-z0-9-]+\.md")
           [ "${#parts[@]}" -gt 0 ]
           allowed="^($(IFS='|'; echo "${parts[*]}"))$"
           patch="$RUNNER_TEMP/change/change.patch"

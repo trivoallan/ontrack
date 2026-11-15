@@ -270,3 +270,22 @@ test('a check: line leaves the instructions output unchanged', async () => {
   assert.equal(withCheck.stdout, without.stdout);
   assert.equal(withCheck.code, 0);
 });
+
+test('own ADRs in docs/adr/local/ and in the historical layout share the local namespace', () => {
+  const root = makeTree({
+    'docs/adr/local/ADR-0010-release.md': adr('Release', 'status: proposed'),
+    'docs/adr/ADR-0011-hosting.md': adr('Hosting', 'status: proposed'),
+  });
+  assert.deepEqual(refs(readAdrs(root)).sort(), ['local/ADR-0010-release', 'local/ADR-0011-hosting']);
+});
+
+test('the same file name in docs/adr/ and docs/adr/local/ is an error', async () => {
+  const root = makeTree({
+    'docs/adr/local/ADR-0010-release.md': adr('Release', 'status: proposed'),
+    'docs/adr/ADR-0010-release.md': adr('Release', 'status: proposed'),
+  });
+  const r = await instructions(root);
+  assert.equal(r.code, 1);
+  assert.equal(r.stdout, '');
+  assert.match(r.stderr, /docs\/adr\/ADR-0010-release\.md and docs\/adr\/local\/ADR-0010-release\.md/);
+});

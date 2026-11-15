@@ -52,6 +52,9 @@ export function discoverSources(projectRoot: string): Source[] {
     if (alias.startsWith('@')) {
       throw new Error(`source "${alias}" must be installed under an unscoped alias`);
     }
+    if (alias === 'local') {
+      throw new Error('source "local" must be installed under another alias: local names the repository\'s own ADRs');
+    }
     if (!key.success) {
       const field = key.error.issues[0].path.join('.');
       throw new Error(`source "${alias}" has no "${field}" string in its ontrack key`);

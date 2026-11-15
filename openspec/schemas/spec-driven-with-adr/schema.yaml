@@ -165,9 +165,10 @@ artifacts:
 
       Prior decisions (read existing ADRs first):
 
-      Before writing, list every ADR-NNNN-slug.md file in docs/adr/ and in
-      its subdirectories. A subdirectory holds the ADRs imported from a
-      governance source (docs/adr/trivoallan/); they count like the
+      Before writing, list every ADR-NNNN-slug.md file in the
+      subdirectories of docs/adr/. docs/adr/local/ holds the repository's
+      own ADRs; every other subdirectory holds the ADRs imported from a
+      governance source (docs/adr/trivoallan/), which count like the
       repository's own. Read each file's frontmatter: an ADR is in force when
       its `status:` is `accepted` and no other accepted ADR lists it in
       `supersedes:`. A `proposed` ADR is an open question, a `rejected` one
@@ -219,11 +220,11 @@ artifacts:
 
       Durable Architecture Decision Records live in docs/adr/ and persist
       across changes. The ADRs this repository writes for itself are the
-      files directly in docs/adr/, with their own numbering. Each
+      files of docs/adr/local/, with their own numbering. Each other
       subdirectory (docs/adr/trivoallan/) holds the ADRs imported from a
       governance source: read them, never create or edit a file there. If
       this change introduces a new durable architectural decision, create
-      docs/adr/ADR-NNNN-slug.md and reference it from
+      docs/adr/local/ADR-NNNN-slug.md and reference it from
       openspec/changes/<change>/adr.md. Do not duplicate the full ADR content
       in the manifest.
 
@@ -241,11 +242,11 @@ artifacts:
       Process:
 
 
-      1. Read every ADR-NNNN-slug.md in docs/adr/ and its subdirectories.
+      1. Read every ADR-NNNN-slug.md in the subdirectories of docs/adr/.
       Build the supersession graph from each frontmatter's `supersedes:`
       list. The ADRs in force are those with `status: accepted` that no
       accepted ADR supersedes. Note the highest number in use among the files
-      directly in docs/adr/ (the subdirectories number separately). Record
+      of docs/adr/local/ (the other subdirectories number separately). Record
       the in-force ADRs reviewed in the change-local adr.md manifest.
 
 
@@ -262,8 +263,8 @@ artifacts:
 
 
       3. For each qualifying decision, create a NEW file at
-      docs/adr/ADR-NNNN-slug.md, where NNNN is a 4-digit number one greater
-      than the highest among the files directly in docs/adr/ (0001 when there
+      docs/adr/local/ADR-NNNN-slug.md, where NNNN is a 4-digit number one greater
+      than the highest among the files of docs/adr/local/ (0001 when there
       is none), and slug is a short kebab-case name. Write it in the format
       the in-force ADR on recording decisions prescribes
       (docs/adr/trivoallan/ADR-0001-record-architecture-decisions.md unless
@@ -282,7 +283,7 @@ artifacts:
       `## References`, in English.
 
       If the decision replaces an in-force ADR, name it in `supersedes:` — by
-      its file name without .md for an ADR directly in docs/adr/
+      its file name without .md for an ADR of docs/adr/local/
       (`ADR-0003-slug`), prefixed with its directory for a governance ADR
       (`trivoallan/ADR-0006-commits`) — and explain in Context why the prior
       decision is revisited. There is no `Supersedes:` field in the body. Do
@@ -300,7 +301,7 @@ artifacts:
 
       Filename convention: ADR-NNNN-slug.md (e.g.,
       ADR-0042-use-postgres-for-catalog.md). Numbers are monotonic among the
-      files directly in docs/adr/ and never reused.
+      files of docs/adr/local/ and never reused.
     requires:
       - design
   - id: tasks

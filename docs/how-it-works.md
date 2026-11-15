@@ -104,7 +104,9 @@ It only runs once the repository holds that ADR as `accepted`.
 A repository can import more than one source: one from the platform team,
 another from security. The npm alias a source is installed under is its
 **namespace**. Its ADRs live in `docs/adr/<namespace>/`, so sources sit side
-by side without colliding.
+by side without colliding. The ADRs a repository writes for itself live the
+same way, in `docs/adr/local/`: `local` is their namespace, and no source
+can be installed under that alias.
 
 ```mermaid
 flowchart TD

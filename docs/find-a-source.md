@@ -38,7 +38,8 @@ source:
 ## Install it
 
 Install the package under an alias. The alias is the namespace: the ADRs
-land in `docs/adr/<alias>/`. It must be unscoped.
+land in `docs/adr/<alias>/`. It must be unscoped, and cannot be `local`,
+the namespace of your own ADRs.
 
 ```bash
 npm i -D <alias>@npm:<package>

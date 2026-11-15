@@ -95,6 +95,11 @@ test('scoped alias is rejected', () => {
   assert.throws(() => discoverSources(root), /@acme\/rules.*unscoped alias/);
 });
 
+test('the alias local is rejected', () => {
+  const root = project({ deps: { local: '1' }, installed: { local: source('adr-catalog') } });
+  assert.throws(() => discoverSources(root), /"local".*another alias/);
+});
+
 test('adr path escaping the package is rejected', () => {
   const root = project({ deps: { platform: '1' }, installed: { platform: source('platform', { adr: '../../etc' }) } });
   assert.throws(() => discoverSources(root), /platform.*\.\.\/\.\.\/etc/);

@@ -5,6 +5,9 @@ import type { Comparison } from './revision.ts';
 import { discoverSources } from './sources.ts';
 import type { Source } from './sources.ts';
 
+/** The namespace of the ADRs a repository writes for itself. */
+export const OWN = 'local';
+
 export type Category = 'revised' | 'new' | 'removed' | 'undetermined' | 'unreadable' | 'check' | 'unchanged';
 /** The `check:` line of the local copy (`from`) and of the source (`to`); null when absent. */
 export type CheckChange = { from: string | null; to: string | null };
@@ -91,7 +94,16 @@ function planSource(root: string, source: Source): SourcePlan {
 
 /** What importing each source would change, as data. Reads only. */
 export function buildPlan(root: string): Plan {
-  return discoverSources(root).map((source) => planSource(root, source));
+  const sources = discoverSources(root);
+  const plan = sources.map((source) => planSource(root, source));
+  // The repository's own ADRs still placed directly in docs/adr/: the root
+  // files no source ships. They move to docs/adr/local/, as a last entry
+  // that has no ADR to classify.
+  const adrRoot = path.join(root, 'docs', 'adr');
+  const shipped = new Set(sources.flatMap(sourceFiles));
+  const own = existsSync(adrRoot) ? markdownFiles(adrRoot).filter((file) => !shipped.has(file)) : [];
+  if (own.length > 0) plan.push({ namespace: OWN, adrDir: path.join(adrRoot, OWN), adrs: [], migration: own });
+  return plan;
 }
 
 /** True when anything in the plan needs a human. */
@@ -120,14 +132,13 @@ export const checkLines = (adr: PlannedAdr): string[] =>
  * get a line too and every ADR line carries the repository's verdict.
  */
 export function formatPlan(plan: Plan, { all = false } = {}): string {
-  if (plan.length === 0) return 'no ontrack source found\n';
-  const lines: string[] = [];
+  const lines: string[] = plan.some((s) => s.namespace !== OWN) ? [] : ['no ontrack source found'];
   for (const source of plan) {
     const counts = ORDER.map((category): [Category, number] => [
       category,
       source.adrs.filter((a) => a.category === category).length,
     ]).filter(([category, n]) => n > 0 || category === 'unchanged');
-    lines.push(`${source.namespace}: ${counts.map(([c, n]) => `${n} ${c}`).join(', ')}`);
+    if (source.namespace !== OWN) lines.push(`${source.namespace}: ${counts.map(([c, n]) => `${n} ${c}`).join(', ')}`);
 
     for (const adr of source.adrs) {
       if (adr.category === 'unchanged' && !all) continue;
