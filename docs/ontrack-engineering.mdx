@@ -1,9 +1,9 @@
 ---
 title: The ontrack-engineering track
-description: The reference track ontrack is built with, what a repository gets from it, and how to install it.
+description: The reference track ontrack is built with, and what a repository gets from it.
 ---
 
-import { Aside, Card, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import { Aside, Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 import { domains, questions, version } from '../site/src/track.mjs';
 
 export const DomainLink = ({ name }) => {
@@ -62,32 +62,9 @@ A check confirms the wiring is there, not that it is right. Reject any
 question that does not fit your repository: a rejection is a full answer.
 </Aside>
 
-## Install it
+## Go on
 
-<Steps>
-
-1. Install the track under the alias `trivoallan`, its namespace: the
-   questions land in `docs/adr/trivoallan/`.
-
-   ```bash
-   npm i -D trivoallan@npm:@trivoallan/ontrack-engineering
-   ```
-
-2. Check that the package was built by the track's release workflow.
-
-   ```bash
-   npm audit signatures
-   ```
-
-3. List the questions it would import. The [tutorial](tutorial.mdx) goes on
-   from here.
-
-   ```bash
-   npx ontrack plan
-   ```
-
-</Steps>
-
-## Questions
-
-<LinkCard title="Questions" href="questions/" description={`The ${questions.length} questions of ontrack-engineering ${version}, by domain.`} />
+<CardGrid>
+  <LinkCard title="Use it" href="use-it/" description="Install the track, take its new releases, and reject a question that does not fit." />
+  <LinkCard title="Questions" href="questions/" description={`The ${questions.length} questions of ontrack-engineering ${version}, by domain.`} />
+</CardGrid>

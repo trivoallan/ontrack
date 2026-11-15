@@ -22,7 +22,9 @@ may still carry the earlier keyword:
 
 [`@trivoallan/ontrack-engineering`](https://www.npmjs.com/package/@trivoallan/ontrack-engineering)
 is the track ontrack uses on itself. Its ADRs are in
-[trivoallan/ontrack-engineering](https://github.com/trivoallan/ontrack-engineering).
+[trivoallan/ontrack-engineering](https://github.com/trivoallan/ontrack-engineering);
+[Use the ontrack-engineering track](ontrack-engineering/use-it.md) shows how
+to install it and follow its releases.
 
 > [!WARNING]
 > ontrack does not review the tracks the search returns. A track is a
