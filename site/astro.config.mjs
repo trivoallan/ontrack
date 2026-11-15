@@ -112,6 +112,9 @@ export default defineConfig({
         },
       ],
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/trivoallan/ontrack' }],
+      // The edit link and the date of each page: Starlight looks for both
+      // under site/, where the pages are a symbolic link.
+      routeMiddleware: './src/route-data.ts',
     }),
   ],
 });
