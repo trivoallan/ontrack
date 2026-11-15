@@ -7,13 +7,13 @@
 
 ## 2. Phase 2: the sequence prompt (after the go/no-go on observation round 1)
 
-- [ ] 2.1 Confirm with the maintainer that phase 2 is cleared to start; stop here otherwise
-- [ ] 2.2 In `formatSequence` (`src/review.ts`), add the text that rulings are optional and `npx ontrack check` runs only decided ADRs, and the survey (skipped when the list holds one ADR), before `STEPS`
-- [ ] 2.3 After `STEPS`, add skip and stop, change the last line to "ruled or skipped", and add the end-of-review summary; leave `STEPS` untouched
-- [ ] 2.4 In `TRACKING`, replace "Once every ADR is ruled" with "Once the review ends, whether every ADR is ruled or the user stops"
-- [ ] 2.5 Update `test/review.test.ts`: the new scenarios (survey, single ADR, optional rulings, skip and stop, summary, tracking on stop, named ADR without survey), the changed Sequence scenario, and the existing same-text scenarios still passing
-- [ ] 2.6 Update `docs/commands.md`: the `review` prompt contract and the quoted sequence prompt; and `docs/tutorial.mdx` where it rules the remaining questions one at a time
-- [ ] 2.7 Run the test suite and coverage; commit as `feat(review): …`
+- [x] 2.1 Confirm with the maintainer that phase 2 is cleared to start; stop here otherwise
+- [x] 2.2 In `formatSequence` (`src/review.ts`), add the text that rulings are optional and `npx ontrack check` runs only decided ADRs, and the survey (skipped when the list holds one ADR), before `STEPS`
+- [x] 2.3 After `STEPS`, add skip and stop, change the last line to "ruled or skipped", and add the end-of-review summary; leave `STEPS` untouched
+- [x] 2.4 In `TRACKING`, replace "Once every ADR is ruled" with "Once the review ends, whether every ADR is ruled or the user stops"
+- [x] 2.5 Update `test/review.test.ts`: the new scenarios (survey, single ADR, optional rulings, skip and stop, summary, tracking on stop, named ADR without survey), the changed Sequence scenario, and the existing same-text scenarios still passing
+- [x] 2.6 Update `docs/commands.md`: the `review` prompt contract and the quoted sequence prompt; and `docs/tutorial.mdx` where it rules the remaining questions one at a time
+- [x] 2.7 Run the test suite and coverage; commit as `feat(review): …`
 
 ## 3. Evaluation (phase 2)
 

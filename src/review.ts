@@ -23,8 +23,9 @@ const STEPS = `1. Read its file in full. Do not edit any other ADR.
 `;
 
 // Rulings ahead of the repository become tracking items, proposed once the
-// whole review is ruled, since the tracker may be one of the ADRs ruled.
-const TRACKING = `Once every ADR is ruled, list the rulings this repository does not follow yet: a value its code, configuration or tooling does not match, or a tool the ruling names that is not set up. A ruling is identified by its ADR's reference without the slug, in brackets, and its trait key, as in \`[trivoallan/ADR-0015] secrets.guard\`. The tracker is the one named by the decided \`tracking\` trait in AGENTS.md. Before proposing, list the items in that tracker that carry the label \`ontrack\`, open and closed: propose nothing for a ruling whose identifier starts the title of one of those items, and say in one line which closed items name a ruling this repository still does not follow. When you cannot list the tracker's items, propose every ruling and say that duplicates were not checked. For each ruling left, propose a tracking item: its title starts with the ruling's identifier, as in \`[trivoallan/ADR-0015] secrets.guard: install gitleaks\`, and it names the ADR it serves. Create in the tracker (\`tracking.tool\`, in \`tracking.project\`) only the items the user agrees to, asked with a question tool such as \`AskUserQuestion\` when you have one, each with the label \`ontrack\`, creating the label first when the tracker requires it. When no \`tracking\` trait is decided, or \`tracking.tool\` is \`none\`, give the list in your reply and create nothing.
+// review ends (every ADR ruled, or the user stops), since the tracker may be
+// one of the ADRs ruled.
+const TRACKING = `Once the review ends, whether every ADR is ruled or the user stops, list the rulings this repository does not follow yet: a value its code, configuration or tooling does not match, or a tool the ruling names that is not set up. A ruling is identified by its ADR's reference without the slug, in brackets, and its trait key, as in \`[trivoallan/ADR-0015] secrets.guard\`. The tracker is the one named by the decided \`tracking\` trait in AGENTS.md. Before proposing, list the items in that tracker that carry the label \`ontrack\`, open and closed: propose nothing for a ruling whose identifier starts the title of one of those items, and say in one line which closed items name a ruling this repository still does not follow. When you cannot list the tracker's items, propose every ruling and say that duplicates were not checked. For each ruling left, propose a tracking item: its title starts with the ruling's identifier, as in \`[trivoallan/ADR-0015] secrets.guard: install gitleaks\`, and it names the ADR it serves. Create in the tracker (\`tracking.tool\`, in \`tracking.project\`) only the items the user agrees to, asked with a question tool such as \`AskUserQuestion\` when you have one, each with the label \`ontrack\`, creating the label first when the tracker requires it. When no \`tracking\` trait is decided, or \`tracking.tool\` is \`none\`, give the list in your reply and create nothing.
 `;
 
 // How a superseded ADR is marked, and the sections of the new one, are the
@@ -199,17 +200,28 @@ ${TRACKING}`;
 }
 
 /** The contract prompt for every pending ADR, ruled one at a time (see docs/commands.md). */
+// The order is the agent's reading of the repository, agreed by the user:
+// the CLI lists in reference order and judges nothing. The survey, skip,
+// stop and summary stay outside STEPS, which both forms share.
 export function formatSequence(adrs: Adr[]): string {
-  return `Review the architecture decision records of this repository that are still \`proposed\`, one at a time, in this order:
+  return `Review the architecture decision records of this repository that are still \`proposed\`, one at a time, in the order agreed with the user:
 
 ${adrs.map((adr) => `- ${named(adr)}`).join('\n')}
 
 Each is a question this repository has not answered yet, shipped with the answer its track recommends. Propose a ruling; the user decides. Where an ADR itself says how to rule, it prevails over this prompt.
 
-For each ADR, in turn:
+None of them has to be ruled now: the repository works with them open, and \`npx ontrack check\` runs only the decided ADRs. The user rules as many as they choose.
+
+First, when the list holds more than one ADR, survey them. Read every ADR in the list and look at this repository's files, configuration, CI and history, writing nothing. Put each ADR in one of two groups: those this repository already answers, and those that need a discussion. Present both groups, the first one first, and ask the user to agree to that order or give another, with a question tool such as \`AskUserQuestion\` when you have one.
+
+Then, for each ADR, in the agreed order:
 
 ${STEPS}
-Then take the next ADR in the list. Do not start an ADR before the previous one is ruled.
+When you present a ruling, the user can also skip the ADR: leave its file untouched and take the next one. The user can stop the review at any time: then write nothing more for the open ADR.
+
+Then take the next ADR in the list. Do not start an ADR before the previous one is ruled or skipped.
+
+When the list is done or the user stops, give a summary: the ADRs ruled in this review, the ADRs still \`proposed\` with the group each belongs to, and a sentence saying the repository works with them open.
 
 ${TRACKING}`;
 }
