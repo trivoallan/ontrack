@@ -20,7 +20,6 @@
 - [x] 3.1 Add `workflow_call` with the inputs `label` (default `ontrack:apply`) and `routine_id`, and the secret `fire_token`, keeping `pull_request_target: labeled`
 - [x] 3.2 Fall back to `vars.ONTRACK_APPLY_ROUTINE_ID` and `secrets.ONTRACK_APPLY_FIRE_TOKEN` on ontrack's own trigger
 - [x] 3.3 Post the fixed "could not be started" comment when the token or the routine is missing
-- [x] 3.4 Refuse a second session for a head commit that already got one, found by the workflow's own comment (on trivoallan/tambouille#19 the label added twice, 33 seconds apart, started two sessions on the same commit)
 
 ## 4. Test
 
