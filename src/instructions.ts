@@ -3,6 +3,7 @@
 // trait "is read without interpretation", and agents read YAML natively.
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
+import type { Link } from './links.ts';
 import { OWN, markdownFiles } from './plan.ts';
 import { frontmatter, readTitle } from './revision.ts';
 
@@ -103,6 +104,34 @@ function readAdr(root: string, { dir, ns, file }: AdrFile): Adr | null {
     traits,
     check: status === 'accepted' ? topValue(lines, 'check') || null : null,
   };
+}
+
+/**
+ * `supersedes:` entries that name namespace `from`, each with its line and
+ * the entry it becomes under `to`. A file of docs/adr/<from>/ is reported at
+ * its path under docs/adr/<to>/. Reads only.
+ */
+export function supersedesNaming(root: string, from: string, to: string): Link[] {
+  const found: Link[] = [];
+  for (const { dir, ns, file } of adrFiles(root)) {
+    const lines = readFileSync(path.join(dir, file), 'utf8').split('\n');
+    if (lines[0] !== '---') continue;
+    const end = lines.indexOf('---', 1);
+    const start = lines.findIndex((l, i) => i > 0 && (end < 0 || i < end) && l.startsWith('supersedes:'));
+    if (start < 0) continue;
+    const held = ns === from ? `docs/adr/${to}/${file}` : path.relative(root, path.join(dir, file)).split(path.sep).join('/');
+    const report = (index: number, items: string[]) => {
+      for (const item of items.map((i) => unquote(i.trim()))) {
+        if (item.startsWith(`${from}/`)) found.push({ file: held, line: index + 1, old: item, new: `${to}/${item.slice(from.length + 1)}` });
+      }
+    };
+    const inline = lines[start].slice('supersedes:'.length).replace(/\s#.*$/, '').trim();
+    if (inline.startsWith('[')) report(start, inline.replace(/^\[|\]$/g, '').split(','));
+    else if (inline === '') {
+      for (let i = start + 1; i < lines.length && /^\s*-\s/.test(lines[i]); i++) report(i, [lines[i].replace(/^\s*-\s+/, '')]);
+    }
+  }
+  return found.sort((a, b) => a.file.localeCompare(b.file) || a.line - b.line);
 }
 
 // Dotted paths of the mapping keys in a traits block, and those with no key

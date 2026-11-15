@@ -403,3 +403,82 @@ test('--all: the exit code is the one of plan', async () => {
   assert.equal((await plan(pending)).code, 2);
   assert.equal((await plan(pending, '--all')).code, 2);
 });
+
+// Namespace rename
+
+test('alias changed: the old folder is a rename, classified in place', async () => {
+  const root = makeProject({
+    tracks: { engineering: { 'A.md': adr(1), 'B.md': adr(2) } },
+    local: { 'docs/adr/old/A.md': adr(1, 'accepted'), 'docs/adr/old/B.md': adr(2, 'accepted') },
+  });
+  const [s] = buildPlan(root);
+  assert.equal(s.rename, 'old');
+  assert.deepEqual(categories(buildPlan(root)), { 'A.md': 'unchanged', 'B.md': 'unchanged' });
+  const r = await plan(root);
+  assert.equal(r.stdout, 'engineering: 2 unchanged\nrename: docs/adr/old/ → docs/adr/engineering/\n');
+  assert.equal(r.code, 2);
+});
+
+test('rename line follows the ADR lines; revised and removed read in the old folder', () => {
+  const root = makeProject({
+    tracks: { engineering: { 'A.md': adr(2), 'N.md': adr(1) } },
+    local: { 'docs/adr/old/A.md': adr(1, 'accepted'), 'docs/adr/old/Z.md': adr(1, 'accepted') },
+  });
+  assert.equal(
+    formatPlan(buildPlan(root)),
+    [
+      'engineering: 1 revised, 1 new, 1 removed, 0 unchanged',
+      '  revised       A (revision 1 → 2)',
+      '  new           N',
+      '  removed       Z',
+      'rename: docs/adr/old/ → docs/adr/engineering/',
+      '',
+    ].join('\n'),
+  );
+});
+
+test('a pending rename is a pending change', () => {
+  assert.equal(hasPendingChanges([{ adrs: [], migration: [], rename: 'old' }]), true);
+});
+
+test('no rename: the folder of an installed track, local, or a folder sharing no file', () => {
+  const root = makeProject({
+    tracks: { engineering: { 'A.md': adr(1) }, platform: { 'P.md': adr(1) } },
+    local: {
+      'docs/adr/platform/A.md': adr(1),
+      'docs/adr/local/A.md': adr(1),
+      'docs/adr/archive/Q.md': adr(1),
+    },
+  });
+  const engineering = buildPlan(root).find((s) => s.namespace === 'engineering');
+  assert.equal(engineering?.rename, undefined);
+  assert.equal(engineering?.adrs[0].category, 'new');
+});
+
+test('no rename when the track already has its folder', () => {
+  const root = makeProject({
+    tracks: { engineering: { 'A.md': adr(1) } },
+    local: { 'docs/adr/engineering/A.md': adr(1), 'docs/adr/old/A.md': adr(1) },
+  });
+  assert.equal(buildPlan(root)[0].rename, undefined);
+});
+
+test('two candidate folders: plan fails and names them', async () => {
+  const root = makeProject({
+    tracks: { engineering: { 'A.md': adr(1) } },
+    local: { 'docs/adr/old/A.md': adr(1), 'docs/adr/older/A.md': adr(1) },
+  });
+  const r = await plan(root);
+  assert.equal(r.code, 1);
+  assert.match(r.stderr, /"engineering".*docs\/adr\/old\/ or docs\/adr\/older\//);
+});
+
+test('one folder for two tracks: plan fails and names both', async () => {
+  const root = makeProject({
+    tracks: { one: { 'A.md': adr(1) }, two: { 'A.md': adr(1) } },
+    local: { 'docs/adr/old/A.md': adr(1) },
+  });
+  const r = await plan(root);
+  assert.equal(r.code, 1);
+  assert.match(r.stderr, /docs\/adr\/old\/.*"one" and "two"/);
+});
