@@ -10,6 +10,12 @@ related: research/problem-statement-backlog-reveal.md
 
 # Hypothesis: The first proposal is where adopters recognise their own practice
 
+> **Run 3 (same day), the prompt as shipped in PR #205: still 25 of 42 found,
+> but 16 of the 17 wrong departing values are now marked `absent`, and 10 of
+> 10 `forge.gate` values come back as a question.** Only 3 of 90 values are
+> presented as practice when they are not. Whether to run H2 now, with its
+> gate changed, is open. See the results file, "Run 3".
+
 > **Result (2026-11-15): H1 invalidated, H2 not run.** The desk test matched
 > 19 of 42 departing values (45%, threshold 50%). The agent finds a practice
 > that is present in the files (8 / 8) but keeps the track's recommendation

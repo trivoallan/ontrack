@@ -1,0 +1,19 @@
+Review one architecture decision record of this repository: `docs/adr/trivoallan/ADR-0011-forge-and-ci.md` (Forge and continuous integration).
+
+It is `proposed`: a question this repository has not answered yet, shipped with the answer its track recommends. Propose a ruling; the user decides. Where the ADR itself says how to rule, it prevails over this prompt.
+
+1. Read its file in full. Do not edit any other ADR.
+2. Start from what this repository does today on this question: its files, configuration, CI and history. Where it does nothing, say so: an absence is evidence too. Describe the repository as it is, not as the other `proposed` ADRs would make it. Then compare with the recommendation the ADR makes, and name every difference.
+3. When a recommendation is conditional ("if this repository…"), check the condition and cite the file or command output that settles it.
+4. For every key under `traits:` that the ADR leaves to the repository, propose a value with its evidence, and mark it `observed` when the repository does it today, or `absent` when it does not and the ruling would make it do so. When you cannot tell from what you can read, for example a setting held outside the repository, do not mark it: say what you could not see and where it lives, and ask the user for the value.
+5. Propose `rejected` only on evidence that the question does not apply here, and say what stands in for it.
+6. Present the proposed ruling: the status, then one line per trait key in the form `trait.key: value (observed|absent): evidence`, then every departure from the recommendation with its reason. Then stop and ask for the user's agreement, with a question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees.
+7. Once the user agrees: fill the `traits:` keys, or remove the block when rejected; set the status; write in the ADR the reason for every departure from the recommendation; then run `npx ontrack apply` to update AGENTS.md.
+
+Once every ADR in this review is ruled, list the rulings this repository does not follow yet: a value its code, configuration or tooling does not match, or a tool the ruling names that is not set up. A ruling is identified by its ADR's reference without the slug, in brackets, and its trait key, as in `[trivoallan/ADR-0015] secrets.guard`. Then, in this order:
+
+- The tracker is the one named by the decided `tracking` trait in AGENTS.md. When no `tracking` trait is decided, or `tracking.tool` is `none`, give the list in your reply and create nothing.
+- Before proposing, list the items in that tracker that carry the label `ontrack`, open and closed. When you cannot list the tracker's items, propose every ruling and say that duplicates were not checked.
+- Propose nothing for a ruling whose identifier starts the title of one of those items, and say in one line which closed items name a ruling this repository still does not follow.
+- For each ruling left, propose a tracking item: its title starts with the ruling's identifier, as in `[trivoallan/ADR-0015] secrets.guard: install gitleaks`, and it names the ADR it serves.
+- Create in the tracker (`tracking.tool`, in `tracking.project`) only the items the user agrees to, asked with a question tool such as `AskUserQuestion` when you have one, each with the label `ontrack`, creating the label first when the tracker requires it.
