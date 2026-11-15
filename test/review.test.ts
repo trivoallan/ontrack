@@ -233,8 +233,15 @@ test('sequence: a survey in two groups, agreed before the first ruling, writing 
   const out = formatSequence(pendingAdrs(tree()));
   const survey = out.indexOf('First, when the list holds more than one ADR, survey them');
   assert.ok(survey > 0 && survey < out.indexOf('1. '));
-  assert.match(out, /writing nothing\. Put each ADR in one of two groups\. The first holds the ADRs this repository already answers: for every value the ADR asks for, you can cite the file, the configuration or the command output in this repository that shows the value itself\. A citation that shows only something next to the value, from which you would infer it, does not count\./);
-  assert.match(out, /Every other ADR goes to the second group, including one where a single value is held outside this repository, inferred, or drawn from history alone: name that value and say where it lives, or that you don't know\. Present both groups, the first one first, with the citation for every value of a first-group ADR, and for each citation in either group say whether it shows the value itself or only something next to it,/);
+  assert.match(out, /survey them, writing nothing\./);
+  assert.match(out, /For each ADR, take every value it asks for \(every key under `traits:`\) and look for a citation/);
+  assert.match(out, /- `shows the value`: the citation states the value itself\./);
+  assert.match(out, /- `next to it`: the citation shows something from which you would infer the value\./);
+  assert.match(out, /An absence counts as a citation only when the absence is the value/);
+  assert.match(out, /Put an ADR in the first group only when every one of its values has a citation labelled `shows the value`\. Put every other ADR in the second group, including one where a single value is held outside this repository, is inferred, or is drawn from history alone/);
+  assert.match(out, /Do not put an ADR in the first group on a `next to it` citation, however likely the value seems\. Do not leave a value of the second group without saying where it lives/);
+  assert.match(out, /a heading per group with its number of ADRs, equal to the ADRs listed under it;\n- for the first group, one row per value: ADR, key, value, citation;\n- for the second group, one row per ADR: ADR, the value you could not show, where it lives or "unknown", and any citation you have, with its label\./);
+  assert.match(out, /Then ask the user to agree to that order or give another, with a question tool such as `AskUserQuestion`/);
   assert.match(out, /ask the user to agree to that order or give another, with a question tool such as `AskUserQuestion`/);
 });
 

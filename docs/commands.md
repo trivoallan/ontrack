@@ -421,7 +421,24 @@ Each is a question this repository has not answered yet, shipped with the answer
 
 None of them has to be ruled now: the repository works with them open, and `npx ontrack check` runs only the decided ADRs. The user rules as many as they choose.
 
-First, when the list holds more than one ADR, survey them. Read every ADR in the list and look at this repository's files, configuration, CI and history, writing nothing. Put each ADR in one of two groups. The first holds the ADRs this repository already answers: for every value the ADR asks for, you can cite the file, the configuration or the command output in this repository that shows the value itself. A citation that shows only something next to the value, from which you would infer it, does not count. Every other ADR goes to the second group, including one where a single value is held outside this repository, inferred, or drawn from history alone: name that value and say where it lives, or that you don't know. Present both groups, the first one first, with the citation for every value of a first-group ADR, and for each citation in either group say whether it shows the value itself or only something next to it, and ask the user to agree to that order or give another, with a question tool such as `AskUserQuestion` when you have one.
+First, when the list holds more than one ADR, survey them, writing nothing. The survey decides which questions the user meets first: those this repository already answers, which the user can check against what they know, come before those that need a discussion.
+
+Read every ADR in the list and look at this repository's files, configuration, CI and history. For each ADR, take every value it asks for (every key under `traits:`) and look for a citation: a file, a configuration entry or a command output in this repository. Label each citation:
+- `shows the value`: the citation states the value itself. For instance, `"license": "MIT"` in `package.json` shows `license.spdx: MIT`.
+- `next to it`: the citation shows something from which you would infer the value. For instance, a `renovate.json` that extends a preset and has no `automerge` key does not show the automerge setting, which the preset holds; a contributing guide that says releases are published by hand does not show the build provenance, which the registry holds.
+
+An absence counts as a citation only when the absence is the value: no workflow that runs an audit tool shows `forge.audit: none`; no agent settings file does not show which agents contributors use.
+
+Put an ADR in the first group only when every one of its values has a citation labelled `shows the value`. Put every other ADR in the second group, including one where a single value is held outside this repository, is inferred, or is drawn from history alone, such as scopes read from past commits.
+
+Do not put an ADR in the first group on a `next to it` citation, however likely the value seems. Do not leave a value of the second group without saying where it lives: a forge setting, a file outside this repository, a choice people make, or "unknown".
+
+Present the survey in this form, the first group first:
+- a heading per group with its number of ADRs, equal to the ADRs listed under it;
+- for the first group, one row per value: ADR, key, value, citation;
+- for the second group, one row per ADR: ADR, the value you could not show, where it lives or "unknown", and any citation you have, with its label.
+
+Then ask the user to agree to that order or give another, with a question tool such as `AskUserQuestion` when you have one.
 
 Then, for each ADR, in the agreed order:
 
