@@ -168,7 +168,7 @@ artifacts:
       Before writing, list every ADR-NNNN-slug.md file in the
       subdirectories of docs/adr/. docs/adr/local/ holds the repository's
       own ADRs; every other subdirectory holds the ADRs imported from a
-      governance track (docs/adr/trivoallan/), which count like the
+      track (docs/adr/trivoallan/), which count like the
       repository's own. Read each file's frontmatter: an ADR is in force when
       its `status:` is `accepted` and no other accepted ADR lists it in
       `supersedes:`. A `proposed` ADR is an open question, a `rejected` one
@@ -222,7 +222,7 @@ artifacts:
       across changes. The ADRs this repository writes for itself are the
       files of docs/adr/local/, with their own numbering. Each other
       subdirectory (docs/adr/trivoallan/) holds the ADRs imported from a
-      governance track: read them, never create or edit a file there. If
+      track: read them, never create or edit a file there. If
       this change introduces a new durable architectural decision, create
       docs/adr/local/ADR-NNNN-slug.md and reference it from
       openspec/changes/<change>/adr.md. Do not duplicate the full ADR content
@@ -234,7 +234,7 @@ artifacts:
       previously accepted decision, record a NEW ADR whose frontmatter lists
       the prior one in `supersedes:`. The reverse edge is never written: an
       ADR is superseded when another accepted ADR lists it in `supersedes:`.
-      A governance ADR whose `status:` is still `proposed` is not accepted:
+      An imported ADR whose `status:` is still `proposed` is not accepted:
       ruling it is the repository's answer to a question, done on the user's
       decision, not an edit of a decision and not this step's job.
 
@@ -275,7 +275,7 @@ artifacts:
       the file name, `title:`, `status: accepted`, `date:` (YYYY-MM-DD),
       `authors:` (names of the people who decided, no email addresses) and
       `supersedes:` (a list, `[]` when empty). `revision:` and `traits:`
-      belong to governance ADRs: leave them out;
+      belong to imported ADRs: leave them out;
 
       - the Nygard sections, in this order: `# <title>`, `## Status`,
       `## Context`, `## Decision`, `## Consequences` (with `### Positive`,
@@ -284,7 +284,7 @@ artifacts:
 
       If the decision replaces an in-force ADR, name it in `supersedes:` — by
       its file name without .md for an ADR of docs/adr/local/
-      (`ADR-0003-slug`), prefixed with its directory for a governance ADR
+      (`ADR-0003-slug`), prefixed with its directory for an imported ADR
       (`trivoallan/ADR-0006-commits`) — and explain in Context why the prior
       decision is revisited. There is no `Supersedes:` field in the body. Do
       NOT touch the body of the prior ADR. Reference every new ADR file from
