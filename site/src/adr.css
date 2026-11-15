@@ -1,4 +1,6 @@
-/* A status badge inside an ADR page: the look of Starlight's sidebar badges. */
+/* A status badge in a page: filled with the colour of the status's dot in
+   the sidebar, so that a status has one colour on the whole site. The
+   colours are bright in both themes, hence dark text. */
 .adr-status {
   display: inline-block;
   border: 1px solid var(--sl-color-border-badge);
@@ -7,30 +9,24 @@
   font-family: var(--sl-font-system-mono);
   font-size: var(--sl-text-sm);
   line-height: normal;
-  color: var(--sl-color-text-badge);
-  background-color: var(--sl-color-bg-badge);
+  color: #17181c;
+  background-color: var(--sl-color-border-badge);
 }
 .adr-status.success {
-  --sl-color-bg-badge: var(--sl-badge-success-bg);
   --sl-color-border-badge: var(--sl-badge-success-border);
-  --sl-color-text-badge: var(--sl-badge-success-text);
 }
 .adr-status.caution {
-  --sl-color-bg-badge: var(--sl-badge-caution-bg);
   --sl-color-border-badge: var(--sl-badge-caution-border);
-  --sl-color-text-badge: var(--sl-badge-caution-text);
 }
 /* A question that comes with a check. */
 .adr-status.tip {
-  --sl-color-bg-badge: var(--sl-badge-tip-bg);
   --sl-color-border-badge: var(--sl-badge-tip-border);
-  --sl-color-text-badge: var(--sl-badge-tip-text);
 }
-/* Starlight has no grey badge: its default variant is the accent colour. */
+/* Starlight has no grey badge: its default variant is the accent colour.
+   Grey is dark in the light theme and light in the dark one. */
 .adr-status.adr-neutral {
-  --sl-color-bg-badge: var(--sl-color-gray-5);
   --sl-color-border-badge: var(--sl-color-gray-3);
-  --sl-color-text-badge: var(--sl-color-white);
+  color: var(--sl-color-text-invert);
 }
 
 /* In the sidebar the status is a dot before the title: fifteen words in a
