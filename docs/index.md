@@ -143,6 +143,8 @@ ontrack is at version 0.4.0. It is young, and it changes.
 - It needs Node 22.18 or later.
 - Its command outputs are specified in the
   [commands reference](commands.md).
+- Each version says what it changes, and which changes break:
+  [Upgrade ontrack](upgrade-ontrack.md) shows where to read it.
 
 ## Questions
 
