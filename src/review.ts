@@ -14,11 +14,11 @@ const sorted = (root: string) => readAdrs(root).sort((a, b) => a.ref.localeCompa
 const named = (adr: Adr) => `\`${adr.path}\`${adr.title ? ` (${adr.title})` : ''}`;
 
 const STEPS = `1. Read its file in full. Do not edit any other ADR.
-2. Start from the recommendation the ADR makes. Look in this repository for evidence that it does not apply here. If you find none, say so in one line.
+2. Start from what this repository does today on this question: its files, configuration, CI and history. Where it does nothing, say so: an absence is evidence too. Describe the repository as it is, not as the other \`proposed\` ADRs would make it. Then compare with the recommendation the ADR makes, and name every difference.
 3. When a recommendation is conditional ("if this repository…"), check the condition and cite the file or command output that settles it.
-4. For every key under \`traits:\` that the ADR leaves to the repository, propose a value drawn from the repository, with its evidence.
+4. For every key under \`traits:\` that the ADR leaves to the repository, propose a value with its evidence, and mark it \`observed\` when the repository does it today, or \`absent\` when it does not and the ruling would make it do so.
 5. Propose \`rejected\` only on evidence that the question does not apply here, and say what stands in for it.
-6. Present the proposed ruling: the status, one line per trait key with its value and evidence, and every departure from the recommendation with its reason. Then stop and ask for the user's agreement, with a question tool such as \`AskUserQuestion\` when you have one. Write nothing until the user agrees.
+6. Present the proposed ruling: the status, one line per trait key with its value, marked observed or absent, and its evidence, and every departure from the recommendation with its reason. Then stop and ask for the user's agreement, with a question tool such as \`AskUserQuestion\` when you have one. Write nothing until the user agrees.
 7. Once the user agrees: fill the \`traits:\` keys, or remove the block when rejected; set the status; write in the ADR the reason for every departure from the recommendation; then run \`npx ontrack apply\` to update AGENTS.md.
 `;
 

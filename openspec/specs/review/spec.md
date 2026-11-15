@@ -125,11 +125,11 @@ A revised ADR yields the prompt to rule again, whatever its status and whether o
 ### Requirement: Prompt
 The prompt SHALL be printed to standard output and follow the contract in the commands reference, `docs/commands.md`. It names each selected ADR by its path relative to the project root, with `/` separators, and by its title when it has one. For a named ADR, it names that ADR alone. Without an argument, it lists the selected ADRs in order, one per line, and tells the agent to rule them one at a time, in that order, and not to start an ADR before the previous one is ruled. In both forms of the review prompt it SHALL tell the agent, for an ADR and in this order, to:
 1. read its file in full, and edit no other ADR;
-2. start from the recommendation the ADR makes, look in the repository for evidence that it does not apply, and say so in one line when there is none;
+2. start from what the repository does today on the question (its files, configuration, CI and history), say so where it does nothing, describe the repository as it is and not as the other `proposed` ADRs would make it, then compare with the recommendation the ADR makes and name every difference;
 3. check the condition of every conditional recommendation, and cite the evidence that settles it;
-4. propose, with its evidence, a value for every trait key the ADR leaves to the repository;
+4. propose, with its evidence, a value for every trait key the ADR leaves to the repository, and mark it `observed` when the repository does it today, or `absent` when it does not and the ruling would make it do so;
 5. propose `rejected` only on evidence that the question does not apply, and say what stands in for it;
-6. present the proposed ruling, then stop, ask for the user's agreement with a question tool such as `AskUserQuestion` when the agent has one, and write nothing until the user agrees;
+6. present the proposed ruling, each trait value with its mark, then stop, ask for the user's agreement with a question tool such as `AskUserQuestion` when the agent has one, and write nothing until the user agrees;
 7. once the user agrees, fill the traits or remove the block when rejected, set the status, write in the ADR the reason for every departure from the recommendation, and run `npx ontrack apply`.
 
 After the seven steps, and in the sequence form after the instruction to take the next ADR, the prompt SHALL tell the agent, once every ADR is ruled, to list the rulings the repository does not follow yet, and to create in the tracker named by the decided `tracking` trait (`tracking.tool`, in `tracking.project`) only the items the user agrees to; when no `tracking` trait is decided or `tracking.tool` is `none`, to list them in its reply and create nothing. It SHALL identify a ruling by its ADR's reference without the slug, in brackets, and its trait key, as in `[trivoallan/ADR-0015] secrets.guard`, and tell the agent, before proposing:
@@ -185,6 +185,17 @@ The review prompt SHALL also say that an ADR's own instructions on how to rule p
 #### Scenario: Tracker that cannot be listed
 - **WHEN** `ontrack review` prints a prompt, in either form
 - **THEN** the tracking-items text tells the agent, when it cannot list the tracker's items, to propose every ruling and say that duplicates were not checked
+
+#### Scenario: Practice before recommendation
+- **WHEN** `ontrack review` prints a prompt, in either form
+- **THEN** step 2 tells the agent to start from what the repository does today, and says that an absence is evidence too
+- **AND** it tells the agent not to describe the repository as the other `proposed` ADRs would make it
+- **AND** the comparison with the recommendation comes after the description
+
+#### Scenario: Observed or absent
+- **WHEN** `ontrack review` prints a prompt, in either form
+- **THEN** step 4 tells the agent to mark every proposed value `observed` or `absent`, and says what each means
+- **AND** step 6 tells it to present each trait line with its mark
 
 #### Scenario: Own ADR
 - **WHEN** `ontrack review ADR-0020-release` selects `local/ADR-0020-release`

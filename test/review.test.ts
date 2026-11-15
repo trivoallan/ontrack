@@ -163,6 +163,26 @@ test('prompt: agreement comes before writing, and apply closes it', () => {
   assert.deepEqual(out.match(/^\d\./gm), ['1.', '2.', '3.', '4.', '5.', '6.', '7.']);
 });
 
+test('prompt: both forms start from the practice, and compare with the recommendation after', () => {
+  for (const out of [formatReview(selectAdr(tree(), 'ADR-0006')), formatSequence(pendingAdrs(tree()))]) {
+    const step = out.match(/^2\. .*$/m)?.[0] ?? '';
+    assert.ok(step.startsWith('2. Start from what this repository does today'));
+    assert.ok(step.includes('an absence is evidence too'));
+    assert.ok(step.includes('not as the other `proposed` ADRs would make it'));
+    assert.ok(step.indexOf('does today') < step.indexOf('compare with the recommendation'));
+  }
+});
+
+test('prompt: both forms mark every value observed or absent, and present the mark', () => {
+  for (const out of [formatReview(selectAdr(tree(), 'ADR-0006')), formatSequence(pendingAdrs(tree()))]) {
+    const choose = out.match(/^4\. .*$/m)?.[0] ?? '';
+    assert.ok(choose.includes('mark it `observed` when the repository does it today'));
+    assert.ok(choose.includes('`absent` when it does not and the ruling would make it do so'));
+    const present = out.match(/^6\. .*$/m)?.[0] ?? '';
+    assert.ok(present.includes('one line per trait key with its value, marked observed or absent, and its evidence'));
+  }
+});
+
 test('prompt: an own ADR sits in docs/adr/local/', () => {
   const root = makeTree({ [RELEASE]: adr('Release', 'status: proposed') });
   assert.ok(formatReview(selectAdr(root, 'ADR-0020-release')).includes(`\`${RELEASE}\``));
