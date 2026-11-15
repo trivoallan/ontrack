@@ -21,7 +21,9 @@ const both = (pages: Loader, catalogue: Loader): Loader => ({
           return typeof value === 'function' ? value.bind(store) : value;
         },
       });
-    const inCatalogue = (id: string) => id.startsWith(`${CATALOGUE}/`);
+    // The catalogue's ids are those of its files, all ADRs: a page of docs/ may
+    // sit in the same directory.
+    const inCatalogue = (id: string) => id.startsWith(`${CATALOGUE}/adr-`);
     await pages.load({ ...context, store: view((id) => !inCatalogue(id)) });
     await catalogue.load({ ...context, store: view(inCatalogue) });
   },

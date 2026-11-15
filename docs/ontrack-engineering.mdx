@@ -1,14 +1,14 @@
 ---
 title: The ontrack-engineering track
-description: The reference track ontrack is built with, what a repository gets from it, how to install it, and its questions as a repository receives them.
+description: The reference track ontrack is built with, what a repository gets from it, and how to install it.
 ---
 
 import { Aside, Card, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
-import { domains, version } from '../site/src/track.mjs';
+import { domains, questions, version } from '../site/src/track.mjs';
 
 export const DomainLink = ({ name }) => {
   const domain = domains.find((d) => d.name === name);
-  return <a class="card-link" href={`#${domain.slug}`}>{domain.questions.length} questions</a>;
+  return <a class="card-link" href={`questions/#${domain.slug}`}>{domain.questions.length} questions</a>;
 };
 
 [`@trivoallan/ontrack-engineering`](https://www.npmjs.com/package/@trivoallan/ontrack-engineering)
@@ -90,18 +90,4 @@ question that does not fit your repository: a rejection is a full answer.
 
 ## Questions
 
-The questions of ontrack-engineering {version}, the release ontrack depends
-on, as a repository receives them: `proposed`, their traits empty, the
-recommended answer in each body. They are also in
-[the track's repository](https://github.com/trivoallan/ontrack-engineering/tree/main/adr).
-
-{domains.map((domain) => (
-  <>
-    <h3 id={domain.slug}><span class="domain-badge" style={`--domain: var(--sl-color-${domain.color}); --domain-low: var(--sl-color-${domain.color}-low)`}>{domain.name}</span></h3>
-    <CardGrid>
-      {domain.questions.map((q) => (
-        <LinkCard title={`${q.adr} ${q.title}`} href={`./${q.id}/`} />
-      ))}
-    </CardGrid>
-  </>
-))}
+<LinkCard title="Questions" href="questions/" description={`The ${questions.length} questions of ontrack-engineering ${version}, by domain.`} />
