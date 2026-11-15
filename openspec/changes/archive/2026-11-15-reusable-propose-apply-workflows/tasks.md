@@ -38,5 +38,5 @@
 
 - [x] 6.2 After the merge, label one issue of ontrack and one pull request, and confirm both runs behave as before (issue 145: nothing left to propose, the migration exists; pull request 144: refused, not approved)
 - [x] 6.3 Call `propose` from `governance` with `frameworks: openspec`, label one issue, and confirm a draft pull request with a valid change and no ADR (trivoallan/governance#92 calls it; issue 75 gave trivoallan/governance#93, a valid `add-tools-adr` change, OpenSpec files only)
-- [ ] 6.4 Call both workflows from one open source project and confirm a draft proposal and an apply session
+- [x] 6.4 Call both workflows from one open source project and confirm a draft proposal and an apply session (trivoallan/tambouille, after it adopted ontrack: issue 16 gave trivoallan/tambouille#19; once approved at its head commit, the apply label started a `tambouille-apply` session. Two labels added 33 seconds apart started two sessions on the same commit: nothing stops a second one while the first runs)
 - [x] 6.5 Mark tasks 5.3 of `propose-change-on-issue-label` done with the verdict "keep", and update the roadmap to say this work came before the pilot review
