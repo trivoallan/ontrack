@@ -49,12 +49,12 @@ npx ontrack plan
 ```
 
 ```
-trivoallan: 20 new, 0 unchanged
+trivoallan: 25 new, 0 unchanged
   new           ADR-0001-record-architecture-decisions
   new           ADR-0002-localization
   new           ADR-0003-architecture
   …
-  new           ADR-0020-adding-dependencies
+  new           ADR-0025-tools
 ```
 
 `plan` wrote nothing. It exited with `2`, which means changes are pending.
@@ -67,13 +67,18 @@ npx ontrack apply
 ```
 
 ```
-trivoallan: 20 imported
+trivoallan: 25 imported
   imported      ADR-0001-record-architecture-decisions
   imported      ADR-0002-localization
   …
-  imported      ADR-0020-adding-dependencies
+  imported      ADR-0025-tools
 AGENTS.md: rules block created
+next: 24 proposed ADRs to rule
+  from a shell:  claude "$(npx ontrack review)"
+  as a prompt:   Run `npx ontrack review` and follow its output.
 ```
+
+The last three lines name the next step. Step 4 takes it for one question.
 
 The ADRs are now in `docs/adr/trivoallan/`, and `AGENTS.md` has a block that
 belongs to ontrack:
@@ -94,7 +99,7 @@ record-architecture-decisions:
 - Localization (trivoallan/ADR-0002-localization)
 - Software architecture (trivoallan/ADR-0003-architecture)
 - …
-- Adding a dependency (trivoallan/ADR-0020-adding-dependencies)
+- Tools outside the package manager (trivoallan/ADR-0025-tools)
 
 <!-- ontrack:end -->
 ````

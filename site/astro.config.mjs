@@ -10,6 +10,8 @@ export const base = '/ontrack';
 
 const repository = new URL('..', import.meta.url).pathname;
 
+const escape = (text) => text.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
 const walk = (node, visit) => {
   visit(node);
   node.children?.forEach((child) => walk(child, visit));
@@ -39,11 +41,14 @@ const pages = () => (tree, file) => {
     type: 'html',
     // The reference is what `ontrack review` takes. The search does not split
     // it at the slash, so the number is also there on its own, for the search
-    // and for screen readers, and weighted: a reader holding `ADR-0011` gets
-    // this page before the pages that cite it.
+    // and for screen readers, and weighted. The weight alone does not put
+    // this page first: a page that cites `ADR-0011` a dozen times outranks
+    // it. The number is in the title of the search result too, which does,
+    // and which tells this page from the pages that cite it.
     value:
       `<p><span class="adr-status ${statusTone(adr.status)}">${adr.status}</span> ` +
-      `<span class="sr-only" data-pagefind-weight="10">${adr.id}</span> <code>${adr.ref}</code></p>`,
+      `<span class="sr-only" data-pagefind-weight="10" data-pagefind-meta="title[data-title]" ` +
+      `data-title="${escape(`${adr.id} ${adr.title ?? ''}`.trim())}">${adr.id}</span> <code>${adr.ref}</code></p>`,
   }];
   if (adr.traits) ruling.push({ type: 'code', lang: 'yaml', meta: 'title="Decided traits"', value: adr.traits.join('\n') });
   tree.children.unshift(...ruling);
