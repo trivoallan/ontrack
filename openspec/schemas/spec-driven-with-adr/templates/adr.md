@@ -10,7 +10,7 @@
 
 <!-- List currently in-force repository-level ADRs reviewed before completing this change.
 Use `- docs/adr/local/ADR-NNNN-slug.md - short relevance note`
-(`docs/adr/<source>/ADR-NNNN-slug.md` for a governance ADR).
+(`docs/adr/<track>/ADR-NNNN-slug.md` for a governance ADR).
 If none exist, write `- None: no existing repository-level ADRs were present.` -->
 
 -

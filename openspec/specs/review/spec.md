@@ -6,7 +6,7 @@
 ## Requirements
 
 ### Requirement: Read-only and offline
-`ontrack review` MUST NOT create, modify or delete any file, and MUST NOT make any network call. It reads `docs/adr/` and, to find the revised ADRs, the sources `plan` reads. It needs no `package.json` and no `node_modules`: when the sources cannot be read, it finds no revised ADR and reports no error.
+`ontrack review` MUST NOT create, modify or delete any file, and MUST NOT make any network call. It reads `docs/adr/` and, to find the revised ADRs, the tracks `plan` reads. It needs no `package.json` and no `node_modules`: when the tracks cannot be read, it finds no revised ADR and reports no error.
 
 #### Scenario: Tree unchanged
 - **WHEN** `ontrack review` runs on a project with pending ADRs
@@ -157,8 +157,8 @@ For a named `accepted` ADR that is not superseded, the prompt SHALL be the super
 2. establish what changes in the decision, asking the user when they have not said, and cite the evidence that supports the change, whether the repository moved since the decision was taken or the decision never matched it, or say in one line that there is none;
 3. list every key under the ADR's `traits:` and propose, for each, the value it keeps or the value it takes, with the evidence for every change, leaving no key out, because a key the new ADR omits is no longer decided;
 4. when the ADR has a `check:` command, propose to keep it, change it or drop it, with the reason;
-5. present the proposal: the new ADR's file name, in `docs/adr/` and numbered after the ADRs that sit directly in that directory, from 0001 when there is none, its title, one line per trait key, the check, and the reason for the change; then stop, ask for the user's agreement with a question tool such as `AskUserQuestion` when the agent has one, and write nothing until the user agrees;
-6. once the user agrees, write the new ADR in `docs/adr/` with `status: accepted`, the superseded ADR's reference in `supersedes:`, and the traits, in the format the repository's rules prescribe, referring to the superseded ADR for context instead of restating it; mark the superseded ADR only as the repository's rules spell out, and leave its file untouched when they do not say what to write in it; then run `npx ontrack apply`.
+5. present the proposal: the new ADR's file name, in `docs/adr/local/` and numbered after the ADRs of that directory and the own ADRs still placed directly in `docs/adr/`, from 0001 when there is none, its title, one line per trait key, the check, and the reason for the change; then stop, ask for the user's agreement with a question tool such as `AskUserQuestion` when the agent has one, and write nothing until the user agrees;
+6. once the user agrees, write the new ADR in `docs/adr/local/` with `status: accepted`, the superseded ADR's reference in `supersedes:`, and the traits, in the format the repository's rules prescribe, referring to the superseded ADR for context instead of restating it; mark the superseded ADR only as the repository's rules spell out, and leave its file untouched when they do not say what to write in it; then run `npx ontrack apply`.
 
 After the six steps the prompt SHALL hold the tracking-items text of the review prompt, unchanged. Apart from the ADR's path, title and reference, the supersession prompt SHALL be the same text for every ADR. It MUST NOT name a status value for the superseded ADR.
 
@@ -169,7 +169,11 @@ After the six steps the prompt SHALL hold the tracking-items text of the review 
 
 #### Scenario: Own ADR
 - **WHEN** `ontrack review ADR-0020-release` selects the `accepted` ADR `local/ADR-0020-release`
-- **THEN** standard output contains `docs/adr/ADR-0020-release.md` and `supersedes: [local/ADR-0020-release]`
+- **THEN** standard output contains `docs/adr/local/ADR-0020-release.md` and `supersedes: [local/ADR-0020-release]`
+
+#### Scenario: Where the new ADR is written
+- **WHEN** `ontrack review` prints a supersession prompt
+- **THEN** it names `docs/adr/local/` as the directory of the new ADR
 
 #### Scenario: Every trait key carried over
 - **WHEN** `ontrack review` prints a supersession prompt
@@ -202,7 +206,7 @@ After the six steps the prompt SHALL hold the tracking-items text of the review 
 A revised ADR is one the `plan` capability reports as `revised` and whose copy under `docs/adr/` has a status other than `proposed`. Without an argument, when no ADR is pending, `ontrack review` SHALL select every revised ADR, in reference order. While an ADR is pending, it SHALL select the pending ADRs only. A `proposed` ADR that `plan` reports as `revised` is pending, not revised.
 
 #### Scenario: Revised ADRs once nothing is pending
-- **WHEN** `trivoallan/ADR-0001-record-architecture-decisions` is `accepted` at revision `1` and its source ships revision `3`, `trivoallan/ADR-0012-delivery` is `rejected` at revision `1` and its source ships revision `2`, and no ADR is `proposed`
+- **WHEN** `trivoallan/ADR-0001-record-architecture-decisions` is `accepted` at revision `1` and its track ships revision `3`, `trivoallan/ADR-0012-delivery` is `rejected` at revision `1` and its track ships revision `2`, and no ADR is `proposed`
 - **THEN** `ontrack review` prints the prompt to rule again, listing both ADRs in that order, and exits with `2`
 
 #### Scenario: Pending ADRs first
@@ -213,25 +217,25 @@ A revised ADR is one the `plan` capability reports as `revised` and whose copy u
 - **WHEN** the user runs `ontrack review ADR-0012-delivery`, and that ADR is `rejected` and revised
 - **THEN** the prompt to rule again is printed for it, and the exit code is `2`
 
-#### Scenario: Sources not installed
+#### Scenario: Tracks not installed
 - **WHEN** `ontrack review` runs on a project without `package.json`, whose ADRs are all `accepted`
 - **THEN** standard output is empty and the exit code is `0`
 
 ### Requirement: Prompt to rule again
-For revised ADRs, the prompt SHALL follow the contract in the commands reference, `docs/commands.md`. It names each ADR by its path relative to the project root, with `/` separators, and by its title when it has one; next to it, the path of the source's copy, relative to the project root, the revision the repository ruled on and the revision the source asks. It SHALL say that the ruling stands until it is taken again, and that the source's copy prevails over the prompt where it says how to rule. It SHALL tell the agent, in this order, to:
-1. read both copies in full, and edit neither the source's copy nor any other ADR;
+For revised ADRs, the prompt SHALL follow the contract in the commands reference, `docs/commands.md`. It names each ADR by its path relative to the project root, with `/` separators, and by its title when it has one; next to it, the path of the track's copy, relative to the project root, the revision the repository ruled on and the revision the track asks. It SHALL say that the ruling stands until it is taken again, and that the track's copy prevails over the prompt where it says how to rule. It SHALL tell the agent, in this order, to:
+1. read both copies in full, and edit neither the track's copy nor any other ADR;
 2. list what moved in the question: trait keys added, removed or renamed, allowed values changed, recommendations changed;
 3. keep the ruled value of every trait key that did not move, with the reason written for a departure;
-4. for every trait key that moved, start from the recommendation of the source's copy and propose a value drawn from the repository, with its evidence;
+4. for every trait key that moved, start from the recommendation of the track's copy and propose a value drawn from the repository, with its evidence;
 5. keep the status unless what moved settles whether the question applies, and propose `rejected` only on evidence;
 6. present the proposed ruling, each trait value marked kept or changed, then stop and ask for the user's agreement, writing nothing before it;
-7. once the user agrees, replace the repository's copy with the source's copy, write the ruling in it, and run `npx ontrack apply`.
+7. once the user agrees, replace the repository's copy with the track's copy, write the ruling in it, and run `npx ontrack apply`.
 
 It SHALL end with the tracking paragraph of the review prompt. For a named ADR, the prompt names that ADR alone. Without an argument, it lists every revised ADR and gives the steps once.
 
 #### Scenario: One revised ADR
-- **WHEN** `ontrack review ADR-0012-delivery` selects the revised ADR `trivoallan/ADR-0012-delivery`, titled `Delivery`, ruled on revision `1`, whose source asks revision `2` in `node_modules/trivoallan/adr/ADR-0012-delivery.md`
-- **THEN** the prompt names `docs/adr/trivoallan/ADR-0012-delivery.md` (Delivery), that source path and both revisions, gives seven steps, and names no other ADR
+- **WHEN** `ontrack review ADR-0012-delivery` selects the revised ADR `trivoallan/ADR-0012-delivery`, titled `Delivery`, ruled on revision `1`, whose track asks revision `2` in `node_modules/trivoallan/adr/ADR-0012-delivery.md`
+- **THEN** the prompt names `docs/adr/trivoallan/ADR-0012-delivery.md` (Delivery), that track path and both revisions, gives seven steps, and names no other ADR
 
 ### Requirement: Exit codes
 `ontrack review` SHALL exit with `2` when it prints a prompt, because a ruling is pending. When no ADR is pending, none is revised and no argument is given, it SHALL exit with `0`, leave standard output empty, and say on standard error that no ADR is `proposed` or revised. Errors exit with `1`.

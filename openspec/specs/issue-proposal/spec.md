@@ -108,10 +108,10 @@ The agent SHALL produce the change that the `changes` trait of `AGENTS.md` calls
 - **AND** its first artefact carries `Issue served: trivoallan/ontrack#103` for issue 103
 
 ### Requirement: A proposal only adds planning files
-The publishing job SHALL treat the patch and the change name as untrusted, and MUST refuse the whole patch unless every entry adds a regular, non-executable file that is either a Markdown or YAML file under `openspec/changes/<change-name>/` or a new `docs/adr/ADR-NNNN-slug.md` that declares no `check:` command. A refused patch fails the run before anything is committed.
+The publishing job SHALL treat the patch and the change name as untrusted, and MUST refuse the whole patch unless every entry adds a regular, non-executable file that is either a Markdown or YAML file under `openspec/changes/<change-name>/` or a new `docs/adr/local/ADR-NNNN-slug.md` that declares no `check:` command. A refused patch fails the run before anything is committed.
 
 #### Scenario: A proposal and its ADR
-- **WHEN** the patch adds `openspec/changes/scan-dependencies/proposal.md` and `docs/adr/ADR-0002-scan-dependencies.md`
+- **WHEN** the patch adds `openspec/changes/scan-dependencies/proposal.md` and `docs/adr/local/ADR-0002-scan-dependencies.md`
 - **THEN** the patch is accepted
 
 #### Scenario: A modified file

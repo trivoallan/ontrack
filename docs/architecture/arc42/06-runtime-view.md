@@ -18,7 +18,7 @@ from [Introduction and Goals](01-introduction-and-goals.md).
 
 ## `ontrack plan`
 
-`plan` reads and never writes. It builds the plan of every source, asks for
+`plan` reads and never writes. It builds the plan of every track, asks for
 the state of the rules block, prints both and returns `2` when either needs
 attention.
 
@@ -28,7 +28,7 @@ sequenceDiagram
     participant Cli as cli
     participant Cmd as commands/plan
     participant Plan as plan
-    participant Sources as sources
+    participant Tracks as tracks
     participant Revision as revision
     participant Agents as agents
     participant Instructions as instructions
@@ -36,10 +36,10 @@ sequenceDiagram
     User->>Cli: ontrack plan
     Cli->>Cmd: handler(io)
     Cmd->>Plan: buildPlan(root)
-    Plan->>Sources: discoverSources(root)
-    Note right of Sources: reads package.json and each<br/>node_modules/alias/package.json
-    Sources-->>Plan: sources, sorted by namespace
-    loop each ADR file a source ships
+    Plan->>Tracks: discoverTracks(root)
+    Note right of Tracks: reads package.json and each<br/>node_modules/alias/package.json
+    Tracks-->>Plan: tracks, sorted by namespace
+    loop each ADR file a track ships
         Plan->>Revision: readTitle(upstream)
         Plan->>Revision: compareRevision(local, upstream)
         Revision-->>Plan: stale, up-to-date, undetermined or unreadable

@@ -11,7 +11,7 @@ navigation, each opening with its status and its decided traits. They are
 not repeated here.
 
 ontrack maintains that directory with ontrack. The ADRs under
-`docs/adr/<namespace>/` are imported from a source declared in the dev
+`docs/adr/<namespace>/` are imported from a track declared in the dev
 dependencies of `package.json`: `ontrack plan` says when a question moved
 upstream, `ontrack apply` imports new ones, and each is ruled in its own
 file, where the reason for the ruling is written. A decision that changes is

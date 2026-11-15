@@ -132,7 +132,7 @@ test('unreadable frontmatter still reads the heading', () => {
   assert.equal(readTitle('# Rules\n\nBody.\n', 'X'), 'Rules');
 });
 
-test('the frontmatter example in the body is not a title source', () => {
+test('the frontmatter example in the body is not a title track', () => {
   const text = '---\nrevision: 1\n---\n# Real title\n\n```yaml\n---\ntitle: Example\n---\n```\n';
   assert.equal(readTitle(text, 'X'), 'Real title');
 });

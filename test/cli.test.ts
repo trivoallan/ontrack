@@ -76,7 +76,7 @@ test('a subcommand that throws exits with code 1', async () => {
 
 test('exit codes: pending changes give 2', async () => {
   const root = makeProject({
-    sources: { platform: { 'A.md': adr(2) } },
+    tracks: { platform: { 'A.md': adr(2) } },
     local: { 'docs/adr/platform/A.md': adr(1) },
   });
   assert.equal((await runWith(undefined, ['plan'], root)).code, 2);

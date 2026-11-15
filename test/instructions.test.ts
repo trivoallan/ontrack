@@ -44,7 +44,7 @@ test('imported and own ADRs, deeper files ignored', () => {
 });
 
 test('shipped ADRs are not read', () => {
-  const root = makeProject({ sources: { trivoallan: { 'ADR-0006-commits.md': commits() } } });
+  const root = makeProject({ tracks: { trivoallan: { 'ADR-0006-commits.md': commits() } } });
   assert.deepEqual(buildInstructions(root), { decided: [], pending: [] });
 });
 

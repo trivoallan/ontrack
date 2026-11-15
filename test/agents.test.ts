@@ -32,7 +32,7 @@ async function run(root: string, ...argv: string[]) {
 test('nothing to keep: no ADR, no AGENTS.md', async () => {
   const root = makeTree({ 'package.json': '{}' });
   assert.equal(agentsStatus(root).state, 'none');
-  assert.equal((await run(root, 'plan')).stdout, 'no ontrack source found\n');
+  assert.equal((await run(root, 'plan')).stdout, 'no track found\n');
   await run(root, 'apply');
   assert.equal(existsSync(path.join(root, 'AGENTS.md')), false);
 });
@@ -79,13 +79,13 @@ test('trait conflict is skipped with the instructions message', async () => {
 test('plan reports a missing block and exits 2, without writing', async () => {
   const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided() });
   const r = await run(root, 'plan');
-  assert.equal(r.stdout, 'no ontrack source found\nAGENTS.md: rules block missing\n');
+  assert.equal(r.stdout, 'no track found\nAGENTS.md: rules block missing\n');
   assert.equal(r.code, 2);
   assert.equal(existsSync(path.join(root, 'AGENTS.md')), false);
 });
 
 test('plan: only the rules block is stale gives 2', async () => {
-  const root = makeProject({ sources: { platform: { 'A.md': adr(1) } }, local: { 'docs/adr/platform/A.md': adr(1), 'AGENTS.md': '<!-- ontrack:begin -->\nold\n<!-- ontrack:end -->\n' } });
+  const root = makeProject({ tracks: { platform: { 'A.md': adr(1) } }, local: { 'docs/adr/platform/A.md': adr(1), 'AGENTS.md': '<!-- ontrack:begin -->\nold\n<!-- ontrack:end -->\n' } });
   const r = await run(root, 'plan');
   assert.equal(r.stdout, 'platform: 1 unchanged\nAGENTS.md: rules block out of date\n');
   assert.equal(r.code, 2);
@@ -117,7 +117,7 @@ test('an empty AGENTS.md receives the block alone', async () => {
 });
 
 test('file created after an import, listing the pending ADR', async () => {
-  const root = makeProject({ sources: { platform: { 'SDR-0015.md': adr(1, 'proposed', 'Observability') } } });
+  const root = makeProject({ tracks: { platform: { 'SDR-0015.md': adr(1, 'proposed', 'Observability') } } });
   const r = await run(root, 'apply');
   assert.match(read(root), /### Not yet decided\n\n- Observability \(platform\/SDR-0015\)/);
   assert.equal(r.code, 0);
@@ -126,7 +126,7 @@ test('file created after an import, listing the pending ADR', async () => {
 
 test('skipped does not stop the ADR actions', async () => {
   const twoPairs = '<!-- ontrack:begin -->\n<!-- ontrack:end -->\n<!-- ontrack:begin -->\n<!-- ontrack:end -->\n';
-  const root = makeProject({ sources: { platform: { 'NEW.md': adr(1) } }, local: { 'AGENTS.md': twoPairs } });
+  const root = makeProject({ tracks: { platform: { 'NEW.md': adr(1) } }, local: { 'AGENTS.md': twoPairs } });
   const r = await run(root, 'apply');
   assert.equal(existsSync(path.join(root, 'docs/adr/platform/NEW.md')), true);
   assert.equal(read(root), twoPairs);
@@ -158,7 +158,7 @@ test('a block ending the file without a newline stays that way', () => {
 });
 
 test('apply twice leaves AGENTS.md byte-identical and exits like plan', async () => {
-  const root = makeProject({ sources: { platform: { 'N.md': adr(1), 'R.md': adr(2) } }, local: { 'docs/adr/platform/R.md': adr(1), 'AGENTS.md': '# Mine\n' } });
+  const root = makeProject({ tracks: { platform: { 'N.md': adr(1), 'R.md': adr(2) } }, local: { 'docs/adr/platform/R.md': adr(1), 'AGENTS.md': '# Mine\n' } });
   await run(root, 'apply');
   const first = read(root);
   const second = await run(root, 'apply');
@@ -171,7 +171,7 @@ test('apply twice leaves AGENTS.md byte-identical and exits like plan', async ()
 // Dry run
 
 test('dry run with an import announces an update and writes nothing', async () => {
-  const root = withAgents(makeProject({ sources: { platform: { 'A.md': adr(1), 'N.md': adr(1) } }, local: { 'docs/adr/platform/A.md': adr(1) } }));
+  const root = withAgents(makeProject({ tracks: { platform: { 'A.md': adr(1), 'N.md': adr(1) } }, local: { 'docs/adr/platform/A.md': adr(1) } }));
   const before = read(root);
   const r = await run(root, 'apply', '--dry-run');
   assert.match(r.stdout, /^AGENTS\.md: rules block to update$/m);
@@ -198,7 +198,7 @@ test('dry run reports a skipped block as plan does', async () => {
 test('CLAUDE.md without the import: warning, exit code unchanged', async () => {
   const root = withAgents(makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'CLAUDE.md': '# Claude\n' }));
   const r = await run(root, 'plan');
-  assert.equal(r.stdout, `no ontrack source found\n${WARNING}\n`);
+  assert.equal(r.stdout, `no track found\n${WARNING}\n`);
   assert.equal(r.code, 0);
 });
 

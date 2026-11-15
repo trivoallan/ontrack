@@ -3,17 +3,17 @@
 # ontrack
 
 ontrack imports shared architecture decision records (ADRs) into a repository
-from **sources**. A source is an npm dependency whose `package.json` carries
+from **tracks**. A track is an npm dependency whose `package.json` carries
 an `ontrack` key; its npm alias is its namespace.
 
 ## Why
 
 Teams that share conventions (how to commit, branch, test, deliver) tend to
 copy them from repository to repository, where the copies drift. With ontrack
-the conventions are written once, as ADRs in a source repository. Each ADR
+the conventions are written once, as ADRs in a track repository. Each ADR
 asks a question and recommends an answer.
 
-- Every repository that depends on the source imports the ADRs and answers them for itself.
+- Every repository that depends on the track imports the ADRs and answers them for itself.
 - When a question changes upstream, `ontrack plan` says which answers must be taken again; a CI job can rely on its exit code.
 - The answers are written to `AGENTS.md`, so coding agents follow the rules the repository decided.
 
@@ -42,13 +42,13 @@ npm i -D ontrack@git+https://github.com/trivoallan/ontrack.git#v0.4.0
 
 <!-- x-release-please-end -->
 
-Add a source with npm, under the alias of your choice:
+Add a track with npm, under the alias of your choice:
 
 ```bash
-npm i -D <alias>@npm:<source-package>
+npm i -D <alias>@npm:<track-package>
 ```
 
-npm 12 fetches no git dependency by default. To install ontrack or a source
+npm 12 fetches no git dependency by default. To install ontrack or a track
 from a git repository, set `allow-git=root` in the project's `.npmrc`.
 
 ## Usage
@@ -56,7 +56,7 @@ from a git repository, set `allow-git=root` in the project's `.npmrc`.
 ```bash
 npx ontrack --help         # list commands
 npx ontrack --version
-npx ontrack plan          # what importing the sources would change
+npx ontrack plan          # what importing the tracks would change
 npx ontrack apply         # do it
 npx ontrack instructions  # the decided traits, as a block for AGENTS.md
 npx ontrack review        # a prompt asking a coding agent to rule the proposed ADRs, to rule the revised ones again, or to supersede an accepted one
@@ -71,7 +71,7 @@ Every command shares the same exit codes:
 |------|---------|
 | `0` | Nothing to do |
 | `2` | Changes pending, or a check failed |
-| `1` | Error (unknown command, unreadable source…) |
+| `1` | Error (unknown command, unreadable track…) |
 
 A CI job can detect an out-of-date repository on `2` without parsing the output.
 
@@ -79,9 +79,9 @@ A CI job can detect an out-of-date repository on `2` without parsing the output.
 
 The documentation is at <https://trivoallan.github.io/ontrack/>.
 
-- [Tutorial](https://trivoallan.github.io/ontrack/tutorial/): try ontrack on one repository, with a public source.
+- [Tutorial](https://trivoallan.github.io/ontrack/tutorial/): try ontrack on one repository, with a public track.
 - [Commands](https://trivoallan.github.io/ontrack/commands/): what each command does, and the exact format of what it prints. That format is a contract.
-- [File formats](https://trivoallan.github.io/ontrack/file-formats/): the `ontrack` key of a source, the frontmatter of an ADR, the rules block of `AGENTS.md`.
+- [File formats](https://trivoallan.github.io/ontrack/file-formats/): the `ontrack` key of a track, the frontmatter of an ADR, the rules block of `AGENTS.md`.
 
 ## Development
 

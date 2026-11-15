@@ -6,7 +6,7 @@ import {
   ontrackJsonSchema,
   ontrackKey,
   projectManifest,
-  sourceManifest,
+  trackManifest,
 } from '../src/schemas.ts';
 
 const { revision, title } = adrFrontmatter.shape;
@@ -22,10 +22,10 @@ test('projectManifest: a dependency map must map strings to strings', () => {
   assert.equal(projectManifest.safeParse(null).success, false);
 });
 
-test('sourceManifest: name is required, ontrack is left unparsed', () => {
-  assert.deepEqual(sourceManifest.parse({ name: 's', ontrack: 3 }), { name: 's', ontrack: 3 });
-  assert.deepEqual(sourceManifest.parse({ name: 's' }), { name: 's' });
-  assert.equal(sourceManifest.safeParse({ ontrack: {} }).success, false);
+test('trackManifest: name is required, ontrack is left unparsed', () => {
+  assert.deepEqual(trackManifest.parse({ name: 's', ontrack: 3 }), { name: 's', ontrack: 3 });
+  assert.deepEqual(trackManifest.parse({ name: 's' }), { name: 's' });
+  assert.equal(trackManifest.safeParse({ ontrack: {} }).success, false);
 });
 
 test('ontrackKey: adr is a required string', () => {
@@ -87,4 +87,11 @@ test('ontrackJsonSchema: constrains the ontrack property of a package.json, and 
   assert.equal(key.properties.namespace.type, 'string');
   assert.notEqual(key.additionalProperties, false);
   assert.match(key.description, /inside the package/);
+});
+
+test('ontrackJsonSchema: calls the package a track', () => {
+  const text = JSON.stringify(ontrackJsonSchema());
+  const words = text.replaceAll("ontrack", "");
+  assert.match(words, /track/);
+  assert.doesNotMatch(words, /source/i);
 });

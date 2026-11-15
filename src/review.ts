@@ -1,6 +1,6 @@
 // Prints the prompt that asks a coding agent to rule `proposed` ADRs: every
 // one in sequence, or a single named one; to rule again the ruled ADRs whose
-// source revised the question; or, for a named `accepted` ADR, to supersede it. The prompt is fixed text plus paths, titles and references:
+// track revised the question; or, for a named `accepted` ADR, to supersede it. The prompt is fixed text plus paths, titles and references:
 // everything specific to a question is in its ADR, which the agent reads.
 import path from 'node:path';
 import { readAdrs, supersededBy } from './instructions.ts';
@@ -27,7 +27,7 @@ const TRACKING = `Once every ADR is ruled, list the rulings this repository does
 `;
 
 // How a superseded ADR is marked, and the sections of the new one, are the
-// repository's rules (its source's ADR on recording decisions), not ontrack's:
+// repository's rules (its track's ADR on recording decisions), not ontrack's:
 // the prompt names neither.
 const supersedeSteps = (adr: Adr) => `1. Read its file in full. Read the rules of this repository on recording decisions, in AGENTS.md and in the ADR they come from.
 2. Establish what changes in the decision; ask the user when they have not said. Cite the file or command output that supports the change: what moved in this repository since the decision was taken, or what the decision never matched. If you find nothing, say so in one line.
@@ -38,42 +38,42 @@ const supersedeSteps = (adr: Adr) => `1. Read its file in full. Read the rules o
 `;
 
 // The ruling is carried over where the question did not move, and taken as
-// for a new question where it did. The source's copy replaces the local one,
+// for a new question where it did. The track's copy replaces the local one,
 // so the new text and its `revision:` come with it.
-const RULE_AGAIN = `1. Read both files in full: the repository's copy, which holds the ruling, and the source's copy, which holds the question as it is asked now. Edit neither the source's copy nor any other ADR.
+const RULE_AGAIN = `1. Read both files in full: the repository's copy, which holds the ruling, and the track's copy, which holds the question as it is asked now. Edit neither the track's copy nor any other ADR.
 2. List what moved in the question between the two: every key under \`traits:\` added, removed or renamed, every set of allowed values that changed, and every recommendation that changed. Leave out what only the ruling changed. If nothing that moved touches the ruling, say so in one line.
 3. For every trait key that did not move, keep the value this repository ruled, and the reason written for it where it departs from the recommendation.
-4. For every trait key that moved, start from the recommendation the source's copy makes. Look in this repository for evidence that it does not apply here, check every condition it states ("if this repository…"), and propose a value drawn from the repository, with its evidence.
+4. For every trait key that moved, start from the recommendation the track's copy makes. Look in this repository for evidence that it does not apply here, check every condition it states ("if this repository…"), and propose a value drawn from the repository, with its evidence.
 5. Keep the status, unless what moved settles whether the question applies here. Propose \`rejected\` only on evidence that it does not, and say what stands in for it.
 6. Present the proposed ruling: the status, one line per trait key with its value, marked kept or changed, the evidence for every change, and every departure from the recommendation with its reason. Then stop and ask for the user's agreement, with a question tool such as \`AskUserQuestion\` when you have one. Write nothing until the user agrees.
-7. Once the user agrees: replace the repository's copy with the source's copy, which carries the new \`revision:\`; write the ruling in it: the agreed status, the \`traits:\` keys filled, or the block removed when rejected, and the reason for every departure from the recommendation; then run \`npx ontrack apply\` to update AGENTS.md.
+7. Once the user agrees: replace the repository's copy with the track's copy, which carries the new \`revision:\`; write the ruling in it: the agreed status, the \`traits:\` keys filled, or the block removed when rejected, and the reason for every departure from the recommendation; then run \`npx ontrack apply\` to update AGENTS.md.
 `;
 
-/** A ruled ADR whose source asks a later revision of the question. */
-export type Revised = { adr: Adr; source: string; from: number; to: number };
+/** A ruled ADR whose track asks a later revision of the question. */
+export type Revised = { adr: Adr; track: string; from: number; to: number };
 
 /**
- * The ruled ADRs whose source has revised the question, in reference order.
- * A `proposed` one is left to the review prompt. Without `plan`, the sources
+ * The ruled ADRs whose track has revised the question, in reference order.
+ * A `proposed` one is left to the review prompt. Without `plan`, the tracks
  * are read; none when they cannot be: `plan` is the command that says why.
  */
 export function revisedAdrs(root: string, plan?: Plan): Revised[] {
-  let sources: Plan;
+  let tracks: Plan;
   try {
-    sources = plan ?? buildPlan(root);
+    tracks = plan ?? buildPlan(root);
   } catch {
     return [];
   }
   const adrs = sorted(root);
-  return sources
-    .flatMap((source) =>
-      source.adrs.flatMap((planned): Revised[] => {
+  return tracks
+    .flatMap((track) =>
+      track.adrs.flatMap((planned): Revised[] => {
         if (planned.category !== 'revised') return [];
-        const paths = [`docs/adr/${source.namespace}/${planned.name}`, `docs/adr/${planned.name}`];
+        const paths = [`docs/adr/${track.namespace}/${planned.name}`, `docs/adr/${planned.name}`];
         const adr = adrs.find((a) => paths.includes(a.path) && a.status !== 'proposed');
         if (!adr) return [];
-        const copy = path.relative(root, path.join(source.adrDir, planned.name)).split(path.sep).join('/');
-        return [{ adr, source: copy, from: planned.from as number, to: planned.to as number }];
+        const copy = path.relative(root, path.join(track.adrDir, planned.name)).split(path.sep).join('/');
+        return [{ adr, track: copy, from: planned.from as number, to: planned.to as number }];
       }),
     )
     .sort((a, b) => a.adr.ref.localeCompare(b.adr.ref));
@@ -117,17 +117,17 @@ export function selectAdr(root: string, name: string): Adr {
 export function formatReview(adr: Adr): string {
   return `Review one architecture decision record of this repository: ${named(adr)}.
 
-It is \`proposed\`: a question this repository has not answered yet, shipped with the answer its source recommends. Propose a ruling; the user decides. Where the ADR itself says how to rule, it prevails over this prompt.
+It is \`proposed\`: a question this repository has not answered yet, shipped with the answer its track recommends. Propose a ruling; the user decides. Where the ADR itself says how to rule, it prevails over this prompt.
 
 ${STEPS}
 ${TRACKING}`;
 }
 
 /** The contract prompt to rule one revised ADR again (see docs/commands.md). */
-export function formatRevision({ adr, source, from, to }: Revised): string {
+export function formatRevision({ adr, track, from, to }: Revised): string {
   return `Rule again one architecture decision record of this repository: ${named(adr)}.
 
-Its source has revised the question: this repository ruled on revision ${from}, and \`${source}\` asks revision ${to}. The ruling stands until it is taken again. Propose the new ruling; the user decides. Where the source's copy itself says how to rule, it prevails over this prompt.
+Its track has revised the question: this repository ruled on revision ${from}, and \`${track}\` asks revision ${to}. The ruling stands until it is taken again. Propose the new ruling; the user decides. Where the track's copy itself says how to rule, it prevails over this prompt.
 
 ${RULE_AGAIN}
 ${TRACKING}`;
@@ -135,11 +135,11 @@ ${TRACKING}`;
 
 /** The contract prompt for every revised ADR, ruled again one at a time (see docs/commands.md). */
 export function formatRevisions(revised: Revised[]): string {
-  return `Rule again the architecture decision records of this repository whose source has revised the question, one at a time, in this order:
+  return `Rule again the architecture decision records of this repository whose track has revised the question, one at a time, in this order:
 
-${revised.map(({ adr, source, from, to }) => `- ${named(adr)}, ruled on revision ${from}: \`${source}\` asks revision ${to}`).join('\n')}
+${revised.map(({ adr, track, from, to }) => `- ${named(adr)}, ruled on revision ${from}: \`${track}\` asks revision ${to}`).join('\n')}
 
-Each holds a ruling of this repository; the file named after it is its source's copy. The ruling stands until it is taken again. Propose the new ruling; the user decides. Where a source's copy itself says how to rule, it prevails over this prompt.
+Each holds a ruling of this repository; the file named after it is its track's copy. The ruling stands until it is taken again. Propose the new ruling; the user decides. Where a track's copy itself says how to rule, it prevails over this prompt.
 
 For each ADR, in turn:
 
@@ -171,7 +171,7 @@ export function formatSequence(adrs: Adr[]): string {
 
 ${adrs.map((adr) => `- ${named(adr)}`).join('\n')}
 
-Each is a question this repository has not answered yet, shipped with the answer its source recommends. Propose a ruling; the user decides. Where an ADR itself says how to rule, it prevails over this prompt.
+Each is a question this repository has not answered yet, shipped with the answer its track recommends. Propose a ruling; the user decides. Where an ADR itself says how to rule, it prevails over this prompt.
 
 For each ADR, in turn:
 

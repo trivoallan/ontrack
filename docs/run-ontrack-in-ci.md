@@ -1,20 +1,20 @@
 ---
 title: Run ontrack in CI
-description: Fail a build when a repository is behind its source or breaks a decision, and get told when the source itself has moved.
+description: Fail a build when a repository is behind its track or breaks a decision, and get told when the track itself has moved.
 ---
 
 This guide shows how to run ontrack in a repository's CI. It sets up three
-things: a build that fails when the repository is behind the source it has
+things: a build that fails when the repository is behind the track it has
 installed, a build that fails when the work breaks a decision, and a weekly
-job that notices when the source has moved.
+job that notices when the track has moved.
 
 The examples are GitHub Actions workflows. The commands are the same on any
 CI. ontrack exits with `2` when something is pending, which fails a job
 without any parsing of its output.
 
-You need ontrack and a source in the repository's `devDependencies`.
+You need ontrack and a track in the repository's `devDependencies`.
 
-## 1. Fail when the repository is behind its source
+## 1. Fail when the repository is behind its track
 
 Add `plan` to the workflow that runs on pull requests:
 
@@ -23,9 +23,9 @@ Add `plan` to the workflow that runs on pull requests:
       - run: npx ontrack plan
 ```
 
-`plan` fails the job when the installed source ships a question the
+`plan` fails the job when the installed track ships a question the
 repository has not imported, or has revised one it answered. It fails on the
-pull request that updates the source, and keeps failing until the questions
+pull request that updates the track, and keeps failing until the questions
 are imported and ruled.
 
 ## 2. Fail when the work breaks a decision
@@ -37,7 +37,7 @@ Add `check` after it:
 ```
 
 `check` runs the command each accepted ADR names, and fails the job when one
-of them does. These commands are yours or your source's: give the job what
+of them does. These commands are yours or your track's: give the job what
 they need. A check that reads the commit history, for instance, needs a full
 checkout:
 
@@ -47,14 +47,14 @@ checkout:
           fetch-depth: 0
 ```
 
-## 3. Notice when the source has moved
+## 3. Notice when the track has moved
 
-`plan` reads the source as it is installed. It cannot see a question revised
+`plan` reads the track as it is installed. It cannot see a question revised
 upstream until the dependency is updated. Add a second workflow that updates
 it in a throwaway checkout, once a week:
 
 ```yaml
-name: source-updates
+name: track-updates
 
 on:
   schedule:
@@ -74,21 +74,21 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      # The alias of each source the repository imports.
+      # The alias of each track the repository imports.
       - run: npm update platform
       - run: npx ontrack plan
 ```
 
-The job fails when the updated source has something new for the repository.
+The job fails when the updated track has something new for the repository.
 It changes nothing: the checkout is discarded. The failed run is the notice.
 
 ## When a job fails
 
 | Job | It means | Do |
 | --- | --- | --- |
-| `plan`, on a pull request | The installed source is ahead of the repository | Run `npx ontrack apply`, then rule with `review` |
+| `plan`, on a pull request | The installed track is ahead of the repository | Run `npx ontrack apply`, then rule with `review` |
 | `check` | The work breaks a decision | Fix the work, or supersede the decision |
-| The weekly job | The source has moved upstream | Follow [Revise a question](revise-a-question.md#in-each-repository), from step 4 |
+| The weekly job | The track has moved upstream | Follow [Revise a question](revise-a-question.md#in-each-repository), from step 4 |
 
 ## Related
 

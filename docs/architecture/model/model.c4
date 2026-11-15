@@ -10,7 +10,7 @@ model {
   }
 
   ontrack = system "ontrack" {
-    description "Imports shared ADRs from npm sources into a repository"
+    description "Imports shared ADRs from npm tracks into a repository"
 
     cli = module "cli" {
       description "Parses the command line, runs the subcommand, maps errors to exit code 1"
@@ -29,14 +29,14 @@ model {
     schemas = module "schemas" {
       description "zod models of everything read from outside"
     }
-    sources = module "sources" {
-      description "Lists the sources among the project's npm dependencies"
+    tracks = module "tracks" {
+      description "Lists the tracks among the project's npm dependencies"
     }
     revision = module "revision" {
       description "Reads frontmatter without a YAML parser and compares revisions"
     }
     planner = module "plan" {
-      description "Builds the plan: each source ADR and its category"
+      description "Builds the plan: each track ADR and its category"
     }
     applier = module "apply" {
       description "Turns a plan into checked actions and executes them"
@@ -81,7 +81,7 @@ model {
     commands.check -> check "runChecks"
 
     // Imports: between domain modules
-    planner -> sources "discoverSources"
+    planner -> tracks "discoverTracks"
     planner -> revision "compareRevision"
     applier -> planner "plan types and formatting"
     applier -> revision "setRevision"
@@ -91,7 +91,7 @@ model {
     agents -> instructions "buildInstructions"
     review -> instructions "readAdrs"
     check -> instructions "adrsInForce"
-    sources -> schemas "validates with"
+    tracks -> schemas "validates with"
     revision -> schemas "validates with"
   }
 
@@ -99,7 +99,7 @@ model {
     description "The repository ontrack runs in"
 
     manifest = external "package.json" {
-      description "Declares the sources as npm dependencies"
+      description "Declares the tracks as npm dependencies"
     }
     adrs = external "docs/adr/<namespace>/" {
       description "The ADRs the repository holds, with its rulings"
@@ -111,11 +111,11 @@ model {
       description "May link to ADRs a migration moves"
     }
   }
-  installed = external "Installed source packages" {
+  installed = external "Installed track packages" {
     description "node_modules/<alias>/: a package.json with an ontrack key, and ADR files"
   }
   npm = external "npm and git" {
-    description "How ontrack and the sources arrive; never called by ontrack"
+    description "How ontrack and the tracks arrive; never called by ontrack"
   }
   git = external "git" {
     description "Moves files in a work tree"
@@ -126,7 +126,7 @@ model {
 
   // People and agents
   maintainer -> ontrack.cli "runs a command, reads the report and the exit code"
-  maintainer -> npm "installs ontrack and sources with"
+  maintainer -> npm "installs ontrack and tracks with"
   npm -> installed "installs"
   npm -> project.manifest "records dependencies in"
   ontrack.review -> agent "prints a prompt for"
@@ -134,8 +134,8 @@ model {
   agent -> project.adrs "writes rulings in"
 
   // Files each module reads or writes
-  ontrack.sources -> project.manifest "reads the dependency aliases of"
-  ontrack.sources -> installed "reads the ontrack key of"
+  ontrack.tracks -> project.manifest "reads the dependency aliases of"
+  ontrack.tracks -> installed "reads the ontrack key of"
   ontrack.planner -> installed "reads the ADRs of"
   ontrack.planner -> project.adrs "reads local copies in"
   ontrack.applier -> installed "copies new ADRs from"

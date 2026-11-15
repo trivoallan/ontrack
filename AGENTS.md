@@ -47,7 +47,7 @@ validation:
 
 ```yaml
 commits:
-  scopes: [apply, check, cli, governance, instructions, openspec, plan, review, revision, sources]
+  scopes: [apply, check, cli, governance, instructions, openspec, plan, review, revision, tracks]
   tool: commitlint
 ```
 

@@ -35,7 +35,7 @@ copied: into a template, a wiki page, thirty repositories.
 
 With ontrack, a convention is an architecture decision record (ADR) that asks
 a question and recommends an answer. You keep these ADRs in one repository,
-the **source**. Every other repository imports them and answers.
+the **track**. Every other repository imports them and answers.
 
 A coding agent does the legwork. It reads the question, looks in the
 repository for evidence, proposes an answer, and writes nothing until you
@@ -52,7 +52,7 @@ commits. The answer lives in its copy of the ADR:
 status: accepted
 traits:
   commits:
-    scopes: [apply, check, cli, governance, instructions, openspec, plan, review, revision, sources]
+    scopes: [apply, check, cli, governance, instructions, openspec, plan, review, revision, tracks]
     tool: commitlint
 ```
 
@@ -63,7 +63,7 @@ And ontrack wrote it to `AGENTS.md`, where coding agents look for rules:
 
 ```yaml
 commits:
-  scopes: [apply, check, cli, governance, instructions, openspec, plan, review, revision, sources]
+  scopes: [apply, check, cli, governance, instructions, openspec, plan, review, revision, tracks]
   tool: commitlint
 ```
 ````
@@ -73,7 +73,7 @@ the others, on this site.
 
 ## When a question changes, every repository is told
 
-Each ADR carries a revision number. When you change a question in the source,
+Each ADR carries a revision number. When you change a question in the track,
 `ontrack plan` reports it in every repository that answered the earlier
 revision. This is the format it follows:
 
@@ -88,8 +88,8 @@ platform: 2 revised, 1 new, 3 unchanged
 output, and the repository knows which answers to take again. `plan` changes
 no file and makes no network call.
 
-`plan` reads the source as the repository has installed it. A weekly job
-that updates the source is what tells a repository the question moved:
+`plan` reads the track as the repository has installed it. A weekly job
+that updates the track is what tells a repository the question moved:
 [Run ontrack in CI](run-ontrack-in-ci.md) gives it to copy.
 
 ## Next to what you already have
@@ -119,7 +119,7 @@ The platform team owns the questions. Each repository owns its answers.
 
 ## Nothing to migrate away from
 
-An ADR is a Markdown file in `docs/adr/`. A source is an npm dependency. The
+An ADR is a Markdown file in `docs/adr/`. A track is an npm dependency. The
 rules are a block in `AGENTS.md`. If you stop using ontrack, all three remain
 and read the same.
 
@@ -146,7 +146,7 @@ ontrack is at version 0.2.0. It is young, and it changes.
 
 ### Does it need a server, an account or a network call?
 
-No. A source is an npm dependency, and decisions are Markdown files under
+No. A track is an npm dependency, and decisions are Markdown files under
 `docs/adr/`. `plan`, `instructions` and `review` make no network call.
 
 ### What does it change in my repository?
@@ -160,17 +160,17 @@ decided on.
 Any agent that reads `AGENTS.md`. ontrack warns when Claude Code would not
 read it because a `CLAUDE.md` exists without importing it.
 
-### How do I write my own source?
+### How do I write my own track?
 
 A `package.json` with an `ontrack` key and a directory of ADRs.
-[Write your own source](write-your-own-source.md) takes four steps.
+[Write your own track](write-your-own-track.md) takes four steps.
 [trivoallan/governance](https://github.com/trivoallan/governance) is a
 working example to start from.
 
-### Where do I find a source someone else wrote?
+### Where do I find a track someone else wrote?
 
-Published sources carry the keyword `ontrack-source` on the npm registry.
-[Find a source](find-a-source.md) gives the search, and what to read before
+Published tracks carry the keyword `ontrack-tracks` on the npm registry.
+[Find a track](find-a-track.md) gives the search, and what to read before
 you install one.
 
 ## Try it on one repository

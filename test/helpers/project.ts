@@ -26,21 +26,21 @@ export function makeTree(files: Files): string {
 }
 
 /**
- * A project depending on `sources` ({ alias: { file: content } }) installed
+ * A project depending on `tracks` ({ alias: { file: content } }) installed
  * with an `ontrack` key and `adr: "adr"`, plus `local` files under the root.
  */
 export function makeProject({
-  sources = {},
+  tracks = {},
   local = {},
-}: { sources?: Record<string, Files>; local?: Files } = {}): string {
+}: { tracks?: Record<string, Files>; local?: Files } = {}): string {
   const files: Files = {
     'package.json': JSON.stringify({
       name: 'project',
-      devDependencies: Object.fromEntries(Object.keys(sources).map((a) => [a, '1'])),
+      devDependencies: Object.fromEntries(Object.keys(tracks).map((a) => [a, '1'])),
     }),
     ...local,
   };
-  for (const [alias, adrs] of Object.entries(sources)) {
+  for (const [alias, adrs] of Object.entries(tracks)) {
     files[`node_modules/${alias}/package.json`] = JSON.stringify({
       name: alias,
       ontrack: { namespace: alias, adr: 'adr' },

@@ -21,7 +21,7 @@ The ADRs read, their status and their supersession SHALL be those of `instructio
 - **THEN** the command of `trivoallan/ADR-0006-commits` does not run
 
 #### Scenario: Shipped ADRs are not read
-- **WHEN** source `trivoallan` ships an `accepted` ADR with `check: exit 1` in `node_modules` and the project has no copy of it
+- **WHEN** track `trivoallan` ships an `accepted` ADR with `check: exit 1` in `node_modules` and the project has no copy of it
 - **THEN** no command runs
 
 #### Scenario: Empty value

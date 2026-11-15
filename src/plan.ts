@@ -2,14 +2,14 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { compareRevision, readCheckLine, readRevision, readStatus, readTitle } from './revision.ts';
 import type { Comparison } from './revision.ts';
-import { discoverSources } from './sources.ts';
-import type { Source } from './sources.ts';
+import { discoverTracks } from './tracks.ts';
+import type { Track } from './tracks.ts';
 
 /** The namespace of the ADRs a repository writes for itself. */
 export const OWN = 'local';
 
 export type Category = 'revised' | 'new' | 'removed' | 'undetermined' | 'unreadable' | 'check' | 'unchanged';
-/** The `check:` line of the local copy (`from`) and of the source (`to`); null when absent. */
+/** The `check:` line of the local copy (`from`) and of the track (`to`); null when absent. */
 export type CheckChange = { from: string | null; to: string | null };
 /**
  * `from` is set when revised, `to` when revised or undetermined, `check` when check.
@@ -24,8 +24,8 @@ export type PlannedAdr = {
   check?: CheckChange;
   status?: string | null;
 };
-export type SourcePlan = { namespace: string; adrDir: string; adrs: PlannedAdr[]; migration: string[] };
-export type Plan = SourcePlan[];
+export type TrackPlan = { namespace: string; adrDir: string; adrs: PlannedAdr[]; migration: string[] };
+export type Plan = TrackPlan[];
 
 const ORDER: Category[] = ['revised', 'new', 'removed', 'undetermined', 'unreadable', 'check', 'unchanged'];
 const CATEGORY: Record<Comparison, Category> = {
@@ -43,23 +43,23 @@ export function markdownFiles(dir: string): string[] {
     .sort();
 }
 
-function sourceFiles(source: Source): string[] {
+function trackFiles(track: Track): string[] {
   try {
-    return markdownFiles(source.adrDir);
+    return markdownFiles(track.adrDir);
   } catch {
-    throw new Error(`source "${source.namespace}" has no readable ADR directory ${source.adrDir}`);
+    throw new Error(`track "${track.namespace}" has no readable ADR directory ${track.adrDir}`);
   }
 }
 
-function planSource(root: string, source: Source): SourcePlan {
+function planTrack(root: string, track: Track): TrackPlan {
   const adrRoot = path.join(root, 'docs', 'adr');
-  const localDir = path.join(adrRoot, source.namespace);
-  const shipped = sourceFiles(source);
+  const localDir = path.join(adrRoot, track.namespace);
+  const shipped = trackFiles(track);
   const adrs: PlannedAdr[] = [];
   const migration: string[] = [];
 
   for (const file of shipped) {
-    const upstream = readFileSync(path.join(source.adrDir, file), 'utf8');
+    const upstream = readFileSync(path.join(track.adrDir, file), 'utf8');
     const title = readTitle(upstream, stem(file));
     let localPath = path.join(localDir, file);
     if (!existsSync(localPath)) {
@@ -76,7 +76,7 @@ function planSource(root: string, source: Source): SourcePlan {
     if (adr.category === 'revised') adr.from = readRevision(local);
     if (adr.category === 'revised' || adr.category === 'undetermined') adr.to = readRevision(upstream);
     if (adr.category === 'unchanged') {
-      // The check line follows the source; the verdict stays the repository's.
+      // The check line follows the track; the verdict stays the repository's.
       const check = { from: readCheckLine(local), to: readCheckLine(upstream) };
       if (check.from !== check.to) Object.assign(adr, { category: 'check', check });
     }
@@ -89,18 +89,18 @@ function planSource(root: string, source: Source): SourcePlan {
     adrs.push({ name: file, category: 'removed', title: readTitle(local, stem(file)), status: readStatus(local) });
   }
   adrs.sort((a, b) => a.name.localeCompare(b.name));
-  return { namespace: source.namespace, adrDir: source.adrDir, adrs, migration };
+  return { namespace: track.namespace, adrDir: track.adrDir, adrs, migration };
 }
 
-/** What importing each source would change, as data. Reads only. */
+/** What importing each track would change, as data. Reads only. */
 export function buildPlan(root: string): Plan {
-  const sources = discoverSources(root);
-  const plan = sources.map((source) => planSource(root, source));
+  const tracks = discoverTracks(root);
+  const plan = tracks.map((track) => planTrack(root, track));
   // The repository's own ADRs still placed directly in docs/adr/: the root
-  // files no source ships. They move to docs/adr/local/, as a last entry
+  // files no track ships. They move to docs/adr/local/, as a last entry
   // that has no ADR to classify.
   const adrRoot = path.join(root, 'docs', 'adr');
-  const shipped = new Set(sources.flatMap(sourceFiles));
+  const shipped = new Set(tracks.flatMap(trackFiles));
   const own = existsSync(adrRoot) ? markdownFiles(adrRoot).filter((file) => !shipped.has(file)) : [];
   if (own.length > 0) plan.push({ namespace: OWN, adrDir: path.join(adrRoot, OWN), adrs: [], migration: own });
   return plan;
@@ -132,25 +132,25 @@ export const checkLines = (adr: PlannedAdr): string[] =>
  * get a line too and every ADR line carries the repository's verdict.
  */
 export function formatPlan(plan: Plan, { all = false } = {}): string {
-  const lines: string[] = plan.some((s) => s.namespace !== OWN) ? [] : ['no ontrack source found'];
-  for (const source of plan) {
+  const lines: string[] = plan.some((s) => s.namespace !== OWN) ? [] : ['no track found'];
+  for (const track of plan) {
     const counts = ORDER.map((category): [Category, number] => [
       category,
-      source.adrs.filter((a) => a.category === category).length,
+      track.adrs.filter((a) => a.category === category).length,
     ]).filter(([category, n]) => n > 0 || category === 'unchanged');
-    if (source.namespace !== OWN) lines.push(`${source.namespace}: ${counts.map(([c, n]) => `${n} ${c}`).join(', ')}`);
+    if (track.namespace !== OWN) lines.push(`${track.namespace}: ${counts.map(([c, n]) => `${n} ${c}`).join(', ')}`);
 
-    for (const adr of source.adrs) {
+    for (const adr of track.adrs) {
       if (adr.category === 'unchanged' && !all) continue;
       const revision = adr.category === 'revised' ? ` (revision ${adr.from} → ${adr.to})` : '';
       const verdict = all ? `${(adr.status ?? '-').padEnd(10)}  ` : '';
       lines.push(row(adr.category, verdict + label(adr) + revision), ...checkLines(adr));
     }
 
-    if (source.migration.length > 0) {
-      const n = source.migration.length;
-      lines.push(`migration: ${n} file${n === 1 ? '' : 's'} docs/adr/ → docs/adr/${source.namespace}/`);
-      for (const file of source.migration) lines.push(row('move', file));
+    if (track.migration.length > 0) {
+      const n = track.migration.length;
+      lines.push(`migration: ${n} file${n === 1 ? '' : 's'} docs/adr/ → docs/adr/${track.namespace}/`);
+      for (const file of track.migration) lines.push(row('move', file));
     }
   }
   return `${lines.join('\n')}\n`;

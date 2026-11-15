@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { main } from '../src/cli.ts';
 import { formatApply, planActions } from '../src/apply.ts';
 import { buildPlan, formatPlan } from '../src/plan.ts';
-import type { PlannedAdr, SourcePlan } from '../src/plan.ts';
+import type { PlannedAdr, TrackPlan } from '../src/plan.ts';
 import { adr, cleanup, makeProject, withAgents } from './helpers/project.ts';
 
 after(cleanup);
@@ -43,7 +43,7 @@ function snapshot(root: string) {
 // Same plan as plan
 
 test('nothing to apply: same output as plan, exit 0', async () => {
-  const root = withAgents(makeProject({ sources: { platform: { 'A.md': adr(1) } }, local: { 'docs/adr/platform/A.md': adr(1) } }));
+  const root = withAgents(makeProject({ tracks: { platform: { 'A.md': adr(1) } }, local: { 'docs/adr/platform/A.md': adr(1) } }));
   const before = snapshot(root);
   const r = await run(root, 'apply');
   assert.equal(r.stdout, 'platform: 1 unchanged\n');
@@ -55,7 +55,7 @@ test('nothing to apply: same output as plan, exit 0', async () => {
 
 test('new ADR imported byte for byte', async () => {
   const content = `${adr(1, 'proposed', 'Observability')}\nbinary-ish é text\n`;
-  const root = makeProject({ sources: { platform: { 'SDR-0015.md': content } } });
+  const root = makeProject({ tracks: { platform: { 'SDR-0015.md': content } } });
   const r = await run(root, 'apply');
   assert.equal(read(root, 'docs/adr/platform/SDR-0015.md'), content);
   assert.equal(r.stdout, 'platform: 1 imported\n  imported      SDR-0015  Observability\nAGENTS.md: rules block created\n');
@@ -63,7 +63,7 @@ test('new ADR imported byte for byte', async () => {
 });
 
 test('next step on stderr while ADRs are proposed, in a shell form and a prompt form', async () => {
-  const root = makeProject({ sources: { platform: { 'A.md': adr(1), 'B.md': adr(1) } } });
+  const root = makeProject({ tracks: { platform: { 'A.md': adr(1), 'B.md': adr(1) } } });
   const first = await run(root, 'apply');
   assert.equal(
     first.stderr,
@@ -78,7 +78,7 @@ test('next step on stderr while ADRs are proposed, in a shell form and a prompt 
 });
 
 test('next step once nothing is proposed: the revised ADRs to rule again', async () => {
-  const root = withAgents(makeProject({ sources: { platform: { 'A.md': adr(2), 'B.md': adr(1) } }, local: { 'docs/adr/platform/A.md': adr(1, 'accepted') } }));
+  const root = withAgents(makeProject({ tracks: { platform: { 'A.md': adr(2), 'B.md': adr(1) } }, local: { 'docs/adr/platform/A.md': adr(1, 'accepted') } }));
   assert.match((await run(root, 'apply')).stderr, /^next: 1 proposed ADR to rule$/m);
   writeFileSync(path.join(root, 'docs/adr/platform/B.md'), adr(1, 'accepted'));
   assert.match((await run(root, 'apply')).stderr, /^next: 1 revised ADR to rule again\n {2}from a shell: /);
@@ -87,7 +87,7 @@ test('next step once nothing is proposed: the revised ADRs to rule again', async
 // Flat-layout migration
 
 test('outside git: flat files renamed with identical content', async () => {
-  const root = makeProject({ sources: { platform: { 'SDR-0006.md': adr(1) } }, local: { 'docs/adr/SDR-0006.md': adr(1, 'accepted') } });
+  const root = makeProject({ tracks: { platform: { 'SDR-0006.md': adr(1) } }, local: { 'docs/adr/SDR-0006.md': adr(1, 'accepted') } });
   const r = await run(root, 'apply');
   assert.equal(existsSync(path.join(root, 'docs/adr/SDR-0006.md')), false);
   assert.equal(read(root, 'docs/adr/platform/SDR-0006.md'), adr(1, 'accepted'));
@@ -96,7 +96,7 @@ test('outside git: flat files renamed with identical content', async () => {
 });
 
 test('inside git: flat files moved with git mv', async () => {
-  const root = makeProject({ sources: { platform: { 'SDR-0006.md': adr(1) } }, local: { 'docs/adr/SDR-0006.md': adr(1, 'accepted') } });
+  const root = makeProject({ tracks: { platform: { 'SDR-0006.md': adr(1) } }, local: { 'docs/adr/SDR-0006.md': adr(1, 'accepted') } });
   const git = (...args: string[]) => spawnSync('git', args, { cwd: root, encoding: 'utf8' });
   git('init', '-q');
   git('add', 'docs');
@@ -108,7 +108,7 @@ test('inside git: flat files moved with git mv', async () => {
 });
 
 test('inside git: an untracked flat file falls back to a rename', async () => {
-  const root = makeProject({ sources: { platform: { 'SDR-0006.md': adr(1) } }, local: { 'docs/adr/SDR-0006.md': adr(1) } });
+  const root = makeProject({ tracks: { platform: { 'SDR-0006.md': adr(1) } }, local: { 'docs/adr/SDR-0006.md': adr(1) } });
   spawnSync('git', ['init', '-q'], { cwd: root });
   await run(root, 'apply');
   assert.equal(existsSync(path.join(root, 'docs/adr/platform/SDR-0006.md')), true);
@@ -120,7 +120,7 @@ test('inside git: an untracked flat file falls back to a rename', async () => {
 test('links broken by the migration are listed, files untouched', async () => {
   const arc42 = 'Intro\n'.repeat(11) + 'See [commits](adr/SDR-0006.md#context).\n';
   const root = makeProject({
-    sources: { platform: { 'SDR-0006.md': adr(1) } },
+    tracks: { platform: { 'SDR-0006.md': adr(1) } },
     local: { 'docs/adr/SDR-0006.md': adr(1), 'docs/arc42.md': arc42 },
   });
   const r = await run(root, 'apply');
@@ -132,7 +132,7 @@ test('links broken by the migration are listed, files untouched', async () => {
 
 test('revised ADR left alone, exit 2, listed under remaining', async () => {
   const root = makeProject({
-    sources: { platform: { 'NEW.md': adr(1), 'REV.md': adr(2, 'proposed', 'Commits') } },
+    tracks: { platform: { 'NEW.md': adr(1), 'REV.md': adr(2, 'proposed', 'Commits') } },
     local: { 'docs/adr/platform/REV.md': adr(1, 'accepted') },
   });
   const r = await run(root, 'apply', '--confirm', 'all', '--prune');
@@ -146,7 +146,7 @@ test('revised ADR left alone, exit 2, listed under remaining', async () => {
 
 test('removed ADRs stay without --prune and go with it', async () => {
   const project = () => makeProject({
-    sources: { platform: { 'A.md': adr(1) } },
+    tracks: { platform: { 'A.md': adr(1) } },
     local: { 'docs/adr/platform/A.md': adr(1), 'docs/adr/platform/OLD.md': adr(1, 'accepted', 'Hosting') },
   });
   const kept = project();
@@ -165,7 +165,7 @@ test('removed ADRs stay without --prune and go with it', async () => {
 test('confirm one ADR: only the revision line changes', async () => {
   const local = '---\nstatus: accepted\nrevision: 0\nauthors:\n- Jane\n---\n\nDecision text.\n';
   const root = makeProject({
-    sources: { platform: { 'SDR-0003.md': adr(2, 'proposed', 'Architecture') } },
+    tracks: { platform: { 'SDR-0003.md': adr(2, 'proposed', 'Architecture') } },
     local: { 'docs/adr/platform/SDR-0003.md': local },
   });
   const r = await run(root, 'apply', '--confirm', 'SDR-0003');
@@ -175,14 +175,14 @@ test('confirm one ADR: only the revision line changes', async () => {
 });
 
 test('a flat undetermined ADR is confirmed at its new place', async () => {
-  const root = makeProject({ sources: { platform: { 'U.md': adr(3) } }, local: { 'docs/adr/U.md': adr(0) } });
+  const root = makeProject({ tracks: { platform: { 'U.md': adr(3) } }, local: { 'docs/adr/U.md': adr(0) } });
   await run(root, 'apply', '--confirm', 'U.md');
   assert.equal(read(root, 'docs/adr/platform/U.md'), adr(3));
 });
 
 test('confirm a name that is not undetermined: code 1, nothing written', async () => {
   const root = makeProject({
-    sources: { platform: { 'NEW.md': adr(1), 'SDR-0006.md': adr(2) } },
+    tracks: { platform: { 'NEW.md': adr(1), 'SDR-0006.md': adr(2) } },
     local: { 'docs/adr/platform/SDR-0006.md': adr(1) },
   });
   const before = snapshot(root);
@@ -194,7 +194,7 @@ test('confirm a name that is not undetermined: code 1, nothing written', async (
 
 test('confirm all skips undetermined ADRs whose upstream has no revision', async () => {
   const root = makeProject({
-    sources: { platform: { 'A.md': adr(2), 'B.md': adr() } },
+    tracks: { platform: { 'A.md': adr(2), 'B.md': adr() } },
     local: { 'docs/adr/platform/A.md': adr(0), 'docs/adr/platform/B.md': adr(0) },
   });
   const r = await run(root, 'apply', '--confirm', 'all');
@@ -204,7 +204,7 @@ test('confirm all skips undetermined ADRs whose upstream has no revision', async
 });
 
 test('an existing target aborts before any write', () => {
-  const root = makeProject({ sources: { platform: { 'A.md': adr(1), 'B.md': adr(1) } }, local: { 'docs/adr/A.md': adr(1) } });
+  const root = makeProject({ tracks: { platform: { 'A.md': adr(1), 'B.md': adr(1) } }, local: { 'docs/adr/A.md': adr(1) } });
   const plan = buildPlan(root);
   // Simulate a race: the target of the move appears after the plan was built.
   mkdirSync(path.join(root, 'docs/adr/platform'), { recursive: true });
@@ -213,7 +213,7 @@ test('an existing target aborts before any write', () => {
 });
 
 test('a mistyped option writes nothing', async () => {
-  const root = makeProject({ sources: { platform: { 'NEW.md': adr(1) } } });
+  const root = makeProject({ tracks: { platform: { 'NEW.md': adr(1) } } });
   const before = snapshot(root);
   const r = await run(root, 'apply', '--prunee');
   assert.equal(r.code, 1);
@@ -226,7 +226,7 @@ test('a mistyped option writes nothing', async () => {
 
 test('dry run of confirm all names both ADRs and writes nothing', async () => {
   const root = makeProject({
-    sources: { platform: { 'A.md': adr(2), 'B.md': adr(4), 'N.md': adr(1) } },
+    tracks: { platform: { 'A.md': adr(2), 'B.md': adr(4), 'N.md': adr(1) } },
     local: { 'docs/adr/platform/A.md': adr(0), 'docs/adr/B.md': adr() },
   });
   const before = snapshot(root);
@@ -248,19 +248,19 @@ test('dry run of confirm all names both ADRs and writes nothing', async () => {
 test('the commands reference example is what formatApply prints', () => {
   const reference = readFileSync(new URL('../docs/commands.md', import.meta.url), 'utf8');
   const example = /```\n(dry run: [\s\S]*?)```/.exec(reference)?.[1];
-  const source: SourcePlan = { namespace: 'platform', adrDir: 'node_modules/platform/adr', adrs: [], migration: [] };
+  const track: TrackPlan = { namespace: 'platform', adrDir: 'node_modules/platform/adr', adrs: [], migration: [] };
   const unchanged = (name: string): PlannedAdr => ({ name, category: 'unchanged', title: null });
   const to = (name: string) => `docs/adr/platform/${name}`;
   const out = formatApply({
     dryRun: true,
     actions: [
-      { kind: 'imported', source, adr: { name: 'SDR-0015.md', category: 'new', title: 'Observability' }, from: 'node_modules/platform/adr/SDR-0015.md', to: to('SDR-0015.md') },
-      { kind: 'moved', source, file: 'SDR-0006.md', from: 'docs/adr/SDR-0006.md', to: to('SDR-0006.md') },
-      { kind: 'moved', source, file: 'SDR-0010.md', from: 'docs/adr/SDR-0010.md', to: to('SDR-0010.md') },
+      { kind: 'imported', track, adr: { name: 'SDR-0015.md', category: 'new', title: 'Observability' }, from: 'node_modules/platform/adr/SDR-0015.md', to: to('SDR-0015.md') },
+      { kind: 'moved', track, file: 'SDR-0006.md', from: 'docs/adr/SDR-0006.md', to: to('SDR-0006.md') },
+      { kind: 'moved', track, file: 'SDR-0010.md', from: 'docs/adr/SDR-0010.md', to: to('SDR-0010.md') },
     ],
     links: [{ file: 'docs/arc42.md', line: 12, old: 'adr/SDR-0006.md', new: 'adr/platform/SDR-0006.md' }],
     remaining: [{
-      ...source,
+      ...track,
       adrs: [
         unchanged('SDR-0006.md'),
         { name: 'SDR-0010.md', category: 'revised', title: 'Forge and CI', from: 3, to: 4 },
@@ -275,7 +275,7 @@ test('the commands reference example is what formatApply prints', () => {
 
 test('apply twice: the second run writes nothing and exits like plan', () => {
   const root = makeProject({
-    sources: { platform: { 'N.md': adr(1), 'F.md': adr(1), 'R.md': adr(2) } },
+    tracks: { platform: { 'N.md': adr(1), 'F.md': adr(1), 'R.md': adr(2) } },
     local: { 'docs/adr/F.md': adr(1), 'docs/adr/platform/R.md': adr(1) },
   });
   const first = spawnSync(process.execPath, [bin, 'apply'], { cwd: root, encoding: 'utf8' });
@@ -294,7 +294,7 @@ const ruled = (...extra: string[]) => ['---', 'status: accepted', 'revision: 1',
 const shipped = (revision: number, ...extra: string[]) => ['---', 'status: proposed', `revision: ${revision}`, ...extra, 'traits:', '  commits:', '    tool:', '---', '', 'Body.', ''].join('\n');
 const FILE = 'docs/adr/trivoallan/ADR-0006-commits.md';
 const synced = (local: string, upstream: string, at = FILE) =>
-  makeProject({ sources: { trivoallan: { 'ADR-0006-commits.md': upstream } }, local: { [at]: local } });
+  makeProject({ tracks: { trivoallan: { 'ADR-0006-commits.md': upstream } }, local: { [at]: local } });
 
 test('check added to a ruled ADR: one line after revision, then unchanged', async () => {
   const root = synced(ruled(), shipped(1, 'check: npx commitlint --last'));
@@ -312,7 +312,7 @@ test('check replaced in place, comment included', async () => {
   assert.equal(read(root, FILE), ruled('check: exit 1  # stricter'));
 });
 
-test('check removed when the source has none', async () => {
+test('check removed when the track has none', async () => {
   const root = synced(ruled('check: exit 0'), shipped(1));
   await run(root, 'apply');
   assert.equal(read(root, FILE), ruled());
@@ -358,7 +358,7 @@ const git = (root: string, ...args: string[]) => spawnSync('git', args, { cwd: r
 test('own ADRs move to docs/adr/local/ with git, links listed, then nothing is left', async () => {
   const own = adr() + '[commits](platform/SDR-0006.md) [queue](ADR-0002-queue.md)\n';
   const root = makeProject({
-    sources: { platform: { 'SDR-0006.md': adr(1, 'accepted') } },
+    tracks: { platform: { 'SDR-0006.md': adr(1, 'accepted') } },
     local: {
       'docs/adr/ADR-0001-cache.md': own,
       'docs/adr/ADR-0002-queue.md': adr(undefined, 'accepted'),
@@ -383,7 +383,7 @@ test('own ADRs move to docs/adr/local/ with git, links listed, then nothing is l
   assert.doesNotMatch(formatPlanOf(root), /migration/);
 });
 
-test('own ADRs move without any source', async () => {
+test('own ADRs move without any track', async () => {
   const root = makeProject({ local: { 'docs/adr/ADR-0001-cache.md': adr(undefined, 'accepted') } });
   const r = await run(root, 'apply');
   assert.match(r.stdout, /^local: 1 moved\n  moved         ADR-0001-cache\.md\n/);
@@ -393,7 +393,7 @@ test('own ADRs move without any source', async () => {
 
 test('an own ADR already in docs/adr/local/ stops apply before any write', async () => {
   const root = makeProject({
-    sources: { platform: { 'SDR-0006.md': adr(1) } },
+    tracks: { platform: { 'SDR-0006.md': adr(1) } },
     local: { 'docs/adr/ADR-0001-cache.md': adr(), 'docs/adr/local/ADR-0001-cache.md': adr() },
   });
   const r = await run(root, 'apply');

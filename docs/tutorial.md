@@ -1,11 +1,11 @@
 ---
 title: Try ontrack on one repository
-description: Import a public source of ADRs into a repository, answer one question with a coding agent, and read the rule in AGENTS.md.
+description: Import a public track of ADRs into a repository, answer one question with a coding agent, and read the rule in AGENTS.md.
 sidebar:
   order: 1
 ---
 
-In this tutorial you import a public source of architecture decision records
+In this tutorial you import a public track of architecture decision records
 (ADRs) into one repository, let a coding agent propose an answer to one of
 them, and read the resulting rule in `AGENTS.md`.
 
@@ -23,7 +23,7 @@ the agent took about a minute to propose an answer.
 Work on a branch. ontrack never commits, so `git status` shows everything it
 did, and you can discard it.
 
-## 1. Install ontrack and a source
+## 1. Install ontrack and a track
 
 ```bash
 npm i -D @trivoallan/ontrack
@@ -31,7 +31,7 @@ npm i -D @trivoallan/ontrack
 
 The package is scoped; the command it installs is `ontrack`.
 
-A **source** is an npm dependency that ships ADRs. Its npm alias is its
+A **track** is an npm dependency that ships ADRs. Its npm alias is its
 namespace. [trivoallan/governance](https://github.com/trivoallan/governance)
 is a public one, published as `@trivoallan/ontrack-governance`:
 
@@ -58,7 +58,7 @@ trivoallan: 20 new, 0 unchanged
 ```
 
 `plan` wrote nothing. It exited with `2`, which means changes are pending.
-The catalogue of the source grows over time, so your count may differ.
+The catalogue of the track grows over time, so your count may differ.
 
 ## 3. Import the ADRs
 
@@ -99,7 +99,7 @@ record-architecture-decisions:
 <!-- ontrack:end -->
 ````
 
-One ADR came already decided by its source. The others are questions your
+One ADR came already decided by its track. The others are questions your
 repository has not answered yet.
 
 ## 4. Answer one question
@@ -141,7 +141,7 @@ reads:
 
 ```yaml
 commits:
-  scopes: [apply, check, cli, governance, instructions, openspec, plan, review, revision, sources]
+  scopes: [apply, check, cli, governance, instructions, openspec, plan, review, revision, tracks]
   tool: commitlint
 ```
 ````
@@ -154,8 +154,8 @@ agents read.
 - Answer the remaining questions, one at a time, with
   `claude "$(npx ontrack review)"`.
 - [Run ontrack in CI](run-ontrack-in-ci.md). `plan` exits with `2` when the
-  source asks a new question or changes one you answered.
-- [Write your own source](write-your-own-source.md): a `package.json` with
+  track asks a new question or changes one you answered.
+- [Write your own track](write-your-own-track.md): a `package.json` with
   an `ontrack` key that points to a directory of ADRs.
   [File formats](file-formats.md) lists what ontrack reads in both.
 - Read [how ontrack works](how-it-works.md): the pieces, the life of a

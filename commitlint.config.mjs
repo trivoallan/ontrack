@@ -7,7 +7,7 @@ export default {
     'scope-enum': [
       2,
       'always',
-      ['apply', 'check', 'cli', 'governance', 'instructions', 'openspec', 'plan', 'review', 'revision', 'sources'],
+      ['apply', 'check', 'cli', 'governance', 'instructions', 'openspec', 'plan', 'review', 'revision', 'tracks'],
     ],
   },
 };

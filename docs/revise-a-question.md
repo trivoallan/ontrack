@@ -1,16 +1,16 @@
 ---
 title: Revise a question
-description: Change a question in your source, and take each repository that answered it through ruling again.
+description: Change a question in your track, and take each repository that answered it through ruling again.
 ---
 
-This guide shows how to change a question in a source you maintain, then how
+This guide shows how to change a question in a track you maintain, then how
 a repository that answered the earlier version takes its ruling again.
 
-It follows [Write your own source](write-your-own-source.md) and uses the
-same names: the source `platform-governance`, installed under the alias
+It follows [Write your own track](write-your-own-track.md) and uses the
+same names: the track `platform-governance`, installed under the alias
 `platform`.
 
-## In the source
+## In the track
 
 ### 1. Change the question
 
@@ -31,17 +31,17 @@ to rule again on a fixed typo.
 
 ### 3. Publish
 
-Commit and push the source, the way you publish any other change to it.
+Commit and push the track, the way you publish any other change to it.
 
 ## In each repository
 
-### 4. Update the source
+### 4. Update the track
 
 ```bash
 npm update platform
 ```
 
-`plan` reads the source as it is installed. Until this step, the repository
+`plan` reads the track as it is installed. Until this step, the repository
 cannot see the revision.
 
 ### 5. See what moved
@@ -64,11 +64,11 @@ until it is taken again: `AGENTS.md` still carries it.
 claude "$(npx ontrack review)"
 ```
 
-The agent reads the repository's copy and the source's, keeps your ruling
+The agent reads the repository's copy and the track's, keeps your ruling
 where the question did not move, and proposes one where it did. It writes
 nothing until you agree. This needs a version of ontrack later than 0.3.0.
 
-Once you agree, the agent replaces the repository's copy with the source's,
+Once you agree, the agent replaces the repository's copy with the track's,
 which carries the new revision, writes the ruling in it, and runs
 `npx ontrack apply` to update `AGENTS.md`.
 
@@ -88,7 +88,7 @@ platform: 1 unchanged
 `plan` exits with `0`. Commit the lockfile, the ADR and `AGENTS.md`
 together.
 
-## Other changes to a source
+## Other changes to a track
 
 | You | The repository sees in `plan` | What it does |
 | --- | --- | --- |
@@ -100,7 +100,7 @@ None of these needs a new revision.
 
 ## Related
 
-- To have each repository told that the source moved, without anyone
+- To have each repository told that the track moved, without anyone
   remembering step 4, see [Run ontrack in CI](run-ontrack-in-ci.md).
 - [File formats](file-formats.md#how-revision-is-compared) says how `plan`
   compares two revisions.
