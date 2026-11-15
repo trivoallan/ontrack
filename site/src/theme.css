@@ -27,3 +27,9 @@
   fill: var(--sl-color-bg) !important;
   opacity: 1 !important;
 }
+
+/* A group inside a group reads as one more entry of its parent, not as a
+   second heading: Starlight draws it as large as the top-level ones. */
+.sidebar-content ul ul .group-label .large {
+  font-size: var(--sl-text-sm);
+}
