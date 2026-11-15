@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.5.0](https://github.com/trivoallan/ontrack/compare/v0.4.0...v0.5.0) (2026-11-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* **tracks:** `ontrack plan` prints `no track found` where it printed `no ontrack source found`; discovery errors say `track "<alias>"` where they said `source "<alias>"`; the npm keyword of a published package is `ontrack-tracks`, no longer `ontrack-source`. Exit codes and file formats are unchanged.
+* own ADRs directly in docs/adr/ make `ontrack plan` exit with 2 until `ontrack apply` has moved them to docs/adr/local/. A source can no longer be installed under the alias `local`. The propose workflow refuses a new ADR placed directly in docs/adr/.
+
+### Features
+
+* **instructions:** point agents at `ontrack review` in the rules block ([#185](https://github.com/trivoallan/ontrack/issues/185)) ([f982ce0](https://github.com/trivoallan/ontrack/commit/f982ce04888457662fa4cc58c18bdd6bc632cfcf))
+* let other repositories call the propose and apply workflows ([#156](https://github.com/trivoallan/ontrack/issues/156)) ([e2144ac](https://github.com/trivoallan/ontrack/commit/e2144ac9aaa6c4fa13e24852e025ccee9c179518))
+* move a repository's own ADRs to docs/adr/local ([#165](https://github.com/trivoallan/ontrack/issues/165)) ([ef7a712](https://github.com/trivoallan/ontrack/commit/ef7a712178ec68f6f1c02db95e120439875a012c))
+* **review:** import the new ADRs before ruling them ([#175](https://github.com/trivoallan/ontrack/issues/175)) ([43e6bbf](https://github.com/trivoallan/ontrack/commit/43e6bbf3b54c6cd9e87c0bafc1a918e3c9a6105b))
+* **review:** title tracking items by bracketed ADR reference ([#169](https://github.com/trivoallan/ontrack/issues/169)) ([a194d20](https://github.com/trivoallan/ontrack/commit/a194d20e1f5417e1ac7fba61278fdfc4ab37494d))
+* **tracks:** call a package of questions a track ([#168](https://github.com/trivoallan/ontrack/issues/168)) ([f20966c](https://github.com/trivoallan/ontrack/commit/f20966c4fbf81737fff6be52097bbf45b2867ae8))
+* verify-release-provenance ([#134](https://github.com/trivoallan/ontrack/issues/134)) ([1778e73](https://github.com/trivoallan/ontrack/commit/1778e73513df929c19ee0d6e0d051e6f4a71d0d4))
+
+
+### Bug Fixes
+
+* **apply:** start one apply session per head commit ([#160](https://github.com/trivoallan/ontrack/issues/160)) ([4eb88cf](https://github.com/trivoallan/ontrack/commit/4eb88cffc8dcecbb80854b4329f51b9679ee9e24))
+* **cli:** name the package in printed commands when ontrack is not installed ([#202](https://github.com/trivoallan/ontrack/issues/202)) ([73d7272](https://github.com/trivoallan/ontrack/commit/73d7272044ca9e6af7b66d84f4e52aed2b5a5118))
+* give the apply sessions the secret guard the checks expect ([#142](https://github.com/trivoallan/ontrack/issues/142)) ([00d3a7e](https://github.com/trivoallan/ontrack/commit/00d3a7eb5beaf58b870d0995a06f722a97df5e8c))
+* keep the apply session silent on the pull request's draft state ([#141](https://github.com/trivoallan/ontrack/issues/141)) ([80690b7](https://github.com/trivoallan/ontrack/commit/80690b7f5aefba6e6220d166bafe49453636b941))
+* **review:** give the supersedes reference ontrack resolves ([#191](https://github.com/trivoallan/ontrack/issues/191)) ([8c125e8](https://github.com/trivoallan/ontrack/commit/8c125e87646da9b0005db88f7aafe9decbe45cb3))
+* **tracks:** say where to run from when there is no package.json ([#177](https://github.com/trivoallan/ontrack/issues/177)) ([66b9caf](https://github.com/trivoallan/ontrack/commit/66b9caf4a81deb5d33799f0659aee104cd403b81))
+
 ## [0.4.0](https://github.com/trivoallan/ontrack/compare/v0.3.0...v0.4.0) (2026-11-14)
 
 
