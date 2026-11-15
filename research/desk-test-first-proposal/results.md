@@ -696,3 +696,74 @@ the gain did not cost more questions to discuss.
 Two runs in a row now meet the threshold, on ten repositories never seen,
 each run with its own scorer. That says the threshold can be met with this
 prompt, not how often.
+
+## Run 10: the survey's second group, one row per value not shown
+
+The survey after `review-survey-one-row-per-value`, which answers the form
+defects run 9 left:
+- the second group lists one row per value not shown, and none for a value
+  that was shown;
+- each citation takes exactly one of the two labels, word for word, and a
+  citation drawn from history alone is `next to it`;
+- a count appears only when a command the agent ran produced it, and the
+  agent names the command.
+
+The repositories are lodash, body-parser, sinon, chalk and uuid, at the
+commits in [run10/repos-at.txt](run10/repos-at.txt); no earlier run used
+them. One read-only run each ($8.32). Raw: [run10/surveys/](run10/surveys/).
+A new independent scorer applied the same strict rule and checked the
+layout: [run10/score.md](run10/score.md).
+
+| Repository | First-group ADRs | ADRs with an unseen value | Mislabels |
+|---|---|---|---|
+| lodash | 6 | 0 | 0 |
+| chalk | 9 | 0 | 0 |
+| body-parser | 9 | **1**: 0015 `secrets.storage` (where contributors keep secrets on their machines; the citation shows only that CI reads none) | 1 |
+| sinon | 7 | 0 | 0 |
+| uuid | 7 | 0 | 0 |
+| **Total** | **38** | **1** | **1** |
+
+| | Run 8 | Run 9 | Run 10 |
+|---|---|---|---|
+| First-group ADRs | 40 | 42 | 38 |
+| Values not visible in the first group | 2 | 0 | **1** (unstated) |
+| Mislabels | 2 | 0 | 1 |
+| Repositories over the threshold | 0 of 5 | 0 of 5 | 0 of 5 |
+| Group headings with a wrong count | 0 | 0 | 0 |
+| Second-group ADRs with several rows per value | (not asked) | 2 of 10 surveys | **0** |
+| Second-group ADRs with a row for a value that was shown | (not asked) | 13 of 102 rows | **12 of 122 rows** |
+| Citations with no label, in either group | | 3 | **17** |
+| Labels not one of the two exact words | | 2 | **0** |
+| Counts given without a command named | | 1 false count | 6 given without a command, 2 false |
+| Second-group rows saying where the value lives | 70 of 85 | 89 of 102 | **122 of 122** |
+
+No run tried to write.
+
+**AB-1 restated: passes** (at most 1 per repository), for the third run in a
+row on repositories never seen. It is no longer clean: body-parser's secrets
+row repeats a kind run 6 found, a negative CI fact offered for where people
+keep secrets, and the agent did not flag it.
+
+What the form change did:
+- **Worked:** one row per value in the second group (0 repeats), exact label
+  words (0 variants), and a place for every second-group row (122 of 122).
+- **Did not work:**
+  - **Rows for shown values stayed** (12 of 122), mostly `commits` and
+    `default` overrides of ADR-0002, and `boundary` of ADR-0005.
+  - **Unlabelled citations went from 3 to 17**, mostly parentheticals in
+    table cells.
+  - **Counts without a named command rose**: 6, two of them false (lodash
+    "CI installs everything through npm or npx", where `ci-bun.yml` runs
+    `bun install`; "8 one-off scopes", which is 6).
+
+The scorer's 12 "shown" rows rest on one judgement applied across repos
+(for example, treating a group-1 acceptance of "no UI framework" as showing
+the value); a different reading would change that count.
+
+**For the maintainer:** the first group is stable across runs 8 to 10, one
+exception at most. The second group's form is where the prompt now leaks:
+three instructions it was given (no row for a shown value, a label on every
+citation, a command for every count) are each followed most of the time and
+not always, and the labels got worse. The next change would be a check, not
+a rule: ask the agent to re-read its own tables against those three rules
+before presenting them.
