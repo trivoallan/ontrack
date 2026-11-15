@@ -12,32 +12,12 @@ itself:
   approved its last commit: a Claude Code session starts and implements the
   change with you.
 
-Both are reusable workflows that live in ontrack. Your repository calls them
-by commit SHA, and does not copy them. The security posture stays in ontrack:
-the agent never holds a token that can write, and the job that writes accepts
-only new planning files.
-[ADR-0004](adr/local/ADR-0004-other-repositories-call-the-propose-and-apply-workflows.md)
-records why.
-
-```mermaid
-flowchart TD
-  issue["Issue, written by anyone"] -- "a maintainer adds ontrack:propose" --> caller1["Your propose.yml"]
-  caller1 -- "uses: …/propose.yml@sha" --> draft
-  subgraph ontrack_propose["ontrack's propose workflow"]
-    draft["draft job: the agent, read-only token,<br/>writes only what the catalog enables"]
-    publish["publish job: no agent,<br/>accepts only new planning files"]
-    draft -- "patch" --> publish
-  end
-  draft -. "OIDC token exchange" .-> provider["Model provider"]
-  publish -- "pushes the branch" --> pr["Draft pull request"]
-  pr -- "a person with write access<br/>approves the head commit" --> approved["Approved pull request"]
-  approved -- "a maintainer adds ontrack:apply" --> caller2["Your apply.yml"]
-  caller2 -- "uses: …/apply.yml@sha" --> gate
-  subgraph ontrack_apply["ontrack's apply workflow"]
-    gate["gate: checks the approval,<br/>checks out nothing"]
-  end
-  gate -- "fires your routine" --> session["Claude Code session<br/>implements the change with you"]
-```
+Both are reusable workflows that live in ontrack: your repository calls
+them by commit SHA, and does not copy them.
+[Why you call ontrack's workflows](why-you-call-ontracks-workflows.md)
+explains why, and what the security posture is.
+[Propose and apply workflows](propose-and-apply-workflows.md) lists their
+inputs and everything this guide adds to your repository.
 
 You need:
 
@@ -134,20 +114,9 @@ jobs:
       # label: ontrack:propose
 ```
 
-The agent may only write for the entries you enable:
-
-| Entry | The agent may add |
-| --- | --- |
-| `openspec` | A change under `openspec/changes/` |
-| `adr` | A new ADR in `docs/adr/local` |
-
-A caller pinned to a version of the workflow that wrote new ADRs directly in
-`docs/adr` keeps doing so until it is updated: ontrack still reads them, and
-`ontrack plan` reports them as files to move to `docs/adr/local`.
-
-An ADR that declares a `check:` command is always refused: a person writes
-that command. A framework that is not in the catalog cannot be enabled; to
-add one, open a pull request to ontrack that adds its entry.
+`frameworks` enables entries of a closed catalog: the agent may only write
+what they write. The [catalog](propose-and-apply-workflows.md#the-catalog)
+says what each entry lets it add.
 
 ## 5. Call `apply`
 
@@ -221,8 +190,8 @@ commit is refused instead of starting a second session on the same branch.
 | "Not applied: a reviewer has requested changes" | The last review of a person with write access asks for changes | Settle the review first |
 | "The pull request is approved, but the apply session could not be started" | The routine did not fire | Open the run linked in the comment; check `APPLY_ROUTINE_ID` and `APPLY_FIRE_TOKEN` (step 5). Adding the label again is allowed: no session was announced |
 
-Refusing a second session needs ontrack's workflow at commit `4eb88cf` or
-later. With an older pin, two labels on the same commit start two sessions.
+Refusing a second session needs a recent pin: see
+[Versions](propose-and-apply-workflows.md#versions).
 
 ## When a run fails
 
@@ -239,12 +208,14 @@ Open the run linked in the comment.
 ## Keep it up to date
 
 Pin both calls to a commit SHA, with the tag in a comment, and let
-Dependabot propose the updates (`package-ecosystem: github-actions`). A
-security fix in ontrack then reaches you as a pull request. A change that
-breaks callers comes with a major version of ontrack.
+Dependabot propose the updates: the
+[reference](propose-and-apply-workflows.md#the-files-in-full) gives the
+`dependabot.yml`.
 
 ## Related
 
+- [Propose and apply workflows](propose-and-apply-workflows.md) lists the
+  inputs, and the files in full.
 - [How ontrack works](how-it-works.md) explains the traits the workflow reads
   from `AGENTS.md`.
 - [Run ontrack in CI](run-ontrack-in-ci.md) sets up the checks that run on
