@@ -88,9 +88,10 @@ export default defineConfig({
       // stay one click away, collapsed at the end of the reference.
       // Grouped by what the reader came to do, and the guides by who they
       // are: a repository that installs a track, or the author of one. The
-      // model is read right after the tutorial, before either set of guides.
+      // notions, then the model, are read right after the tutorial, before
+      // either set of guides.
       sidebar: [
-        { label: 'Start here', items: ['tutorial', 'how-it-works'] },
+        { label: 'Start here', items: ['tutorial', 'concepts', 'how-it-works'] },
         { label: 'Use a track', items: ['find-a-track', 'run-ontrack-in-ci', 'draft-a-change-from-an-issue', 'upgrade-ontrack'] },
         { label: 'Maintain a track', items: ['write-your-own-track', 'revise-a-question'] },
         {
