@@ -62,14 +62,14 @@ ontrack's answer when ontrack has imported that question.
 - **AND** it links to `adr/trivoallan/adr-0006-commits/`
 
 ### Requirement: The catalogue is in the navigation
-The navigation SHALL hold a top-level group "ontrack-engineering", right
+The navigation SHALL hold a top-level group "The reference track", right
 after "Start here" and not collapsed, listing the track page, as "Overview",
 the page "Use it", then the page "Questions", as "Questions (X.Y.Z)". The
 catalogue pages are reached from that page, not listed in the navigation.
 
 #### Scenario: Navigation
 - **WHEN** the site is built with 26 questions in the installed track
-- **THEN** the second group of the navigation is "ontrack-engineering", holding "Overview", "Use it" and "Questions (0.6.0)"
+- **THEN** the second group of the navigation is "The reference track", holding "Overview", "Use it" and "Questions (0.6.0)"
 - **AND** no catalogue page is listed in the navigation
 
 ### Requirement: ontrack's decisions are labelled as an example
