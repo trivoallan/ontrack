@@ -54,10 +54,17 @@
 .card:has(.card-link):hover {
   border-color: var(--sl-color-gray-2);
 }
-/* The look of a LinkCard's affordance, not of a link in prose. */
-.card .card-link {
+/* The look of a LinkCard's affordance, not of a link in prose, at the
+   foot of the card whatever the length of its text. */
+.card:has(.card-link) .body {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+}
+.card .body > .card-link {
   display: block;
-  margin-top: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
   color: var(--sl-color-gray-2);
   font-size: var(--sl-text-sm);
   font-weight: 600;
