@@ -640,3 +640,59 @@ scorer counted as labelled.
 
 One run of five repositories, with its own scorer: it shows that the
 threshold can be met, not how often.
+
+## Run 9: the survey restructured around labelled citations
+
+The survey after `review-survey-labelled-citations`, rewritten with a
+rules-first structure:
+- it states its purpose and goes value by value;
+- it uses two labels, `shows the value` and `next to it`, with one example
+  each from runs 7 and 8;
+- an absence counts only when it is the value;
+- two prohibitions are explicit;
+- the layout is fixed: a count per group, one row per value in the first
+  group, one row per ADR in the second.
+
+The repositories are pug, nodemailer, underscore, morgan and debug, at the
+commits in [run9/repos-at.txt](run9/repos-at.txt); no earlier run used
+them. One read-only run each ($9.08). Raw: [run9/surveys/](run9/surveys/).
+A new independent scorer applied the same strict rule, key by key, and
+checked the labels and the layout: [run9/score.md](run9/score.md).
+
+| Repository | First-group ADRs | Values not visible | Mislabels | Second-group rows saying where the value lives |
+|---|---|---|---|---|
+| debug | 9 | 0 | 0 | 19 of 25 |
+| morgan | 7 | 0 | 0 | 18 of 18 |
+| underscore | 8 | 0 | 0 | 17 of 17 |
+| nodemailer | 10 | 0 | 0 | 18 of 25 |
+| pug | 8 | 0 | 0 | 17 of 17 |
+| **Total** | **42** | **0** | **0** | **89 of 102** |
+
+| | Run 5 | Run 6 | Run 7 | Run 8 | Run 9 |
+|---|---|---|---|---|---|
+| First-group ADRs | 56 | 65 | 59 | 40 | 42 |
+| Values not visible in the first group | 7 | 5 | 3 | 2 | **0** |
+| Of those, left unstated | 2 | 4 | 3 | 2 | 0 |
+| Repositories over the threshold | 2 of 5 | 1 of 5 | 1 of 5 | 0 of 5 | **0 of 5** |
+| Mislabels | | | | 2 | 0 |
+| Group headings with a wrong count | 1 | | 1 | | 0 |
+
+No run tried to write.
+
+**AB-1 restated: passes, with no exception at all.** The layout held: every
+heading count is right, and every first-group ADR is laid out one row per
+value. Three things remain, all in the second group or in form:
+- **Second-group rows not one per ADR** in debug and nodemailer: 25 rows for
+  16 and 15 ADRs. The 13 rows without a place are values shown as `none`,
+  written "—" or "none needed".
+- **3 missing labels in the second group** (pug), and two labels worded
+  differently ("does not show the value").
+- **One count partly false**: pug 0004 says "20 of the 21 source entry
+  files", and the clone has 19.
+
+The first group stays at about 40 ADRs over five repositories, as in run 8:
+the gain did not cost more questions to discuss.
+
+Two runs in a row now meet the threshold, on ten repositories never seen,
+each run with its own scorer. That says the threshold can be met with this
+prompt, not how often.
