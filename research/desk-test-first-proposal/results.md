@@ -530,3 +530,62 @@ examples now steer what the agent checks. Listing more examples would
 chase the next kind. The next step could be a general rule instead: an ADR
 goes to the first group only when the agent can cite, for every value, the
 file or command that shows it.
+
+## Run 7: a citation for every value
+
+The survey after `review-survey-cites-every-value`, which replaces the
+examples with one rule. An ADR goes to the first group only when the agent
+can cite, for every value, the file, configuration or command output that
+shows it, and it shows those citations. Any ADR with a value held outside
+the repository, inferred, or drawn from history alone goes to the second
+group, naming that value and where it lives.
+
+The repositories are dotenv, node-glob, yargs, jquery and mocha, at the
+commits in [run7/repos-at.txt](run7/repos-at.txt); no earlier run used
+them. One read-only run each ($10.26); the answers are about a fifth longer
+than in run 6. Raw: [run7/surveys/](run7/surveys/). A new independent
+scorer applied the same strict rule: [run7/score.md](run7/score.md).
+
+| Repository | First-group rows | Values not visible | Left unstated |
+|---|---|---|---|
+| dotenv | 12 | 0 | |
+| node-glob | 12 | 0 | |
+| mocha | 10 | 0 | |
+| jquery | 13 | 1: 0012 `release_notes: changelog` (each release also needs a blog post; the clone's release script requires its URL) | yes |
+| yargs | 12 | **2**: 0017 `hosts: []` (which agents contributors use; `AI_POLICY.md` allows them); 0018 `automerge: none` (comes from the external Renovate preset `config:base`) | yes, both |
+| **Total** | **59** | **3** | **3** |
+
+| | Run 5 | Run 6 | Run 7 |
+|---|---|---|---|
+| Survey rule | none | four examples of outside values | a citation per value |
+| Values not visible in the first group | 7 in 56 | 5 in 65 | 3 in 59 |
+| Of those, left unstated | 2 | 4 | **3** |
+| Repositories over the threshold (> 1) | 2 of 5 | 1 of 5 | 1 of 5 (yargs, 2) |
+| False evidence | 0 | 0 | 1 (jquery 0012) |
+| First-group rows missing a citation | (not asked) | (not asked) | 1 (dotenv 0008 `channels`, no site) |
+| Second-group rows naming the unseen value | (not asked) | 60 of 60 | 66 of 66 |
+
+No run tried to write.
+
+**AB-1 restated: still fails in 1 of 5 repositories** (yargs, 2). The count
+fell again, and every failing row now carries a citation that is true but
+does not show the value. Examples: no host settings file, offered for which
+agents people use; a `renovate.json` without an automerge key, whose preset
+sets it. The citations make the three wrong placements look grounded, and
+the agent flagged none of them. One of the three (yargs 0018, an external
+preset) is a kind run 6's examples named and the general rule dropped.
+
+Three runs with five repositories each move the count from 7 to 5 to 3,
+with different repositories and scorers each time. That is a direction,
+not a rate.
+
+**For the maintainer:** the restated threshold (at most 1 per repository)
+has been missed by one repository in each of the last two runs. What is
+left is small but silent, which matters more than the count: the adopter
+agrees to an order built on a citation that does not show what it seems to.
+Options:
+- accept the result, and rely on the ruling step, which checks each value
+  again (step 2 of the seven) before anything is written;
+- keep both the rule and the examples;
+- ask the survey to say, in every citation, whether it shows the value
+  itself or only something next to it.
