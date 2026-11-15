@@ -83,9 +83,9 @@ revision. This is the format it follows:
 
 ```
 platform: 2 revised, 1 new, 3 unchanged
-  revised       SDR-0006  Commits (revision 1 → 2)
-  revised       SDR-0010  Forge and CI (revision 3 → 4)
-  new           SDR-0015  Observability
+  revised       ADR-0006  Commits (revision 1 → 2)
+  revised       ADR-0010  Forge and CI (revision 3 → 4)
+  new           ADR-0015  Observability
 ```
 
 `plan` then exits with `2`. A CI job fails on that code without parsing the
@@ -130,7 +130,7 @@ and read the same.
 ## It governs itself
 
 ontrack is built under its own rules. This repository imports
-[trivoallan/governance](https://github.com/trivoallan/governance), and every
+[trivoallan/ontrack-engineering](https://github.com/trivoallan/ontrack-engineering), and every
 ruling it made is published here, starting with
 [how decisions are recorded](adr/trivoallan/ADR-0001-record-architecture-decisions.md).
 Its [architecture](architecture/arc42/01-introduction-and-goals.md) is
@@ -172,7 +172,7 @@ read it because a `CLAUDE.md` exists without importing it.
 
 A `package.json` with an `ontrack` key and a directory of ADRs.
 [Write your own track](write-your-own-track.md) takes four steps.
-[trivoallan/governance](https://github.com/trivoallan/governance) is a
+[trivoallan/ontrack-engineering](https://github.com/trivoallan/ontrack-engineering) is a
 working example to start from.
 
 ### Where do I find a track someone else wrote?

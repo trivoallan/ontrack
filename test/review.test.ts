@@ -251,8 +251,8 @@ test('prompt: every form matches the commands reference contract', () => {
     makeProject({
       tracks: {
         platform: {
-          'SDR-0015-observability.md': asked('Observability', 1),
-          'SDR-0002-localization.md': asked('Localization', 1),
+          'ADR-0015-observability.md': asked('Observability', 1),
+          'ADR-0002-localization.md': asked('Localization', 1),
         },
       },
     }),
@@ -474,10 +474,10 @@ test('command: new ADRs come first, before revised and before proposed ones, and
 });
 
 test('command: new ADRs alone, in a repository without docs/adr, print the import prompt', async () => {
-  const root = makeProject({ tracks: { platform: { 'SDR-0015-observability.md': asked('Observability', 1) } } });
+  const root = makeProject({ tracks: { platform: { 'ADR-0015-observability.md': asked('Observability', 1) } } });
   const r = await review(root);
   assert.equal(r.code, 2);
-  assert.ok(r.stdout.includes('`docs/adr/platform/SDR-0015-observability.md` (Observability)'));
+  assert.ok(r.stdout.includes('`docs/adr/platform/ADR-0015-observability.md` (Observability)'));
 });
 
 test('command: without tracks, a proposed ADR still gets the sequence prompt', async () => {

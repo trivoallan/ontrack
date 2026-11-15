@@ -183,5 +183,5 @@ repository that rules again.
   [published JSON Schema](file-formats.md#the-ontrack-key-of-a-track).
 - See how a person [finds a track](find-a-track.md) to install, yours
   included.
-- Read [trivoallan/governance](https://github.com/trivoallan/governance), a
+- Read [trivoallan/ontrack-engineering](https://github.com/trivoallan/ontrack-engineering), a
   track in use.

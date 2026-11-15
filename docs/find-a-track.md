@@ -20,9 +20,9 @@ A track was called a source before ontrack 0.5. A package published then
 may still carry the earlier keyword:
 [search npm for `keywords:ontrack-source`](https://www.npmjs.com/search?q=keywords%3Aontrack-source).
 
-[`@trivoallan/ontrack-governance`](https://www.npmjs.com/package/@trivoallan/ontrack-governance)
+[`@trivoallan/ontrack-engineering`](https://www.npmjs.com/package/@trivoallan/ontrack-engineering)
 is the track ontrack uses on itself. Its ADRs are in
-[trivoallan/governance](https://github.com/trivoallan/governance).
+[trivoallan/ontrack-engineering](https://github.com/trivoallan/ontrack-engineering).
 
 ontrack does not review the tracks the search returns. A track is a
 dependency: decide on it as you decide on any other.
