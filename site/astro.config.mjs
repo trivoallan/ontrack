@@ -91,13 +91,15 @@ export default defineConfig({
       // model is read right after the tutorial, before either set of guides.
       sidebar: [
         { label: 'Start here', items: ['tutorial', 'how-it-works'] },
-        { label: 'Use a track', items: ['find-a-track', 'run-ontrack-in-ci', 'draft-a-change-from-an-issue'] },
+        { label: 'Use a track', items: ['find-a-track', 'run-ontrack-in-ci', 'draft-a-change-from-an-issue', 'upgrade-ontrack'] },
         { label: 'Maintain a track', items: ['write-your-own-track', 'revise-a-question'] },
         {
           label: 'Reference',
           items: [
             'commands',
             'file-formats',
+            // What each version changed is on the forge, written by the release.
+            { label: 'Release notes', link: 'https://github.com/trivoallan/ontrack/releases' },
             // The glossary is section 12 of the arc42 document, listed here
             // because users need its terms too. Its frontmatter hides it from
             // the Architecture group, so it has one entry.
