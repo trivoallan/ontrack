@@ -5,7 +5,7 @@ title: A ruled ADR follows the files it references
 status: accepted
 date: 2026-11-15
 authors: [Tristan Rivoallan]
-supersedes: [trivoallan/ADR-0001]
+supersedes: [engineering/ADR-0001]
 check: npx --no-install ontrack-engineering-check ADR-0001
 traits:
   record-architecture-decisions:
@@ -20,7 +20,7 @@ Accepted
 
 ## Context
 
-[ADR-0001](../trivoallan/ADR-0001-record-architecture-decisions.md) rule 4
+[ADR-0001](../engineering/ADR-0001-record-architecture-decisions.md) rule 4
 freezes the body of a ruled ADR: the only things still written in it are its
 `status` and its `check:` line.
 
@@ -76,7 +76,7 @@ ADR-0001 carry over unchanged.
 
 ## References
 
-- [ADR-0001](../trivoallan/ADR-0001-record-architecture-decisions.md), which
+- [ADR-0001](../engineering/ADR-0001-record-architecture-decisions.md), which
   this record supersedes.
 - [ADR-0005](ADR-0005-own-adrs-live-in-docs-adr-local.md), the folders under
   `docs/adr/`.

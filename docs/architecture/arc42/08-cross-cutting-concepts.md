@@ -55,7 +55,7 @@ ADRs, `package.json` files and `AGENTS.md` are written by other people and
 tools. ontrack treats them accordingly:
 
 - JSON it reads is parsed with the zod models of `src/schemas.ts`
-  ([ADR-0005](../../adr/trivoallan/ADR-0005-validation.md)).
+  ([ADR-0005](../../adr/engineering/ADR-0005-validation.md)).
 - Frontmatter is scanned line by line, and what cannot be read is a
   category (`unreadable`, `undetermined`), not an error. Specified in
   [adr-revision](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/adr-revision/spec.md).
@@ -78,4 +78,4 @@ builds a throwaway project on disk for the tests that need one. Commands are
 tested through `main` with an `Io` that captures output, so only the test of
 the executable starts ontrack as a process. `npm test` fails below
 95 % of lines, branches or functions
-([ADR-0007](../../adr/trivoallan/ADR-0007-tests.md)).
+([ADR-0007](../../adr/engineering/ADR-0007-tests.md)).

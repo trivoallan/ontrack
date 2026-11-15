@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import starlight from '@astrojs/starlight';
@@ -66,18 +66,18 @@ const pages = () => (tree, file) => {
   // A question of the catalogue opens as a repository receives it, and with
   // none of this repository's rulings: its status, its blank traits, and a
   // link to how ontrack answered it.
-  if (file.path.includes('/node_modules/trivoallan/adr/')) {
+  if (file.path.includes('/node_modules/engineering/adr/')) {
     const name = file.path.split('/').pop();
     const source = readFileSync(file.path, 'utf8');
     const status = source.match(/^status:\s*(\S+)/m)?.[1] ?? 'proposed';
-    const answered = existsSync(new URL(`../docs/adr/trivoallan/${name}`, import.meta.url));
+    const answered = existsSync(new URL(`../docs/adr/engineering/${name}`, import.meta.url));
     const block = [{
       type: 'html',
       value:
         `<p><span class="adr-status ${statusTone(status)}">${status}</span> ` +
         (/^check:\s*\S/m.test(source) ? '<span class="adr-status tip">checked</span> ' : '') +
         `A question of ontrack-engineering ${trackVersion}.` +
-        (answered ? ` <a href="../../adr/trivoallan/${name.replace(/\.md$/, '').toLowerCase()}/">How ontrack answered it</a>.` : '') +
+        (answered ? ` <a href="../../adr/engineering/${name.replace(/\.md$/, '').toLowerCase()}/">How ontrack answered it</a>.` : '') +
         '</p>',
     }];
     const traits = source.match(/^traits:\n(?:[ \t].*\n?)*/m)?.[0];
@@ -111,6 +111,13 @@ export default defineConfig({
   redirects: {
     '/find-a-source': `${base}/find-a-track/`,
     '/write-your-own-source': `${base}/write-your-own-track/`,
+    // The track's answers, once under the alias trivoallan.
+    ...Object.fromEntries(
+      readdirSync(new URL('../docs/adr/engineering/', import.meta.url))
+        .filter((file) => file.endsWith('.md'))
+        .map((file) => file.replace(/\.md$/, '').toLowerCase())
+        .map((name) => [`/adr/trivoallan/${name}`, `${base}/adr/engineering/${name}/`]),
+    ),
   },
   // The logo is the favicon too: serve docs/assets as static files.
   publicDir: '../docs/assets',

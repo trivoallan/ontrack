@@ -5,7 +5,7 @@ title: The engineering track skips the cooldown under its new alias
 status: accepted
 date: 2026-11-15
 authors: [Tristan Rivoallan]
-supersedes: [ADR-0024, trivoallan/ADR-0018, trivoallan/ADR-0020]
+supersedes: [ADR-0024, engineering/ADR-0018, engineering/ADR-0020]
 check: npx --no-install ontrack-engineering-check ADR-0018
 traits:
   dependencies:
@@ -26,8 +26,8 @@ Accepted
 
 [ADR-0024](ADR-0024-the-engineering-track-skips-the-cooldown.md) exempts the
 engineering track from the three-day cooldown of
-[ADR-0018](../trivoallan/ADR-0018-dependencies.md) rule 2 and
-[ADR-0020](../trivoallan/ADR-0020-adding-dependencies.md) rule 2. Read it,
+[ADR-0018](../engineering/ADR-0018-dependencies.md) rule 2 and
+[ADR-0020](../engineering/ADR-0020-adding-dependencies.md) rule 2. Read it,
 and ADR-0023 before it, for the reasons, which stand.
 
 Its decision names the alias `trivoallan` in `.github/dependabot.yml`, and

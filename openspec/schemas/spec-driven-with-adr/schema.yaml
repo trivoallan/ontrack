@@ -168,7 +168,7 @@ artifacts:
       Before writing, list every ADR-NNNN-slug.md file in the
       subdirectories of docs/adr/. docs/adr/local/ holds the repository's
       own ADRs; every other subdirectory holds the ADRs imported from a
-      track (docs/adr/trivoallan/), which count like the
+      track (docs/adr/engineering/), which count like the
       repository's own. Read each file's frontmatter: an ADR is in force when
       its `status:` is `accepted` and no other accepted ADR lists it in
       `supersedes:`. A `proposed` ADR is an open question, a `rejected` one
@@ -221,7 +221,7 @@ artifacts:
       Durable Architecture Decision Records live in docs/adr/ and persist
       across changes. The ADRs this repository writes for itself are the
       files of docs/adr/local/, with their own numbering. Each other
-      subdirectory (docs/adr/trivoallan/) holds the ADRs imported from a
+      subdirectory (docs/adr/engineering/) holds the ADRs imported from a
       track: read them, never create or edit a file there. If
       this change introduces a new durable architectural decision, create
       docs/adr/local/ADR-NNNN-slug.md and reference it from
@@ -267,7 +267,7 @@ artifacts:
       than the highest among the files of docs/adr/local/ (0001 when there
       is none), and slug is a short kebab-case name. Write it in the format
       the in-force ADR on recording decisions prescribes
-      (docs/adr/trivoallan/ADR-0001-record-architecture-decisions.md unless
+      (docs/adr/engineering/ADR-0001-record-architecture-decisions.md unless
       superseded): read it first, it prevails over this instruction. As of
       this schema's installation that means:
 
@@ -285,7 +285,7 @@ artifacts:
       If the decision replaces an in-force ADR, name it in `supersedes:` — by
       its file name without .md for an ADR of docs/adr/local/
       (`ADR-0003-slug`), prefixed with its directory for an imported ADR
-      (`trivoallan/ADR-0006-commits`) — and explain in Context why the prior
+      (`engineering/ADR-0006-commits`) — and explain in Context why the prior
       decision is revisited. There is no `Supersedes:` field in the body. Do
       NOT touch the body of the prior ADR. Reference every new ADR file from
       openspec/changes/<change>/adr.md.

@@ -7,7 +7,7 @@ import { pathToFileURL } from 'node:url';
 // From the working directory, not from this file: the build bundles this
 // module for the MDX page that imports it, and moves it.
 // ponytail: assumes the build runs in site/, as `npm run build` does.
-const root = pathToFileURL(`${process.cwd()}/../node_modules/trivoallan/`);
+const root = pathToFileURL(`${process.cwd()}/../node_modules/engineering/`);
 const read = (path) => readFileSync(new URL(path, root), 'utf8');
 
 export const version = JSON.parse(read('package.json')).version;

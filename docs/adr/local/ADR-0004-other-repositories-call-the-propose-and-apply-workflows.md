@@ -91,7 +91,7 @@ posture drifts copy by copy.
 
 - [ADR-0002](ADR-0002-a-label-asks-for-a-change.md)
 - [ADR-0003](ADR-0003-a-label-on-an-approved-pull-request-starts-its-apply.md)
-- [Forge and continuous integration](../trivoallan/ADR-0011-forge-and-ci.md)
-- [Changes](../trivoallan/ADR-0016-changes.md)
+- [Forge and continuous integration](../engineering/ADR-0011-forge-and-ci.md)
+- [Changes](../engineering/ADR-0016-changes.md)
 - `openspec/changes/reusable-propose-apply-workflows/`
 - trivoallan/ontrack#152

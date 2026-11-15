@@ -28,9 +28,9 @@ updates:
     cooldown:
       default-days: 3
       # The engineering track is left out of the cooldown, as in .npmrc
-      # (local/ADR-0024).
+      # (local/ADR-0026).
       # Dependabot names an aliased dependency by its key in package.json.
-      exclude: ["trivoallan"]
+      exclude: ["engineering"]
     ignore:
       - dependency-name: "yargs"
         update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]

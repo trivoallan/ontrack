@@ -31,7 +31,7 @@ anyone to ask decides alone, or stops.
 Running that agent on a runner was considered and set aside. It has to
 check out the pull request and execute it in a job that can reach the model
 provider, which is what rule 5 of
-[ADR-0011](../trivoallan/ADR-0011-forge-and-ci.md) forbids; the job token
+[ADR-0011](../engineering/ADR-0011-forge-and-ci.md) forbids; the job token
 cannot push a change to a workflow; and no check runs on what a bot pushes.
 
 ## Decision
@@ -114,8 +114,8 @@ integration. The repository holds the gate in front of it:
 
 - [ADR-0002](ADR-0002-a-label-asks-for-a-change.md), the proposal this
   decision applies.
-- [ADR-0011](../trivoallan/ADR-0011-forge-and-ci.md), forge and continuous
+- [ADR-0011](../engineering/ADR-0011-forge-and-ci.md), forge and continuous
   integration, rule 5.
-- [ADR-0014](../trivoallan/ADR-0014-work-tracking.md), work tracking: tracker
+- [ADR-0014](../engineering/ADR-0014-work-tracking.md), work tracking: tracker
   text is data.
 - `.github/workflows/apply.yml` and `.github/apply-session.md`.
