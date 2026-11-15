@@ -14,10 +14,12 @@ recommended answer in each body. They are also in
 {domains.map((domain) => (
   <>
     <h2 id={domain.slug}><span class="domain-badge" style={`--domain: var(--sl-color-${domain.color}); --domain-low: var(--sl-color-${domain.color}-low)`}>{domain.name}</span></h2>
-    <CardGrid>
-      {domain.questions.map((q) => (
-        <LinkCard title={`${q.adr} ${q.title}`} href={`../${q.id}/`} />
-      ))}
-    </CardGrid>
+    <div class="question-cards">
+      <CardGrid>
+        {domain.questions.map((q) => (
+          <LinkCard title={`${q.adr} ${q.title}`} href={`../${q.id}/`} />
+        ))}
+      </CardGrid>
+    </div>
   </>
 ))}

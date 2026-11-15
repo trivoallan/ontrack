@@ -79,3 +79,8 @@
   position: absolute;
   inset: 0;
 }
+
+/* A question card's arrow sits at its foot, as the domain cards' link. */
+.question-cards .sl-link-card .icon {
+  align-self: end;
+}
