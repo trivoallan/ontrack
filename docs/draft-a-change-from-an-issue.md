@@ -199,6 +199,27 @@ first commit. Your required checks run on the first push a person makes.
 The text the agent reads is the title and body the issue had when the label
 was added, without its HTML comments. An edit made afterwards is not read.
 
+## 7. Label the approved pull request
+
+Approve the last commit of the pull request, then add `ontrack:apply`. The
+label is removed when the run ends, and a comment says what happened.
+
+Add the label once per commit. A head commit gets one session: the comment
+that announces it is what the gate looks for, so a second label on the same
+commit is refused instead of starting a second session on the same branch.
+
+| What you see | It means | Do |
+| --- | --- | --- |
+| "An apply session was started for commit …" | The session is running on the branch | Open the session linked in the comment; it reports on the pull request when it stops |
+| "Not applied: an apply session was already started for commit …" | This commit already had its session | Go back to that session. To start another, push a new commit and approve it. Delete the first comment only when that session is gone for good |
+| "Not applied: the approval was given before the last push" | A push came after the approval | Approve the head commit, then add the label again |
+| "Not applied: a person with write access must approve this pull request first" | No approval counts yet; a bot's never does | Approve it, then add the label again |
+| "Not applied: a reviewer has requested changes" | The last review of a person with write access asks for changes | Settle the review first |
+| "The pull request is approved, but the apply session could not be started" | The routine did not fire | Open the run linked in the comment; check `APPLY_ROUTINE_ID` and `APPLY_FIRE_TOKEN` (step 5). Adding the label again is allowed: no session was announced |
+
+Refusing a second session needs ontrack's workflow at commit `4eb88cf` or
+later. With an older pin, two labels on the same commit start two sessions.
+
 ## When a run fails
 
 Open the run linked in the comment.
