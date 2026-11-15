@@ -3,7 +3,14 @@
 
 When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output.
 
-### The engineering track skips the cooldown (local/ADR-0024-the-engineering-track-skips-the-cooldown)
+### A ruled ADR follows the files it references (local/ADR-0025-a-ruled-adr-follows-the-files-it-references)
+
+```yaml
+record-architecture-decisions:
+  format: nygard
+```
+
+### The engineering track skips the cooldown under its new alias (local/ADR-0026-the-engineering-track-skips-the-cooldown-under-its-new-alias)
 
 ```yaml
 dependencies:
@@ -12,13 +19,6 @@ dependencies:
 admission:
   approver: person
   install_scripts: ignored
-```
-
-### Record architecture decisions (trivoallan/ADR-0001-record-architecture-decisions)
-
-```yaml
-record-architecture-decisions:
-  format: nygard
 ```
 
 ### Localization (trivoallan/ADR-0002-localization)
