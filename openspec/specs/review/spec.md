@@ -89,7 +89,7 @@ The prompt SHALL be printed to standard output and follow the contract in the co
 6. present the proposed ruling, then stop, ask for the user's agreement with a question tool such as `AskUserQuestion` when the agent has one, and write nothing until the user agrees;
 7. once the user agrees, fill the traits or remove the block when rejected, set the status, write in the ADR the reason for every departure from the recommendation, and run `npx ontrack apply`.
 
-After the seven steps, and in the sequence form after the instruction to take the next ADR, the prompt SHALL tell the agent, once every ADR is ruled, to list the rulings the repository does not follow yet, and to create in the tracker named by the decided `tracking` trait (`tracking.tool`, in `tracking.project`) only the items the user agrees to; when no `tracking` trait is decided or `tracking.tool` is `none`, to list them in its reply and create nothing. It SHALL identify a ruling by its ADR number and trait key, as in `ADR-0015 secrets.guard`, and tell the agent, before proposing:
+After the seven steps, and in the sequence form after the instruction to take the next ADR, the prompt SHALL tell the agent, once every ADR is ruled, to list the rulings the repository does not follow yet, and to create in the tracker named by the decided `tracking` trait (`tracking.tool`, in `tracking.project`) only the items the user agrees to; when no `tracking` trait is decided or `tracking.tool` is `none`, to list them in its reply and create nothing. It SHALL identify a ruling by its ADR's reference without the slug, in brackets, and its trait key, as in `[trivoallan/ADR-0015] secrets.guard`, and tell the agent, before proposing:
 - to list the tracker's items that carry the label `ontrack`, open and closed;
 - to propose nothing for a ruling whose identifier starts the title of one of those items;
 - to say in one line which closed items name a ruling the repository still does not follow;
@@ -132,7 +132,7 @@ The review prompt SHALL also say that an ADR's own instructions on how to rule p
 
 #### Scenario: Ruling identifier in the title
 - **WHEN** `ontrack review` prints a prompt, in either form
-- **THEN** the tracking-items text gives `ADR-0015 secrets.guard` as the form of a ruling's identifier, and tells the agent to start each proposed item's title with it
+- **THEN** the tracking-items text gives `[trivoallan/ADR-0015] secrets.guard` as the form of a ruling's identifier, and tells the agent to start each proposed item's title with it
 
 #### Scenario: Existing items checked first
 - **WHEN** `ontrack review` prints a prompt, in either form
