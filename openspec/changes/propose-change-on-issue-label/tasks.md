@@ -84,4 +84,4 @@
 
 - [ ] 5.1 Label the open issues to be worked on next
 - [ ] 5.2 Record for each one whether the proposal reached implementation without being rewritten
-- [ ] 5.3 Decide: keep, propose it to the governance source, or delete the workflow, the variables and the federation rule
+- [x] 5.3 Decide: keep, propose it to the governance source, or delete the workflow, the variables and the federation rule. Decided on 2026-11-15: keep, and let other repositories call the workflows (ADR-0004, change `reusable-propose-apply-workflows`, #156)
