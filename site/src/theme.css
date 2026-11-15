@@ -1,0 +1,5 @@
+/* The home page has no sidebar, so its text ran 1080px wide: about 150
+   characters a line. Keep it at the width of the other pages' text. */
+[data-has-hero] .sl-markdown-content {
+  max-width: 45rem;
+}

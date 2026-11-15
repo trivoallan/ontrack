@@ -78,7 +78,7 @@ export default defineConfig({
       title: 'ontrack',
       logo: { src: '../docs/assets/logo.png' },
       favicon: '/logo.png',
-      customCss: ['./src/adr.css'],
+      customCss: ['./src/theme.css', './src/adr.css'],
       // The prompts `review` prints are single lines of a thousand characters,
       // documented as they are in the commands reference: wrap code blocks
       // rather than scroll them sideways.
