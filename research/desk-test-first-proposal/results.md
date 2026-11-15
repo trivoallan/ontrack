@@ -589,3 +589,54 @@ Options:
 - keep both the rule and the examples;
 - ask the survey to say, in every citation, whether it shows the value
   itself or only something next to it.
+
+## Run 8: citations that show the value itself
+
+The survey after `review-survey-direct-citations`. A citation counts for
+the first group only when it shows the value itself, not something next to
+it from which the agent would infer the value. Each citation, in either
+group, is labelled one way or the other.
+
+The repositories are node-fetch, winston, socket.io, handlebars.js and
+cheerio, at the commits in [run8/repos-at.txt](run8/repos-at.txt); no
+earlier run used them. One read-only run each ($9.55). Raw:
+[run8/surveys/](run8/surveys/). A new independent scorer applied the same
+strict rule and checked every label: [run8/score.md](run8/score.md).
+
+| Repository | First-group rows | Values not visible | Left unstated | Mislabels |
+|---|---|---|---|---|
+| cheerio | 9 | 0 | | 0 |
+| handlebars.js | 9 | 1: 0021 `build_level: 0` (published by hand from a workstation; provenance would be on the registry) | yes | 1 |
+| node-fetch | 6 | 0 | | 0 |
+| socket.io | 6 | 0 | | 0 |
+| winston | 10 | 1: 0021 `build_level: 0` (same case) | yes | 1 |
+| **Total** | **40** | **2** | **2** | **2** |
+
+| | Run 5 | Run 6 | Run 7 | Run 8 |
+|---|---|---|---|---|
+| Survey rule | none | four examples | a citation per value | the citation shows the value itself |
+| First-group rows | 56 | 65 | 59 | **40** |
+| Values not visible in the first group | 7 | 5 | 3 | 2 |
+| Of those, left unstated | 2 | 4 | 3 | 2 |
+| Repositories over the threshold (> 1) | 2 of 5 | 1 of 5 | 1 of 5 | **0 of 5** |
+| False evidence | 0 | 0 | 1 | 0 |
+| Second-group rows naming the unseen value and where it lives | (not asked) | 60 of 60 | 66 of 66 | 70 of 85 |
+
+No run tried to write. Every first-group row had a citation and a label.
+Two repositories labelled all their citations in one sentence, which the
+scorer counted as labelled.
+
+**AB-1 restated: passes for the first time** (at most 1 per repository, on
+5 repositories never seen). Three things to weigh against it:
+- **The first group shrank by a third** (40 rows, 6 in node-fetch and
+  socket.io). The adopter sees fewer questions answered by the history, and
+  more questions to discuss.
+- **Both remaining failures are mislabels of the same kind**: a document
+  describing a manual publish, labelled as showing the build level itself.
+  Both went unstated.
+- **The second group got vaguer**: 15 of 85 rows rest on an absence or defer
+  to another ADR without saying where the value lives, against none in
+  runs 6 and 7.
+
+One run of five repositories, with its own scorer: it shows that the
+threshold can be met, not how often.
