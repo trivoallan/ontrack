@@ -12,7 +12,7 @@ Its section "Questions" SHALL name the release, X.Y.Z, the `version` of
 `node_modules/trivoallan/package.json` at build time, and list every
 question as a link card to its catalogue page, grouped by the domains of the
 track's README table, in its order; a question the table does not place is
-under "Other". A card says when its question comes with a check.
+under "Other".
 
 #### Scenario: Version shown
 - **WHEN** the site is built with `@trivoallan/ontrack-engineering` 0.6.0 installed under the alias `trivoallan`
@@ -22,7 +22,6 @@ under "Other". A card says when its question comes with a check.
 #### Scenario: Grouped by domain
 - **WHEN** the README places 0017, 0022 and 0026 under **Agents**
 - **THEN** the track page shows ADR-0017, ADR-0022 and ADR-0026 under "Agents"
-- **AND** the cards of ADR-0017 and ADR-0022 say "Checked by ontrack-engineering-check"
 
 ### Requirement: The catalogue is the installed release
 The site SHALL build one catalogue page per Markdown file of

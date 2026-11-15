@@ -91,9 +91,8 @@ question that does not fit your repository: a rejection is a full answer.
 ## Questions
 
 The questions of ontrack-engineering {version}, the release ontrack depends
-on, as a repository receives them: `proposed`, their traits empty, the recommended answer in each body.
-A question marked "Checked by ontrack-engineering-check" comes with a check
-that `ontrack check` runs once you accept it. They are also in
+on, as a repository receives them: `proposed`, their traits empty, the
+recommended answer in each body. They are also in
 [the track's repository](https://github.com/trivoallan/ontrack-engineering/tree/main/adr).
 
 {domains.map((domain) => (
@@ -101,7 +100,7 @@ that `ontrack check` runs once you accept it. They are also in
     <h3 id={domain.slug}><span class="domain-badge" style={`--domain: var(--sl-color-${domain.color}); --domain-low: var(--sl-color-${domain.color}-low)`}>{domain.name}</span></h3>
     <CardGrid>
       {domain.questions.map((q) => (
-        <LinkCard title={`${q.adr} ${q.title}`} href={`./${q.id}/`} description={q.checked ? 'Checked by ontrack-engineering-check' : undefined} />
+        <LinkCard title={`${q.adr} ${q.title}`} href={`./${q.id}/`} />
       ))}
     </CardGrid>
   </>

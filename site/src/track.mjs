@@ -31,7 +31,6 @@ export const questions = readdirSync(new URL('adr/', root))
       adr,
       id: file.replace(/\.md$/, '').toLowerCase(),
       title: source.match(/^title:\s*(.*)$/m)?.[1] ?? file,
-      checked: /^check:\s*\S/m.test(source),
       domain: domainOf.get(adr) ?? 'Other',
     };
   });
