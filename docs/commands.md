@@ -7,11 +7,11 @@ ontrack has five commands. Only `apply` writes to the repository.
 
 | Command | What it does | Writes |
 | --- | --- | --- |
-| [`plan`](#ontrack-plan) | Shows what importing the tracks would change | Nothing |
 | [`apply`](#ontrack-apply) | Imports the ADRs and updates `AGENTS.md`, as `plan` reports | `docs/adr/`, `AGENTS.md` |
-| [`instructions`](#ontrack-instructions) | Prints the decided traits as the rules block of `AGENTS.md` | Nothing |
-| [`review`](#ontrack-review-adr) | Prints a prompt asking a coding agent to rule on ADRs | Nothing |
 | [`check`](#ontrack-check) | Runs the check command of each decided ADR | Nothing itself |
+| [`instructions`](#ontrack-instructions) | Prints the decided traits as the rules block of `AGENTS.md` | Nothing |
+| [`plan`](#ontrack-plan) | Shows what importing the tracks would change | Nothing |
+| [`review`](#ontrack-review-adr) | Prints a prompt asking a coding agent to rule on ADRs | Nothing |
 
 The files these commands read and write are described in
 [File formats](file-formats.md).
@@ -34,93 +34,6 @@ Every command shares the same exit codes.
 
 A CI job can detect an out-of-date repository on `2` without parsing the
 output.
-
-## `ontrack plan`
-
-Shows what importing the tracks would change in the repository. It never
-modifies a file and makes no network call.
-
-```bash
-npx ontrack plan
-```
-
-Each ADR that is not up to date falls in one category:
-
-| Category | Meaning |
-| --- | --- |
-| `new` | Not imported yet |
-| `revised` | The question moved upstream; the line ends with `(revision <local> → <upstream>)` |
-| `removed` | No longer shipped by the track |
-| `undetermined` | No usable `revision:` to compare |
-| `unreadable` | No recognizable frontmatter |
-| `check` | Up to date, but the track's `check:` line differs from yours |
-
-`plan` also reports files to move from a flat `docs/adr/` layout: a track's
-ADRs to `docs/adr/<alias>/`, your own to `docs/adr/local/`. It reports the state of the rules block in `AGENTS.md`
-(`missing` or `out of date`).
-
-**Exit code.** `0` when every ADR is unchanged, or when there is no track at
-all. `2` for any other category, a migration, or a rules block to write.
-
-**Options.**
-
-| Option | Effect |
-| --- | --- |
-| `--all` | Lists every ADR, the unchanged ones too, each with your verdict |
-
-```bash
-npx ontrack plan --all
-```
-
-```
-trivoallan: 1 revised, 2 unchanged
-  unchanged     accepted    ADR-0005-validation
-  revised       accepted    ADR-0006-commits (revision 2 → 3)
-  unchanged     rejected    ADR-0013-frontend
-```
-
-The exit code is the same with and without `--all`.
-
-### `plan` output contract
-
-`plan` never modifies a file and makes no network call. Its output follows
-this format, one block per track, tracks sorted by alias:
-
-```
-platform: 2 revised, 1 new, 3 unchanged
-  revised       SDR-0006  Commits (revision 1 → 2)
-  revised       SDR-0010  Forge and CI (revision 3 → 4)
-  new           SDR-0015  Observability
-migration: 5 files docs/adr/ → docs/adr/platform/
-  move          SDR-0001.md
-  move          SDR-0003.md
-  move          SDR-0006.md
-  move          SDR-0008.md
-  move          SDR-0010.md
-```
-
-- Line 1, per track: `<alias>: <count per category>`, in the order revised, new, removed, undetermined, unreadable, check, unchanged. Zero counts are omitted, except "unchanged".
-- Then one line per ADR that is not unchanged, sorted by name: two spaces, the category in a 12-character column, two spaces, the file name without `.md`, then two spaces and the ADR's title, unless the name already carries a slug (`ADR-0006-commits`). A `revised` line ends with `(revision <local> → <upstream>)`.
-- The title is the frontmatter `title:` key, or else the first `# ` heading, without a leading `<name>: ` that repeats the file name. It comes from the track's copy (the local copy for a `removed` ADR). An ADR without a title shows its name only.
-- Categories: `new` (not imported yet), `revised` (the question moved upstream), `removed` (no longer shipped by the track), `undetermined` (no usable `revision:` to compare), `unreadable` (no recognizable frontmatter), `check` (up to date, but the track's `check:` line differs from yours).
-- A `check` line is followed by the `check:` line that would go (four spaces, `- `) and the one that would come (four spaces, `+ `), so you read the command before `apply` writes it:
-
-  ```
-  trivoallan: 1 check, 13 unchanged
-    check         ADR-0006-commits
-      - check: exit 0
-      + check: npx commitlint --last
-  ```
-
-  The `check:` line is the first one at column zero in the frontmatter. Only an ADR that is up to date can be `check`: a `revised` ADR gets its check once you have ruled again.
-- A flat-layout migration (`docs/adr/<file>` that belongs to the track but is not under `docs/adr/<alias>/`) is always shown: `migration: <n> file(s) docs/adr/ → docs/adr/<alias>/`, then one `move` line per file.
-- Your own ADRs live in `docs/adr/local/`. Those still placed directly in `docs/adr/` (the root files no track ships) are shown the same way, after the last track: `migration: <n> file(s) docs/adr/ → docs/adr/local/`, then one `move` line per file.
-- With `--all`, the unchanged ADRs get a line too, so every ADR has one, sorted by name whatever its category. Each ADR line then carries a verdict between the category and the name: the category in its 12-character column, two spaces, the verdict in a 10-character column, two spaces, then the name and the rest of the line as above. The summary line, the `- ` and `+ ` lines, the migration lines and the exit code do not change.
-- The verdict is the `status:` of your copy, never the track's: the first `status:` line at column zero in its frontmatter, without a trailing `# comment`. It is `-` when you have no copy yet (a `new` ADR), when the copy has no recognizable frontmatter, or when it states no status.
-- When there is nothing to do, one line per track (`platform: 14 unchanged`), and the exit code is `0`. Any other category, or a migration, gives `2`.
-- With no track at all, `plan` prints `no track found` and exits with `0`, or prints the migration of your own ADRs after that line and exits with `2`.
-
-Any change to this format goes through this page first.
 
 ## `ontrack apply`
 
@@ -226,6 +139,79 @@ next: 3 proposed ADRs to rule
 Once no ADR is `proposed`, the first line counts the ruled ADRs that remain
 `revised` instead: `next: 2 revised ADRs to rule again`.
 
+## `ontrack check`
+
+Runs the check command of each decided ADR and reports one line per ADR.
+ontrack judges nothing itself: an ADR names the command that does, in the
+`check:` key of its frontmatter.
+
+```bash
+npx ontrack check
+```
+
+| Status | Meaning |
+| --- | --- |
+| `pass` | The command exited with `0` |
+| `fail` | The command exited with anything else, including a program that is not installed |
+| `unchecked` | The ADR has decided traits and no `check:`, or its command exited with `78` |
+
+- An ADR carries a check when it is `accepted`, is not superseded, and has a
+  non-empty `check:` value.
+- Commands run through the shell, from the project root, with your
+  environment, one at a time. A failure does not stop the run.
+- Each command gets `ONTRACK_ADR`: the path of its ADR's file, relative to
+  the project root.
+- Only ADRs committed under `docs/adr/` are read, never `node_modules`. A
+  track's command runs only once `apply` has written it into your copy and
+  your repository holds the ADR as `accepted`.
+
+**Exit code.** `2` when at least one check failed, `0` otherwise, `1` on an
+error. `unchecked` ADRs do not change it.
+
+### `check` output contract
+
+`instructions` tells an agent what the repository decided. `check` tells it
+when its work departs from a decision. ontrack judges nothing itself: an ADR
+names the command that does, in a top-level `check:` key of its frontmatter.
+
+```yaml
+---
+adr: ADR-0006
+title: Commits
+status: accepted
+check: npx commitlint --from origin/main
+traits:
+  commits:
+    scopes: [api, cli, docs]
+    tool: commitlint
+---
+```
+
+`check` runs each command and reports one line per ADR:
+
+```
+unchecked  Record architecture decisions (trivoallan/ADR-0001-record-architecture-decisions)
+fail       Commits (trivoallan/ADR-0006-commits)
+  rule: docs/adr/trivoallan/ADR-0006-commits.md
+  check: echo "scope may not be empty"; exit 1
+  | scope may not be empty
+pass       Branching (trivoallan/ADR-0009-branching)
+1 failed, 1 passed, 1 unchecked
+```
+
+- The ADRs read, their status and their supersession are those of `instructions`. An ADR carries a check when it is `accepted`, is not superseded, and has a non-empty `check:` value. A local ADR that supersedes a track's ADR silences its check and may carry its own.
+- The command is the rest of the `check:` line. A trailing ` # comment` is removed, and so is one pair of matching quotes around the whole value. Lines below are not part of it: put a longer command in a script.
+- Commands run through the shell, from the project root, with your environment, one at a time, in reference order. A failure does not stop the run.
+- Each command also gets `ONTRACK_ADR`: the path of its ADR's file, relative to the project root, with forward slashes, the value of the `rule:` line. A script that reads the ruled traits opens that file instead of searching for it.
+- `pass`: the command exited with `0`. `fail`: anything else, including a program that is not installed. `unchecked`: the ADR carries decided traits and no `check:`, or its command exited with `78`, the code reserved for a command that has nothing to verify (a tool the decision does not use, for instance). Like a pass, its output is not printed.
+- A `fail` line is followed by the ADR's path, the command, and the command's standard output then standard error, each line after `  | `. The output of a passing command is not printed.
+- Lines are sorted by reference. The last line counts each status, and is the only line when there is nothing to report.
+- Conflicting traits are an error, as in `instructions`, and no command runs.
+- `check` exits with `2` when at least one check failed, `0` otherwise, `1` on an error. `unchecked` ADRs do not change the exit code.
+- Only ADRs committed under `docs/adr/` are read, never `node_modules`. A track's command therefore runs only once `apply` has written it into your copy and your repository holds the ADR as `accepted`. `apply` keeps that line in step with the track, so updating a track can change what runs here: `plan` prints the old and new lines first. Read them as you would an npm install script.
+
+Any change to this format goes through this page first.
+
 ## `ontrack instructions`
 
 Prints the traits decided in the repository's ADRs as the rules block of
@@ -295,6 +281,93 @@ commits:
 - Two decided ADRs sharing a top-level trait key are an error that names both. Superseding one of them settles it.
 - Sections are sorted by reference. With nothing decided and nothing pending, the block holds only its heading.
 - `instructions` never writes a file and makes no network call. It exits with `0`, or with `1` on an error; it never returns `2`.
+
+Any change to this format goes through this page first.
+
+## `ontrack plan`
+
+Shows what importing the tracks would change in the repository. It never
+modifies a file and makes no network call.
+
+```bash
+npx ontrack plan
+```
+
+Each ADR that is not up to date falls in one category:
+
+| Category | Meaning |
+| --- | --- |
+| `new` | Not imported yet |
+| `revised` | The question moved upstream; the line ends with `(revision <local> → <upstream>)` |
+| `removed` | No longer shipped by the track |
+| `undetermined` | No usable `revision:` to compare |
+| `unreadable` | No recognizable frontmatter |
+| `check` | Up to date, but the track's `check:` line differs from yours |
+
+`plan` also reports files to move from a flat `docs/adr/` layout: a track's
+ADRs to `docs/adr/<alias>/`, your own to `docs/adr/local/`. It reports the state of the rules block in `AGENTS.md`
+(`missing` or `out of date`).
+
+**Exit code.** `0` when every ADR is unchanged, or when there is no track at
+all. `2` for any other category, a migration, or a rules block to write.
+
+**Options.**
+
+| Option | Effect |
+| --- | --- |
+| `--all` | Lists every ADR, the unchanged ones too, each with your verdict |
+
+```bash
+npx ontrack plan --all
+```
+
+```
+trivoallan: 1 revised, 2 unchanged
+  unchanged     accepted    ADR-0005-validation
+  revised       accepted    ADR-0006-commits (revision 2 → 3)
+  unchanged     rejected    ADR-0013-frontend
+```
+
+The exit code is the same with and without `--all`.
+
+### `plan` output contract
+
+`plan` never modifies a file and makes no network call. Its output follows
+this format, one block per track, tracks sorted by alias:
+
+```
+platform: 2 revised, 1 new, 3 unchanged
+  revised       SDR-0006  Commits (revision 1 → 2)
+  revised       SDR-0010  Forge and CI (revision 3 → 4)
+  new           SDR-0015  Observability
+migration: 5 files docs/adr/ → docs/adr/platform/
+  move          SDR-0001.md
+  move          SDR-0003.md
+  move          SDR-0006.md
+  move          SDR-0008.md
+  move          SDR-0010.md
+```
+
+- Line 1, per track: `<alias>: <count per category>`, in the order revised, new, removed, undetermined, unreadable, check, unchanged. Zero counts are omitted, except "unchanged".
+- Then one line per ADR that is not unchanged, sorted by name: two spaces, the category in a 12-character column, two spaces, the file name without `.md`, then two spaces and the ADR's title, unless the name already carries a slug (`ADR-0006-commits`). A `revised` line ends with `(revision <local> → <upstream>)`.
+- The title is the frontmatter `title:` key, or else the first `# ` heading, without a leading `<name>: ` that repeats the file name. It comes from the track's copy (the local copy for a `removed` ADR). An ADR without a title shows its name only.
+- Categories: `new` (not imported yet), `revised` (the question moved upstream), `removed` (no longer shipped by the track), `undetermined` (no usable `revision:` to compare), `unreadable` (no recognizable frontmatter), `check` (up to date, but the track's `check:` line differs from yours).
+- A `check` line is followed by the `check:` line that would go (four spaces, `- `) and the one that would come (four spaces, `+ `), so you read the command before `apply` writes it:
+
+  ```
+  trivoallan: 1 check, 13 unchanged
+    check         ADR-0006-commits
+      - check: exit 0
+      + check: npx commitlint --last
+  ```
+
+  The `check:` line is the first one at column zero in the frontmatter. Only an ADR that is up to date can be `check`: a `revised` ADR gets its check once you have ruled again.
+- A flat-layout migration (`docs/adr/<file>` that belongs to the track but is not under `docs/adr/<alias>/`) is always shown: `migration: <n> file(s) docs/adr/ → docs/adr/<alias>/`, then one `move` line per file.
+- Your own ADRs live in `docs/adr/local/`. Those still placed directly in `docs/adr/` (the root files no track ships) are shown the same way, after the last track: `migration: <n> file(s) docs/adr/ → docs/adr/local/`, then one `move` line per file.
+- With `--all`, the unchanged ADRs get a line too, so every ADR has one, sorted by name whatever its category. Each ADR line then carries a verdict between the category and the name: the category in its 12-character column, two spaces, the verdict in a 10-character column, two spaces, then the name and the rest of the line as above. The summary line, the `- ` and `+ ` lines, the migration lines and the exit code do not change.
+- The verdict is the `status:` of your copy, never the track's: the first `status:` line at column zero in its frontmatter, without a trailing `# comment`. It is `-` when you have no copy yet (a `new` ADR), when the copy has no recognizable frontmatter, or when it states no status.
+- When there is nothing to do, one line per track (`platform: 14 unchanged`), and the exit code is `0`. Any other category, or a migration, gives `2`.
+- With no track at all, `plan` prints `no track found` and exits with `0`, or prints the migration of your own ADRs after that line and exits with `2`.
 
 Any change to this format goes through this page first.
 
@@ -465,76 +538,3 @@ Once every ADR is ruled, list the rulings this repository does not follow yet: a
 - It exits with `2` when it prints a prompt, because a ruling is pending. With no `proposed` and no revised ADR it exits with `0`, says so on standard error and prints nothing, so that no agent receives that sentence as a prompt. An unknown or ambiguous name, a `rejected` ADR, or one already superseded, is an error, with `1`, unless the ADR is revised.
 
 Any change to this prompt goes through this page first.
-
-## `ontrack check`
-
-Runs the check command of each decided ADR and reports one line per ADR.
-ontrack judges nothing itself: an ADR names the command that does, in the
-`check:` key of its frontmatter.
-
-```bash
-npx ontrack check
-```
-
-| Status | Meaning |
-| --- | --- |
-| `pass` | The command exited with `0` |
-| `fail` | The command exited with anything else, including a program that is not installed |
-| `unchecked` | The ADR has decided traits and no `check:`, or its command exited with `78` |
-
-- An ADR carries a check when it is `accepted`, is not superseded, and has a
-  non-empty `check:` value.
-- Commands run through the shell, from the project root, with your
-  environment, one at a time. A failure does not stop the run.
-- Each command gets `ONTRACK_ADR`: the path of its ADR's file, relative to
-  the project root.
-- Only ADRs committed under `docs/adr/` are read, never `node_modules`. A
-  track's command runs only once `apply` has written it into your copy and
-  your repository holds the ADR as `accepted`.
-
-**Exit code.** `2` when at least one check failed, `0` otherwise, `1` on an
-error. `unchecked` ADRs do not change it.
-
-### `check` output contract
-
-`instructions` tells an agent what the repository decided. `check` tells it
-when its work departs from a decision. ontrack judges nothing itself: an ADR
-names the command that does, in a top-level `check:` key of its frontmatter.
-
-```yaml
----
-adr: ADR-0006
-title: Commits
-status: accepted
-check: npx commitlint --from origin/main
-traits:
-  commits:
-    scopes: [api, cli, docs]
-    tool: commitlint
----
-```
-
-`check` runs each command and reports one line per ADR:
-
-```
-unchecked  Record architecture decisions (trivoallan/ADR-0001-record-architecture-decisions)
-fail       Commits (trivoallan/ADR-0006-commits)
-  rule: docs/adr/trivoallan/ADR-0006-commits.md
-  check: echo "scope may not be empty"; exit 1
-  | scope may not be empty
-pass       Branching (trivoallan/ADR-0009-branching)
-1 failed, 1 passed, 1 unchecked
-```
-
-- The ADRs read, their status and their supersession are those of `instructions`. An ADR carries a check when it is `accepted`, is not superseded, and has a non-empty `check:` value. A local ADR that supersedes a track's ADR silences its check and may carry its own.
-- The command is the rest of the `check:` line. A trailing ` # comment` is removed, and so is one pair of matching quotes around the whole value. Lines below are not part of it: put a longer command in a script.
-- Commands run through the shell, from the project root, with your environment, one at a time, in reference order. A failure does not stop the run.
-- Each command also gets `ONTRACK_ADR`: the path of its ADR's file, relative to the project root, with forward slashes, the value of the `rule:` line. A script that reads the ruled traits opens that file instead of searching for it.
-- `pass`: the command exited with `0`. `fail`: anything else, including a program that is not installed. `unchecked`: the ADR carries decided traits and no `check:`, or its command exited with `78`, the code reserved for a command that has nothing to verify (a tool the decision does not use, for instance). Like a pass, its output is not printed.
-- A `fail` line is followed by the ADR's path, the command, and the command's standard output then standard error, each line after `  | `. The output of a passing command is not printed.
-- Lines are sorted by reference. The last line counts each status, and is the only line when there is nothing to report.
-- Conflicting traits are an error, as in `instructions`, and no command runs.
-- `check` exits with `2` when at least one check failed, `0` otherwise, `1` on an error. `unchecked` ADRs do not change the exit code.
-- Only ADRs committed under `docs/adr/` are read, never `node_modules`. A track's command therefore runs only once `apply` has written it into your copy and your repository holds the ADR as `accepted`. `apply` keeps that line in step with the track, so updating a track can change what runs here: `plan` prints the old and new lines first. Read them as you would an npm install script.
-
-Any change to this format goes through this page first.
