@@ -58,6 +58,10 @@ platform: 1 revised, 0 unchanged
 `plan` exits with `2`. The ruling the repository made on revision 1 stands
 until it is taken again: `AGENTS.md` still carries it.
 
+No `apply` step comes next. `apply` does not write to a `revised` ADR, so
+there is nothing for it to do until the question is ruled again. The agent
+runs it at the end of the next step.
+
 ### 6. Rule again
 
 ```bash
@@ -92,7 +96,7 @@ together.
 
 | You | The repository sees in `plan` | What it does |
 | --- | --- | --- |
-| Add a question | `new` | `npx ontrack apply`, then rules it with `review` |
+| Add a question | `new` | Rules it with `review`, whose prompt has the agent run `npx ontrack apply` first |
 | Change the `check` line only | `check` | `npx ontrack apply` copies the new line |
 | Remove a question | `removed` | `npx ontrack apply --prune` deletes its copy |
 

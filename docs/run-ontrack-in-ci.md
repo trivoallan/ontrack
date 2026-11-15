@@ -86,7 +86,7 @@ It changes nothing: the checkout is discarded. The failed run is the notice.
 
 | Job | It means | Do |
 | --- | --- | --- |
-| `plan`, on a pull request | The installed track is ahead of the repository | Run `npx ontrack apply`, then rule with `review` |
+| `plan`, on a pull request | The installed track is ahead of the repository | Rule with `review`: its prompt has the agent run `npx ontrack apply` first when the track ships new questions |
 | `check` | The work breaks a decision | Fix the work, or supersede the decision |
 | The weekly job | The track has moved upstream | Follow [Revise a question](revise-a-question.md#in-each-repository), from step 4 |
 

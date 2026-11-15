@@ -3,11 +3,13 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import {
+  formatImport,
   formatReview,
   formatRevision,
   formatRevisions,
   formatSequence,
   formatSupersession,
+  newAdrs,
   pendingAdrs,
   revisedAdrs,
   selectAdr,
@@ -244,6 +246,17 @@ test('prompt: every form matches the commands reference contract', () => {
   const revised = revisedAdrs(stale());
   assert.ok(reference.includes(`~~~\n${formatRevision(revised[1])}~~~`));
   assert.ok(reference.includes(`~~~\n${formatRevisions(revised)}~~~`));
+  const fresh = newAdrs(
+    makeProject({
+      tracks: {
+        platform: {
+          'SDR-0015-observability.md': asked('Observability', 1),
+          'SDR-0002-localization.md': asked('Localization', 1),
+        },
+      },
+    }),
+  );
+  assert.ok(reference.includes(`~~~\n${formatImport(fresh)}~~~`));
 });
 
 // Supersession prompt
@@ -407,4 +420,75 @@ test('command: without an argument, the revised ADRs come once no ADR is propose
   assert.deepEqual(await review(root), { code: 2, stdout: formatRevisions(revisedAdrs(root)), stderr: '' });
   const mixed = stale({ [LOCALIZATION]: asked('Localization', 2) });
   assert.equal((await review(mixed)).stdout, formatSequence(pendingAdrs(mixed)));
+});
+
+// New ADRs
+
+const OBSERVABILITY = 'docs/adr/trivoallan/ADR-0015-observability.md';
+
+/** `stale()`, whose track also ships two questions the repository never imported, one without a title. */
+const behind = (local: Record<string, string> = {}) =>
+  makeProject({
+    tracks: {
+      trivoallan: {
+        'ADR-0001-record-architecture-decisions.md': asked('Record architecture decisions', 3),
+        'ADR-0015-observability.md': asked('Observability', 1),
+        'ADR-0003-architecture.md': adr(null, 'status: proposed', 'revision: 1'),
+      },
+    },
+    local: { [RECORD]: asked('Record architecture decisions', 1, 'accepted'), ...local },
+  });
+
+test('new: the ADRs plan reports as new, in reference order, where apply writes them; none when tracks cannot be read', () => {
+  assert.deepEqual(newAdrs(behind()), [
+    { path: 'docs/adr/trivoallan/ADR-0003-architecture.md', title: null },
+    { path: OBSERVABILITY, title: 'Observability' },
+  ]);
+  assert.deepEqual(newAdrs(stale()), []);
+  assert.deepEqual(newAdrs(makeTree({ [RECORD]: asked('R', 1) })), []);
+});
+
+test('import prompt: lists paths and titles, apply before review, none of the ruling steps', () => {
+  const out = formatImport(newAdrs(behind()));
+  assert.ok(out.startsWith('Import the architecture decision records this repository does not hold yet, then review them.'));
+  assert.ok(out.includes('   - `docs/adr/trivoallan/ADR-0003-architecture.md`\n   - `docs/adr/trivoallan/ADR-0015-observability.md` (Observability)\n'));
+  assert.ok(out.indexOf('npx ontrack apply') < out.indexOf('npx ontrack review'));
+  assert.deepEqual(out.match(/^\d\./gm), ['1.', '2.']);
+  assert.ok(!out.includes('status'));
+  assert.ok(out.includes('writes nothing to an ADR this repository has ruled'));
+  assert.ok(out.includes('If `apply` fails, stop and report its error.'));
+  assert.ok(out.includes('exits with `2` when it prints a prompt: that is not an error'));
+});
+
+test('command: new ADRs come first, before revised and before proposed ones, and the tree is unchanged', async () => {
+  const root = behind();
+  const before = snapshot(root);
+  assert.deepEqual(await review(root), { code: 2, stdout: formatImport(newAdrs(root)), stderr: '' });
+  assert.deepEqual(snapshot(root), before);
+  const mixed = behind({ [LOCALIZATION]: asked('Localization', 1) });
+  const r = await review(mixed);
+  assert.equal(r.stdout, formatImport(newAdrs(mixed)));
+  assert.ok(!r.stdout.includes(LOCALIZATION));
+  assert.ok(!r.stdout.includes(RECORD));
+});
+
+test('command: new ADRs alone, in a repository without docs/adr, print the import prompt', async () => {
+  const root = makeProject({ tracks: { platform: { 'SDR-0015-observability.md': asked('Observability', 1) } } });
+  const r = await review(root);
+  assert.equal(r.code, 2);
+  assert.ok(r.stdout.includes('`docs/adr/platform/SDR-0015-observability.md` (Observability)'));
+});
+
+test('command: without tracks, a proposed ADR still gets the sequence prompt', async () => {
+  const root = makeTree({ [LOCALIZATION]: asked('Localization', 1) });
+  assert.equal((await review(root)).stdout, formatSequence(pendingAdrs(root)));
+});
+
+test('command: a named ADR that is not imported is unknown, and a named one ignores new ADRs', async () => {
+  const root = behind({ [LOCALIZATION]: asked('Localization', 1) });
+  const unknown = await review(root, 'ADR-0015');
+  assert.equal(unknown.code, 1);
+  assert.equal(unknown.stdout, '');
+  assert.match(unknown.stderr, /ADR-0015/);
+  assert.equal((await review(root, 'ADR-0002-localization')).stdout, formatReview(selectAdr(root, 'ADR-0002-localization')));
 });
