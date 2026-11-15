@@ -20,6 +20,12 @@
   --sl-color-border-badge: var(--sl-badge-caution-border);
   --sl-color-text-badge: var(--sl-badge-caution-text);
 }
+/* A question that comes with a check. */
+.adr-status.tip {
+  --sl-color-bg-badge: var(--sl-badge-tip-bg);
+  --sl-color-border-badge: var(--sl-badge-tip-border);
+  --sl-color-text-badge: var(--sl-badge-tip-text);
+}
 /* Starlight has no grey badge: its default variant is the accent colour. */
 .adr-status.adr-neutral {
   --sl-color-bg-badge: var(--sl-color-gray-5);

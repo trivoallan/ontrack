@@ -7,7 +7,7 @@ This guide shows how to create a track that holds your own conventions,
 try it against one repository, and publish it for the others.
 
 You need Node 22.18 or later, and to have gone through the
-[tutorial](tutorial.md) once. The examples name the track
+[tutorial](tutorial.mdx) once. The examples name the track
 `platform-governance` and install it under the alias `platform`.
 
 ## 1. Create the package

@@ -25,6 +25,8 @@ hero:
       variant: minimal
 ---
 
+import { Aside, Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
 ## Conventions are copied, then they drift
 
 You agreed on how to commit, branch, test and deliver. Then the agreement was
@@ -107,8 +109,10 @@ that updates the track is what tells a repository the question moved:
 | A standards platform, such as Packmind | Sends one playbook from a server to every repository and agent | A repository can pin a version or leave a package out, but has no place to record why it differs |
 | ontrack | Asks each repository a question and records its answer | The answer itself: that is the repository's call |
 
+<Aside type="note">
 ontrack does not replace your linters. An ADR can name the command that
 checks its decision, and `ontrack check` runs it.
+</Aside>
 
 ## Your teams keep their answers
 
@@ -123,9 +127,13 @@ The platform team owns the questions. Each repository owns its answers.
 
 ## Nothing to migrate away from
 
-An ADR is a Markdown file in `docs/adr/`. A track is an npm dependency. The
-rules are a block in `AGENTS.md`. If you stop using ontrack, all three remain
-and read the same.
+If you stop using ontrack, all three remain and read the same.
+
+<CardGrid>
+  <Card title="An ADR" icon="document">A Markdown file in `docs/adr/`.</Card>
+  <Card title="A track" icon="seti:npm">An npm dependency.</Card>
+  <Card title="The rules" icon="list-format">A block in `AGENTS.md`.</Card>
+</CardGrid>
 
 ## It governs itself
 
@@ -138,9 +146,9 @@ documented the way those decisions prescribe.
 
 ## Where the project stands
 
-<!-- x-release-please-start-version -->
+{/* x-release-please-start-version */}
 ontrack is at version 0.4.0. It is young, and it changes.
-<!-- x-release-please-end -->
+{/* x-release-please-end */}
 
 - It is published to the npm registry as `@trivoallan/ontrack`, and can
   also be installed from GitHub, by git URL.
@@ -183,9 +191,12 @@ you install one.
 
 ## Try it on one repository
 
-The [tutorial](tutorial.md) takes four commands. On a fresh repository, the
-first three ran in 14 seconds and left an `AGENTS.md` with its first rule. The
-agent then took about a minute to propose its first answer.
+The tutorial takes four commands. On a fresh repository, the first three ran
+in 14 seconds and left an `AGENTS.md` with its first rule. The agent then
+took about a minute to propose its first answer.
 
-To understand the model first, read [how ontrack works](how-it-works.md). To
-see what each command does, read the [commands reference](commands.md).
+<CardGrid>
+  <LinkCard title="Try ontrack on one repository" href="tutorial/" description="Import a track, answer one question with a coding agent." />
+  <LinkCard title="How ontrack works" href="how-it-works/" description="The model first: the pieces, the life of a question, the cycle." />
+  <LinkCard title="Commands" href="commands/" description="What each command does, its options and exit codes." />
+</CardGrid>

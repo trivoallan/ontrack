@@ -3,6 +3,9 @@ title: The ontrack-engineering track
 description: The reference track ontrack is built with, what a repository gets from it, how to install it, and its questions as a repository receives them.
 ---
 
+import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import { domains, version } from '../site/src/track.mjs';
+
 [`@trivoallan/ontrack-engineering`](https://www.npmjs.com/package/@trivoallan/ontrack-engineering)
 is the reference track: 26 questions on how a Python or TypeScript
 repository on GitHub is engineered, each with the answer it recommends.
@@ -21,23 +24,52 @@ ontrack is built with it, and answers every one of its questions in
 | **Supply chain** (0015, 0018, 0019, 0020, 0021, 0025) | gitleaks before every commit, dependencies admitted by a person with install scripts ignored, a CycloneDX SBOM scanned by Grype, SLSA Build Level 2 provenance, and the tools outside npm pinned in one place | gitleaks finds no secret; Dependabot and its automerge are configured; the publishing workflow emits provenance; mise pins the tools your answers name |
 | **Workflow** (0006, 0009, 0014, 0016) | One convention for commits and branch names, refused at the gate instead of argued in review | the commits pass commitlint; the branch name has an accepted prefix; OpenSpec uses the schema you chose |
 
+<Aside type="note">
 A check confirms the wiring is there, not that it is right. Reject any
 question that does not fit your repository: a rejection is a full answer.
+</Aside>
 
 ## Install it
 
-```bash
-npm i -D trivoallan@npm:@trivoallan/ontrack-engineering
-npm audit signatures
-npx ontrack plan
-```
+<Steps>
 
-The alias, `trivoallan`, is the namespace: the questions land in
-`docs/adr/trivoallan/`. The [tutorial](tutorial.md) goes on from `plan`.
+1. Install the track under the alias `trivoallan`, its namespace: the
+   questions land in `docs/adr/trivoallan/`.
 
-## Its questions
+   ```bash
+   npm i -D trivoallan@npm:@trivoallan/ontrack-engineering
+   ```
 
-The site lists below the questions of the release ontrack depends on, as a
-repository receives them: `proposed`, their traits empty, the recommended
-answer in each body. They are also in
+2. Check that the package was built by the track's release workflow.
+
+   ```bash
+   npm audit signatures
+   ```
+
+3. List the questions it would import. The [tutorial](tutorial.mdx) goes on
+   from here.
+
+   ```bash
+   npx ontrack plan
+   ```
+
+</Steps>
+
+## Questions
+
+The questions of ontrack-engineering {version}, the release ontrack depends
+on, as a repository receives them: `proposed`, their traits empty, the recommended answer in each body.
+A question marked "Checked by ontrack-engineering-check" comes with a check
+that `ontrack check` runs once you accept it. They are also in
 [the track's repository](https://github.com/trivoallan/ontrack-engineering/tree/main/adr).
+
+{domains.map((domain) => (
+  <>
+    <h3>{domain.name}</h3>
+    <CardGrid>
+      {domain.questions.map((q) => (
+        <LinkCard title={`${q.adr} ${q.title}`} href={`./${q.id}/`} description={q.checked ? 'Checked by ontrack-engineering-check' : undefined} />
+      ))}
+    </CardGrid>
+  </>
+))}

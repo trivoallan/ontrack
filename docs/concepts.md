@@ -7,7 +7,7 @@ This page explains the notions the rest of the documentation takes for
 granted, one at a time. It needs no prior knowledge of ontrack or of
 architecture decision records.
 
-To see them at work in one repository, follow the [tutorial](tutorial.md).
+To see them at work in one repository, follow the [tutorial](tutorial.mdx).
 For what happens to them over time, read
 [how ontrack works](how-it-works.md). The [glossary](architecture/arc42/12-glossary.md)
 gives each term in one line.

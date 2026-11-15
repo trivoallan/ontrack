@@ -6,7 +6,7 @@ description: The pieces ontrack is made of, what happens to a question from the 
 This page explains the model behind ontrack: what you run, what each
 repository holds, and what happens over time. For what an ADR, a track or a
 ruling is, start with the [concepts](concepts.md). For what it is for, see the
-[home page](index.md). For each command and its options, see the
+[home page](index.mdx). For each command and its options, see the
 [commands reference](commands.md).
 
 ## Why questions, not rules
@@ -160,5 +160,5 @@ it with the tools it already uses.
 
 ## Next
 
-- [Try it on one repository](tutorial.md), in four commands.
+- [Try it on one repository](tutorial.mdx), in four commands.
 - Look up a command in the [commands reference](commands.md).

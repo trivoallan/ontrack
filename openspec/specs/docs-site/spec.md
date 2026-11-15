@@ -33,7 +33,7 @@ Each page SHALL be served at the path of its file relative to `docs/`, in lower 
 - **AND** no page is served at `documentation/`
 
 #### Scenario: Home page
-- **WHEN** `docs/index.md` exists
+- **WHEN** `docs/index.mdx` exists
 - **THEN** it is served at the root of the site
 
 ### Requirement: Navigation follows the directory tree
@@ -63,7 +63,7 @@ The page of an architecture decision record SHALL show, before its body, the sta
 - **THEN** its page shows a "rejected" badge and no traits block
 
 #### Scenario: A page that is not an ADR
-- **WHEN** `docs/index.md` is built
+- **WHEN** `docs/index.mdx` is built
 - **THEN** its page shows no status
 
 ### Requirement: Status marks in the navigation
@@ -82,7 +82,7 @@ A page whose frontmatter declares a `status:` SHALL carry a coloured dot before 
 - **THEN** its dot is orange in the navigation, and its page shows an orange "proposed" badge
 
 #### Scenario: Home page
-- **WHEN** `docs/index.md` declares no `status:`
+- **WHEN** `docs/index.mdx` declares no `status:`
 - **THEN** its navigation link has no dot
 
 ### Requirement: Links between pages
@@ -93,7 +93,7 @@ A relative link from one page to another Markdown file under `docs/` SHALL lead 
 - **THEN** the link on the built page leads to the page of ADR-0001
 
 #### Scenario: Link from the home page
-- **WHEN** `docs/index.md` links to `adr/trivoallan/ADR-0008-documentation.md`
+- **WHEN** `docs/index.mdx` links to `adr/trivoallan/ADR-0008-documentation.md`
 - **THEN** the link on the home page leads to the page of ADR-0008
 
 #### Scenario: External link
@@ -161,7 +161,7 @@ The page of an architecture decision record SHALL show, on the line of its statu
 - **THEN** the results hold the page of `trivoallan/ADR-0011-forge-and-ci`
 
 #### Scenario: A page that is not an ADR
-- **WHEN** `docs/index.md` is built
+- **WHEN** `docs/index.mdx` is built
 - **THEN** its page shows no reference
 
 ### Requirement: ADR numbers in the navigation
@@ -172,7 +172,7 @@ The navigation entry of a page whose frontmatter declares an `adr:` identifier S
 - **THEN** its navigation entry reads `ADR-0011 Forge and continuous integration` and its page title reads `Forge and continuous integration`
 
 #### Scenario: Entry of another page
-- **WHEN** `docs/tutorial.md` declares no `adr:`
+- **WHEN** `docs/tutorial.mdx` declares no `adr:`
 - **THEN** its navigation entry is its title
 
 ### Requirement: Every ADR namespace is in the navigation
@@ -192,3 +192,31 @@ When a page of `docs/` is renamed, the site SHALL serve a redirect from its form
 #### Scenario: A link to the former search guide
 - **WHEN** a reader opens `/ontrack/find-a-source/`
 - **THEN** the reader arrives at `/ontrack/find-a-track/`
+
+### Requirement: GitHub alerts render as asides
+A blockquote of a Markdown page that opens with a GitHub alert marker SHALL
+render as a Starlight aside: `[!NOTE]` and `[!IMPORTANT]` as a note,
+`[!TIP]` as a tip, `[!WARNING]` as a caution and `[!CAUTION]` as a danger.
+The marker is not shown.
+
+#### Scenario: A warning
+- **WHEN** `docs/find-a-track.md` holds a blockquote opening with `[!WARNING]`
+- **THEN** its page shows a caution aside with the rest of the blockquote, and no `[!WARNING]` text
+
+### Requirement: MDX pages use Starlight's components
+A page under `docs/` written in MDX SHALL be able to import Starlight's
+components from `@astrojs/starlight/components`, although the file is
+outside `site/`. Its URL is that of a Markdown page with the same name.
+
+#### Scenario: The tutorial
+- **WHEN** `docs/tutorial.mdx` imports `Steps` and `FileTree` from `@astrojs/starlight/components`
+- **THEN** the site builds, and its page is served at `tutorial/`
+
+### Requirement: llms.txt links the catalogue to the track
+`llms.txt` SHALL link each catalogue question to its file in the track's
+repository, at the tag of the installed release, not to a path of
+ontrack's repository.
+
+#### Scenario: Catalogue entry
+- **WHEN** the site is built with ontrack-engineering 0.6.0 installed
+- **THEN** `llms.txt` links ADR-0006 to `https://raw.githubusercontent.com/trivoallan/ontrack-engineering/v0.6.0/adr/ADR-0006-commits.md`
