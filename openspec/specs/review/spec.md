@@ -125,7 +125,7 @@ A revised ADR yields the prompt to rule again, whatever its status and whether o
 ### Requirement: Prompt
 The prompt SHALL be printed to standard output and follow the contract in the commands reference, `docs/commands.md`. It names each selected ADR by its path relative to the project root, with `/` separators, and by its title when it has one. For a named ADR, it names that ADR alone. Without an argument, it lists the selected ADRs in order, one per line, and tells the agent to rule them one at a time, in that order, and not to start an ADR before the previous one is ruled. In both forms of the review prompt it SHALL tell the agent, for an ADR and in this order, to:
 1. read its file in full, and edit no other ADR;
-2. start from the recommendation the ADR makes, look in the repository for evidence that it does not apply, and say so in one line when there is none;
+2. start from what the repository does today on the question (its files, configuration, CI and history), say so where it does nothing, describe the repository as it is and not as the other `proposed` ADRs would make it, then compare with the recommendation the ADR makes and name every difference;
 3. check the condition of every conditional recommendation, and cite the evidence that settles it;
 4. propose, with its evidence, a value for every trait key the ADR leaves to the repository;
 5. propose `rejected` only on evidence that the question does not apply, and say what stands in for it;
@@ -185,6 +185,12 @@ The review prompt SHALL also say that an ADR's own instructions on how to rule p
 #### Scenario: Tracker that cannot be listed
 - **WHEN** `ontrack review` prints a prompt, in either form
 - **THEN** the tracking-items text tells the agent, when it cannot list the tracker's items, to propose every ruling and say that duplicates were not checked
+
+#### Scenario: Practice before recommendation
+- **WHEN** `ontrack review` prints a prompt, in either form
+- **THEN** step 2 tells the agent to start from what the repository does today, and says that an absence is evidence too
+- **AND** it tells the agent not to describe the repository as the other `proposed` ADRs would make it
+- **AND** the comparison with the recommendation comes after the description
 
 #### Scenario: Own ADR
 - **WHEN** `ontrack review ADR-0020-release` selects `local/ADR-0020-release`
