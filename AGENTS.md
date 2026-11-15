@@ -3,7 +3,7 @@
 
 When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output.
 
-### The governance track skips the cooldown (local/ADR-0023-the-governance-track-skips-the-cooldown)
+### The engineering track skips the cooldown (local/ADR-0024-the-engineering-track-skips-the-cooldown)
 
 ```yaml
 dependencies:

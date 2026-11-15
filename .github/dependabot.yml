@@ -10,7 +10,7 @@ updates:
       default-days: 3
     commit-message:
       prefix: chore
-  # npm at the root: version updates for the governance track only, security
+  # npm at the root: version updates for the engineering track only, security
   # updates for everything. A question governance revises must reach this
   # repository as soon as it is released, so its bump comes as a pull request.
   # `allow` would also filter security updates, so the other direct
@@ -27,7 +27,8 @@ updates:
     open-pull-requests-limit: 1
     cooldown:
       default-days: 3
-      # The governance track is left out of the cooldown, as in .npmrc.
+      # The engineering track is left out of the cooldown, as in .npmrc
+      # (local/ADR-0024).
       # Dependabot names an aliased dependency by its key in package.json.
       exclude: ["trivoallan"]
     ignore:
