@@ -134,7 +134,9 @@ documented the way those decisions prescribe.
 
 ## Where the project stands
 
-ontrack is at version 0.2.0. It is young, and it changes.
+<!-- x-release-please-start-version -->
+ontrack is at version 0.4.0. It is young, and it changes.
+<!-- x-release-please-end -->
 
 - It is published to the npm registry as `@trivoallan/ontrack`, and can
   also be installed from GitHub, by git URL.

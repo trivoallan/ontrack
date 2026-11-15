@@ -42,7 +42,11 @@ command that writes. It never commits, and it never touches an ADR you
 already decided on, except for its `check:` line.
 
 ```bash
-npx ontrack apply
+npx ontrack apply --dry-run          # print what apply would do, write nothing
+npx ontrack apply                    # import new ADRs, move flat files
+npx ontrack apply --prune            # also delete ADRs the track no longer ships
+npx ontrack apply --confirm SDR-0003 # declare an undetermined verdict still holds
+npx ontrack apply --confirm all      # same, for every undetermined ADR
 ```
 
 | Option | Effect |
@@ -56,13 +60,18 @@ What it does, per track:
 | Action | When | Effect |
 | --- | --- | --- |
 | `imported` | A `new` ADR | Copied, byte for byte, into `docs/adr/<alias>/` |
-| `moved` | A flat-layout file | Moved from `docs/adr/` to `docs/adr/<alias>/`, or to `docs/adr/local/` for one of your own ADRs |
+| `moved` | A flat-layout file | Moved from `docs/adr/` to `docs/adr/<alias>/`, or to `docs/adr/local/` for one of your own ADRs, under a `local:` line (`git mv` in a git repository, a plain rename otherwise) |
 | `pruned` | A `removed` ADR, with `--prune` | Deleted |
 | `confirmed` | An `undetermined` ADR, with `--confirm` | Gets the upstream `revision:`; nothing else changes |
-| `synced` | A `check` ADR | Gets the track's `check:` line; nothing else changes |
+| `synced` | A `check` ADR | Gets the track's `check:` line, set, replaced or removed; nothing else changes. It needs no option |
 
-A `revised` or `unreadable` ADR is never written to or deleted: a person must
-rule again.
+The `check:` line of an imported ADR belongs to its track: to run a different
+check, supersede the ADR with one of your own.
+
+A `revised` or `unreadable` ADR is never written to or deleted (only moved by
+a migration): a person must rule again. For a `revised` one,
+[`ontrack review`](#ontrack-review-adr) prints the prompt that asks a coding
+agent to do it with you.
 
 `apply` also writes the [rules block](file-formats.md#the-rules-block-in-agentsmd) of
 `AGENTS.md`. Every check runs before the first write, so an error never
@@ -73,35 +82,7 @@ something still needs a person, `1` error.
 
 ### `apply` output
 
-`apply` brings the repository in line with what `plan` reports, in one
-command. It is the only command that writes, it never commits, and it never
-touches an ADR you already decided on, except for its `check:` line. Besides
-`docs/adr/`, it writes one
-file: the [rules block](file-formats.md#the-rules-block-in-agentsmd) of
-`AGENTS.md`.
-
-```bash
-npx ontrack apply --dry-run          # print what apply would do, write nothing
-npx ontrack apply                    # import new ADRs, move flat files
-npx ontrack apply --prune            # also delete ADRs the track no longer ships
-npx ontrack apply --confirm SDR-0003 # declare an undetermined verdict still holds
-npx ontrack apply --confirm all      # same, for every undetermined ADR
-```
-
-What it does, per track:
-
-- `imported`: a `new` ADR is copied, byte for byte, into `docs/adr/<alias>/`.
-- `moved`: a flat-layout file moves from `docs/adr/` to `docs/adr/<alias>/`, and one of your own ADRs to `docs/adr/local/`, under a `local:` line (`git mv` in a git repository, a plain rename otherwise).
-- `pruned`, only with `--prune`: a `removed` ADR is deleted.
-- `confirmed`, only with `--confirm`: an `undetermined` ADR gets the upstream `revision:`; nothing else in the file changes.
-- `synced`: a `check` ADR gets the track's `check:` line, set, replaced or removed; nothing else in the file changes. It needs no option. The `check:` line of an imported ADR belongs to its track: to run a different check, supersede the ADR with one of your own.
-
-A `revised` or `unreadable` ADR is never written to or deleted (only moved by
-a migration): its verdict must be taken again by a person. For a `revised`
-one, `ontrack review` prints the prompt that asks a coding agent to do it
-with you.
-
-Its output lists the actions, then every Markdown link the migration breaks
+The output lists the actions, then every Markdown link the migration breaks
 (links to a moved file, and links held by a moved file to a file left in
 place; it lists them, it does not rewrite them), then what still needs a
 human, in the `plan` format:
@@ -120,10 +101,7 @@ platform: 1 revised, 2 unchanged
 ```
 
 The first line only appears with `--dry-run`. With nothing to do, `apply`
-prints the same output as `plan`. Exit codes are those of `plan`, computed on
-what remains after the run: `0` nothing left, `2` something still needs a
-human, `1` error. Every check runs before the first write, so an error never
-leaves a half-applied repository.
+prints the same output as `plan`.
 
 When ADRs are `proposed` in `docs/adr/` after the run (the ones it imported,
 and any left from an earlier run), `apply` names the next step on stderr, as
