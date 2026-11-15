@@ -68,6 +68,7 @@ What it does, per track:
 
 | Action | When | Effect |
 | --- | --- | --- |
+| `renamed` | A `rename:` line | The old folder moved, as a whole and first, to `docs/adr/<alias>/` (`git mv` in a git repository, a plain rename otherwise); its files are unchanged |
 | `imported` | A `new` ADR | Copied, byte for byte, into `docs/adr/<alias>/` |
 | `moved` | A flat-layout file | Moved from `docs/adr/` to `docs/adr/<alias>/`, or to `docs/adr/local/` for one of your own ADRs, under a `local:` line (`git mv` in a git repository, a plain rename otherwise) |
 | `pruned` | A `removed` ADR, with `--prune` | Deleted |
@@ -91,10 +92,11 @@ something still needs a person, `1` error.
 
 ### `apply` output
 
-The output lists the actions, then every Markdown link the migration breaks
-(links to a moved file, and links held by a moved file to a file left in
-place; it lists them, it does not rewrite them), then what still needs a
-human, in the `plan` format:
+The output lists the actions, then every Markdown link a migration or a
+rename breaks (links to a moved file, and links held by a moved file to a
+file left in place), then, after a rename, every `supersedes:` entry that
+names the old namespace. It lists them, it does not rewrite them. Then comes
+what still needs a human, in the `plan` format:
 
 ```
 dry run: nothing written
@@ -108,6 +110,22 @@ remaining:
 platform: 1 revised, 2 unchanged
   revised       ADR-0010  Forge and CI (revision 3 → 4)
 ```
+
+After a rename, the actions start with the `renamed` line, and the
+`supersedes:` entries follow the links:
+
+```
+engineering: 1 renamed
+  renamed       docs/adr/trivoallan/ → docs/adr/engineering/
+links to update:
+  docs/adr/local/ADR-0001-propose.md:20  ../trivoallan/ADR-0014-work-tracking.md → ../engineering/ADR-0014-work-tracking.md
+supersedes to update:
+  docs/adr/local/ADR-0024-cooldown.md:8  trivoallan/ADR-0018 → engineering/ADR-0018
+```
+
+Until those entries are edited, they match no ADR, so the ADRs they named are
+in force again; when they decide a trait the replacing ADR decides too, the
+rules block is skipped. Fix the entries and run `apply` again.
 
 The first line only appears with `--dry-run`. With nothing to do, `apply`
 prints the same output as `plan`.
@@ -299,7 +317,7 @@ ADRs to `docs/adr/<alias>/`, your own to `docs/adr/local/`. It reports the state
 (`missing` or `out of date`).
 
 **Exit code.** `0` when every ADR is unchanged, or when there is no track at
-all. `2` for any other category, a migration, or a rules block to write.
+all. `2` for any other category, a migration, a rename, or a rules block to write.
 
 **Options.**
 
@@ -352,6 +370,7 @@ migration: 5 files docs/adr/ → docs/adr/platform/
   ```
 
   The `check:` line is the first one at column zero in the frontmatter. Only an ADR that is up to date can be `check`: a `revised` ADR gets its check once you have ruled again.
+- A rename, when the track was installed under another alias before: the track has no `docs/adr/<alias>/`, and exactly one other folder of `docs/adr/` (not `local`, not the alias of an installed track) holds at least one file the track ships. The ADRs are classified against that folder, as if the rename were done, and the ADR lines are followed by `rename: docs/adr/<old>/ → docs/adr/<alias>/`. It counts as a change to make: exit code `2`. Two folders that could be the old one for a track, or one folder that could be the old one for two tracks, make `plan` fail with exit code `1`.
 - A flat-layout migration (`docs/adr/<file>` that belongs to the track but is not under `docs/adr/<alias>/`) is always shown: `migration: <n> file(s) docs/adr/ → docs/adr/<alias>/`, then one `move` line per file.
 - Your own ADRs live in `docs/adr/local/`. Those still placed directly in `docs/adr/` (the root files no track ships) are shown the same way, after the last track: `migration: <n> file(s) docs/adr/ → docs/adr/local/`, then one `move` line per file.
 - With `--all`, the unchanged ADRs get a line too, so every ADR has one, sorted by name whatever its category. Each ADR line then carries a verdict between the category and the name: the category in its 12-character column, two spaces, the verdict in a 10-character column, two spaces, then the name and the rest of the line as above. The summary line, the `- ` and `+ ` lines, the migration lines and the exit code do not change.

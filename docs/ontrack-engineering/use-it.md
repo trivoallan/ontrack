@@ -64,6 +64,25 @@ To be told when the track moves, rather than remember to update it, see
 > own releases. ontrack exempts the track from it in
 > [local/ADR-0024](../adr/local/ADR-0024-the-engineering-track-skips-the-cooldown.md).
 
+## Change the alias
+
+The alias names the folder and every reference to the track's ADRs. To
+install the track under another one, `engineering` for example, reinstall it
+and let ontrack move the folder:
+
+```bash
+npm uninstall trivoallan
+npm i -D engineering@npm:@trivoallan/ontrack-engineering
+npx ontrack plan
+npx ontrack apply
+```
+
+`plan` reads the old folder as the track's and ends with
+`rename: docs/adr/trivoallan/ → docs/adr/engineering/`. `apply` moves it as
+a whole, so your rulings stay. It then lists the links and the `supersedes:`
+entries that still name `trivoallan`: edit them, and run `npx ontrack apply`
+again to write `AGENTS.md`.
+
 ## Reject a question
 
 A question that does not fit your repository is answered by rejecting it: a

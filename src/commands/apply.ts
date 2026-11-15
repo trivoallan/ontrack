@@ -2,11 +2,12 @@ import { agentsPending, agentsReport, agentsStatus, writeAgents } from '../agent
 import { formatApply, planActions, planAfter, runActions } from '../apply.ts';
 import type { Action } from '../apply.ts';
 import type { Io } from '../cli.ts';
+import path from 'node:path';
 import type { Argv } from 'yargs';
 import { findLinks } from '../links.ts';
-import { buildPlan, formatPlan, hasPendingChanges } from '../plan.ts';
+import { buildPlan, formatPlan, hasPendingChanges, markdownFiles } from '../plan.ts';
 import type { Plan } from '../plan.ts';
-import { qualify } from '../instructions.ts';
+import { qualify, supersedesNaming } from '../instructions.ts';
 import { pendingAdrs, revisedAdrs } from '../review.ts';
 
 export const command = 'apply';
@@ -18,7 +19,7 @@ export const builder = (y: Argv) =>
     .option('confirm', { type: 'string', array: true, default: [], describe: 'Declare an undetermined verdict still holds (a name, or "all")' })
     .option('dry-run', { type: 'boolean', default: false, describe: 'Print what apply would do, write nothing' });
 
-const CHANGES_BLOCK: Action['kind'][] = ['imported', 'moved', 'pruned'];
+const CHANGES_BLOCK: Action['kind'][] = ['renamed', 'imported', 'moved', 'pruned'];
 
 // The AGENTS.md lines of this run, and whether the block is still pending.
 // The block is computed on the resulting tree, which a dry run does not have:
@@ -73,8 +74,16 @@ export function handler({
   const root = io.cwd();
   const plan = buildPlan(root);
   const actions = planActions(root, plan, { prune, confirm });
-  const moves = actions.filter((a) => a.kind === 'moved').map(({ from, to }) => ({ from, to }));
+  // A renamed folder moves each of its files.
+  const moves = actions.flatMap((a) =>
+    a.kind === 'moved'
+      ? [{ from: a.from, to: a.to }]
+      : a.kind === 'renamed'
+        ? markdownFiles(a.from).map((file) => ({ from: path.join(a.from, file), to: path.join(a.to, file) }))
+        : [],
+  );
   const links = moves.length > 0 ? findLinks(root, moves) : [];
+  const supersedes = plan.flatMap((track) => (track.rename ? supersedesNaming(root, track.rename, track.namespace) : []));
   if (!dryRun) runActions(root, actions);
   const agents = agentsStep(root, actions, dryRun);
 
@@ -84,7 +93,7 @@ export function handler({
     return hasPendingChanges(plan) || agents.pending ? 2 : 0;
   }
   const remaining = actions.length === 0 ? plan : dryRun ? planAfter(plan, actions) : buildPlan(root);
-  io.stdout.write(formatApply({ actions, links, agents: agents.lines, remaining, dryRun }));
+  io.stdout.write(formatApply({ actions, links, supersedes, agents: agents.lines, remaining, dryRun }));
   nextStep(io, root, remaining);
   return hasPendingChanges(remaining) || agents.pending ? 2 : 0;
 }

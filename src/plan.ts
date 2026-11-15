@@ -24,7 +24,8 @@ export type PlannedAdr = {
   check?: CheckChange;
   status?: string | null;
 };
-export type TrackPlan = { namespace: string; adrDir: string; adrs: PlannedAdr[]; migration: string[] };
+/** `rename` is the namespace of the folder `apply` moves to `docs/adr/<namespace>/`, when the alias changed. */
+export type TrackPlan = { namespace: string; adrDir: string; adrs: PlannedAdr[]; migration: string[]; rename?: string };
 export type Plan = TrackPlan[];
 
 const ORDER: Category[] = ['revised', 'new', 'removed', 'undetermined', 'unreadable', 'check', 'unchanged'];
@@ -51,10 +52,10 @@ function trackFiles(track: Track): string[] {
   }
 }
 
-function planTrack(root: string, track: Track): TrackPlan {
+function planTrack(root: string, track: Track, shipped: string[], rename?: string): TrackPlan {
   const adrRoot = path.join(root, 'docs', 'adr');
-  const localDir = path.join(adrRoot, track.namespace);
-  const shipped = trackFiles(track);
+  // A pending rename is classified as if it were done: against the old folder.
+  const localDir = path.join(adrRoot, rename ?? track.namespace);
   const adrs: PlannedAdr[] = [];
   const migration: string[] = [];
 
@@ -89,27 +90,64 @@ function planTrack(root: string, track: Track): TrackPlan {
     adrs.push({ name: file, category: 'removed', title: readTitle(local, stem(file)), status: readStatus(local) });
   }
   adrs.sort((a, b) => a.name.localeCompare(b.name));
-  return { namespace: track.namespace, adrDir: track.adrDir, adrs, migration };
+  return { namespace: track.namespace, adrDir: track.adrDir, adrs, migration, ...(rename ? { rename } : {}) };
+}
+
+const rel = (dir: string) => `docs/adr/${dir}/`;
+
+/**
+ * For each track with no folder of its own, the orphan folder of docs/adr/
+ * (neither local nor an installed alias) that holds at least one file it
+ * ships: the folder of the alias it was installed under before. Throws when
+ * a track has two candidates, or a folder two tracks.
+ */
+function findRenames(adrRoot: string, tracks: Track[], shipped: Map<Track, string[]>): Map<Track, string> {
+  const renames = new Map<Track, string>();
+  if (!existsSync(adrRoot)) return renames;
+  const taken = new Set([OWN, ...tracks.map((t) => t.namespace)]);
+  const orphans = readdirSync(adrRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && !taken.has(entry.name))
+    .map((entry) => ({ name: entry.name, files: new Set(markdownFiles(path.join(adrRoot, entry.name))) }));
+  const owner = new Map<string, Track>();
+  for (const track of tracks) {
+    if (existsSync(path.join(adrRoot, track.namespace))) continue;
+    const files = shipped.get(track) ?? [];
+    const candidates = orphans.filter((o) => files.some((f) => o.files.has(f))).map((o) => o.name);
+    if (candidates.length > 1) {
+      throw new Error(`track "${track.namespace}" could be renamed from ${candidates.map(rel).join(' or ')}; remove the folder that is not its own`);
+    }
+    if (candidates.length === 0) continue;
+    const [old] = candidates;
+    const other = owner.get(old);
+    if (other) {
+      throw new Error(`${rel(old)} could be renamed to tracks "${other.namespace}" and "${track.namespace}"; create the folder of the one it is not`);
+    }
+    owner.set(old, track);
+    renames.set(track, old);
+  }
+  return renames;
 }
 
 /** What importing each track would change, as data. Reads only. */
 export function buildPlan(root: string): Plan {
   const tracks = discoverTracks(root);
-  const plan = tracks.map((track) => planTrack(root, track));
+  const adrRoot = path.join(root, 'docs', 'adr');
+  const files = new Map(tracks.map((track) => [track, trackFiles(track)]));
+  const renames = findRenames(adrRoot, tracks, files);
+  const plan = tracks.map((track) => planTrack(root, track, files.get(track) ?? [], renames.get(track)));
   // The repository's own ADRs still placed directly in docs/adr/: the root
   // files no track ships. They move to docs/adr/local/, as a last entry
   // that has no ADR to classify.
-  const adrRoot = path.join(root, 'docs', 'adr');
-  const shipped = new Set(tracks.flatMap(trackFiles));
+  const shipped = new Set([...files.values()].flat());
   const own = existsSync(adrRoot) ? markdownFiles(adrRoot).filter((file) => !shipped.has(file)) : [];
   if (own.length > 0) plan.push({ namespace: OWN, adrDir: path.join(adrRoot, OWN), adrs: [], migration: own });
   return plan;
 }
 
 /** True when anything in the plan needs a human. */
-export function hasPendingChanges(plan: { adrs: { category: Category }[]; migration: unknown[] }[]): boolean {
+export function hasPendingChanges(plan: { adrs: { category: Category }[]; migration: unknown[]; rename?: string }[]): boolean {
   return plan.some(
-    (s) => s.migration.length > 0 || s.adrs.some((a) => a.category !== 'unchanged'),
+    (s) => s.rename !== undefined || s.migration.length > 0 || s.adrs.some((a) => a.category !== 'unchanged'),
   );
 }
 
@@ -147,6 +185,7 @@ export function formatPlan(plan: Plan, { all = false } = {}): string {
       lines.push(row(adr.category, verdict + label(adr) + revision), ...checkLines(adr));
     }
 
+    if (track.rename) lines.push(`rename: ${rel(track.rename)} → ${rel(track.namespace)}`);
     if (track.migration.length > 0) {
       const n = track.migration.length;
       lines.push(`migration: ${n} file${n === 1 ? '' : 's'} docs/adr/ → docs/adr/${track.namespace}/`);

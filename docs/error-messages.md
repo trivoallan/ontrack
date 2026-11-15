@@ -35,6 +35,8 @@ come from `plan` and `apply`.
 | `track "<alias>" has no "<field>" string in its ontrack key` | The `ontrack` key of the track lacks `namespace` or `adr`, or holds something that is not text | The track is at fault: tell its author. [File formats](file-formats.md#the-ontrack-key-of-a-track) says what the key holds |
 | `track "<alias>" declares adr "<path>" outside its package` | The `adr` of the track points out of the package | The track is at fault: tell its author |
 | `track "<alias>" has no readable ADR directory <directory>` | The directory the track names does not exist in the installed package, often because the track did not publish it | The track is at fault: tell its author. If it is yours, list the directory under `files` in its `package.json`: see [Write your own track](write-your-own-track.md) |
+| `track "<alias>" could be renamed from docs/adr/<old>/ or docs/adr/<older>/; remove the folder that is not its own` | The track has no folder yet, and two folders that belong to no installed track hold files it ships: either could be its folder from a previous alias | Delete or rename the stale folder, or create `docs/adr/<alias>/` if neither is the track's |
+| `docs/adr/<old>/ could be renamed to tracks "<one>" and "<two>"; create the folder of the one it is not` | Two tracks without a folder ship files that `docs/adr/<old>/` holds | Create `docs/adr/<alias>/` for the track the folder does not belong to |
 
 ## ADRs
 
