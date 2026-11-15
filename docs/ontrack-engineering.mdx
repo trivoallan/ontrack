@@ -8,7 +8,7 @@ import { domains, questions, version } from '../site/src/track.mjs';
 
 export const DomainLink = ({ name }) => {
   const domain = domains.find((d) => d.name === name);
-  return <a class="card-link" href={`questions/#${domain.slug}`}>{domain.questions.length} questions</a>;
+  return <a class="card-link" href={`questions/#${domain.slug}`}>{domain.questions.length} questions <span aria-hidden="true">→</span></a>;
 };
 
 [`@trivoallan/ontrack-engineering`](https://www.npmjs.com/package/@trivoallan/ontrack-engineering)

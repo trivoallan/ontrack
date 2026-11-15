@@ -52,7 +52,20 @@
   position: relative;
 }
 .card:has(.card-link):hover {
-  border-color: var(--sl-color-white);
+  border-color: var(--sl-color-gray-2);
+}
+/* The look of a LinkCard's affordance, not of a link in prose. */
+.card .card-link {
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--sl-color-gray-2);
+  font-size: var(--sl-text-sm);
+  font-weight: 600;
+  text-align: end;
+  text-decoration: none;
+}
+.card:has(.card-link):hover .card-link {
+  color: var(--sl-color-white);
 }
 .card-link::after {
   content: '';
