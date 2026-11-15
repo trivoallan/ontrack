@@ -1,0 +1,23 @@
+# Tools outside the package manager (ADR-0025, tools.manager: mise): the one
+# place that holds the version of each tool an accepted ADR names. mise.lock
+# holds their checksums. The pre-commit hook, the workflows and an agent
+# session all install from here, with `mise install --locked`.
+# A person moves a pin, and runs `mise lock` in the same pull request so the
+# checksum moves with it: nothing proposes an update (Dependabot reads no
+# mise file).
+
+# The mise version the workflows install (jdx/mise-action `version:`) and a
+# session installs (MISE_VERSION). An older mise refuses this file.
+min_version = "2026.11.8"
+
+[settings]
+lockfile = true
+# The platforms mise.lock holds a checksum for: the runner, and contributors'
+# machines. Another platform needs its entry before a tool installs there.
+lockfile_platforms = ["linux-x64", "linux-arm64", "macos-arm64", "macos-x64"]
+
+[tools]
+# ADR-0015, secrets.guard: the pre-commit hook and `ontrack check`.
+gitleaks = "8.30.1"
+# ADR-0011, forge.audit: `ontrack check`, and the zizmor job reads this version.
+zizmor = "1.32.0"

@@ -14,6 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           # The commits check (ADR-0006) reads the history since origin/HEAD.
           fetch-depth: 0
       - run: git remote set-head origin --auto
@@ -27,7 +28,7 @@ jobs:
       # ponytail: the version is written in each workflow that installs, and
       # nothing updates it. Drop these steps once the Node in .nvmrc ships
       # npm 12.
-      - run: npm install --global npm@12.2.2
+      - run: npm install --global npm@12.2.2 # zizmor: ignore[adhoc-packages] npm itself, exact version, no lockfile can hold it
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
@@ -39,13 +40,15 @@ jobs:
       # on the pull request that updates the track; track-updates.yml is
       # what notices that an update exists.
       - run: node dist/bin/ontrack.js plan
-      # The secrets check (ADR-0015) runs gitleaks, a Go binary outside npm.
-      # Its version and checksum are pinned in the script (ADR-0011), which
-      # the apply sessions run too.
-      - name: Install gitleaks
-        run: |
-          scripts/install-gitleaks.sh "$RUNNER_TEMP"
-          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      # The secrets check (ADR-0015) runs gitleaks and the workflow audit
+      # (ADR-0011) runs zizmor, two binaries outside npm. mise installs both
+      # at the versions mise.toml pins, checked against mise.lock (ADR-0025;
+      # the action passes --locked when the lockfile is there), and puts them
+      # on the PATH. mise's own version is written here and nothing updates
+      # it: keep it at mise.toml's min_version.
+      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+        with:
+          version: 2026.11.8
       # And fails when a decided ADR's check does.
       # On a pull request, the branch check (ADR-0009) reads GITHUB_HEAD_REF;
       # the changes check (ADR-0016) finds openspec in node_modules/.bin.
@@ -57,6 +60,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22.18'

@@ -33,9 +33,16 @@ A remote session starts without what the repository's checks expect. Before
 you apply anything, and using the files of the default branch, not those of
 the pull request:
 
-- install the secret guard into a directory that is on the PATH of the
-  commands you run:
-  `git show origin/main:scripts/install-gitleaks.sh | sh -s -- /usr/local/bin`;
+- install the tools the default branch's `mise.toml` pins (ADR-0025),
+  gitleaks and zizmor, which the secret guard and the governance check run.
+  If `mise` is missing, install the version CI pins (`jdx/mise-action`'s
+  `version:` in `.github/workflows/test.yml`) with
+  `curl https://mise.run | MISE_VERSION=v<that version> sh`. Then install
+  from the default branch's files, not the pull request's, since
+  `mise.lock` names the download URLs:
+  `d=$(mktemp -d) && git show origin/main:mise.toml > "$d/mise.toml" && git show origin/main:mise.lock > "$d/mise.lock" && mise trust "$d/mise.toml" && mise -C "$d" install --locked`,
+  and `mise trust` in the repository. Never install gitleaks or zizmor
+  another way;
 - tell git which branch is the default one, which the commit check reads:
   `git remote set-head origin --auto`;
 - turn the repository's hooks on, so that the secret guard runs on each of

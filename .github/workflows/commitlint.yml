@@ -13,12 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm
       # npm 12, which runs no dependency's install script: see test.yml.
-      - run: npm install --global npm@12.2.2
+      - run: npm install --global npm@12.2.2 # zizmor: ignore[adhoc-packages] npm itself, exact version, no lockfile can hold it
       # --ignore-scripts skips `prepare`: linting a title needs no build.
       - run: npm ci --ignore-scripts
       # Through the environment: a title interpolated into the script could inject shell.

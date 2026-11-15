@@ -1,0 +1,40 @@
+name: zizmor
+
+# Workflow audit of ADR-0011 (forge.audit: zizmor): zizmor reads the workflows
+# for what the ADR's rules forbid, on every pull request, with its online
+# audits. A finding fails the job. It is silenced only inline, on its line,
+# with its reason (`# zizmor: ignore[audit] why`), never in a zizmor.yml.
+# The job is named `zizmor`: that is the check the main ruleset requires.
+# No paths: filter, so every pull request reports it.
+on:
+  pull_request:
+
+# Reading the code, and GitHub's API for the online audits. No secret, so a
+# pull request from a fork runs it too.
+permissions:
+  contents: read
+
+jobs:
+  zizmor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # ADR-0025: mise.toml is the one place that holds zizmor's version. The
+      # action installs zizmor itself, so it is given that version rather
+      # than one written here.
+      - id: pin
+        run: |
+          version=$(sed -n 's/^zizmor = "\(.*\)"$/\1/p' mise.toml)
+          [ -n "$version" ] || { echo "no zizmor version in mise.toml" >&2; exit 1; }
+          echo "zizmor=$version" >> "$GITHUB_OUTPUT"
+      - uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
+        with:
+          version: ${{ steps.pin.outputs.zizmor }}
+          # The files ADR-0011 names, the ones `ontrack check` audits offline.
+          inputs: .github/workflows
+          # Findings fail the job and show in its log. Not uploaded as SARIF:
+          # that would need security-events: write, which a fork's token
+          # lacks, and would no longer fail the job.
+          advanced-security: false

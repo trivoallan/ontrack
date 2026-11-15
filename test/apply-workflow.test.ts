@@ -158,7 +158,7 @@ test('the pull request is told what happened, in fixed words', () => {
 });
 
 test('the workflow checks out nothing, runs no agent and starts the session only behind the gate', () => {
-  assert.match(workflow, /^  pull_request_target:$/m);
+  assert.match(workflow, /^  pull_request_target:( # zizmor: ignore\[dangerous-triggers\] .+)?$/m);
   assert.doesNotMatch(workflow, /uses:/);
   assert.match(workflow, /^        if: steps\.gate\.outputs\.verdict == 'approved'$/m);
   const secretLines = workflow.split('\n').filter((l) => /secrets\.[A-Za-z]/.test(l));
