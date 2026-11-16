@@ -1106,3 +1106,48 @@ pre-registered rule. A run on repositories never used, with a fixed
 criterion that includes the variance seen here (a margin relative to the
 spread of the two p10 runs, not to their lower value), would settle it; it
 costs about the same as this one.
+
+## Run 13 (pre-registered, written before any run): the trace rule on repositories never used
+
+Run 12 left the trace rule (p11) unadopted because its margin could not be
+reached, and showed that two runs of the same prompt differ as much as
+prompts did in run 11. This run tests p11 on repositories that none of runs
+4 to 12 used, so the rule is no longer judged on the data it came from.
+
+**Repositories** (fixed now, not chosen after seeing results): marked,
+postcss, gulp, zod and qs. Track `@trivoallan/ontrack-engineering` 0.6.0,
+imported with the same procedure as before; model pinned to Sonnet 5.5.
+
+**Conditions**, one survey each per repository:
+- **p10**: the survey prompt now in the pull request (`ontrack review`
+  without an argument at the current head, vocabulary of `main` included).
+- **p11**: the same prompt with the two edits of run 12, applied to that
+  text and nothing else.
+
+**Scoring**: as in run 12. Blind, one scorer per repository, the two surveys
+under random labels, the same classes (S, T, A1, A2, O), and a placement
+is failing when a key is O or fails the strict rule, doubtful when a key is
+A2 or O.
+
+**What the noise looks like.** In run 12, the two runs of p10 gave 1 and 4
+doubtful ADRs, 0 and 1 failing, 24 and 27 other placements. A difference
+smaller than that spread tells nothing.
+
+**Decision rule, fixed now.** p11 is adopted when all four hold:
+1. at most 1 doubtful ADR over the 5 repositories;
+2. no failing ADR;
+3. its other placements are at least those of p10 minus 3 (the spread of
+   the two p10 runs of run 12);
+4. ADR-0004 (languages) is in its first group in every repository where the
+   scorer finds one main language.
+
+If any one fails, p11 is not adopted. If p10 itself has at most 1 doubtful
+ADR in this run, criterion 1 does not tell p11 apart from p10, and I will
+say so; the case for p11 then rests on criterion 4 and on the labelling
+counts, reported without a threshold.
+
+**Limits, before running.** One survey per condition and repository. The
+criterion is still the rule itself: it shows whether the agent applies the
+trace test, not that adopters are better served. The scorers differ on
+borderline keys, as run 12 showed (the same `none` for a dependency updater
+was A2 in one repository and A1 in another).
