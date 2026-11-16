@@ -41,6 +41,11 @@ Every command shares the same exit codes.
 A CI job can detect an out-of-date repository on `2` without parsing the
 output.
 
+On `1`, standard error holds one line that starts with `ontrack[E<nnn>]:`.
+The code between the brackets is a contract, like the exit codes: it names the
+same failure from one version to the next, whatever the sentence after it
+becomes. [Error messages](error-messages.md) lists every code.
+
 Every error a command prints on `1` is listed, with what to do about it, in
 [Error messages](error-messages.md).
 

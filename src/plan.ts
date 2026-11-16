@@ -4,6 +4,7 @@ import { compareRevision, readCheckLine, readRevision, readStatus, readTitle } f
 import type { Comparison } from './revision.ts';
 import { discoverTracks } from './tracks.ts';
 import type { Track } from './tracks.ts';
+import { OntrackError } from './errors.ts';
 
 /** The namespace of the ADRs a repository writes for itself. */
 export const OWN = 'local';
@@ -48,7 +49,7 @@ function trackFiles(track: Track): string[] {
   try {
     return markdownFiles(track.adrDir);
   } catch {
-    throw new Error(`track "${track.namespace}" has no readable ADR directory ${track.adrDir}`);
+    throw new OntrackError('E111', `track "${track.namespace}" has no readable ADR directory ${track.adrDir}`);
   }
 }
 
@@ -114,13 +115,13 @@ function findRenames(adrRoot: string, tracks: Track[], shipped: Map<Track, strin
     const files = shipped.get(track) ?? [];
     const candidates = orphans.filter((o) => files.some((f) => o.files.has(f))).map((o) => o.name);
     if (candidates.length > 1) {
-      throw new Error(`track "${track.namespace}" could be renamed from ${candidates.map(rel).join(' or ')}; remove the folder that is not its own`);
+      throw new OntrackError('E112', `track "${track.namespace}" could be renamed from ${candidates.map(rel).join(' or ')}; remove the folder that is not its own`);
     }
     if (candidates.length === 0) continue;
     const [old] = candidates;
     const other = owner.get(old);
     if (other) {
-      throw new Error(`${rel(old)} could be renamed to tracks "${other.namespace}" and "${track.namespace}"; create the folder of the one it is not`);
+      throw new OntrackError('E113', `${rel(old)} could be renamed to tracks "${other.namespace}" and "${track.namespace}"; create the folder of the one it is not`);
     }
     owner.set(old, track);
     renames.set(track, old);
