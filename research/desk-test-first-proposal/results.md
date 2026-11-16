@@ -955,3 +955,61 @@ would need a run on repositories not used here.
 the scorers differ in what they flagged as borderline, so some ADRs are
 flagged in one repository and not in another; the first-proposal table
 assumes number order.
+
+## Run 12 (pre-registered, written before any run): a trace rule for absences
+
+**Question.** Does the candidate rule of run 11's analysis (point 6) move
+the doubtful placements out of the survey's first group, without losing the
+clean ones?
+
+**Conditions**, on the five repositories of run 11 (ajv, async, moment,
+rollup, execa), model pinned to Sonnet 5.5:
+- **p10**: the current prompt, the survey already run in run 11.
+- **p10 bis**: the same prompt, run again. It gives the run-to-run
+  difference that the comparison has to beat.
+- **p11**: p10 with two edits, nothing else:
+  1. the sentence on absences is replaced by the trace test: an absence
+     counts only when the thing, if it existed, would have to leave a file
+     or a configuration in this repository, and none is there. It does not
+     count for a thing that could exist without leaving a trace here, and an
+     ADR resting on such an absence goes to the second group;
+  2. a value read from the file tree, such as the main language of the
+     source files, shows the value.
+- **p9**: the survey already run in run 11, scored again in the same batch so
+  that all four are judged by the same scorer.
+
+**Scoring.** Blind, one scorer per repository, the four surveys under
+random labels. Besides the run 11 checks, the scorer classifies every key of
+every first-group ADR, applying the trace test on its own judgement:
+- S: a file or a configuration states the value;
+- T: the file tree or the history shows it directly (the main language,
+  a count);
+- A1: an absence of a thing that would have to leave a trace in the clone,
+  and there is none;
+- A2: an absence of a thing that could exist without leaving a trace in the
+  clone;
+- O: a value held outside the clone (forge, registry, people).
+
+A placement is **doubtful** when any of its keys is A2 or O. A placement
+is **failing** when any key is O (the rule of runs 5 to 11).
+
+**Decision rule, fixed now.** p11 is better than p10 when all three hold:
+1. its doubtful placements are at least 2 fewer than the lower of the two
+   p10 runs;
+2. its other placements are no more than 1 fewer than the lower of the two
+   p10 runs;
+3. it has no failing placement.
+
+If any one fails, the rule is not adopted. It is written for 5 repositories
+and one survey per condition, so it can only reject the rule or call it
+worth a held-out run.
+
+**Known limits, before running.**
+- **The five repositories are not held out.** The rule was drawn from their
+  scores, so a pass here means the prompt follows the rule on data that
+  suggested it, not that it generalises.
+- **The criterion is the rule itself.** The test measures whether the agent
+  applies the trace test. It does not show that adopters are better served
+  by the resulting first group.
+- **The scorers re-judge p9 and p10.** Their numbers may differ from run
+  11's. That difference is a measure of scorer variance.
