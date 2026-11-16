@@ -1,0 +1,27 @@
+---
+// Starlight's PageTitle, with one addition: the search weight of the title
+// (see search.mjs). The title of an ADR ("Code scanning", "Work tracking")
+// outranked the page that answers a search for "exit code" or "track". A
+// search for an ADR's identifier still lands on it: its ruling carries the
+// identifier at the highest weight (see astro.config.mjs).
+import { searchWeight } from '../search.mjs';
+// Starlight does not export its constants: `_top` is what the table of
+// contents and the skip link point to.
+const PAGE_TITLE_ID = '_top';
+
+const route = Astro.locals.starlightRoute;
+---
+
+<h1 id={PAGE_TITLE_ID} data-pagefind-weight={searchWeight(route)}>{route.entry.data.title}</h1>
+
+<style>
+  @layer starlight.core {
+    h1 {
+      margin-top: 1rem;
+      font-size: var(--sl-text-h1);
+      line-height: var(--sl-line-height-headings);
+      font-weight: 600;
+      color: var(--sl-color-white);
+    }
+  }
+</style>
