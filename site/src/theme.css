@@ -91,8 +91,20 @@
 [data-has-hero] .hero {
   padding-block: 1.5rem 1rem;
 }
+/* The logo is as tall as the text beside it, no taller: it does not push
+   the list down, and it is not lost in its column on a wide window. */
 [data-has-hero] .hero > img {
   width: min(100%, 14rem);
+}
+@media (min-width: 50rem) {
+  [data-has-hero] .hero > img {
+    width: min(100%, 20rem);
+  }
+}
+@media (min-width: 90rem) {
+  [data-has-hero] .hero > img {
+    width: min(100%, 26rem);
+  }
 }
 .features ul {
   list-style: none;
