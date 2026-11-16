@@ -1230,3 +1230,53 @@ same way as run 12 on the other axes. Options: leave p10 in this pull
 request and make p11, with a history check before `none`, a separate change
 with its own pre-registered run; or adopt p11 now as a decision of yours,
 recorded as an exception to the rule.
+
+## Run 14 (pre-registered, written before any survey): a history check before `none`
+
+Run 13 left p11 unadopted for one failing ADR, and both p10's and p11's
+failing placement came from the same blind spot: a `none` given after looking
+at files only, while the history showed the thing at work (12
+`dependabot[bot]` commits in postcss). This run tries the edit that targets
+it, on repositories none of runs 4 to 13 used.
+
+**Repositories** (fixed now): chokidar, nock, superagent, terser and grunt
+([run14/repos-at.txt](run14/repos-at.txt)). Bot-authored commits, counted
+with `git log --format=%an` before any survey so that the edit can fail: nock
+269, terser 30, chokidar 13, grunt 0, superagent 0. Track
+`@trivoallan/ontrack-engineering` 0.6.0; model pinned to Sonnet 5.5.
+
+**Conditions**, one survey each per repository:
+- **p11**: the prompt of run 13 (p10 with the trace test and the file tree as
+  proof of the main language), as the control.
+- **p12**: p11 with one paragraph added after the paragraph on absences, and
+  nothing else: before writing `none` for a thing that works through commits
+  or releases (a dependency-update bot, the pull requests of a scanner, a
+  release tool), look for it in the history too, with
+  `git log --format=%an | sort | uniq -c` for bot authors and `git tag` for
+  releases; if the history shows it at work, the value is not `none`, and
+  the survey cites what it found.
+
+**Scoring**: as in runs 12 and 13. Blind, one scorer per repository, the two
+surveys under random labels, the same classes (S, T, A1, A2, O); failing when
+a key is O or fails the strict rule (a `none` for a thing the clone shows),
+doubtful when a key is A2 or O.
+
+**Decision rule, fixed now.** p12 is adopted when all hold:
+1. no failing ADR;
+2. at most 1 doubtful ADR over the 5 repositories;
+3. its other placements are at least those of p11 minus 3 (the spread of the
+   two p10 runs of run 12);
+4. ADR-0004 is in its first group in every repository where the scorer finds
+   one main language;
+5. p11 does not meet criteria 1 to 4 in this run. If p11 meets them too, the
+   edit has not shown a gain, and the simpler p11 is preferred.
+
+If criterion 1 or 2 fails, p12 is not adopted. Adoption of either prompt
+into the pull request stays a decision of the maintainer; this rule says
+what the data support.
+
+**Limits, before running.** One survey per condition and repository; the
+criterion is the rule itself; the scorers decide the borderline classes. With
+two of five repositories without any bot commit, the edit can only show an
+effect in three. The edit was written after seeing postcss, which is not
+among these five.
