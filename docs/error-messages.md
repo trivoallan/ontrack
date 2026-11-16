@@ -62,7 +62,8 @@ ontrack reads the ADRs under `docs/adr/`. These errors come from `apply`,
 | `"<name>" names several ADRs: <references>; name one by its reference` | Two namespaces hold an ADR of that name | Give one of the references the message lists |
 | `<reference> is <status>, neither proposed nor accepted: nothing to review` | The ADR is `rejected`, or its `status:` is one ontrack does not know: there is nothing to rule, and nothing to supersede | To decide again, write a new ADR of your own under `docs/adr/local/` |
 | `<reference> is already superseded by <reference>: name that one` | Another ADR replaced the one you named | Run `review` on the second reference |
-| `no ADR is proposed or revised, nothing to review` | Every ADR is ruled. This is not an error: the command exits with `0` | Nothing |
+| `no ADR is proposed or revised, nothing to review` | Every ADR is ruled, and the tracks were read. This is not an error: the command exits with `0` | Nothing |
+| A message of [The command line](#the-command-line) or of [Tracks](#tracks), from `review` | `review` had no prompt to print, and could not read the tracks to say that nothing is left | What that message says |
 
 ## Lines about `AGENTS.md`
 

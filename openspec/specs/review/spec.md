@@ -6,11 +6,15 @@
 ## Requirements
 
 ### Requirement: Read-only and offline
-`ontrack review` MUST NOT create, modify or delete any file, and MUST NOT make any network call. It reads `docs/adr/` and, to find the revised ADRs, the tracks `plan` reads. It needs no `package.json` and no `node_modules`: when the tracks cannot be read, it finds no revised ADR and reports no error.
+`ontrack review` MUST NOT create, modify or delete any file, and MUST NOT make any network call. It reads `docs/adr/` and, to find the revised ADRs, the tracks `plan` reads. It needs no `package.json` and no `node_modules` to print a prompt for the ADRs under `docs/adr/`: when the tracks cannot be read, it finds no new and no revised ADR. When it then has no prompt to print, it MUST NOT report that nothing is left to review: it SHALL fail with the error `plan` gives, and exit with `1`.
 
 #### Scenario: Tree unchanged
 - **WHEN** `ontrack review` runs on a project with pending ADRs
 - **THEN** every file under the project is byte-identical before and after, and no file was added or removed
+
+#### Scenario: Nothing to print, tracks unreadable
+- **WHEN** `ontrack review` runs where every ADR is ruled and there is no `package.json`
+- **THEN** it prints nothing on standard output, the error on stderr names the expected `package.json`, and the exit code is `1`
 
 ### Requirement: Pending ADRs
 The ADRs read, their references, identifiers, statuses and titles SHALL be those of the `instructions` capability. A pending ADR is one whose status is `proposed`. A conflict between the traits of decided ADRs MUST NOT prevent `ontrack review` from printing a prompt.
