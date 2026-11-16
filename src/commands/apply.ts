@@ -2,6 +2,7 @@ import { agentsPending, agentsReport, agentsStatus, writeAgents } from '../agent
 import { formatApply, planActions, planAfter, runActions } from '../apply.ts';
 import type { Action } from '../apply.ts';
 import type { Io } from '../cli.ts';
+import type { ApplyDocument } from '../documents.ts';
 import { actionJson, planJson, printJson } from '../json.ts';
 import path from 'node:path';
 import type { Argv } from 'yargs';
@@ -98,7 +99,7 @@ export function handler({
     // as what remains.
     const left = actions.length === 0 ? plan : dryRun ? planAfter(plan, actions) : buildPlan(root);
     const pending = hasPendingChanges(left) || agents.pending;
-    printJson(io.stdout, {
+    const document: ApplyDocument = {
       dryRun,
       actions: actions.map((a) => actionJson(root, a)),
       links,
@@ -107,7 +108,8 @@ export function handler({
       remaining: planJson(left),
       next: toRule(root, left),
       pending,
-    });
+    };
+    printJson(io.stdout, document);
     return pending ? 2 : 0;
   }
   if (actions.length === 0 && !agents.wrote) {

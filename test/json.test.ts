@@ -4,6 +4,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { main } from '../src/cli.ts';
 import type { Command } from '../src/cli.ts';
+import { documents } from '../src/documents.ts';
 import { adr, cleanup, makeProject, makeTree } from './helpers/project.ts';
 
 after(cleanup);
@@ -17,7 +18,16 @@ async function run(root: string, argv: string[], commands?: Command[]) {
     stderr: { write: (s: string) => { stderr += s; } },
   };
   const code = await main(argv, io, commands);
-  return { code, stdout, stderr, json: () => JSON.parse(stdout), error: () => JSON.parse(stderr).error };
+  // Every document read by a test is parsed with its model, which refuses a
+  // key it does not name: a key added to the code and not to the model fails.
+  const name = argv.find((a) => a in documents) as keyof typeof documents | undefined;
+  return {
+    code,
+    stdout,
+    stderr,
+    json: () => (name ? documents[name].model.parse(JSON.parse(stdout)) : JSON.parse(stdout)) as any,
+    error: () => documents.error.model.parse(JSON.parse(stderr)).error,
+  };
 }
 
 const planned = (name: string, category: string, rest: object = {}) => ({ name, title: null, category, status: null, revision: null, check: null, ...rest });
@@ -205,4 +215,25 @@ test('--json: a failure ontrack did not foresee has no code and no address', asy
   const r = await run(makeTree({}), ['boom', '--json'], [boom]);
   assert.deepEqual(r.error(), { code: null, message: 'unforeseen', docs: null });
   assert.equal((await run(makeTree({}), ['boom'], [boom])).stderr, 'ontrack: unforeseen\n');
+});
+
+test('schemas: each published file is the one derived from its model, and schema/ holds no other', async () => {
+  const { readFileSync, readdirSync } = await import('node:fs');
+  const { documentJsonSchema } = await import('../src/documents.ts');
+  const dir = new URL('../schema/', import.meta.url);
+  for (const name of Object.keys(documents) as (keyof typeof documents)[]) {
+    const published = JSON.parse(readFileSync(new URL(`${name}.schema.json`, dir), 'utf8'));
+    assert.deepEqual(published, documentJsonSchema(name), `schema/${name}.schema.json is out of date: run \`npm run schema\``);
+    assert.equal(published.$id, `https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/${name}.schema.json`);
+  }
+  assert.deepEqual(readdirSync(dir).sort(), [...Object.keys(documents), 'ontrack'].sort().map((name) => `${name}.schema.json`));
+});
+
+test('schemas: every key is required, and a key a later version adds is let through', async () => {
+  const { documentJsonSchema } = await import('../src/documents.ts');
+  const schema = documentJsonSchema('plan') as any;
+  assert.deepEqual(schema.required, ['tracks', 'agents', 'pending']);
+  assert.doesNotMatch(JSON.stringify(schema), /additionalProperties/);
+  // The model itself refuses the unknown key: that is what the tests above rely on.
+  assert.equal(documents.plan.model.safeParse({ tracks: [], agents: [], pending: false, extra: 1 }).success, false);
 });

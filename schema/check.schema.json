@@ -1,0 +1,89 @@
+{
+  "$id": "https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/check.schema.json",
+  "title": "What `ontrack check --json` prints",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ref": {
+            "type": "string",
+            "description": "`<namespace>/<file name without .md>`."
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "path": {
+            "type": "string"
+          },
+          "check": {
+            "description": "The command; null when the ADR declares none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "fail",
+              "unchecked"
+            ]
+          },
+          "output": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The lines a failed command printed."
+          }
+        },
+        "required": [
+          "ref",
+          "title",
+          "status",
+          "path",
+          "check",
+          "result",
+          "output"
+        ]
+      }
+    },
+    "counts": {
+      "type": "object",
+      "properties": {
+        "fail": {
+          "type": "number"
+        },
+        "pass": {
+          "type": "number"
+        },
+        "unchecked": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "fail",
+        "pass",
+        "unchecked"
+      ]
+    }
+  },
+  "required": [
+    "results",
+    "counts"
+  ]
+}
