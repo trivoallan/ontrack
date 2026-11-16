@@ -27,6 +27,23 @@ hero:
 
 import { Aside, Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
+<div class="features">
+
+- **[Share conventions](features.md#share-conventions-as-questions)**
+  Each one written as a question.
+- **[Rule on each question](features.md#rule-on-each-question)**
+  Your answer, drafted by an agent.
+- **[Answers in the harness](features.md#load-the-answers-into-the-agents-harness)**
+  One block in `AGENTS.md`.
+- **[A compliance backlog](features.md#keep-the-repository-true-to-its-answers)**
+  One issue per ruling not followed yet.
+- **[Question changes reported](features.md#know-when-a-question-changes)**
+  `ontrack plan` exits with `2`.
+- **[No lock-in](features.md#no-lock-in)**
+  Markdown files, an npm dependency, no server.
+
+</div>
+
 ## Conventions are copied, then they drift
 
 You agreed on how to commit, branch, test and deliver. Then the agreement was
@@ -196,7 +213,7 @@ in 14 seconds and left an `AGENTS.md` with its first rule. The agent then
 took about a minute to propose its first answer.
 
 <CardGrid>
-  <LinkCard title="Try ontrack on one repository" href="tutorial/" description="Import a track, answer one question with a coding agent." />
-  <LinkCard title="How ontrack works" href="how-it-works/" description="The model first: the pieces, the life of a question, the cycle." />
+  <LinkCard title="Get started" href="tutorial/" description="Import a track, answer one question with a coding agent." />
+  <LinkCard title="How it works" href="how-it-works/" description="The model first: the pieces, the life of a question, the cycle." />
   <LinkCard title="Commands" href="commands/" description="What each command does, its options and exit codes." />
 </CardGrid>

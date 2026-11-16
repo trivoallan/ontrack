@@ -1,5 +1,5 @@
 ---
-title: How ontrack works
+title: How it works
 description: The pieces ontrack is made of, what happens to a question from the track to a repository, and the cycle that keeps answers current.
 ---
 
