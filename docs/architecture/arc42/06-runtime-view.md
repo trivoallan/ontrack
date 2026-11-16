@@ -19,7 +19,7 @@ from [Introduction and Goals](01-introduction-and-goals.md).
 ## `ontrack plan`
 
 `plan` reads and never writes. It builds the plan of every track, asks for
-the state of the rules block, prints both and returns `2` when either needs
+the state of the instructions block, prints both and returns `2` when either needs
 attention.
 
 ```mermaid
@@ -50,7 +50,7 @@ sequenceDiagram
     Note right of Instructions: reads docs/adr/ only
     Instructions-->>Agents: decided and pending ADRs
     Agents->>Instructions: formatInstructions(instructions)
-    Agents-->>Cmd: state of the rules block
+    Agents-->>Cmd: state of the instructions block
     Cmd->>Plan: formatPlan(plan)
     Cmd->>Agents: agentsReport(status)
     Cmd-->>Cli: 2 when hasPendingChanges or agentsPending, else 0
@@ -62,7 +62,7 @@ sequenceDiagram
 `apply` builds the same plan, derives the actions and checks all of them
 before the first write. With `--dry-run` it stops before writing and
 computes what would remain. Otherwise it executes the actions, writes the
-rules block, and builds the plan again to report what still needs a person.
+instructions block, and builds the plan again to report what still needs a person.
 
 ```mermaid
 sequenceDiagram
@@ -87,14 +87,14 @@ sequenceDiagram
     end
     alt dry run
         Cmd->>Agents: agentsStatus(root)
-        Agents-->>Cmd: state of the rules block
+        Agents-->>Cmd: state of the instructions block
         Cmd->>Apply: planAfter(plan, actions)
         Apply-->>Cmd: remaining plan
     else
         Cmd->>Apply: runActions(root, actions)
         Note right of Apply: copies, moves (git mv or rename),<br/>sets revision, deletes under docs/adr/
         Cmd->>Agents: agentsStatus(root)
-        Agents-->>Cmd: state of the rules block
+        Agents-->>Cmd: state of the instructions block
         opt block missing or out of date
             Cmd->>Agents: writeAgents(status)
         end
@@ -106,7 +106,7 @@ sequenceDiagram
     Cli-->>User: report on standard output, exit code
 ```
 
-When there is no action and the rules block needs no write, the handler
+When there is no action and the instructions block needs no write, the handler
 skips `formatApply`, prints the plan with `formatPlan` and returns what
-`plan` would. The rules block is computed after `runActions`, on the
+`plan` would. The instructions block is computed after `runActions`, on the
 resulting tree, so an ADR imported in the same run is already listed in it.

@@ -2,13 +2,15 @@ import type { Argv } from 'yargs';
 import { agentsPending, agentsReport, agentsStatus } from '../agents.ts';
 import { buildPlan, formatPlan, hasPendingChanges, OWN } from '../plan.ts';
 import type { Io } from '../cli.ts';
+import { schemaOf } from '../documents.ts';
+import type { PlanDocument } from '../documents.ts';
 import { planJson, printJson } from '../json.ts';
 
 export const command = 'plan';
 export const describe = 'Show what importing the tracks would change in the repository';
 
 export const builder = (y: Argv) =>
-  y.option('all', { type: 'boolean', default: false, describe: 'List every ADR, the unchanged ones too, with its verdict' });
+  y.option('all', { type: 'boolean', default: false, describe: 'List every ADR, the unchanged ones too, with its status' });
 
 export function handler({ io, all, json }: { io: Io; all: boolean; json: boolean }): number {
   const root = io.cwd();
@@ -16,7 +18,8 @@ export function handler({ io, all, json }: { io: Io; all: boolean; json: boolean
   const agents = agentsStatus(root);
   const pending = hasPendingChanges(plan) || agentsPending(agents);
   if (json) {
-    printJson(io.stdout, { tracks: planJson(plan), agents: agentsReport(agents), pending });
+    const document: PlanDocument = { $schema: schemaOf('plan'), tracks: planJson(plan), agents: agentsReport(agents), pending };
+    printJson(io.stdout, document);
     return pending ? 2 : 0;
   }
   io.stdout.write(formatPlan(plan, { all }) + agentsReport(agents).map((l) => `${l}\n`).join(''));

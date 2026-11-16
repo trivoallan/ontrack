@@ -64,7 +64,7 @@ Each `*.md` file in `docs/adr/<alias>/` that the track no longer ships SHALL be 
 - **WHEN** both copies have `revision: 1`, the local copy holds `check: exit 0` and the track ships no `check:` line
 - **THEN** the ADR is `check`
 
-#### Scenario: Same check, different verdict
+#### Scenario: Same check, different ruling
 - **WHEN** both copies have `revision: 1` and `check: exit 0`, and the local copy has `status: accepted` where the track has `status: proposed`
 - **THEN** the ADR is `unchanged`
 
@@ -94,7 +94,7 @@ The output SHALL follow the contract in the commands reference, `docs/commands.m
 When the project has no track, `plan` SHALL print `no track found`, and SHALL write to stderr `next: install a track`, then `  npm i -D <alias>@npm:<track-package>`; standard output and the exit code are what they are without it. After the track lines, `plan` SHALL print the `AGENTS.md` lines described in `agents-file`, when there are any.
 
 #### Scenario: Nothing to do
-- **WHEN** every ADR of track `platform` is up to date, nothing needs to move, and the `AGENTS.md` rules block is current
+- **WHEN** every ADR of track `platform` is up to date, nothing needs to move, and the `AGENTS.md` instructions block is current
 - **THEN** the output is exactly `platform: 14 unchanged`
 - **AND** the exit code is `0`
 
@@ -141,7 +141,7 @@ When the project has no track, `plan` SHALL print `no track found`, and SHALL wr
 - **THEN** the output is `engineering: 1 new, 26 unchanged`, the `new` line, then `rename: docs/adr/trivoallan/ → docs/adr/engineering/`
 
 ### Requirement: Exit code
-`plan` SHALL exit with `2` when any track has a `new`, `revised`, `removed`, `undetermined`, `unreadable` or `check` ADR, or a migration, or when the `AGENTS.md` rules block is `missing`, `out of date` or `skipped` (see `agents-file`); with `0` otherwise; and with `1` when tracks cannot be discovered or a track's ADR directory cannot be read.
+`plan` SHALL exit with `2` when any track has a `new`, `revised`, `removed`, `undetermined`, `unreadable` or `check` ADR, or a migration, or when the `AGENTS.md` instructions block is `missing`, `out of date` or `skipped` (see `agents-file`); with `0` otherwise; and with `1` when tracks cannot be discovered or a track's ADR directory cannot be read.
 
 #### Scenario: Undetermined only
 - **WHEN** the only finding is an imported ADR with `revision: 0`
@@ -152,7 +152,7 @@ When the project has no track, `plan` SHALL print `no track found`, and SHALL wr
 - **THEN** standard error names the track and the directory
 - **AND** the exit code is `1`
 
-#### Scenario: Only the rules block is stale
+#### Scenario: Only the instructions block is stale
 - **WHEN** every ADR is unchanged and the `AGENTS.md` block is out of date
 - **THEN** the exit code is `2`
 
@@ -164,7 +164,7 @@ When the project has no track, `plan` SHALL print `no track found`, and SHALL wr
 `ontrack plan` SHALL accept an `--all` option. Without it, the output SHALL be exactly what the `Output format` requirement describes. With it, the output SHALL differ in two ways only:
 
 1. each `unchanged` ADR gets a line too, so that every ADR of a track has one, sorted by name whatever its category;
-2. every ADR line carries a verdict column between the category and the file name: two spaces, the category left-aligned in a 12-character column, two spaces, the verdict left-aligned in a 10-character column, two spaces, then the file name and what follows it as in `Output format`.
+2. every ADR line carries a status column between the category and the file name: two spaces, the category left-aligned in a 12-character column, two spaces, the status left-aligned in a 10-character column, two spaces, then the file name and what follows it as in `Output format`.
 
 The summary line, the `- ` and `+ ` lines under a `check` ADR, the migration lines and the `AGENTS.md` lines SHALL be the same with and without `--all`. A line SHALL NOT end with spaces.
 
@@ -179,36 +179,36 @@ The summary line, the `- ` and `+ ` lines under a `check` ADR, the migration lin
 
 #### Scenario: Output without the option is untouched
 - **WHEN** `ontrack plan` runs without `--all` on a track with revised, new and unchanged ADRs
-- **THEN** the output has no line for an unchanged ADR and no verdict column
+- **THEN** the output has no line for an unchanged ADR and no status column
 
 #### Scenario: Check lines keep their place
 - **WHEN** `ADR-0006-commits` is `check` and `accepted`, and `ontrack plan --all` runs
 - **THEN** its line is `  check         accepted    ADR-0006-commits`, followed by the same `- ` and `+ ` lines as without `--all`
 
-### Requirement: Verdict of an ADR
-The verdict of an ADR SHALL be the value of the first column-zero `status:` line in the recognized frontmatter (see `adr-revision`) of the repository's copy, without surrounding whitespace and without a trailing ` # comment`. The track's copy SHALL NOT be read for it. The verdict SHALL be `-` when the ADR has no local copy, when the copy's frontmatter is not recognized, or when it has no `status:` line or an empty one.
+### Requirement: Status of an ADR
+The status of an ADR SHALL be the value of the first column-zero `status:` line in the recognized frontmatter (see `adr-revision`) of the repository's copy, without surrounding whitespace and without a trailing ` # comment`. The track's copy SHALL NOT be read for it. The status SHALL be `-` when the ADR has no local copy, when the copy's frontmatter is not recognized, or when it has no `status:` line or an empty one.
 
 #### Scenario: Rejected ADR
 - **WHEN** `docs/adr/trivoallan/ADR-0013-frontend.md` has `status: rejected` and is unchanged, and `ontrack plan --all` runs
 - **THEN** its line is `  unchanged     rejected    ADR-0013-frontend`
 
-#### Scenario: Local verdict, not the track's
+#### Scenario: Local status, not the track's
 - **WHEN** the local copy has `status: accepted` and the track ships the same ADR with `status: proposed`
-- **THEN** the verdict is `accepted`
+- **THEN** the status is `accepted`
 
 #### Scenario: Trailing comment
 - **WHEN** the local copy holds `status: accepted     # proposed as shipped; accepted or rejected once ruled`
-- **THEN** the verdict is `accepted`
+- **THEN** the status is `accepted`
 
-#### Scenario: New ADR has no verdict
+#### Scenario: New ADR has no status
 - **WHEN** a track ships an ADR the repository has no copy of, and `ontrack plan --all` runs
 - **THEN** its line starts with `  new           -           `
 
-#### Scenario: Unreadable copy has no verdict
+#### Scenario: Unreadable copy has no status
 - **WHEN** the local copy has no recognizable frontmatter
-- **THEN** the ADR is `unreadable` and its verdict is `-`
+- **THEN** the ADR is `unreadable` and its status is `-`
 
-#### Scenario: Removed ADR keeps its verdict
+#### Scenario: Removed ADR keeps its status
 - **WHEN** `docs/adr/platform/SDR-0012.md` has `status: accepted` and track `platform` no longer ships it
 - **THEN** its line starts with `  removed       accepted    SDR-0012`
 
@@ -216,7 +216,7 @@ The verdict of an ADR SHALL be the value of the first column-zero `status:` line
 The exit code of `ontrack plan --all` SHALL be the one `ontrack plan` returns on the same repository.
 
 #### Scenario: Nothing to do
-- **WHEN** every ADR is unchanged, nothing needs to move, the `AGENTS.md` rules block is current, and `ontrack plan --all` runs
+- **WHEN** every ADR is unchanged, nothing needs to move, the `AGENTS.md` instructions block is current, and `ontrack plan --all` runs
 - **THEN** the exit code is `0`
 
 #### Scenario: Rejected ADR does not change the code

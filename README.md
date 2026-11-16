@@ -11,11 +11,11 @@ an `ontrack` key; its npm alias is its namespace.
 Teams that share conventions (how to commit, branch, test, deliver) tend to
 copy them from repository to repository, where the copies drift. With ontrack
 the conventions are written once, as ADRs in a track repository. Each ADR
-asks a question and recommends an answer.
+states a convention and recommends its values.
 
-- Every repository that depends on the track imports the ADRs and answers them for itself.
-- When a question changes upstream, `ontrack plan` says which answers must be taken again; a CI job can rely on its exit code.
-- The answers are written to `AGENTS.md`, so coding agents follow the rules the repository decided.
+- Every repository that depends on the track imports the ADRs and rules on them for itself.
+- When a convention changes upstream, `ontrack plan` says which rulings must be taken again; a CI job can rely on its exit code.
+- The rulings are written to `AGENTS.md`, so coding agents follow what the repository decided.
 
 ## Installation
 
@@ -61,7 +61,7 @@ npx ontrack --version
 npx ontrack plan          # what importing the tracks would change
 npx ontrack apply         # do it
 npx ontrack instructions  # the decided traits, as a block for AGENTS.md
-npx ontrack review        # a prompt asking a coding agent to import the new ADRs, to rule the proposed ones, to rule the revised ones again, or to supersede an accepted one
+npx ontrack review        # the prompt a coding agent follows to rule the ADRs that await a ruling, or the one you name
 npx ontrack check         # run the check command of each decided ADR
 npx ontrack plan --json   # any command: the same facts as one JSON document
 ```
@@ -84,7 +84,7 @@ The documentation is at <https://trivoallan.github.io/ontrack/>.
 
 - [Tutorial](https://trivoallan.github.io/ontrack/tutorial/): try ontrack on one repository, with a public track.
 - [Commands](https://trivoallan.github.io/ontrack/commands/): what each command does, and the exact format of what it prints. That format is a contract.
-- [File formats](https://trivoallan.github.io/ontrack/file-formats/): the `ontrack` key of a track, the frontmatter of an ADR, the rules block of `AGENTS.md`.
+- [File formats](https://trivoallan.github.io/ontrack/file-formats/): the `ontrack` key of a track, the frontmatter of an ADR, the instructions block of `AGENTS.md`.
 
 ## Development
 
@@ -103,7 +103,7 @@ node bin/ontrack.ts plan   # the CLI, from the sources
 npm test                   # tests and coverage; fails below 95% lines, branches or functions
 npm run typecheck          # strict type check of bin/, src/ and test/
 npm run build              # compiles bin/ and src/ to dist/, what an install ships
-npm run schema             # regenerates schema/ontrack.schema.json from its model
+npm run schema             # regenerates the files of schema/ from their models
 ```
 
 Node does not run TypeScript from `node_modules`, so the installed package is

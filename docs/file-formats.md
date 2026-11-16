@@ -1,6 +1,6 @@
 ---
 title: File formats
-description: What ontrack reads and writes in the three files it works on - the ontrack key of a track, the frontmatter of an ADR, and the rules block of AGENTS.md.
+description: What ontrack reads and writes in the three files it works on - the ontrack key of a track, the frontmatter of an ADR, and the instructions block of AGENTS.md.
 ---
 
 ontrack works on three files. This page says what it reads in each, what it
@@ -10,7 +10,7 @@ writes, and what it leaves to you.
 | --- | --- | --- |
 | [`package.json`](#the-ontrack-key-of-a-track) of a track | The track's repository | The track's author |
 | [An ADR](#the-frontmatter-of-an-adr) | The track, then `docs/adr/` in each repository | The track, then the repository |
-| [`AGENTS.md`](#the-rules-block-in-agentsmd) | The root of each repository | ontrack, between two markers |
+| [`AGENTS.md`](#the-instructions-block-in-agentsmd) | The root of each repository | ontrack, between two markers |
 
 ## The `ontrack` key of a track
 
@@ -101,16 +101,16 @@ traits:
 | Key | Value | Filled by | What ontrack does with it |
 | --- | --- | --- | --- |
 | `adr` | A string. Defaults to the file name without `.md`. | The track | Identifies the ADR in `review <adr>` and in `supersedes`. |
-| `title` | A string. Surrounding quotes are removed. Defaults to the first `# ` heading of the body. | The track | Shows it in `plan` and in the headings of the rules block. |
+| `title` | A string. Surrounding quotes are removed. Defaults to the first `# ` heading of the body. | The track | Shows it in `plan` and in the headings of the instructions block. |
 | `revision` | An integer, written with digits only. | The track | Compares the repository's value with the track's. See [below](#how-revision-is-compared). |
 | `status` | `proposed`, `accepted` or `rejected`. | The repository | Decides how the ADR is treated. See [below](#what-status-decides). |
 | `check` | A shell command, on one line. | The track | Runs it in `check`, once the ADR is `accepted`. `apply` copies the track's line into the repository's copy. |
 | `supersedes` | A list of ADRs: `[ADR-0003]` on the line, or one `- item` per line below. | The repository | Treats each ADR named by an `accepted` ADR as superseded. |
-| `traits` | An indented block. | The track ships the keys, the repository fills the values | Copies the block as it is into the rules block, once the ADR is `accepted`. |
+| `traits` | An indented block. | The track ships the keys, the repository fills the values | Copies the block as it is into the instructions block, once the ADR is `accepted`. |
 
 ### What `status` decides
 
-| `status` | Rules block | `review` | `check` |
+| `status` | Instructions block | `review` | `check` |
 | --- | --- | --- | --- |
 | `proposed` | Listed under "Not yet decided" | Prepares a ruling | Not run |
 | `accepted` | Its traits are written, unless it is superseded | Drafts an ADR that supersedes it | Run, unless it is superseded |
@@ -169,7 +169,7 @@ with one schema file shipped next to its ADRs,
 [`adr/.mdschema.yml`](https://github.com/trivoallan/ontrack-engineering/blob/main/adr/.mdschema.yml),
 which lists the accepted values of every trait.
 
-## The rules block in `AGENTS.md`
+## The instructions block in `AGENTS.md`
 
 `ontrack apply` keeps the block printed by `ontrack instructions` current in
 the `AGENTS.md` at the root of the repository, and `ontrack plan` reports its
@@ -177,8 +177,8 @@ state. The text between `<!-- ontrack:begin -->` and `<!-- ontrack:end -->`
 belongs to ontrack and is overwritten; everything outside the markers is
 yours and is never touched.
 
-- `apply` replaces the block when the file holds one marker pair, appends it after an empty line when the file has no marker, and creates `AGENTS.md` when there is none. It prints `AGENTS.md: rules block updated` or `AGENTS.md: rules block created`. With `--dry-run` it prints `AGENTS.md: rules block to update` or `AGENTS.md: rules block to create` and writes nothing.
-- `plan` prints `AGENTS.md: rules block missing` or `AGENTS.md: rules block out of date` and exits with `2`, like any other pending change.
+- `apply` replaces the block when the file holds one marker pair, appends it after an empty line when the file has no marker, and creates `AGENTS.md` when there is none. It prints `AGENTS.md: instructions block updated` or `AGENTS.md: instructions block created`. With `--dry-run` it prints `AGENTS.md: instructions block to update` or `AGENTS.md: instructions block to create` and writes nothing.
+- `plan` prints `AGENTS.md: instructions block missing` or `AGENTS.md: instructions block out of date` and exits with `2`, like any other pending change.
 - The block is needed as soon as one ADR is decided or pending. With none, and no marker in `AGENTS.md`, nothing is printed and no file is created.
 - When the block cannot be written (a marker without its pair, more than one pair, or two decided ADRs sharing a trait key), only this step is skipped: the ADRs are still handled, `AGENTS.md` is left untouched, and both commands print `AGENTS.md: skipped, <reason>` and exit with `2`.
 - Claude Code reads `AGENTS.md` on its own only when the repository has no `CLAUDE.md` and no `CLAUDE.local.md`. When one of them exists and `CLAUDE.md` holds no line `@AGENTS.md`, both commands print `AGENTS.md: not read by Claude Code while CLAUDE.md exists; add a line "@AGENTS.md" to CLAUDE.md`. ontrack never writes `CLAUDE.md`; this warning does not change the exit code.

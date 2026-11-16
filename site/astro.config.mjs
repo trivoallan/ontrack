@@ -14,7 +14,7 @@ export const base = process.env.SITE_BASE ?? '/ontrack';
 const repository = new URL('..', import.meta.url).pathname;
 
 // The sidebar is narrow: its group says less than the heading of the page.
-const questionsLabel = `Questions (${trackVersion})`;
+const conventionsLabel = `Conventions (${trackVersion})`;
 
 const escape = (text) => text.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
@@ -63,25 +63,25 @@ const pages = () => (tree, file) => {
   // Starlight does not show the frontmatter, which is where an ADR holds its
   // ruling: open the page with it. The CLI reads it, so that the site and
   // AGENTS.md cannot disagree.
-  // A question of the catalogue opens as a repository receives it, and with
+  // A convention of the catalogue opens as a repository receives it, and with
   // none of this repository's rulings: its status, its blank traits, and a
-  // link to how ontrack answered it.
+  // link to how ontrack ruled on it.
   if (file.path.includes('/node_modules/engineering/adr/')) {
     const name = file.path.split('/').pop();
     const source = readFileSync(file.path, 'utf8');
     const status = source.match(/^status:\s*(\S+)/m)?.[1] ?? 'proposed';
-    const answered = existsSync(new URL(`../docs/adr/engineering/${name}`, import.meta.url));
+    const ruled = existsSync(new URL(`../docs/adr/engineering/${name}`, import.meta.url));
     const block = [{
       type: 'html',
       value:
         `<p><span class="adr-status ${statusTone(status)}">${status}</span> ` +
         (/^check:\s*\S/m.test(source) ? '<span class="adr-status tip">checked</span> ' : '') +
-        `A question of ontrack-engineering ${trackVersion}.` +
-        (answered ? ` <a href="../../adr/engineering/${name.replace(/\.md$/, '').toLowerCase()}/">How ontrack answered it</a>.` : '') +
+        `A convention of ontrack-engineering ${trackVersion}.` +
+        (ruled ? ` <a href="../../adr/engineering/${name.replace(/\.md$/, '').toLowerCase()}/">How ontrack ruled on it</a>.` : '') +
         '</p>',
     }];
     const traits = source.match(/^traits:\n(?:[ \t].*\n?)*/m)?.[0];
-    if (traits) block.push({ type: 'code', lang: 'yaml', meta: 'title="Traits to answer"', value: traits.trimEnd() });
+    if (traits) block.push({ type: 'code', lang: 'yaml', meta: 'title="Traits to rule on"', value: traits.trimEnd() });
     tree.children.unshift(...block);
     return;
   }
@@ -111,7 +111,10 @@ export default defineConfig({
   redirects: {
     '/find-a-source': `${base}/find-a-track/`,
     '/write-your-own-source': `${base}/write-your-own-track/`,
-    // The track's answers, once under the alias trivoallan.
+    // Pages renamed when a question became a convention.
+    '/revise-a-question': `${base}/revise-a-convention/`,
+    '/ontrack-engineering/questions': `${base}/ontrack-engineering/conventions/`,
+    // The rulings on the track, once under the alias trivoallan.
     ...Object.fromEntries(
       readdirSync(new URL('../docs/adr/engineering/', import.meta.url))
         .filter((file) => file.endsWith('.md'))
@@ -142,6 +145,16 @@ export default defineConfig({
       logo: { src: '../docs/assets/logo.png' },
       favicon: '/logo.png',
       customCss: ['./src/theme.css', './src/adr.css'],
+      // Search ranks the guides and the reference before the ADRs and the
+      // architecture document: see src/search.mjs. A long page is not a worse
+      // answer: the commands reference is the longest, and the one most
+      // searches are for. And a word that only starts like the one searched
+      // counts for less: "track" is not "tracking", the subject of an ADR.
+      pagefind: { ranking: { pageLength: 0.1, termSimilarity: 5 } },
+      components: {
+        PageTitle: './src/components/PageTitle.astro',
+        MarkdownContent: './src/components/MarkdownContent.astro',
+      },
       // The 404 page is site/src/pages/404.astro.
       disable404Route: true,
       // The prompts `review` prints are single lines of a thousand characters,
@@ -157,9 +170,11 @@ export default defineConfig({
       // either set of guides. Automate is what a repository runs on GitHub
       // Actions, with or without a track.
       sidebar: [
-        { label: 'Start here', items: ['tutorial', 'concepts', 'how-it-works'] },
+        // What ontrack does comes before the tutorial: it is read to decide
+        // whether to follow it.
+        { label: 'Start here', items: ['features', 'tutorial', 'concepts', 'how-it-works'] },
         // The reference track, next to the tutorial that installs it: what
-        // it is, how to use it, and its questions as the installed release
+        // it is, how to use it, and its conventions as the installed release
         // asks them. It is the only public track; a second one would need
         // its own place decided, here or in its own repository.
         {
@@ -167,12 +182,12 @@ export default defineConfig({
           items: [
             { slug: 'ontrack-engineering', label: 'Overview' },
             { slug: 'ontrack-engineering/use-it', label: 'Use it' },
-            // One page lists the questions; the sidebar does not.
-            { slug: 'ontrack-engineering/questions', label: questionsLabel },
+            // One page lists the conventions; the sidebar does not.
+            { slug: 'ontrack-engineering/conventions', label: conventionsLabel },
           ],
         },
         // Any other track: find one, or write and revise your own.
-        { label: 'Tracks', items: ['find-a-track', 'write-your-own-track', 'revise-a-question'] },
+        { label: 'Tracks', items: ['find-a-track', 'write-your-own-track', 'revise-a-convention'] },
         { label: 'GitHub Actions', items: ['run-ontrack-in-ci', 'draft-a-change-from-an-issue', 'why-you-call-ontracks-workflows'] },
         {
           label: 'Reference',
@@ -191,10 +206,10 @@ export default defineConfig({
             'error-messages',
             // This repository's own decisions and architecture: how ontrack
             // is made, after what a reader looks up to use it. The decisions
-            // are also an example of a repository answering a track. One
+            // are also an example of a repository ruling on a track. One
             // subgroup per namespace: `local`, the repository's own ADRs,
             // then each imported track.
-            { label: 'Example: how ontrack answered', collapsed: true, items: [{ autogenerate: { directory: 'adr', collapsed: true } }] },
+            { label: 'Example: how ontrack ruled', collapsed: true, items: [{ autogenerate: { directory: 'adr', collapsed: true } }] },
             { label: 'Architecture', collapsed: true, items: [{ autogenerate: { directory: 'architecture/arc42' } }] },
           ],
         },

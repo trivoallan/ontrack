@@ -14,7 +14,7 @@ export type Category = 'revised' | 'new' | 'removed' | 'undetermined' | 'unreada
 export type CheckChange = { from: string | null; to: string | null };
 /**
  * `from` is set when revised, `to` when revised or undetermined, `check` when check.
- * `status` is the verdict of the repository's copy: set when there is one, null when it states none.
+ * `status` is the status of the repository's copy: set when there is one, null when it states none.
  */
 export type PlannedAdr = {
   name: string;
@@ -78,7 +78,7 @@ function planTrack(root: string, track: Track, shipped: string[], rename?: strin
     if (adr.category === 'revised') adr.from = readRevision(local);
     if (adr.category === 'revised' || adr.category === 'undetermined') adr.to = readRevision(upstream);
     if (adr.category === 'unchanged') {
-      // The check line follows the track; the verdict stays the repository's.
+      // The check line follows the track; the ruling stays the repository's.
       const check = { from: readCheckLine(local), to: readCheckLine(upstream) };
       if (check.from !== check.to) Object.assign(adr, { category: 'check', check });
     }
@@ -168,7 +168,7 @@ export const checkLines = (adr: PlannedAdr): string[] =>
 
 /**
  * The contract output (see docs/commands.md). With `all`, the unchanged ADRs
- * get a line too and every ADR line carries the repository's verdict.
+ * get a line too and every ADR line carries the repository's status.
  */
 export function formatPlan(plan: Plan, { all = false } = {}): string {
   const lines: string[] = plan.some((s) => s.namespace !== OWN) ? [] : ['no track found'];
@@ -182,8 +182,8 @@ export function formatPlan(plan: Plan, { all = false } = {}): string {
     for (const adr of track.adrs) {
       if (adr.category === 'unchanged' && !all) continue;
       const revision = adr.category === 'revised' ? ` (revision ${adr.from} → ${adr.to})` : '';
-      const verdict = all ? `${(adr.status ?? '-').padEnd(10)}  ` : '';
-      lines.push(row(adr.category, verdict + label(adr) + revision), ...checkLines(adr));
+      const status = all ? `${(adr.status ?? '-').padEnd(10)}  ` : '';
+      lines.push(row(adr.category, status + label(adr) + revision), ...checkLines(adr));
     }
 
     if (track.rename) lines.push(`rename: ${rel(track.rename)} → ${rel(track.namespace)}`);

@@ -2,6 +2,8 @@ import { agentsPending, agentsReport, agentsStatus, writeAgents } from '../agent
 import { formatApply, planActions, planAfter, runActions } from '../apply.ts';
 import type { Action } from '../apply.ts';
 import type { Io } from '../cli.ts';
+import { schemaOf } from '../documents.ts';
+import type { ApplyDocument } from '../documents.ts';
 import { actionJson, planJson, printJson } from '../json.ts';
 import path from 'node:path';
 import type { Argv } from 'yargs';
@@ -17,7 +19,7 @@ export const describe = 'Import new ADRs, move flat-layout files and update AGEN
 export const builder = (y: Argv) =>
   y
     .option('prune', { type: 'boolean', default: false, describe: 'Delete ADRs the track no longer ships' })
-    .option('confirm', { type: 'string', array: true, requiresArg: true, default: [], describe: 'Declare an undetermined verdict still holds (a name, or "all")' })
+    .option('confirm', { type: 'string', array: true, requiresArg: true, default: [], describe: 'Declare an undetermined ruling still holds (a name, or "all")' })
     .option('dry-run', { type: 'boolean', default: false, describe: 'Print what apply would do, write nothing' });
 
 const CHANGES_BLOCK: Action['kind'][] = ['renamed', 'imported', 'moved', 'pruned'];
@@ -35,14 +37,14 @@ function agentsStep(
   if (!dryRun) {
     if (!writable) return { lines: agentsReport(status), pending: agentsPending(status) };
     const verb = writeAgents(status);
-    return { lines: [`AGENTS.md: rules block ${verb}`, ...(status.warning ? [status.warning] : [])], pending: false, wrote: true };
+    return { lines: [`AGENTS.md: instructions block ${verb}`, ...(status.warning ? [status.warning] : [])], pending: false, wrote: true };
   }
   const touched = actions.some((a) => CHANGES_BLOCK.includes(a.kind));
   if (status.state === 'skipped' || (!writable && !touched)) {
     return { lines: agentsReport(status), pending: agentsPending(status) };
   }
   const verb = status.state === 'missing' || status.state === 'none' ? 'create' : 'update';
-  return { lines: [`AGENTS.md: rules block to ${verb}`, ...(status.warning ? [status.warning] : [])], pending: true, wrote: true };
+  return { lines: [`AGENTS.md: instructions block to ${verb}`, ...(status.warning ? [status.warning] : [])], pending: true, wrote: true };
 }
 
 // The next step, on stderr so that stdout keeps its documented format: imported
@@ -103,7 +105,8 @@ export function handler({
     // as what remains.
     const left = actions.length === 0 ? plan : dryRun ? planAfter(plan, actions) : buildPlan(root);
     const pending = hasPendingChanges(left) || agents.pending;
-    printJson(io.stdout, {
+    const document: ApplyDocument = {
+      $schema: schemaOf('apply'),
       dryRun,
       actions: actions.map((a) => actionJson(root, a)),
       links,
@@ -112,7 +115,8 @@ export function handler({
       remaining: planJson(left),
       next: toRule(root, left),
       pending,
-    });
+    };
+    printJson(io.stdout, document);
     return pending ? 2 : 0;
   }
   if (actions.length === 0 && !agents.wrote) {

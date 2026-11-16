@@ -69,7 +69,7 @@ export const adr = (revision?: number, status = 'proposed', title?: string) =>
     '',
   ].join('\n');
 
-/** Writes a current rules block into the project's AGENTS.md; returns the root. */
+/** Writes a current instructions block into the project's AGENTS.md; returns the root. */
 export function withAgents(root: string, { before = '', after = '' }: { before?: string; after?: string } = {}): string {
   const block = qualify(root, formatInstructions(buildInstructions(root)));
   writeFileSync(path.join(root, 'AGENTS.md'), before + block + after);

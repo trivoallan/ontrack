@@ -11,7 +11,7 @@ updates:
     commit-message:
       prefix: chore
   # npm at the root: version updates for the engineering track only, security
-  # updates for everything. A question governance revises must reach this
+  # updates for everything. A convention governance revises must reach this
   # repository as soon as it is released, so its bump comes as a pull request.
   # `allow` would also filter security updates, so the other direct
   # dependencies are ignored by update type instead, which only affects

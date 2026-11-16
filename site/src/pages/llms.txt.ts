@@ -14,7 +14,7 @@ export async function GET() {
     const { title, description, adr, status } = page.data;
     // An ADR has no description: its number and its status say what it is.
     const about = description ?? (adr && status);
-    // A question of the catalogue is a file of the track, at its release.
+    // A convention of the catalogue is a file of the track, at its release.
     const file = page.filePath!.startsWith('../node_modules/engineering/')
       ? `https://raw.githubusercontent.com/trivoallan/ontrack-engineering/v${version}/${page.filePath!.replace('../node_modules/engineering/', '')}`
       : `${raw}${page.filePath!.replace(/^src\/content\//, '')}`;

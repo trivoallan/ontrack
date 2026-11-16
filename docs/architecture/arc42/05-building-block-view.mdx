@@ -66,9 +66,9 @@ module.
 **`src/instructions.ts`** reads the ADRs the repository holds under
 `docs/adr/`, resolves which are in force (accepted and not superseded),
 refuses two ADRs that decide the same trait key, and formats the decided
-traits as the rules block.
+traits as the instructions block.
 
-**`src/agents.ts`** compares the rules block with what `AGENTS.md` holds
+**`src/agents.ts`** compares the instructions block with what `AGENTS.md` holds
 between the two markers, reports its state, and writes it. It is the only
 module that writes `AGENTS.md`.
 
@@ -105,7 +105,7 @@ and no domain module imports a command. The `commands` import `cli` for the
 
 Two groups follow from the table. The modules that deal with *tracks*
 (`tracks`, `plan`, `apply`) are the only ones that read `node_modules`.
-The modules that deal with the repository's *own answers* (`instructions`,
+The modules that deal with the repository's *own rulings* (`instructions`,
 `agents`, `review`, `check`) read the project's files only. Both groups rest
 on `revision` for frontmatter.
 

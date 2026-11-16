@@ -66,11 +66,11 @@ test('CRLF line endings are tolerated', () => {
 
 // Classifying an imported ADR
 
-test('upstream moved the question: stale', () => {
+test('upstream moved the convention: stale', () => {
   assert.equal(compareRevision(adr('revision: 1'), adr('revision: 2')), 'stale');
 });
 
-test('only the local verdict changed: up-to-date', () => {
+test('only the local ruling changed: up-to-date', () => {
   const imported = adr('status: accepted', 'revision: 2', 'authors:', '- Jane');
   const upstream = adr('status: proposed', 'revision: 2', 'authors: []');
   assert.equal(compareRevision(imported, upstream), 'up-to-date');

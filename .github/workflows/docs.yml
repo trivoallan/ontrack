@@ -60,7 +60,7 @@ jobs:
       - run: npm install --global npm@12.2.2 # zizmor: ignore[adhoc-packages] npm itself, exact version, no lockfile can hold it
       # For each channel, from its checkout: the site config imports ../src,
       # which needs the CLI's own runtime dependencies, and reads the
-      # questions of the reference track, a dev dependency (--ignore-scripts
+      # conventions of the reference track, a dev dependency (--ignore-scripts
       # skips `prepare` and every install script); the model is validated so that a
       # failure names its file and line; the build fails on a broken internal
       # link. With a release, `main` is built under next/ with a banner that

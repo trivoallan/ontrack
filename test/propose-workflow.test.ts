@@ -275,7 +275,7 @@ test('an agent that says it was blocked fails the run instead of reporting nothi
 });
 
 /** An `AGENTS.md` that declares traits, as ontrack writes it. */
-const agents = (yaml: string) => `## Project rules (ontrack)\n\n### A rule\n\n\`\`\`yaml\n${yaml}\n\`\`\`\n`;
+const agents = (yaml: string) => `## Project instructions (ontrack)\n\n### A rule\n\n\`\`\`yaml\n${yaml}\n\`\`\`\n`;
 
 /** Runs the `catalog` step of `draft` and returns its status and outputs. */
 function catalog(frameworks: string | undefined, agentsFile?: string) {

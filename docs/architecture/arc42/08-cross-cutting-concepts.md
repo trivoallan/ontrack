@@ -15,7 +15,7 @@ error and returns `1`. A handler returns `0` or `2` and never calls
 `process.exit`. Specified in
 [cli](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/cli/spec.md).
 
-One step is allowed to fail without failing the command: the rules block. A
+One step is allowed to fail without failing the command: the instructions block. A
 trait conflict or malformed markers skip that step, are reported on a line
 of the output, and leave the ADR actions untouched. Specified in
 [agents-file](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/agents-file/spec.md).
@@ -34,7 +34,7 @@ and
 
 `apply` acts on the difference `plan` reports, so once that difference is
 empty a new run has nothing to do. An ADR the repository already holds is
-never overwritten: when its question moved upstream it is reported as
+never overwritten: when its convention moved upstream it is reported as
 `revised` and left for a person. Specified in
 [apply](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/apply/spec.md).
 

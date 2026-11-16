@@ -6,7 +6,7 @@ model {
     description "Runs ontrack in a repository, by hand or from a CI job"
   }
   agent = actor "Coding agent" {
-    description "Follows the rules of AGENTS.md and proposes rulings"
+    description "Follows the instructions of AGENTS.md and proposes rulings"
   }
 
   ontrack = system "ontrack" {
@@ -45,10 +45,10 @@ model {
       description "Finds the Markdown links a migration breaks"
     }
     instructions = module "instructions" {
-      description "Gathers the decided traits into the rules block"
+      description "Gathers the decided traits into the instructions block"
     }
     agents = module "agents" {
-      description "Keeps the rules block of AGENTS.md current"
+      description "Keeps the instructions block of AGENTS.md current"
     }
     review = module "review" {
       description "Formats the prompts that ask an agent to rule or supersede"
@@ -105,7 +105,7 @@ model {
       description "The ADRs the repository holds, with its rulings"
     }
     agentsFile = external "AGENTS.md" {
-      description "Holds the rules block between two markers"
+      description "Holds the instructions block between two markers"
     }
     markdown = external "Other Markdown files" {
       description "May link to ADRs a migration moves"
@@ -130,7 +130,7 @@ model {
   npm -> installed "installs"
   npm -> project.manifest "records dependencies in"
   ontrack.review -> agent "prints a prompt for"
-  agent -> project.agentsFile "reads the rules in"
+  agent -> project.agentsFile "reads the instructions in"
   agent -> project.adrs "writes rulings in"
 
   // Files each module reads or writes
@@ -143,6 +143,6 @@ model {
   ontrack.applier -> git "moves files with"
   ontrack.links -> project.markdown "reads links in"
   ontrack.instructions -> project.adrs "reads status and traits in"
-  ontrack.agents -> project.agentsFile "reads and writes the rules block of"
+  ontrack.agents -> project.agentsFile "reads and writes the instructions block of"
   ontrack.check -> checks "runs"
 }

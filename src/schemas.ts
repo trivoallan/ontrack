@@ -39,7 +39,7 @@ export const adrFrontmatter = z.object({
     .string()
     .transform((raw) => raw.replace(/^(["'])(.*)\1$/, '$2').trim())
     .pipe(z.string().min(1)),
-  // The verdict, without a trailing `# comment`.
+  // The status, without a trailing `# comment`.
   status: z
     .string()
     .transform((raw) => raw.replace(/(^|\s)#.*$/, '').replace(/^(["'])(.*)\1$/, '$2').trim())

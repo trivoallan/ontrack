@@ -32,9 +32,9 @@ cd platform-governance
 `adr` names the directory of the ADRs. `namespace` is the alias you propose
 to the repositories that install the track.
 
-## 2. Write a first question
+## 2. Write a first convention
 
-Add one Markdown file per convention in `adr/`. Write it as a question: the
+Add one Markdown file per convention in `adr/`. Write it as a proposal: the
 status is `proposed`, the revision is `1`, and the trait keys are empty.
 
 ```markdown
@@ -67,7 +67,7 @@ Save it as `adr/ADR-0001-commits.md`. The file name, without `.md`, is how
 `plan` and `apply` name the ADR.
 
 The body is yours. Say what you recommend and why: it is what a person, or
-the agent that `ontrack review` briefs, reads before answering.
+the agent that `ontrack review` briefs, reads before ruling.
 [File formats](file-formats.md#the-frontmatter-of-an-adr) lists the keys
 ontrack reads and how to write them.
 
@@ -88,7 +88,7 @@ platform: 1 new, 0 unchanged
   new           ADR-0001-commits
 ```
 
-Then import the question:
+Then import the convention:
 
 ```bash
 npx ontrack apply
@@ -97,12 +97,12 @@ npx ontrack apply
 ```
 platform: 1 imported
   imported      ADR-0001-commits
-AGENTS.md: rules block created
+AGENTS.md: instructions block created
 ```
 
 The ADR is now in `docs/adr/platform/`, and `AGENTS.md` lists it under "Not
-yet decided". Answer it with `claude "$(npx ontrack review)"` to see your
-question the way a repository will.
+yet decided". Rule on it with `claude "$(npx ontrack review)"` to see your
+convention the way a repository will.
 
 npm installs a `file:` dependency as a link. Each change you make in the
 track shows in the next `npx ontrack plan`, with no reinstall.
@@ -143,22 +143,22 @@ A track can also be installed from its git repository, with
 fetches no git dependency by default: each repository then needs
 `allow-git=root` in its `.npmrc`.
 
-### Say what the track asks
+### Say what the track proposes
 
-A repository that installs your track receives every question in it. Write
+A repository that installs your track receives every convention in it. Write
 a README, which the registry and the git host both show, so that a person
 can judge the track before installing it:
 
-- how many questions it asks, and on which subjects;
-- which questions carry a `check` command, because that command runs in the
+- how many conventions it ships, and on which subjects;
+- which conventions carry a `check` command, because that command runs in the
   repository that accepts the ADR;
 - the alias you propose.
 
 ontrack does not read the README.
 
-## When you change a question
+## When you change a convention
 
-Raise its `revision` in the track. Each repository that answered the
+Raise its `revision` in the track. Each repository that ruled on the
 earlier revision sees it in `plan`, once it has updated the dependency:
 
 ```
@@ -166,17 +166,17 @@ platform: 1 revised, 0 unchanged
   revised       ADR-0001-commits (revision 1 → 2)
 ```
 
-Raise it only when the question itself moves. A fixed typo is not a new
-question.
+Raise it only when the convention itself moves. A fixed typo is not a new
+convention.
 
-[Revise a question](revise-a-question.md) follows the change through to a
+[Revise a convention](revise-a-convention.md) follows the change through to a
 repository that rules again.
 
 ## Go further
 
 - Read [how ontrack works](how-it-works.md) for the model behind these
-  steps: the pieces, the life of a question, and the cycle.
-- Have a question name the command that verifies its answer, in a `check`
+  steps: the pieces, the life of a convention, and the cycle.
+- Have a convention name the command that verifies its ruling, in a `check`
   key. [`ontrack check`](commands.md#ontrack-check) runs it in each
   repository that accepted the ADR.
 - Let your editor check the `ontrack` key as you type, with the

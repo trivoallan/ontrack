@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`ontrack apply` brings a downstream repository in line with what `ontrack plan` reports, in one command, without ever overwriting a verdict the repository already holds.
+`ontrack apply` brings a downstream repository in line with what `ontrack plan` reports, in one command, without ever overwriting a ruling the repository already holds.
 
 ## Requirements
 
@@ -55,7 +55,7 @@ After a migration or a rename, `apply` SHALL list every link a move breaks in th
 - **WHEN** `docs/adr/trivoallan/ADR-0002-localization.md` links to `ADR-0001-record-architecture-decisions.md` in the same folder
 - **THEN** no link is listed for it
 
-### Requirement: Verdicts are never overwritten
+### Requirement: Rulings are never overwritten
 `apply` MUST NOT write to, move or delete a `revised` or `unreadable` ADR, except moving it as part of a migration. It MUST NOT delete a `removed` ADR unless `--prune` is given, and MUST NOT write to an `undetermined` ADR unless `--confirm` names it. In an ADR the repository already holds, `apply` MUST NOT change any line other than `revision:` (see "Confirming undetermined ADRs") and the check line (see "Synchronizing checks"). It MUST NOT commit.
 
 #### Scenario: Revised ADR left alone
@@ -110,9 +110,9 @@ With `--dry-run`, `apply` SHALL print exactly what it would do with the same opt
 - **WHEN** a track has one `new` and one `revised` ADR
 - **THEN** `apply` imports the new one, prints it as `imported`, prints the `revised` line under what remains, and exits with `2`
 
-#### Scenario: Only the rules block to write
+#### Scenario: Only the instructions block to write
 - **WHEN** every ADR is unchanged and the `AGENTS.md` block is out of date
-- **THEN** `apply` prints `AGENTS.md: rules block updated` and exits with `0`
+- **THEN** `apply` prints `AGENTS.md: instructions block updated` and exits with `0`
 
 #### Scenario: Only a check to synchronize
 - **WHEN** track `trivoallan` has one `check` ADR, `ADR-0006-commits`, with a local line `check: exit 0` and a track line `check: exit 1`, and everything else is current

@@ -4,6 +4,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { main } from '../src/cli.ts';
 import type { Command } from '../src/cli.ts';
+import { documents, schemaOf } from '../src/documents.ts';
 import { adr, cleanup, makeProject, makeTree } from './helpers/project.ts';
 
 after(cleanup);
@@ -17,7 +18,17 @@ async function run(root: string, argv: string[], commands?: Command[]) {
     stderr: { write: (s: string) => { stderr += s; } },
   };
   const code = await main(argv, io, commands);
-  return { code, stdout, stderr, json: () => JSON.parse(stdout), error: () => JSON.parse(stderr).error };
+  // Every document read by a test is parsed with its model, which refuses a
+  // key it does not name: a key added to the code and not to the model fails.
+  const name = argv.find((a) => a in documents) as keyof typeof documents | undefined;
+  return {
+    code,
+    stdout,
+    stderr,
+    json: () => (name ? documents[name].model.parse(JSON.parse(stdout)) : JSON.parse(stdout)) as any,
+    error: () => documents.error.model.parse(JSON.parse(stderr)).error,
+    errorSchema: () => JSON.parse(stderr).$schema,
+  };
 }
 
 const planned = (name: string, category: string, rest: object = {}) => ({ name, title: null, category, status: null, revision: null, check: null, ...rest });
@@ -34,7 +45,8 @@ test('plan --json: every ADR of every track, the unchanged ones too, and the exi
   assert.equal(r.code, 2);
   assert.equal(r.stderr, '');
   const doc = r.json();
-  assert.deepEqual(Object.keys(doc), ['tracks', 'agents', 'pending']);
+  assert.deepEqual(Object.keys(doc), ['$schema', 'tracks', 'agents', 'pending']);
+  assert.equal(doc.$schema, 'https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/plan.schema.json');
   assert.deepEqual(doc.tracks, [
     {
       namespace: 'platform',
@@ -53,7 +65,7 @@ test('plan --json: every ADR of every track, the unchanged ones too, and the exi
 
 test('plan --json with no track: no track, and no hint on standard error', async () => {
   const r = await run(makeTree({ 'package.json': '{}' }), ['plan', '--json']);
-  assert.deepEqual(r.json(), { tracks: [], agents: [], pending: false });
+  assert.deepEqual(r.json(), { $schema: schemaOf('plan'), tracks: [], agents: [], pending: false });
   assert.equal(r.stderr, '');
   assert.equal(r.code, 0);
 });
@@ -72,7 +84,7 @@ test('apply --json: the actions, what remains, and what is left to rule', async 
   const root = mixed();
   const r = await run(root, ['apply', '--json']);
   const doc = r.json();
-  assert.deepEqual(Object.keys(doc), ['dryRun', 'actions', 'links', 'supersedes', 'agents', 'remaining', 'next', 'pending']);
+  assert.deepEqual(Object.keys(doc), ['$schema', 'dryRun', 'actions', 'links', 'supersedes', 'agents', 'remaining', 'next', 'pending']);
   assert.equal(doc.dryRun, false);
   assert.deepEqual(doc.actions, [
     { kind: 'imported', track: 'platform', adr: planned('B', 'new'), from: 'node_modules/platform/adr/B.md', to: 'docs/adr/platform/B.md' },
@@ -119,6 +131,7 @@ test('check --json: one result per ADR in force, the output of a failed check, t
   });
   const r = await run(root, ['check', '--json']);
   assert.deepEqual(r.json(), {
+    $schema: schemaOf('check'),
     results: [
       { ref: 'local/ADR-0001-a', title: 'A', status: 'accepted', path: 'docs/adr/local/ADR-0001-a.md', check: 'echo no && exit 1', result: 'fail', output: ['no'] },
       { ref: 'local/ADR-0002-b', title: 'B', status: 'accepted', path: 'docs/adr/local/ADR-0002-b.md', check: 'exit 0', result: 'pass', output: [] },
@@ -141,7 +154,7 @@ const proposed: [string, string] = ['docs/adr/local/ADR-0002-b.md', record('B', 
 test('instructions --json: the decided traits, the pending ADRs, and the block as text', async () => {
   const text = await run(reviewTree(proposed), ['instructions']);
   const doc = (await run(reviewTree(proposed), ['instructions', '--json'])).json();
-  assert.deepEqual(Object.keys(doc), ['hint', 'decided', 'pending', 'block']);
+  assert.deepEqual(Object.keys(doc), ['$schema', 'hint', 'decided', 'pending', 'block']);
   assert.deepEqual(doc.decided, [{ ...A, traits: 'commits:\n  tool: commitlint' }]);
   assert.deepEqual(doc.pending, [B]);
   assert.equal(doc.block, text.stdout);
@@ -156,14 +169,14 @@ test('review --json: the kind of prompt, the ADRs it names, and the prompt of th
   ] as const) {
     const root = reviewTree(proposed);
     const r = await run(root, ['review', ...args, '--json']);
-    assert.deepEqual(r.json(), { kind, adrs, prompt: (await run(root, ['review', ...args])).stdout });
+    assert.deepEqual(r.json(), { $schema: schemaOf('review'), kind, adrs, prompt: (await run(root, ['review', ...args])).stdout });
     assert.equal(r.code, 2);
   }
 });
 
 test('review --json with nothing to review: kind none, no prompt, nothing on standard error', async () => {
   const r = await run(reviewTree(), ['review', '--json']);
-  assert.deepEqual(r.json(), { kind: 'none', adrs: [], prompt: null });
+  assert.deepEqual(r.json(), { $schema: schemaOf('review'), kind: 'none', adrs: [], prompt: null });
   assert.equal(r.stderr, '');
   assert.equal(r.code, 0);
 });
@@ -196,6 +209,7 @@ test('--json: a failure is one document on standard error, with its code and the
 
 test('--json: a refused command line is E001, without the line on --help', async () => {
   const r = await run(makeTree({ 'package.json': '{}' }), ['plann', '--json']);
+  assert.equal(r.errorSchema(), 'https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/error.schema.json');
   assert.deepEqual(r.error(), { code: 'E001', message: 'Unknown argument: plann', docs: 'https://trivoallan.github.io/ontrack/error-messages/#e001' });
   assert.equal(r.code, 1);
 });
@@ -205,4 +219,36 @@ test('--json: a failure ontrack did not foresee has no code and no address', asy
   const r = await run(makeTree({}), ['boom', '--json'], [boom]);
   assert.deepEqual(r.error(), { code: null, message: 'unforeseen', docs: null });
   assert.equal((await run(makeTree({}), ['boom'], [boom])).stderr, 'ontrack: unforeseen\n');
+});
+
+test('schemas: each published file is the one derived from its model, and schema/ holds no other', async () => {
+  const { readFileSync, readdirSync } = await import('node:fs');
+  const { documentJsonSchema } = await import('../src/documents.ts');
+  const dir = new URL('../schema/', import.meta.url);
+  for (const name of Object.keys(documents) as (keyof typeof documents)[]) {
+    const published = JSON.parse(readFileSync(new URL(`${name}.schema.json`, dir), 'utf8'));
+    assert.deepEqual(published, documentJsonSchema(name), `schema/${name}.schema.json is out of date: run \`npm run schema\``);
+    assert.equal(published.$id, `https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/${name}.schema.json`);
+  }
+  assert.deepEqual(readdirSync(dir).sort(), [...Object.keys(documents), 'ontrack'].sort().map((name) => `${name}.schema.json`));
+});
+
+test('schemas: every key is required, and a key a later version adds is let through', async () => {
+  const { documentJsonSchema } = await import('../src/documents.ts');
+  const schema = documentJsonSchema('plan') as any;
+  assert.deepEqual(schema.required, ['$schema', 'tracks', 'agents', 'pending']);
+  assert.doesNotMatch(JSON.stringify(schema), /additionalProperties/);
+  // The model itself refuses the unknown key: that is what the tests above rely on.
+  assert.equal(documents.plan.model.safeParse({ $schema: schemaOf('plan'), tracks: [], agents: [], pending: false, extra: 1 }).success, false);
+});
+
+test('$schema: a document names its own schema, whose $id is that address, and no other schema takes it', async () => {
+  const { documentJsonSchema } = await import('../src/documents.ts');
+  const r = await run(makeTree({ 'package.json': '{}' }), ['plan', '--json']);
+  const raw = JSON.parse(r.stdout);
+  assert.equal(Object.keys(raw)[0], '$schema');
+  assert.equal(raw.$schema, documentJsonSchema('plan').$id);
+  const other = documents.check.model.safeParse(raw);
+  assert.equal(other.success, false);
+  assert.deepEqual(other.error?.issues[0].path, ['$schema']);
 });

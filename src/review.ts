@@ -1,8 +1,8 @@
 // Prints the prompt that asks a coding agent to rule `proposed` ADRs: every
 // one in sequence, or a single named one; to import first the ADRs the
 // repository does not hold yet; to rule again the ruled ADRs whose
-// track revised the question; or, for a named `accepted` ADR, to supersede it. The prompt is fixed text plus paths, titles and references:
-// everything specific to a question is in its ADR, which the agent reads.
+// track revised the convention; or, for a named `accepted` ADR, to supersede it. The prompt is fixed text plus paths, titles and references:
+// everything specific to a convention is in its ADR, which the agent reads.
 import path from 'node:path';
 import { readAdrs, supersededBy } from './instructions.ts';
 import type { Adr } from './instructions.ts';
@@ -15,10 +15,10 @@ const sorted = (root: string) => readAdrs(root).sort((a, b) => a.ref.localeCompa
 const named = (adr: Adr) => `\`${adr.path}\`${adr.title ? ` (${adr.title})` : ''}`;
 
 const STEPS = `1. Read its file in full. Do not edit any other ADR.
-2. Start from what this repository does today on this question: its files, configuration, CI and history. Where it does nothing, say so: an absence is evidence too. Describe the repository as it is, not as the other \`proposed\` ADRs would make it. Then compare with the recommendation the ADR makes, and name every difference.
+2. Start from what this repository does today on this convention: its files, configuration, CI and history. Where it does nothing, say so: an absence is evidence too. Describe the repository as it is, not as the other \`proposed\` ADRs would make it. Then compare with the recommendation the ADR makes, and name every difference.
 3. When a recommendation is conditional ("if this repository…"), check the condition and cite the file or command output that settles it.
 4. For every key under \`traits:\` that the ADR leaves to the repository, propose a value with its evidence, and mark it \`observed\` when the repository does it today, or \`absent\` when it does not and the ruling would make it do so.
-5. Propose \`rejected\` only on evidence that the question does not apply here, and say what stands in for it.
+5. Propose \`rejected\` only on evidence that the convention does not apply here, and say what stands in for it.
 6. Present the proposed ruling: the status, one line per trait key with its value, marked observed or absent, and its evidence, and every departure from the recommendation with its reason. Then stop and ask for the user's agreement, with a question tool such as \`AskUserQuestion\` when you have one. Write nothing until the user agrees.
 7. Once the user agrees: fill the \`traits:\` keys, or remove the block when rejected; set the status; write in the ADR the reason for every departure from the recommendation; then run \`npx ontrack apply\` to update AGENTS.md.
 `;
@@ -40,14 +40,14 @@ const supersedeSteps = (adr: Adr) => `1. Read its file in full. Read the rules o
 6. Once the user agrees: write the new ADR in \`docs/adr/local/\`, in the format the repository's rules prescribe, with \`status: accepted\`, \`supersedes: [${adr.ns}/${adr.id}]\` and the traits; refer to the superseded ADR for context instead of restating it. Mark the superseded ADR only as the repository's rules spell out; when they do not say what to write in it, leave its file untouched. Then run \`npx ontrack apply\` to update AGENTS.md.
 `;
 
-// The ruling is carried over where the question did not move, and taken as
-// for a new question where it did. The track's copy replaces the local one,
+// The ruling is carried over where the convention did not move, and taken as
+// for a new convention where it did. The track's copy replaces the local one,
 // so the new text and its `revision:` come with it.
-const RULE_AGAIN = `1. Read both files in full: the repository's copy, which holds the ruling, and the track's copy, which holds the question as it is asked now. Edit neither the track's copy nor any other ADR.
-2. List what moved in the question between the two: every key under \`traits:\` added, removed or renamed, every set of allowed values that changed, and every recommendation that changed. Leave out what only the ruling changed. If nothing that moved touches the ruling, say so in one line.
+const RULE_AGAIN = `1. Read both files in full: the repository's copy, which holds the ruling, and the track's copy, which holds the convention as it stands now. Edit neither the track's copy nor any other ADR.
+2. List what moved in the convention between the two: every key under \`traits:\` added, removed or renamed, every set of allowed values that changed, and every recommendation that changed. Leave out what only the ruling changed. If nothing that moved touches the ruling, say so in one line.
 3. For every trait key that did not move, keep the value this repository ruled, and the reason written for it where it departs from the recommendation.
 4. For every trait key that moved, start from the recommendation the track's copy makes. Look in this repository for evidence that it does not apply here, check every condition it states ("if this repository…"), and propose a value drawn from the repository, with its evidence.
-5. Keep the status, unless what moved settles whether the question applies here. Propose \`rejected\` only on evidence that it does not, and say what stands in for it.
+5. Keep the status, unless what moved settles whether the convention applies here. Propose \`rejected\` only on evidence that it does not, and say what stands in for it.
 6. Present the proposed ruling: the status, one line per trait key with its value, marked kept or changed, the evidence for every change, and every departure from the recommendation with its reason. Then stop and ask for the user's agreement, with a question tool such as \`AskUserQuestion\` when you have one. Write nothing until the user agrees.
 7. Once the user agrees: replace the repository's copy with the track's copy, which carries the new \`revision:\`; write the ruling in it: the agreed status, the \`traits:\` keys filled, or the block removed when rejected, and the reason for every departure from the recommendation; then run \`npx ontrack apply\` to update AGENTS.md.
 `;
@@ -92,11 +92,11 @@ ${adrs.map(({ path: file, title }) => `   - \`${file}\`${title ? ` (${title})` :
 `;
 }
 
-/** A ruled ADR whose track asks a later revision of the question. */
+/** A ruled ADR whose track ships a later revision of the convention. */
 export type Revised = { adr: Adr; track: string; from: number; to: number };
 
 /**
- * The ruled ADRs whose track has revised the question, in reference order.
+ * The ruled ADRs whose track has revised the convention, in reference order.
  * A `proposed` one is left to the review prompt.
  */
 export function revisedAdrs(root: string, plan: Plan = tracksPlan(root)): Revised[] {
@@ -153,7 +153,7 @@ export function selectAdr(root: string, name: string): Adr {
 export function formatReview(adr: Adr): string {
   return `Review one architecture decision record of this repository: ${named(adr)}.
 
-It is \`proposed\`: a question this repository has not answered yet, shipped with the answer its track recommends. Propose a ruling; the user decides. Where the ADR itself says how to rule, it prevails over this prompt.
+It is \`proposed\`: a convention this repository has not ruled on yet, shipped with the values its track recommends. Propose a ruling; the user decides. Where the ADR itself says how to rule, it prevails over this prompt.
 
 ${STEPS}
 ${TRACKING}`;
@@ -163,7 +163,7 @@ ${TRACKING}`;
 export function formatRevision({ adr, track, from, to }: Revised): string {
   return `Rule again one architecture decision record of this repository: ${named(adr)}.
 
-Its track has revised the question: this repository ruled on revision ${from}, and \`${track}\` asks revision ${to}. The ruling stands until it is taken again. Propose the new ruling; the user decides. Where the track's copy itself says how to rule, it prevails over this prompt.
+Its track has revised the convention: this repository ruled on revision ${from}, and \`${track}\` asks revision ${to}. The ruling stands until it is taken again. Propose the new ruling; the user decides. Where the track's copy itself says how to rule, it prevails over this prompt.
 
 ${RULE_AGAIN}
 ${TRACKING}`;
@@ -171,7 +171,7 @@ ${TRACKING}`;
 
 /** The contract prompt for every revised ADR, ruled again one at a time (see docs/commands.md). */
 export function formatRevisions(revised: Revised[]): string {
-  return `Rule again the architecture decision records of this repository whose track has revised the question, one at a time, in this order:
+  return `Rule again the architecture decision records of this repository whose track has revised the convention, one at a time, in this order:
 
 ${revised.map(({ adr, track, from, to }) => `- ${named(adr)}, ruled on revision ${from}: \`${track}\` asks revision ${to}`).join('\n')}
 
@@ -210,11 +210,11 @@ export function formatSequence(adrs: Adr[]): string {
 
 ${adrs.map((adr) => `- ${named(adr)}`).join('\n')}
 
-Each is a question this repository has not answered yet, shipped with the answer its track recommends. Propose a ruling; the user decides. Where an ADR itself says how to rule, it prevails over this prompt.
+Each is a convention this repository has not ruled on yet, shipped with the values its track recommends. Propose a ruling; the user decides. Where an ADR itself says how to rule, it prevails over this prompt.
 
 None of them has to be ruled now: the repository works with them open, and \`npx ontrack check\` runs only the decided ADRs. The user rules as many as they choose.
 
-First, when the list holds more than one ADR, survey them, writing nothing. The survey decides which questions the user meets first: those this repository already answers, which the user can check against what they know, come before those that need a discussion.
+First, when the list holds more than one ADR, survey them, writing nothing. The survey decides which conventions the user meets first: those this repository already answers, which the user can check against what they know, come before those that need a discussion.
 
 Read every ADR in the list and look at this repository's files, configuration, CI and history. For each ADR, take every value it asks for (every key under \`traits:\`) and look for a citation: a file, a configuration entry or a command output in this repository. Give a count only when it comes from a command you ran, and name the command. Label each citation with exactly one of these two labels, word for word:
 - \`shows the value\`: the citation states the value itself. For instance, \`"license": "MIT"\` in \`package.json\` shows \`license.spdx: MIT\`.

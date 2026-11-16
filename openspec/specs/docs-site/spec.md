@@ -20,7 +20,7 @@ The documentation site SHALL build one page for every Markdown file under `docs/
 - **WHEN** a Markdown file under `docs/` has no `title:` in its frontmatter
 - **THEN** the build fails and names that file
 
-#### Scenario: A question of the installed track becomes a page
+#### Scenario: A convention of the installed track becomes a page
 - **WHEN** the site is built while `node_modules/engineering/adr/ADR-0008-documentation.md` exists
 - **THEN** the built site holds a catalogue page with the title "Documentation" and the content of that file
 
@@ -164,6 +164,17 @@ The page of an architecture decision record SHALL show, on the line of its statu
 - **WHEN** `docs/index.mdx` is built
 - **THEN** its page shows no reference
 
+### Requirement: Search ranks the guides and the reference first
+For a word they share, the site search SHALL rank the tutorial, the guides and the reference pages before the pages of architecture decision records and of the architecture document. A search for the subject of a record, or for its identifier, SHALL still rank that record first.
+
+#### Scenario: A word of the product
+- **WHEN** a reader searches the built site for `exit code`, `install` or `track`
+- **THEN** the first result is a guide or a reference page, not the page of a record
+
+#### Scenario: The subject of a record
+- **WHEN** a reader searches the built site for `commits`
+- **THEN** the first results are the pages of `ADR-0006-commits`
+
 ### Requirement: ADR numbers in the navigation
 The navigation entry of a page whose frontmatter declares an `adr:` identifier SHALL be that identifier followed by the page's title. The page's own title is unchanged. The source files MUST NOT be edited to obtain it.
 
@@ -183,7 +194,7 @@ The navigation SHALL list the ADRs of every subdirectory of `docs/adr/`, one gro
 - **THEN** the navigation holds a group `local` and a group `trivoallan`, each listing its ADRs in number order
 
 ### Requirement: Renamed pages redirect
-When a page of `docs/` is renamed, the site SHALL serve a redirect from its former URL to the new one, so that a link published before the rename still arrives. The pages `find-a-source` and `write-your-own-source` SHALL redirect to `find-a-track` and `write-your-own-track`. Each page once served under `adr/trivoallan/` SHALL redirect to the page of the same name under `adr/engineering/`.
+When a page of `docs/` is renamed, the site SHALL serve a redirect from its former URL to the new one, so that a link published before the rename still arrives. The pages `find-a-source` and `write-your-own-source` SHALL redirect to `find-a-track` and `write-your-own-track`. The pages `revise-a-question` and `ontrack-engineering/questions` SHALL redirect to `revise-a-convention` and `ontrack-engineering/conventions`. Each page once served under `adr/trivoallan/` SHALL redirect to the page of the same name under `adr/engineering/`.
 
 #### Scenario: A link to the former guide
 - **WHEN** a reader opens `/ontrack/write-your-own-source/`
@@ -196,6 +207,14 @@ When a page of `docs/` is renamed, the site SHALL serve a redirect from its form
 #### Scenario: A link to an ADR under its former namespace
 - **WHEN** a reader opens `/ontrack/adr/trivoallan/adr-0006-commits/`
 - **THEN** the reader arrives at `/ontrack/adr/engineering/adr-0006-commits/`
+
+#### Scenario: A link to the former guide on revising
+- **WHEN** a reader opens `/ontrack/revise-a-question/`
+- **THEN** the reader arrives at `/ontrack/revise-a-convention/`
+
+#### Scenario: A link to the former list of the track
+- **WHEN** a reader opens `/ontrack/ontrack-engineering/questions/`
+- **THEN** the reader arrives at `/ontrack/ontrack-engineering/conventions/`
 
 ### Requirement: GitHub alerts render as asides
 A blockquote of a Markdown page that opens with a GitHub alert marker SHALL
@@ -217,7 +236,7 @@ outside `site/`. Its URL is that of a Markdown page with the same name.
 - **THEN** the site builds, and its page is served at `tutorial/`
 
 ### Requirement: llms.txt links the catalogue to the track
-`llms.txt` SHALL link each catalogue question to its file in the track's
+`llms.txt` SHALL link each catalogue convention to its file in the track's
 repository, at the tag of the installed release, not to a path of
 ontrack's repository.
 
