@@ -1,6 +1,6 @@
 {
   "name": "@trivoallan/ontrack",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Imports shared architecture decision records (ADRs) provided by npm tracks into a repository.",
   "keywords": [
     "adr",

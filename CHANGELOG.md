@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.6.0](https://github.com/trivoallan/ontrack/compare/v0.5.0...v0.6.0) (2026-11-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* the block of AGENTS.md opens with "## Project instructions (ontrack)"; plan and apply print "AGENTS.md: instructions block ..."; check prints "adr: <path>" after a fail line; the prompts of review say "convention". Run "ontrack apply" once to rewrite the block.
+* **cli:** an error line starts with `ontrack[E<nnn>]:` where it started with `ontrack:`. The message after the colon and the exit code `1` are unchanged.
+
+### Features
+
+* **apply:** rename a track's namespace without losing its rulings ([#208](https://github.com/trivoallan/ontrack/issues/208)) ([2139a3f](https://github.com/trivoallan/ontrack/commit/2139a3fd63b1f14d8af7b94738ecdcf651b97df9))
+* call what a track ships a convention ([#221](https://github.com/trivoallan/ontrack/issues/221)) ([13157a5](https://github.com/trivoallan/ontrack/commit/13157a548abb3136d2d26e0a4913a9a4e2e04c7b))
+* **cli:** give every error a stable code ([#214](https://github.com/trivoallan/ontrack/issues/214)) ([08d20c5](https://github.com/trivoallan/ontrack/commit/08d20c5332655a1ab4cb2363348397f5c88da47d))
+* **cli:** print what every command reports, and every error, as JSON ([#219](https://github.com/trivoallan/ontrack/issues/219)) ([071ce2e](https://github.com/trivoallan/ontrack/commit/071ce2e2de0751dddfa8a117976f2527f2de83dc))
+* **cli:** publish a JSON Schema for each document of --json ([#217](https://github.com/trivoallan/ontrack/issues/217)) ([0e1228c](https://github.com/trivoallan/ontrack/commit/0e1228c32811f5c13ddd87b96a58df6c79ea3c55))
+* **cli:** start each document of --json with the address of its schema ([#218](https://github.com/trivoallan/ontrack/issues/218)) ([e1e17c0](https://github.com/trivoallan/ontrack/commit/e1e17c00a08b707c46aff7580a5ac19831a914ea))
+* **review:** rule from the repository's practice, and mark each value observed or absent ([#205](https://github.com/trivoallan/ontrack/issues/205)) ([0b5565e](https://github.com/trivoallan/ontrack/commit/0b5565e2d83c0c7eb49c3a32c57ab83b8f8c6543))
+* **review:** rule what the history answers first, and stop when you choose ([#210](https://github.com/trivoallan/ontrack/issues/210)) ([dd26cb9](https://github.com/trivoallan/ontrack/commit/dd26cb9117d5f69c3f8ba25dd3de12070887b1c3))
+
+
+### Bug Fixes
+
+* **cli:** name the cause or the next step in four dead-end messages ([#211](https://github.com/trivoallan/ontrack/issues/211)) ([ea5821f](https://github.com/trivoallan/ontrack/commit/ea5821f17c35925b1211e7b64d3013eba3f6edeb))
+* **review:** say what review prints in one short help line ([#213](https://github.com/trivoallan/ontrack/issues/213)) ([f9e6936](https://github.com/trivoallan/ontrack/commit/f9e69360cd8ca3051fad7cbb78a2131cc04fbee0))
+
 ## [0.5.0](https://github.com/trivoallan/ontrack/compare/v0.4.0...v0.5.0) (2026-11-15)
 
 
