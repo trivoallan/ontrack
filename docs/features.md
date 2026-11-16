@@ -3,8 +3,17 @@ title: Features
 description: What ontrack can do, ordered by what you want to do, each with the page that specifies it.
 ---
 
-This page lists what ontrack does, by need. Each line links to the page
-that specifies it: nothing is specified here.
+ontrack rests on one chain, and the sections below follow it:
+
+1. A **convention** is written once, as a **question** with a recommended
+   answer: "which commit scopes?", not "use these scopes".
+2. Each repository **rules** on the question: it follows the
+   recommendation, departs from it, or rejects it. The ruling is its answer.
+3. The answers become the **rules** coding agents read.
+
+[Concepts](concepts.md) explains each word. This page lists what ontrack
+does at each step, and links every line to the page that specifies it:
+nothing is specified here.
 
 To see most of it at work in one repository, follow the
 [tutorial](tutorial.mdx).
