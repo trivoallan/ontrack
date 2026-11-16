@@ -2,6 +2,7 @@ import type { Argv } from 'yargs';
 import { agentsPending, agentsReport, agentsStatus } from '../agents.ts';
 import { buildPlan, formatPlan, hasPendingChanges, OWN } from '../plan.ts';
 import type { Io } from '../cli.ts';
+import { schemaOf } from '../documents.ts';
 import type { PlanDocument } from '../documents.ts';
 import { planJson, printJson } from '../json.ts';
 
@@ -17,7 +18,7 @@ export function handler({ io, all, json }: { io: Io; all: boolean; json: boolean
   const agents = agentsStatus(root);
   const pending = hasPendingChanges(plan) || agentsPending(agents);
   if (json) {
-    const document: PlanDocument = { tracks: planJson(plan), agents: agentsReport(agents), pending };
+    const document: PlanDocument = { $schema: schemaOf('plan'), tracks: planJson(plan), agents: agentsReport(agents), pending };
     printJson(io.stdout, document);
     return pending ? 2 : 0;
   }

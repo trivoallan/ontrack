@@ -4,6 +4,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/apply.schema.json",
+      "description": "The address of this schema."
+    },
     "dryRun": {
       "type": "boolean"
     },
@@ -386,6 +391,7 @@
     }
   },
   "required": [
+    "$schema",
     "dryRun",
     "actions",
     "links",
