@@ -12,6 +12,7 @@ import {
   selectRevised,
   tracksPlan,
 } from '../review.ts';
+import { buildPlan } from '../plan.ts';
 import type { Io } from '../cli.ts';
 import { qualify } from '../instructions.ts';
 import type { Argv } from 'yargs';
@@ -50,6 +51,9 @@ export function handler({ io, adr }: { io: Io; adr?: string }): number {
   }
   const revised = revisedAdrs(root, plan);
   if (revised.length === 0) {
+    // "Nothing to review" holds only when the tracks were read: when they
+    // cannot be, say why, as `plan` does, instead of reporting all ruled.
+    buildPlan(root);
     io.stderr.write('ontrack: no ADR is proposed or revised, nothing to review\n');
     return 0;
   }

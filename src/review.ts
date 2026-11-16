@@ -52,8 +52,9 @@ const RULE_AGAIN = `1. Read both files in full: the repository's copy, which hol
 
 /**
  * What `plan` reports for the tracks; empty when they cannot be read (no
- * `package.json`, a dependency not installed): `plan` is the command that
- * says why.
+ * `package.json`, a dependency not installed). A prompt for the ADRs already
+ * here does not need them: the command says why only when it has nothing
+ * else to print.
  */
 export function tracksPlan(root: string): Plan {
   try {

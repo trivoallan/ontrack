@@ -62,7 +62,7 @@ npx ontrack apply --confirm all      # same, for every undetermined ADR
 | --- | --- |
 | `--dry-run` | Print what `apply` would do, write nothing |
 | `--prune` | Also delete ADRs the track no longer ships |
-| `--confirm <name>` | Declare that an `undetermined` verdict still holds; `--confirm all` for every one |
+| `--confirm <name>` | Declare that an `undetermined` verdict still holds; `--confirm all` for every one. Without a name, it is a usage error, with `1` |
 
 What it does, per track:
 
@@ -376,7 +376,7 @@ migration: 5 files docs/adr/ → docs/adr/platform/
 - With `--all`, the unchanged ADRs get a line too, so every ADR has one, sorted by name whatever its category. Each ADR line then carries a verdict between the category and the name: the category in its 12-character column, two spaces, the verdict in a 10-character column, two spaces, then the name and the rest of the line as above. The summary line, the `- ` and `+ ` lines, the migration lines and the exit code do not change.
 - The verdict is the `status:` of your copy, never the track's: the first `status:` line at column zero in its frontmatter, without a trailing `# comment`. It is `-` when you have no copy yet (a `new` ADR), when the copy has no recognizable frontmatter, or when it states no status.
 - When there is nothing to do, one line per track (`platform: 14 unchanged`), and the exit code is `0`. Any other category, or a migration, gives `2`.
-- With no track at all, `plan` prints `no track found` and exits with `0`, or prints the migration of your own ADRs after that line and exits with `2`.
+- With no track at all, `plan` prints `no track found` and exits with `0`, or prints the migration of your own ADRs after that line and exits with `2`. It then names the next step on standard error, so that standard output keeps this format: `next: install a track`, then `  npm i -D <alias>@npm:<track-package>`.
 
 Any change to this format goes through this page first.
 
@@ -553,12 +553,12 @@ Import the architecture decision records this repository does not hold yet, then
 
 - A new ADR is one `plan` reports as `new`: its track ships it and this repository holds no copy. Without an argument, one new ADR is enough for the import prompt, which then names no `proposed` and no revised ADR. It lists each new ADR by the path `apply` gives its copy, `docs/adr/<namespace>/<file name>`, in reference order, with its title when it has one.
 - With an argument, new ADRs are not considered: naming a `proposed` ADR rules it without importing anything, and naming an ADR that is not imported is an error, as for any unknown name.
-- The new ADRs are found by reading the tracks, as `plan` does. When they cannot be read, `review` sees no new ADR and says nothing of it.
+- The new ADRs are found by reading the tracks, as `plan` does. When they cannot be read, `review` sees no new ADR.
 - The ADRs read are those of `instructions`. Without an argument, and once no ADR is new, the prompt lists every `proposed` ADR in reference order, the order of "Not yet decided", even when there is only one.
 - An argument with a `/` is a reference (`trivoallan/ADR-0006-commits`). Any other argument is a file name without `.md` (`ADR-0006-commits`) or an `adr:` identifier (`ADR-0006`), looked up in every directory. It must name exactly one ADR, and that ADR must be `proposed`, or `accepted` and not superseded.
 - A revised ADR is one `plan` reports as `revised` and whose copy here is no longer `proposed`, whatever its status: `accepted`, `rejected`, or superseded. Named, it gets the prompt to rule again, not the supersession prompt: rule on the question as it is asked now, then supersede. Without an argument, the revised ADRs come only once no ADR is `proposed`, in reference order.
 - A `proposed` ADR whose track revised the question gets the review prompt, like any other `proposed` one.
-- The revised ADRs are found by reading the tracks, as `plan` does. When they cannot be read (no `package.json`, a dependency not installed), `review` sees no revised ADR and says nothing of it: `plan` is the command that says why.
+- The revised ADRs are found by reading the tracks, as `plan` does. When they cannot be read (no `package.json`, a dependency not installed), `review` sees no revised ADR. It still prints the prompt for the ADRs it found. With nothing to print, it does not say that nothing is left to review: it fails with the error `plan` gives, and exits with `1`.
 - An `accepted` ADR gets the supersession prompt only when named: without an argument, `review` never reopens a decision. Supersession is that of `instructions`: an ADR another `accepted` ADR names in `supersedes:` is already superseded, and naming it is an error that says which ADR supersedes it.
 - The supersession prompt does not say how a superseded ADR is marked, nor which sections the new ADR has: those are the repository's rules on recording decisions, which the agent reads. When they say nothing on marking, the superseded file is left untouched.
 - An ADR without a title is named by its path alone.

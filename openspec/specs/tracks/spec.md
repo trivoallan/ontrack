@@ -50,7 +50,7 @@ The `ontrack` key SHALL hold an `adr` string, a path relative to the installed p
 - **THEN** discovery fails with an error that names the track and the missing `adr`
 
 ### Requirement: Missing installation is an error
-When a declared dependency has no `node_modules/<name>/package.json`, discovery SHALL fail with an error that names the dependency and suggests running `npm install`. When the project has no `package.json`, discovery SHALL fail with an error that names the expected path.
+When a declared dependency has no `node_modules/<name>/package.json`, discovery SHALL fail with an error that names the dependency and suggests running `npm install`. When the project has no `package.json`, discovery SHALL fail with an error that names the expected path. When that file is not valid JSON, or its `dependencies` or `devDependencies` is not a map of names to versions, the error SHALL name the path and the cause: the parser's reason, or the field.
 
 #### Scenario: Dependency not installed
 - **WHEN** the project declares `platform` but `node_modules/platform/package.json` does not exist

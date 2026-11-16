@@ -19,7 +19,10 @@ See [exit codes](commands.md#exit-codes).
 | Message | It means | Do |
 | --- | --- | --- |
 | `Unknown argument: <word>` | The command or the option does not exist | Run `npx ontrack --help`, or `npx ontrack <command> --help`. The [commands reference](commands.md) lists every option |
-| `cannot read <directory>/package.json` | There is no `package.json` in the directory ontrack runs in, or it is not valid JSON, or its `dependencies` are not a map of names to versions | Run ontrack from the root of the npm project |
+| `Not enough arguments following: confirm` | `--confirm` came without a name | Give the name of an `undetermined` ADR, or `all`: `npx ontrack apply --confirm ADR-0003` |
+| `cannot read <directory>/package.json; run ontrack from the root of an npm project` | There is no `package.json` in the directory ontrack runs in | Run ontrack from the root of the npm project |
+| `cannot read <directory>/package.json: it is not valid JSON (<reason>)` | The `package.json` does not parse; `<reason>` is what the parser found, with the position | Correct the file where `<reason>` points |
+| `cannot read <directory>/package.json: "<field>" must map names to versions` | `dependencies` or `devDependencies` is not a map of names to versions | Correct `<field>`, or let npm rewrite it: `npm install` |
 
 ## Tracks
 
@@ -59,7 +62,8 @@ ontrack reads the ADRs under `docs/adr/`. These errors come from `apply`,
 | `"<name>" names several ADRs: <references>; name one by its reference` | Two namespaces hold an ADR of that name | Give one of the references the message lists |
 | `<reference> is <status>, neither proposed nor accepted: nothing to review` | The ADR is `rejected`, or its `status:` is one ontrack does not know: there is nothing to rule, and nothing to supersede | To decide again, write a new ADR of your own under `docs/adr/local/` |
 | `<reference> is already superseded by <reference>: name that one` | Another ADR replaced the one you named | Run `review` on the second reference |
-| `no ADR is proposed or revised, nothing to review` | Every ADR is ruled. This is not an error: the command exits with `0` | Nothing |
+| `no ADR is proposed or revised, nothing to review` | Every ADR is ruled, and the tracks were read. This is not an error: the command exits with `0` | Nothing |
+| A message of [The command line](#the-command-line) or of [Tracks](#tracks), from `review` | `review` had no prompt to print, and could not read the tracks to say that nothing is left | What that message says |
 
 ## Lines about `AGENTS.md`
 
