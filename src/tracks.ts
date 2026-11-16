@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { ZodError } from 'zod';
 import { ontrackKey, projectManifest, trackManifest } from './schemas.ts';
+import { OntrackError } from './errors.ts';
 
 /** An installed package that ships ADRs. The npm alias is the namespace. */
 export type Track = {
@@ -29,12 +30,12 @@ export function discoverTracks(projectRoot: string): Track[] {
     // A missing file is a wrong directory far more often than a missing
     // manifest: say where to run from. Any other cause is the file's content,
     // and the reader fixes it only when told which.
-    const why =
-      (err as NodeJS.ErrnoException).code === 'ENOENT' ? '; run ontrack from the root of an npm project'
-      : err instanceof SyntaxError ? `: it is not valid JSON (${err.message})`
-      : err instanceof ZodError ? `: "${err.issues[0].path.join('.')}" must map names to versions`
-      : '';
-    throw new Error(`cannot read ${manifest}${why}`);
+    const [code, why] =
+      (err as NodeJS.ErrnoException).code === 'ENOENT' ? ['E101', '; run ontrack from the root of an npm project']
+      : err instanceof SyntaxError ? ['E102', `: it is not valid JSON (${err.message})`]
+      : err instanceof ZodError ? ['E103', `: "${err.issues[0].path.join('.')}" must map names to versions`]
+      : ['E104', ''];
+    throw new OntrackError(code, `cannot read ${manifest}${why}`);
   }
 
   const tracks: Track[] = [];
@@ -45,12 +46,12 @@ export function discoverTracks(projectRoot: string): Track[] {
     try {
       raw = readJson(path.join(pkgDir, 'package.json'));
     } catch {
-      throw new Error(`dependency "${alias}" is not installed; run npm install`);
+      throw new OntrackError('E105', `dependency "${alias}" is not installed; run npm install`);
     }
     const pkg = trackManifest.safeParse(raw);
     if (!pkg.success) {
       const field = pkg.error.issues[0].path.join('.');
-      throw new Error(`dependency "${alias}" has an invalid package.json${field && ` ("${field}")`}`);
+      throw new OntrackError('E106', `dependency "${alias}" has an invalid package.json${field && ` ("${field}")`}`);
     }
 
     const key = ontrackKey.safeParse(pkg.data.ontrack);
@@ -59,20 +60,20 @@ export function discoverTracks(projectRoot: string): Track[] {
     if (!key.success && key.error.issues[0].path.length === 0) continue;
 
     if (alias.startsWith('@')) {
-      throw new Error(`track "${alias}" must be installed under an unscoped alias`);
+      throw new OntrackError('E107', `track "${alias}" must be installed under an unscoped alias`);
     }
     if (alias === 'local') {
-      throw new Error('track "local" must be installed under another alias: local names the repository\'s own ADRs');
+      throw new OntrackError('E108', 'track "local" must be installed under another alias: local names the repository\'s own ADRs');
     }
     if (!key.success) {
       const field = key.error.issues[0].path.join('.');
-      throw new Error(`track "${alias}" has no "${field}" string in its ontrack key`);
+      throw new OntrackError('E109', `track "${alias}" has no "${field}" string in its ontrack key`);
     }
     const { adr, namespace } = key.data;
     const adrDir = path.resolve(pkgDir, adr);
     const inside = path.relative(pkgDir, adrDir);
     if (inside.startsWith('..') || path.isAbsolute(inside)) {
-      throw new Error(`track "${alias}" declares adr "${adr}" outside its package`);
+      throw new OntrackError('E110', `track "${alias}" declares adr "${adr}" outside its package`);
     }
 
     tracks.push({

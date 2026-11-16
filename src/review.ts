@@ -8,6 +8,7 @@ import { readAdrs, supersededBy } from './instructions.ts';
 import type { Adr } from './instructions.ts';
 import { buildPlan } from './plan.ts';
 import type { Plan } from './plan.ts';
+import { OntrackError } from './errors.ts';
 
 const stem = (adr: Adr) => adr.ref.slice(adr.ns.length + 1);
 const sorted = (root: string) => readAdrs(root).sort((a, b) => a.ref.localeCompare(b.ref));
@@ -123,9 +124,9 @@ function findAdr(adrs: Adr[], name: string): Adr {
   const matches = name.includes('/')
     ? adrs.filter((a) => a.ref === name)
     : adrs.filter((a) => a.id === name || stem(a) === name);
-  if (matches.length === 0) throw new Error(`no ADR named "${name}" under docs/adr/`);
+  if (matches.length === 0) throw new OntrackError('E301', `no ADR named "${name}" under docs/adr/`);
   if (matches.length > 1) {
-    throw new Error(`"${name}" names several ADRs: ${matches.map((a) => a.ref).join(', ')}; name one by its reference`);
+    throw new OntrackError('E302', `"${name}" names several ADRs: ${matches.map((a) => a.ref).join(', ')}; name one by its reference`);
   }
   return matches[0];
 }
@@ -140,10 +141,10 @@ export function selectAdr(root: string, name: string): Adr {
   const adr = findAdr(adrs, name);
   if (adr.status === 'proposed') return adr;
   if (adr.status !== 'accepted') {
-    throw new Error(`${adr.ref} is ${adr.status ?? 'without a status'}, neither proposed nor accepted: nothing to review`);
+    throw new OntrackError('E303', `${adr.ref} is ${adr.status ?? 'without a status'}, neither proposed nor accepted: nothing to review`);
   }
   const by = supersededBy(adrs).get(adr);
-  if (by) throw new Error(`${adr.ref} is already superseded by ${by.ref}: name that one`);
+  if (by) throw new OntrackError('E304', `${adr.ref} is already superseded by ${by.ref}: name that one`);
   return adr;
 }
 

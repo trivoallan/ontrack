@@ -176,7 +176,7 @@ test('removed ADRs stay without --prune and go with it', async () => {
 test('confirm without a name is a usage error, and writes nothing', async () => {
   const root = makeProject({ tracks: { platform: { 'ADR-0003.md': adr(2, 'proposed') } } });
   const r = await run(root, 'apply', '--confirm');
-  assert.match(r.stderr, /^ontrack: Not enough arguments following: confirm$/m);
+  assert.match(r.stderr, /^ontrack\[E001\]: Not enough arguments following: confirm$/m);
   assert.equal(r.code, 1);
   assert.equal(existsSync(path.join(root, 'docs/adr/platform/ADR-0003.md')), false);
 });

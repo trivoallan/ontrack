@@ -370,7 +370,7 @@ test('command: nothing to print and tracks that cannot be read is an error, not 
   const r = await review(root);
   assert.equal(r.code, 1);
   assert.equal(r.stdout, '');
-  assert.equal(r.stderr, `ontrack: cannot read ${path.join(root, 'package.json')}; run ontrack from the root of an npm project\n`);
+  assert.equal(r.stderr, `ontrack[E101]: cannot read ${path.join(root, 'package.json')}; run ontrack from the root of an npm project\n`);
 });
 
 test('command: a proposed ADR gets its prompt without a package.json', async () => {

@@ -6,6 +6,7 @@ import path from 'node:path';
 import type { Link } from './links.ts';
 import { OWN, markdownFiles } from './plan.ts';
 import { frontmatter, readTitle } from './revision.ts';
+import { OntrackError } from './errors.ts';
 
 type AdrFile = { dir: string; ns: string; file: string };
 
@@ -36,7 +37,7 @@ function adrFiles(root: string): AdrFile[] {
   const files = markdownFiles(adrRoot).map((file) => ({ dir: adrRoot, ns: OWN, file }));
   for (const { file } of files) {
     if (existsSync(path.join(adrRoot, OWN, file))) {
-      throw new Error(`docs/adr/${file} and docs/adr/${OWN}/${file} are the same ADR; keep one`);
+      throw new OntrackError('E201', `docs/adr/${file} and docs/adr/${OWN}/${file} are the same ADR; keep one`);
     }
   }
   for (const entry of readdirSync(adrRoot, { withFileTypes: true })) {
@@ -79,7 +80,7 @@ function readSupersedes(lines: string[]): string[] {
 function readTraitsBlock(lines: string[], file: string): string[] | null {
   const inline = topValue(lines, 'traits');
   if (inline === null || inline === '{}') return null;
-  if (inline !== '') throw new Error(`${file}: write traits: as an indented block, not "${inline}"`);
+  if (inline !== '') throw new OntrackError('E202', `${file}: write traits: as an indented block, not "${inline}"`);
   const block = blockAfter(lines, 'traits', (l) => /^\s/.test(l));
   if (block.length === 0) return null;
   const indent = block[0].length - block[0].trimStart().length;
@@ -190,7 +191,8 @@ function resolve(root: string) {
     // value one sets where the other nests keys.
     const clash = [...leaves].find((p) => pathOwner.has(p)) ?? [...paths].find((p) => leafOwner.has(p));
     if (clash !== undefined) {
-      throw new Error(
+      throw new OntrackError(
+        'E203',
         `trait "${clash}" is decided by both ${pathOwner.get(clash)} and ${adr.ref}; ` +
           'supersede one of them (supersedes:) to settle it',
       );

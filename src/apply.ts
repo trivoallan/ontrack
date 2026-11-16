@@ -5,6 +5,7 @@ import type { Link } from './links.ts';
 import { checkLines, formatPlan, hasPendingChanges, label, row, stem } from './plan.ts';
 import type { CheckChange, Plan, PlannedAdr, TrackPlan } from './plan.ts';
 import { setCheckLine, setRevision } from './revision.ts';
+import { OntrackError } from './errors.ts';
 
 // An undetermined ADR whose upstream copy carries a revision to adopt.
 type ConfirmableAdr = PlannedAdr & { to: number };
@@ -62,14 +63,14 @@ export function planActions(
 
   for (const name of wanted) {
     if (!confirmed.has(name)) {
-      throw new Error(`cannot confirm "${name}": it is not an undetermined ADR with an upstream revision`);
+      throw new OntrackError('E205', `cannot confirm "${name}": it is not an undetermined ADR with an upstream revision`);
     }
   }
   for (const a of actions) {
     if ((a.kind === 'imported' || a.kind === 'moved' || a.kind === 'renamed') && existsSync(a.to)) {
       const rel = (file: string) => path.relative(root, file).split(path.sep).join('/');
       const moved = a.kind === 'imported' ? '' : `, ${rel(a.from)} cannot move there`;
-      throw new Error(`${rel(a.to)} already exists${moved}; nothing was written`);
+      throw new OntrackError('E204', `${rel(a.to)} already exists${moved}; nothing was written`);
     }
   }
   return actions.sort((a, b) => KINDS.indexOf(a.kind) - KINDS.indexOf(b.kind));

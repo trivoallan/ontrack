@@ -8,6 +8,7 @@ import * as review from './commands/review.ts';
 // Imported, not read from disk: the build copies it next to the compiled
 // code, where a path relative to this file would no longer reach it.
 import manifest from '../package.json' with { type: 'json' };
+import { OntrackError, USAGE } from './errors.ts';
 
 type Out = { write(text: string): unknown };
 /** Where a command reads its directory and writes its output. `process` is one. */
@@ -67,7 +68,7 @@ export async function main(argv: string[], io: Io, commands: Command[] = default
   });
 
   if (usageError !== undefined) {
-    io.stderr.write(`ontrack: ${usageError}\nSee ontrack --help.\n`);
+    io.stderr.write(`ontrack[${USAGE}]: ${usageError}\nSee ontrack --help.\n`);
     return 1;
   }
   if (output) io.stdout.write(`${output}\n`);
@@ -75,7 +76,9 @@ export async function main(argv: string[], io: Io, commands: Command[] = default
   try {
     return await run();
   } catch (err) {
-    io.stderr.write(`ontrack: ${(err as Error).message}\n`);
+    // A failure ontrack knows carries its code; one it did not foresee has none.
+    const code = err instanceof OntrackError ? `[${err.code}]` : '';
+    io.stderr.write(`ontrack${code}: ${(err as Error).message}\n`);
     return 1;
   }
 }
