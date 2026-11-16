@@ -237,7 +237,9 @@ test('sequence: a survey in two groups, agreed before the first ruling, writing 
   assert.match(out, /For each ADR, take every value it asks for \(every key under `traits:`\) and look for a citation/);
   assert.match(out, /- `shows the value`: the citation states the value itself\./);
   assert.match(out, /- `next to it`: the citation shows something from which you would infer the value\./);
-  assert.match(out, /An absence counts as a citation only when the absence is the value/);
+  assert.match(out, /An absence counts as a citation only when the thing, if it existed, would have to leave a file or a configuration in this repository, and none is there/);
+  assert.match(out, /An absence does not count for a thing that could exist without leaving a trace in this repository, such as a dependency-update app, the provenance a registry records, a convention like the language of the documentation, or which agents contributors use: an ADR that rests on such an absence goes to the second group\./);
+  assert.match(out, /A value read from the file tree also shows the value: the main language, counted from the source files listed by `git ls-files`\./);
   assert.match(out, /Put an ADR in the first group only when every one of its values has a citation labelled `shows the value`\. Put every other ADR in the second group, including one where a single value is held outside this repository or is inferred\./);
   assert.match(out, /Do not put an ADR in the first group on a `next to it` citation, however likely the value seems\. Do not leave a value you could not show without saying where it lives/);
   assert.match(out, /a heading per group with its number of ADRs, equal to the ADRs listed under it;\n- for the first group, one row per value: ADR, key, value, citation;\n- for the second group, one row per value you could not show, and no row for the values you could: ADR, key, where the value lives or "unknown", and any citation you have, with its label\./);
