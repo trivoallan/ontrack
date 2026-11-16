@@ -1,0 +1,54 @@
+I'll start with the survey, which writes nothing. First I'll read the ADRs and look at the repository.
+---
+I'm still on the survey. I've read the ADRs' keys and now I'm collecting repository evidence (CI, config, history).
+---
+Simpler commands, then.
+---
+# Survey (nothing written)
+
+I read all 25 ADRs and checked `package.json`, `.github/`, `.npmrc`, `license`, `docs/`, the root listing and the git history. Everything below is read-only.
+
+## Group 1: every value has a citation that shows it (3 ADRs)
+
+Each value here rests on a citation that shows it, or on an absence that is the value.
+
+| ADR | Key | Value | Citation |
+| --- | --- | --- | --- |
+| 0016 Changes | `changes.framework` | `none` | `shows the value`: there is no `openspec/` directory and no `openspec` dependency in `package.json`. |
+| 0016 Changes | `changes.schema` | `none` | `shows the value`: the same absence. The ADR requires `none` when `framework` is `none`. |
+| 0023 License | `license.spdx` | `MIT` | `shows the value`: `"license": "MIT"` in `package.json`, and the `license` file opens with "MIT License". |
+| 0025 Tools | `tools.manager` | `none` | `shows the value`: there is no `mise.toml`, `aqua.yaml` or pinned install script. CI only runs `npm install` and GitHub Actions. The ADR allows `none` only while no accepted ADR names such a tool, and none is accepted today. Ruling 0011, 0015, 0019 or 0024 could change that. |
+
+## Group 2: at least one value is not shown (22 ADRs)
+
+| ADR | Value I could not show | Where it lives | Citation I have |
+| --- | --- | --- | --- |
+| 0002 Localization | `localization.language.default` and the four overrides | A choice people make | `next to it`: `readme.md`, `docs/*.md`, symbols and commit subjects are all in English. |
+| 0003 Architecture | `architecture.pattern` | A choice people make | `next to it`: `index.js` plus `lib/`, one published package, no layers or adapters declared. |
+| 0004 Languages | `languages.main.name` | A choice people make | `next to it`: the code is `index.js` and `lib/**/*.js` (ESM, `"type": "module"`). Types are hand-written in `index.d.ts`, `types/` and `test-d/`. Whether the name is "JavaScript" or "TypeScript" is a judgment call. |
+| 0005 Validation | `validation.boundary`, `validation.data_files` | A choice people make | `next to it`: `package.json` has no validation library (no zod, pydantic or similar), and I found no JSON Schema file. |
+| 0006 Commits | `commits.scopes`; `commits.tool` | A choice people make for scopes. `tool` is shown as `none` by absence, because there is no commitlint dependency, hook or CI step. | `next to it`: none of the 918 commit subjects uses a Conventional Commits prefix, so scopes would be read from history alone. |
+| 0007 Tests | `tests.coverage_target` | A choice people make | `next to it`: `package.json` has a `c8` config with reporters and excludes but no threshold. `.github/codecov.yml` sets only `after_n_builds: 6`. |
+| 0008 Documentation | `docs.audience` (and `docs.channels` if a site is chosen) | A choice people make. `docs.tool: none` and `docs.root: docs/` are shown by absence and by `docs/*.md`. | `next to it`: the repository is public on GitHub, and `docs/*.md` are user guides. |
+| 0009 Branching | `branching.model`, `branching.merge`, `branching.prefixes` | `merge` is a forge setting. The other two are a choice people make. | `next to it`: the only branch is `main`, and the history has 0 merge commits (plain commits, no PR merge commits). |
+| 0010 Architecture documentation | `architecture.document`, `architecture.model`, `architecture.diagrams` | A choice people make | `next to it`: there is no `docs/architecture/`. I cannot tell `none` from `elsewhere`. |
+| 0011 Forge and CI | `forge.gate`; `forge.audit` | `gate` is a forge setting (a ruleset on `main`). `audit` is `none` by absence, because no workflow runs zizmor or any audit tool. | `next to it`: `.github/workflows/main.yml` runs lint, type, unit and a link check on push and PR. Nothing in the repository shows the checks are required. |
+| 0012 Delivery | `delivery.target`, `environments`, `release_tool`, `release_notes`, `registry`, `deployment.manifests` | `registry` is held outside the repository (npm). The rest is a choice people make. | `next to it`: `package.json` has `exports` and `files`, so the target looks like `package`. Versions are `10.2.1`-style commits and `v*` tags, with no release workflow. |
+| 0013 Frontend | `frontend.framework` | A choice people make (probably `rejected`) | `next to it`: `package.json` has no UI framework. There is no key value to show, since `none` is not allowed. |
+| 0014 Work tracking | `tracking.tool`, `tracking.project` | A forge setting (whether Issues are enabled) | `next to it`: `"repository": "sindresorhus/execa"` and the `origin` remote. `.github/security.md` points to GitHub advisories. |
+| 0015 Secrets | `secrets.storage`; `secrets.guard` | `storage` is a choice people make. `guard` is `none` by absence, because there is no gitleaks and no hook. | `next to it`: the workflow uses `secrets.CODECOV_TOKEN`, which is CI storage and not where you keep secrets while you work. |
+| 0017 Agent tooling | `agent.hosts` | A choice people make | No agent settings file exists. The only agent file is the untracked `AGENTS.md`. |
+| 0018 Dependencies | `dependencies.updater`, `dependencies.automerge` | A forge or app setting | `next to it`: there is no `dependabot.yml` or `renovate.json`. A Renovate app can run without a file in the repository. |
+| 0019 Vulnerabilities | `vulnerabilities.sbom`, `scanner`, `fail_on` | `scanner` may be a forge setting (`github`), so absence does not settle it. | `next to it`: no workflow runs a scanner and none publishes an SBOM. |
+| 0020 Adding a dependency | `admission.approver`; `admission.install_scripts` | `approver` is a choice people make. `install_scripts` is `allowed` by absence. | `next to it`: `.npmrc` holds only `package-lock=false` and has no `ignore-scripts`. |
+| 0021 Build provenance | `supply_chain.build_level` | The registry or npm (outside the repository) | `next to it`: no workflow publishes, so releases look manual, and nothing shows how npm records provenance. |
+| 0022 Review and merge | `review.by`, `review.approvals` | A forge setting (the ruleset on `main`) | `next to it`: there is no `CODEOWNERS` file, and the history has 594 commits by one contributor and 223 by another. |
+| 0024 Code scanning | `code_scanning.tool`, `fail_on` | A forge setting (CodeQL default setup is not in the repository) | `next to it`: no workflow runs CodeQL or semgrep. |
+| 0026 Agent identity | `agent.identity` | A choice people make | `next to it`: `git config` shows one user, `Tristan Rivoallan`. |
+
+## Proposed order
+
+1. Group 1: 0016, 0023, 0025.
+2. Group 2 in numeric order: 0002 to 0015, 0017 to 0022, 0024, 0026. The ones that depend on others come after what they depend on: 0007 after 0004, and 0011 after the CI-related ones.
+
+Do you agree with this order, or would you like another? You can also drop some ADRs from the review now. I'll start with 0016 once you answer.

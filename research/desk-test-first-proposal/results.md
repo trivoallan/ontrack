@@ -767,3 +767,102 @@ citation, a command for every count) are each followed most of the time and
 not always, and the labels got worse. The next change would be a check, not
 a rule: ask the agent to re-read its own tables against those three rules
 before presenting them.
+
+## Run 11: three survey prompts compared on the same repositories, with Sonnet
+
+Runs 5 to 10 each used a different prompt on different repositories. This
+run puts the three prompts that passed the restated AB-1 side by side, on
+the same repositories, with the model pinned (`--model claude-sonnet-5-5`;
+runs 4 to 10 used the CLI's default model, so absolute numbers below are
+not comparable with those runs).
+
+| Label | Prompt | Source |
+|---|---|---|
+| p8 | direct citations: a citation counts only if it shows the value itself, labelled | run 8, commit `f139bb2` |
+| p9 | labelled citations, a fixed layout with a count per group, one row per ADR in the second group | run 9, commit `0395479` |
+| p10 | p9, with one row per value not shown, exact label words, history alone is `next to it`, counts from a named command | run 10, commit `58adf6e` (current) |
+
+The repositories are ajv, async, moment, rollup and execa, at the commits in
+[run11/repos-at.txt](run11/repos-at.txt); no earlier run used them. 15 runs
+(3 prompts × 5 repositories), one read-only run each, $13.04. Raw:
+[run11/surveys-raw/](run11/surveys-raw/), prompts in
+[run11/prompts/](run11/prompts/).
+
+**Scoring was blind.** Per repository, the three surveys were renamed X, Y
+and Z in a random order ([run11/surveys-blind/](run11/surveys-blind/)); one
+independent scorer per repository scored all three with the strict rule of
+runs 5 to 10 and did not know which prompt produced which
+([run11/scorer-prompt.txt](run11/scorer-prompt.txt),
+[run11/scores/](run11/scores/)). The key was opened after the five reports
+came back ([run11/blind-key.json](run11/blind-key.json)). The layout
+instructions differ between prompts, so only checks that apply to all three
+were scored.
+
+| Over 5 repositories | p8 | p9 | p10 |
+|---|---|---|---|
+| ADRs in the first group | 35 | 23 | 25 |
+| ADRs in the second group | 90 | 102 | 100 |
+| **First-group ADRs with an unseen value** | **0** | **0** | **0** |
+| Mislabels | 3 (ajv, second group) | 0 | 0 |
+| Citations with no label | 13 | 6 | 17 |
+| Rows with false evidence or a false count | 4 | 4 | 2 |
+| Group headings with a wrong count | none given | 0 | 0 |
+| Second-group ADRs for which the scorer found a place for the unseen value | 55 of 90 | 69 of 102 | 74 of 100 |
+| Mean length of the survey message (words) | 963 | 1023 | 1192 |
+| Cost of the 5 runs | $4.65 | $3.56 | $4.83 |
+
+First-group ADRs per repository:
+
+| | ajv | async | moment | rollup | execa |
+|---|---|---|---|---|---|
+| p8 | 9 | 10 | 7 | 2 | 7 |
+| p9 | 4 | 6 | 7 | 3 | 3 |
+| p10 | 5 | 5 | 6 | 3 | 6 |
+
+No run wrote to a repository. One p9 run (async) tried to write a helper
+script into its own scratch directory; the tool was disabled.
+
+**On the criterion the three prompts were built for, they tie:** 0 failing
+first-group ADRs in 83 placements, across 15 surveys. That is cleaner than
+any of runs 5 to 10 under the same rule (7, 5, 3, 2, 0, 1 unseen values).
+This comparison cannot say why. The model was pinned here and not before,
+and the repositories and scorers differ, so a model effect, a repository
+effect and luck are not separable.
+
+**They differ in form, and no prompt wins on all of it:**
+- **p8** has the largest first group (35 against 23 and 25) and the shortest
+  survey, with no failure. Its 3 mislabels are all in one repository (ajv),
+  on negative facts such as "no `.claude/`" labelled as showing the value
+  where the survey itself says people hold the value. It gives no counts in
+  headings, so that check is open for it.
+- **p9** has the fewest unlabelled citations (6) and no mislabel, with the
+  smallest first group (23).
+- **p10** has the fewest false rows (2), the most unlabelled citations (17,
+  8 of them in one repository, as 7 bullets) and the longest survey.
+- **The "place" counts are not comparable between prompts.** Scorers read
+  "where the value lives" differently: one counted "a choice people make" as a
+  place (ajv, p9: 7 of its 21 rows say only that), another did not; execa's
+  scorer gave a strict and a lenient count (22 of 22, 19 of 19, 18 of 18
+  when lenient).
+- **What p10 was built to fix was not scored here**: several rows per ADR
+  and rows for values that were shown, in the second group. Run 10 scored
+  them (12 of 122 rows still listed a shown value). So this comparison
+  cannot show a gain or a loss on that.
+
+**Limits.**
+- **One survey per prompt per repository**, no repeat. Run-to-run variance
+  is unknown; runs 8 to 10 moved by about as much between repository sets.
+- **Blinding is partial**: p8 has a recognisably different layout (no counts
+  in headings), and two scorers said so.
+- **The scorers are of the same model family as the surveys.**
+- **Judgement calls differ by scorer** (for example, whether `tracking.tool`
+  is visible when it rests on an issue tracker link, or `build_level: 0`
+  when a Makefile publishes by hand).
+
+**For the maintainer:** this comparison gives no reason to prefer one prompt
+on the first-group criterion, and form points three ways. Keeping p10 keeps
+what run 10 measured in its favour (one row per value) and its reproducible
+weakness (unlabelled citations: 17 here, 17 in run 10). Reverting to p9
+trades that for fewer unlabelled citations, a shorter survey and the
+layout defects run 9 measured. Reverting to p8 gives the largest first
+group and the shortest survey and drops the count and layout checks.

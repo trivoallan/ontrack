@@ -1,0 +1,51 @@
+I'll start the survey by reading every ADR and checking the repository.
+---
+Using Grep instead.
+---
+Now the repository evidence.
+---
+Still surveying: I'm checking the last borderline ADRs (0010 and 0013) before I present the grouping.
+---
+I haven't written anything yet. The survey found 25 ADRs still `proposed`: 3 whose values this repository already shows, and 22 that need a discussion.
+
+## Group 1: this repository already answers (3 ADRs)
+
+| ADR | Key | Value | Citation |
+| --- | --- | --- | --- |
+| ADR-0010 | `architecture.document` | `elsewhere`, path `ARCHITECTURE.md` | `shows the value`: `ARCHITECTURE.md` at the root is the architecture document. There is no `docs/architecture/arc42/`. |
+| ADR-0010 | `architecture.model` | `none` | `shows the value`: there is no `docs/architecture/model/` and no LikeC4 file. The absence is the value. |
+| ADR-0010 | `architecture.diagrams` | `mermaid` | `shows the value`: a mermaid block at `ARCHITECTURE.md:53`. `docs/AGENTS.md:14` also describes pre-rendered mermaid graphs. |
+| ADR-0016 | `changes.framework` | `none` | `shows the value`: no `openspec/` directory, and "openspec" appears nowhere outside `docs/adr/`. The absence is the value. |
+| ADR-0016 | `changes.schema` | `none` | `shows the value`: the same absence. The ADR pairs `none` with `framework: none`. |
+| ADR-0023 | `license.spdx` | `MIT` | `shows the value`: `"license": "MIT"` at `package.json:112`, and `LICENSE.md` opens with "released under the MIT license". |
+
+## Group 2: needs a discussion (22 ADRs)
+
+| ADR | Value I could not show | Where it lives | Citation |
+| --- | --- | --- | --- |
+| 0002 Localization | `default` and any override | a choice people make | `next to it`: AGENTS.md, docs and recent commits are all in English. |
+| 0003 Architecture | `architecture.pattern` | a choice people make | `next to it`: `ARCHITECTURE.md` describes the layout but names no pattern. |
+| 0004 Languages | `languages.main.name` | a choice people make | `next to it`: AGENTS.md says "TypeScript + Rust hybrid", so which one is "main" is a decision. |
+| 0005 Validation | `boundary`, `data_files` | a choice people make | Not yet checked. I will look when we reach it. |
+| 0006 Commits | `scopes`, `tool` | scopes from history alone; `tool` in hooks and CI | `next to it`: `.husky/pre-commit` runs only `lint-staged`, and no commitlint is configured. |
+| 0007 Tests | `coverage_target` | a choice people make | `next to it`: `codecov.yml` sets no target, and CI uploads coverage. |
+| 0008 Documentation | `tool`, `audience`, `channels` | a choice people make | `next to it`: VitePress in `docs/` (not one of the ADR's listed tools), and a `release:docs` script that publishes via a `documentation-published` branch. |
+| 0009 Branching | `model`, `merge`, `prefixes` | `merge` in GitHub repository settings; the others are choices people make | `next to it`: `renovate.json` has `automergeStrategy: squash`. The remote branch names carry no prefix convention. |
+| 0011 Forge and CI | `gate`, `audit` | `gate` in a GitHub ruleset; `audit` is unknown | `next to it`: a `check-audit` step in `build-and-tests.yml`, and no zizmor workflow. |
+| 0012 Delivery | `target`, `environments`, `release_tool`, `release_notes`, `registry`, `deployment.manifests` | a choice people make | `next to it`: a publish job, `scripts/prepare-release.js`, and `CHANGELOG.md`. |
+| 0013 Frontend | `frontend.framework` | a choice people make | `next to it`: `vue` and `react` in `package.json` devDependencies, used by the docs site and REPL. |
+| 0014 Work tracking | `tool`, `project` | a forge setting (whether Issues is enabled) | `next to it`: the repository URL `rollup/rollup` in `package.json`, and `.github/ISSUE_TEMPLATE/`. |
+| 0015 Secrets | `storage`, `guard` | `storage` on contributors' machines, outside this repository | `next to it`: the pre-commit hook runs no secret scanner. |
+| 0017 Agent tooling | `agent.hosts` | a choice people make | `next to it`: `CLAUDE.md`, `AGENTS.md` and `.agents/skills/`, but no agent settings files. |
+| 0018 Dependencies | `updater`, `automerge` | unclear, since two updaters coexist | `next to it`: `renovate.json` automerges minor and patch updates, and `.github/dependabot.yml` also covers github-actions. |
+| 0019 Vulnerabilities | `sbom`, `scanner`, `fail_on` | `fail_on` is unknown | `next to it`: the `npm run check-audit` CI step with `audit-resolve.json`. No SBOM is generated. |
+| 0020 Adding a dependency | `approver`, `install_scripts` | a choice people make | `next to it`: there is no `.npmrc`, and `prepare` runs scripts. |
+| 0021 Build provenance | `build_level` | npm registry and GitHub | `next to it`: the publish job has `id-token: write`, but nothing shows the attestation. |
+| 0022 Review and merge | `by`, `approvals` | a GitHub ruleset | None in this repository. |
+| 0024 Code scanning | `tool`, `fail_on` | a forge setting (CodeQL default setup leaves no file) | `next to it`: no scanning workflow, which does not rule out default setup. |
+| 0025 Tools | `tools.manager` | a choice people make | `next to it`: `.tool-versions` holds only `npm`, plus `rust-toolchain.toml`. There is no `mise.toml` or `aqua.yaml`. |
+| 0026 Agent identity | `agent.identity` | a choice people make, with the GitHub account | None in this repository. |
+
+**Proposed order:** group 1 first (0010, 0016, 0023), then group 2 in ADR-number order, so 0004 comes before 0005 and 0011. Do you agree, or do you want another order? You can also say which ADRs to skip.
+
+I have no question tool in this session, so I'm asking in plain text. Once you answer, I'll take the first ADR and propose a ruling before writing anything.
