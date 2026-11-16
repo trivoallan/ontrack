@@ -21,7 +21,7 @@ To see most of it at work in one repository, follow the
 | Use a track someone else wrote | A search on the npm registry | [Find a track](find-a-track.md) |
 | Write your own | A `package.json` with an `ontrack` key and a directory of ADRs | [Write your own track](write-your-own-track.md) |
 
-## Answer the questions
+## Rule on each question
 
 | You want to | ontrack gives you | Specified in |
 | --- | --- | --- |
@@ -31,7 +31,7 @@ To see most of it at work in one repository, follow the
 | Say a question does not apply here | `rejected`, a full answer | [A ruling](concepts.md#a-ruling) |
 | Change an answer you already gave | A new ADR that supersedes the first | [`ontrack review`](commands.md#ontrack-review-adr) |
 
-## Give agents the rules
+## Load the rules into the agent's harness
 
 | You want to | ontrack gives you | Specified in |
 | --- | --- | --- |
@@ -39,7 +39,7 @@ To see most of it at work in one repository, follow the
 | See the block before it is written | `ontrack instructions` | [`ontrack instructions`](commands.md#ontrack-instructions) |
 | Know when Claude Code would not read it | A warning while a `CLAUDE.md` exists without importing `AGENTS.md` | [The rules block](file-formats.md#the-rules-block-in-agentsmd) |
 
-## Turn gaps into issues
+## Turn gaps into a conformity backlog
 
 An answer can be ahead of the repository. Once a review is ruled, the agent
 lists the rulings the code, configuration or tooling does not match, and
@@ -74,7 +74,7 @@ was in the repository's settings, not in its code.
 The [`review` prompt contract](commands.md#review-prompt-contract) specifies
 this step.
 
-## Know when something moved
+## Detect drift
 
 | You want to | ontrack gives you | Specified in |
 | --- | --- | --- |
@@ -84,7 +84,7 @@ this step.
 | Read a result without parsing output | One exit-code scheme for every command | [Exit codes](commands.md#exit-codes) |
 | Answer a revised question again | The steps, in the track and in each repository | [Revise a question](revise-a-question.md) |
 
-## Run it on GitHub Actions
+## Automate it
 
 | You want to | ontrack gives you | Specified in |
 | --- | --- | --- |
@@ -92,7 +92,7 @@ this step.
 | Be told when the track itself has moved | A weekly job to copy | [Run ontrack in CI](run-ontrack-in-ci.md#3-notice-when-the-track-has-moved) |
 | Draft a change proposal from an issue | A label on the issue starts a workflow you call | [Draft a change from a labelled issue](draft-a-change-from-an-issue.md) |
 
-## What it leaves alone
+## No lock-in
 
 - **Your answers.** ontrack never rewrites an ADR a repository has decided
   on. When the question changes, a person rules again.
