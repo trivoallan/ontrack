@@ -48,7 +48,7 @@ To see most of it at work in one repository, follow the
 | See the block before it is written | `ontrack instructions` | [`ontrack instructions`](commands.md#ontrack-instructions) |
 | Know when Claude Code would not read it | A warning while a `CLAUDE.md` exists without importing `AGENTS.md` | [The rules block](file-formats.md#the-rules-block-in-agentsmd) |
 
-## Turn gaps into a conformity backlog
+## Turn gaps into a compliance backlog
 
 An answer can be ahead of the repository. Once a review is ruled, the agent
 lists the rulings the code, configuration or tooling does not match, and
