@@ -1013,3 +1013,96 @@ worth a held-out run.
   by the resulting first group.
 - **The scorers re-judge p9 and p10.** Their numbers may differ from run
   11's. That difference is a measure of scorer variance.
+
+### Run 12, results
+
+Conditions and scoring as pre-registered above. 10 runs (p11 and a second
+p10), $10.40, a little over the $8 announced. p9 and the first p10 are the
+surveys of run 11, scored again in the same batch. Raw:
+[run12/surveys-raw/](run12/surveys-raw/); blind batches
+[run12/surveys-blind/](run12/surveys-blind/); scorer instructions
+[run12/scorer-prompt.txt](run12/scorer-prompt.txt); scores
+[run12/scores/](run12/scores/); key [run12/blind-key.json](run12/blind-key.json),
+opened after the five reports. The second p10 launched late: its prompts had
+not been copied (the generating command exits with `2`, which cut the
+copy), so I restored them and ran it again. Nothing else changed. p11's
+prompt differs from p10's by the two pre-registered edits only
+([run12/prompts/](run12/prompts/)).
+
+| Over 5 repositories | p9 | p10 | p10 bis | p11 |
+|---|---|---|---|---|
+| ADRs in the first group | 23 | 25 | 31 | 30 |
+| Failing (an O key, or the strict rule) | 0 | 0 | 1 (execa 0024) | 0 |
+| **Doubtful** (a key in A2 or O) | 2 | 1 | 4 | **0** |
+| Other | 21 | 24 | 27 | **30** |
+| Repositories with a doubtful ADR | 2 | 1 | 3 | **0** |
+| ADR-0004 (languages) in the first group | 2 of 5 | 2 of 5 | 2 of 5 | **5 of 5** |
+| Mislabels | 2 | 1 | 4 | **0** |
+| Citations with no label | 2 | 14 | 10 | **1** |
+| Group-1 rows with false evidence or a false count | 1 | 1 | 0 | 1 |
+| Group headings with a wrong count | 0 | 0 | 0 | 0 |
+
+The doubtful ADRs: p9, async 0010 and moment 0018; p10, moment 0018; p10
+bis, async 0010, moment 0018, execa 0007 and 0024. First-group ADR with the
+lowest number, per repository (ajv, async, moment, rollup, execa):
+
+| | ajv | async | moment | rollup | execa |
+|---|---|---|---|---|---|
+| p9 | 0004 | 0010 | 0004 | 0010 | 0016 |
+| p10 | 0004 | 0014 | 0004 | 0014 | 0010 |
+| p10 bis | 0004 | 0010 | 0004 | 0014 | 0007 |
+| p11 | 0004 | 0004 | 0004 | 0004 | 0004 |
+
+**Against the pre-registered decision rule, p11 is not adopted.**
+1. **Doubtful placements at least 2 fewer than the lower p10 run: not met.**
+   p11 has 0; the lower p10 run has 1, so the difference is 1.
+2. Other placements no more than 1 fewer than the lower p10 run: met (30
+   against 24 and 27).
+3. No failing placement: met.
+
+The first criterion could not be met here: with a lower baseline of 1, a
+margin of 2 asks for fewer than none. I fixed that margin without knowing the
+baseline, so this is a mistake in the pre-registration and not a
+near-miss, and it stays as the verdict. The rule says it can only reject the
+rule or call it worth a held-out run, and the data below are the case for the
+second.
+
+**What the data show, read with that in mind:**
+- **p11 behaves as designed.** No doubtful ADR in 5 repositories, where the
+  three other conditions had 2, 1 and 4. The ADRs it moved to the second
+  group are the ones the other conditions got wrong or doubtful: moment 0018
+  (a dependency-update app may leave no file), async 0010 (an architecture
+  document may live elsewhere), execa 0007 and 0024.
+- **It does not lose clean placements** (30 against 21, 24 and 27) and places
+  the main language in 5 of 5 repositories, where the other three conditions
+  placed it in 2 of 5 (they left it out for async, rollup and execa, which
+  have one main language, 476 `.js` in execa against type declarations).
+  So the "file tree shows the value" edit does its job.
+- **The first proposal is the language question in 5 of 5 repositories**
+  (table above), not Localization, a coverage question or an unseen value.
+- **Mislabels 0 and 1 citation without a label** against 1 to 4 and 2 to
+  14: the part of the trace test that says what a citation can show also
+  helps the labelling.
+
+**Run-to-run variance is large, and run 11 has to be read with it.** The
+two p10 runs, same prompt, same repositories: 25 and 31 first-group ADRs, 1
+and 4 doubtful, 0 and 1 failing, 1 and 4 mislabels, 14 and 10 unlabelled.
+Differences of that size between p9, p10 and p8 in run 11 (23 against 25
+ADRs, 6 against 8 read-by-absence, 17 against 6 unlabelled) are not
+evidence of a difference between those prompts.
+
+**The scorers disagree on the borderline ones.** moment's scorer put
+`dependencies.updater: none` in A2; execa's put the same finding in A1 with
+a note. p9 and p10 had 0 mislabels in run 11 and 2 and 1 here. The doubtful
+counts depend on who scores.
+
+**Limits.** The five repositories are those the rule was drawn from. The
+criterion is the rule: this shows that the agent applies the trace test, not
+that adopters are better served by the resulting first group. One survey per
+condition, a single pair of p10 runs for the variance.
+
+**For the maintainer:** adopting p11 now would go against the verdict of the
+pre-registered rule. A run on repositories never used, with a fixed
+criterion that includes the variance seen here (a margin relative to the
+spread of the two p10 runs, not to their lower value), would settle it; it
+costs about the same as this one.
