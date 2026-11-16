@@ -61,7 +61,7 @@ npx ontrack --version
 npx ontrack plan          # what importing the tracks would change
 npx ontrack apply         # do it
 npx ontrack instructions  # the decided traits, as a block for AGENTS.md
-npx ontrack review        # a prompt asking a coding agent to import the new ADRs, to rule the proposed ones, to rule the revised ones again, or to supersede an accepted one
+npx ontrack review        # the prompt a coding agent follows to rule the ADRs that await a ruling, or the one you name
 npx ontrack check         # run the check command of each decided ADR
 npx ontrack plan --json   # any command: the same facts as one JSON document
 ```
