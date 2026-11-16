@@ -5,8 +5,8 @@ description: The pieces ontrack is made of, what happens to a convention from th
 
 This page explains the model behind ontrack: what you run, what each
 repository holds, and what happens over time. For what an ADR, a track or a
-ruling is, start with the [concepts](concepts.md). For what it is for, see the
-[home page](index.mdx). For each command and its options, see the
+ruling is, start with the [concepts](concepts.md). For what it is for, see
+[Why ontrack](why-ontrack.md). For each command and its options, see the
 [commands reference](commands.md).
 
 ## Proposed, not imposed

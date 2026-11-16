@@ -6,7 +6,7 @@
   "packages": {
     ".": {
       "release-type": "node",
-      "extra-files": ["README.md", "docs/index.mdx"]
+      "extra-files": ["README.md"]
     }
   }
 }

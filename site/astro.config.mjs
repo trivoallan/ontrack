@@ -153,6 +153,7 @@ export default defineConfig({
       pagefind: { ranking: { pageLength: 0.1, termSimilarity: 5 } },
       components: {
         PageTitle: './src/components/PageTitle.astro',
+        SiteTitle: './src/components/SiteTitle.astro',
         MarkdownContent: './src/components/MarkdownContent.astro',
       },
       // The 404 page is site/src/pages/404.astro.
@@ -170,9 +171,9 @@ export default defineConfig({
       // either set of guides. Automate is what a repository runs on GitHub
       // Actions, with or without a track.
       sidebar: [
-        // What ontrack does comes before the tutorial: it is read to decide
-        // whether to follow it.
-        { label: 'Start here', items: ['features', 'tutorial', 'concepts', 'how-it-works'] },
+        // Why, then what ontrack does, come before the tutorial: they are read
+        // to decide whether to follow it.
+        { label: 'Start here', items: ['why-ontrack', 'features', 'tutorial', 'concepts', 'how-it-works'] },
         // The reference track, next to the tutorial that installs it: what
         // it is, how to use it, and its conventions as the installed release
         // asks them. It is the only public track; a second one would need

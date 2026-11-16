@@ -45,6 +45,7 @@ To see most of it at work in one repository, follow the
 | You want to | ontrack gives you | Specified in |
 | --- | --- | --- |
 | Have coding agents follow your rulings | One marked block in `AGENTS.md`, written by `apply` | [The instructions block](file-formats.md#the-instructions-block-in-agentsmd) |
+| Use any coding agent that reads `AGENTS.md` | Nothing to install in the agent: the block is plain Markdown in the file it already reads | [The instructions block](file-formats.md#the-instructions-block-in-agentsmd) |
 | See the block before it is written | `ontrack instructions` | [`ontrack instructions`](commands.md#ontrack-instructions) |
 | Know when Claude Code would not read it | A warning while a `CLAUDE.md` exists without importing `AGENTS.md` | [The instructions block](file-formats.md#the-instructions-block-in-agentsmd) |
 
