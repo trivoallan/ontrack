@@ -157,7 +157,9 @@ export default defineConfig({
       // either set of guides. Automate is what a repository runs on GitHub
       // Actions, with or without a track.
       sidebar: [
-        { label: 'Start here', items: ['tutorial', 'concepts', 'how-it-works'] },
+        // What ontrack does comes before the tutorial: it is read to decide
+        // whether to follow it.
+        { label: 'Start here', items: ['features', 'tutorial', 'concepts', 'how-it-works'] },
         // The reference track, next to the tutorial that installs it: what
         // it is, how to use it, and its questions as the installed release
         // asks them. It is the only public track; a second one would need
