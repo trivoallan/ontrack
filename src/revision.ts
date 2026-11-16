@@ -4,6 +4,7 @@
 
 import type { z } from 'zod';
 import { adrFrontmatter } from './schemas.ts';
+import { OntrackError } from './errors.ts';
 
 export type Comparison = 'up-to-date' | 'stale' | 'undetermined' | 'unreadable';
 
@@ -76,7 +77,7 @@ export function readTitle(text: string, name: string): string | null {
  */
 export function setRevision(text: string, revision: number): string {
   const fm = frontmatter(text);
-  if (fm === null) throw new Error('cannot set revision: no recognizable frontmatter');
+  if (fm === null) throw new OntrackError('E206', 'cannot set revision: no recognizable frontmatter');
   const lines = text.split('\n');
   const eol = lines[0].endsWith('\r') ? '\r' : '';
   const line = `revision: ${revision}${eol}`;
@@ -100,7 +101,7 @@ export function readCheckLine(text: string): string | null {
  */
 export function setCheckLine(text: string, line: string | null): string {
   const fm = frontmatter(text);
-  if (fm === null) throw new Error('cannot set check: no recognizable frontmatter');
+  if (fm === null) throw new OntrackError('E207', 'cannot set check: no recognizable frontmatter');
   const lines = text.split('\n');
   const eol = lines[0].endsWith('\r') ? '\r' : '';
   const at = (re: RegExp) => fm.findIndex((l) => re.test(l)) + 1; // index in `lines`, 0 if absent

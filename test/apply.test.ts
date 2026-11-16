@@ -173,6 +173,14 @@ test('removed ADRs stay without --prune and go with it', async () => {
 
 // Confirming
 
+test('confirm without a name is a usage error, and writes nothing', async () => {
+  const root = makeProject({ tracks: { platform: { 'ADR-0003.md': adr(2, 'proposed') } } });
+  const r = await run(root, 'apply', '--confirm');
+  assert.match(r.stderr, /^ontrack\[E001\]: Not enough arguments following: confirm$/m);
+  assert.equal(r.code, 1);
+  assert.equal(existsSync(path.join(root, 'docs/adr/platform/ADR-0003.md')), false);
+});
+
 test('confirm one ADR: only the revision line changes', async () => {
   const local = '---\nstatus: accepted\nrevision: 0\nauthors:\n- Jane\n---\n\nDecision text.\n';
   const root = makeProject({
@@ -411,4 +419,77 @@ test('an own ADR already in docs/adr/local/ stops apply before any write', async
   assert.equal(r.code, 1);
   assert.match(r.stderr, /docs\/adr\/local\/ADR-0001-cache\.md already exists, docs\/adr\/ADR-0001-cache\.md cannot move there/);
   assert.ok(!existsSync(path.join(root, 'docs/adr/platform/ADR-0006.md')));
+});
+
+// Namespace rename
+
+const renamed = () =>
+  makeProject({
+    tracks: { engineering: { 'A.md': adr(1), 'B.md': adr(1), 'N.md': adr(1) } },
+    local: {
+      'docs/adr/old/A.md': `${adr(1, 'accepted')}[b](B.md) [n](../local/L.md)\n`,
+      'docs/adr/old/B.md': adr(1, 'accepted'),
+      'docs/adr/local/L.md': [
+        '---',
+        'status: accepted',
+        'supersedes: [old/A, L0, "old/B"]',
+        '---',
+        '',
+        '[a](../old/A.md)',
+        '',
+      ].join('\n'),
+      'docs/adr/local/M.md': ['---', 'status: accepted', 'supersedes:', '  - old/B', '  - local/L', '---', ''].join('\n'),
+    },
+  });
+
+test('rename: folder moved first, rulings kept, references listed, never rewritten', async () => {
+  const root = renamed();
+  const before = read(root, 'docs/adr/old/A.md');
+  const local = read(root, 'docs/adr/local/L.md');
+  const r = await run(root, 'apply');
+  assert.equal(
+    r.stdout.split('AGENTS.md')[0],
+    [
+      'engineering: 1 renamed, 1 imported',
+      '  renamed       docs/adr/old/ → docs/adr/engineering/',
+      '  imported      N',
+      'links to update:',
+      '  docs/adr/local/L.md:6  ../old/A.md → ../engineering/A.md',
+      'supersedes to update:',
+      '  docs/adr/local/L.md:3  old/A → engineering/A',
+      '  docs/adr/local/L.md:3  old/B → engineering/B',
+      '  docs/adr/local/M.md:4  old/B → engineering/B',
+      '',
+    ].join('\n'),
+  );
+  assert.equal(existsSync(path.join(root, 'docs/adr/old')), false);
+  assert.equal(read(root, 'docs/adr/engineering/A.md'), before);
+  assert.equal(read(root, 'docs/adr/local/L.md'), local);
+  assert.match(formatPlanOf(root), /^engineering: 3 unchanged\n/);
+});
+
+test('rename inside git: every file reported renamed', async () => {
+  const root = renamed();
+  git(root, 'init', '-q');
+  git(root, 'add', '.');
+  git(root, '-c', 'user.name=t', '-c', 'user.email=t@example.com', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'init');
+  await run(root, 'apply');
+  const status = git(root, 'status', '--short').stdout;
+  assert.match(status, /^R  docs\/adr\/old\/A\.md -> docs\/adr\/engineering\/A\.md$/m);
+  assert.match(status, /^R  docs\/adr\/old\/B\.md -> docs\/adr\/engineering\/B\.md$/m);
+});
+
+test('dry run of a rename: renamed line, nothing moves', async () => {
+  const root = renamed();
+  const before = snapshot(root);
+  const r = await run(root, 'apply', '--dry-run');
+  assert.match(r.stdout, /^dry run: nothing written\nengineering: 1 renamed, 1 imported\n {2}renamed {7}docs\/adr\/old\/ → docs\/adr\/engineering\/\n/);
+  assert.deepEqual(snapshot(root), before);
+});
+
+test('a rename onto an existing folder aborts before any write', () => {
+  const root = renamed();
+  const plan = buildPlan(root);
+  mkdirSync(path.join(root, 'docs/adr/engineering'));
+  assert.throws(() => planActions(root, plan), /docs\/adr\/engineering already exists, docs\/adr\/old cannot move there/);
 });

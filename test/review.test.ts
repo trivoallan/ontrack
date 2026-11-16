@@ -396,12 +396,26 @@ test('command: a named ADR', async () => {
 });
 
 test('command: nothing to review exits 0 with an empty stdout', async () => {
-  for (const root of [makeTree({ [RECORD]: adr('R', 'status: accepted') }), makeTree({ 'README.md': '' })]) {
+  for (const root of [makeTree({ 'package.json': '{}', [RECORD]: adr('R', 'status: accepted') }), makeTree({ 'package.json': '{}' })]) {
     const r = await review(root);
     assert.equal(r.code, 0);
     assert.equal(r.stdout, '');
     assert.match(r.stderr, /no ADR is proposed or revised/);
   }
+});
+
+test('command: nothing to print and tracks that cannot be read is an error, not "nothing to review"', async () => {
+  const root = makeTree({ [RECORD]: adr('R', 'status: accepted') });
+  const r = await review(root);
+  assert.equal(r.code, 1);
+  assert.equal(r.stdout, '');
+  assert.equal(r.stderr, `ontrack[E101]: cannot read ${path.join(root, 'package.json')}; run ontrack from the root of an npm project\n`);
+});
+
+test('command: a proposed ADR gets its prompt without a package.json', async () => {
+  const r = await review(makeTree({ [RECORD]: adr('R', 'status: proposed') }));
+  assert.equal(r.code, 2);
+  assert.notEqual(r.stdout, '');
 });
 
 test('command: an accepted name prints the supersession prompt, exits 2, leaves the tree unchanged', async () => {

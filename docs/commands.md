@@ -41,8 +41,124 @@ Every command shares the same exit codes.
 A CI job can detect an out-of-date repository on `2` without parsing the
 output.
 
+On `1`, standard error holds one line that starts with `ontrack[E<nnn>]:`.
+The code between the brackets is a contract, like the exit codes: it names the
+same failure from one version to the next, whatever the sentence after it
+becomes. [Error messages](error-messages.md) lists every code.
+
 Every error a command prints on `1` is listed, with what to do about it, in
 [Error messages](error-messages.md).
+
+## JSON output
+
+Every command takes `--json`. It then prints one JSON document on standard
+output, in place of the text, with the same facts. Like the text, the
+document is a contract: its keys change here before they change in the code.
+
+- Every key below is always present. Where the text prints nothing, the value
+  is `null`, or an empty list.
+- A path is relative to the repository, with forward slashes.
+- The exit codes do not change.
+- Nothing else is printed: the lines the text form writes on standard error
+  (the next step of `apply` and of `plan`, the `nothing to review` line of
+  `review`) are keys of the document.
+- A key may be added in a later version. A key is not removed or given
+  another meaning without a breaking change.
+
+```bash
+npx ontrack plan --json
+```
+
+### An ADR of a track
+
+`plan` and `apply` describe an ADR of a track the same way:
+
+| Key | Value |
+| --- | --- |
+| `name` | The file name without `.md` |
+| `title` | The title, or `null` |
+| `category` | `revised`, `new`, `removed`, `undetermined`, `unreadable`, `check` or `unchanged` |
+| `status` | The verdict of your copy, as `plan --all` prints it; `null` where it prints `-` |
+| `revision` | `{ "from", "to" }` for a `revised` or `undetermined` ADR, each a number or `null`; else `null` |
+| `check` | `{ "from", "to" }` for a `check` ADR: the line of your copy and the line of the track, each `null` when absent; else `null` |
+
+### An ADR of the repository
+
+`check`, `instructions` and `review` describe an ADR under `docs/adr/` the
+same way:
+
+| Key | Value |
+| --- | --- |
+| `ref` | The reference: `<namespace>/<file name without .md>` |
+| `title` | The title, or `null` |
+| `status` | The `status:` of the file, or `null` |
+| `path` | The file |
+
+### `plan --json`
+
+| Key | Value |
+| --- | --- |
+| `tracks` | One entry per track, then one for `local` when your own ADRs have to move: `namespace`, `adrs` (every ADR of the track, the unchanged ones too), `rename` (`{ "from", "to" }`, two folders, or `null`), `migration` (the files to move) |
+| `agents` | The [lines about `AGENTS.md`](error-messages.md#lines-about-agentsmd), as the text prints them |
+| `pending` | `true` when the exit code is `2` |
+
+`--all` changes nothing: the document always holds every ADR. With no track,
+`tracks` is empty.
+
+### `apply --json`
+
+| Key | Value |
+| --- | --- |
+| `dryRun` | `true` under `--dry-run`: the document says what would be done |
+| `actions` | In the order they ran: `kind` (`renamed`, `imported`, `moved`, `confirmed`, `synced` or `pruned`), `track`, `adr` (the ADR of the track, or `null` for `renamed` and `moved`), `from` (a path, or `null` for `confirmed`, `synced` and `pruned`), `to` |
+| `links` | The links to update: `file`, `line`, `old`, `new` |
+| `supersedes` | The `supersedes:` entries to update, in the same form |
+| `agents` | The lines about `AGENTS.md` |
+| `remaining` | What `plan --json` gives under `tracks`, once the actions are done |
+| `next` | `{ "proposed", "revised" }`: how many ADRs are left to rule, and to rule again |
+| `pending` | `true` when the exit code is `2` |
+
+### `check --json`
+
+| Key | Value |
+| --- | --- |
+| `results` | One entry per ADR checked: the ADR of the repository, then `check` (the command, or `null`), `result` (`pass`, `fail` or `unchecked`) and `output` (the lines a failed command printed) |
+| `counts` | `{ "fail", "pass", "unchecked" }` |
+
+### `instructions --json`
+
+| Key | Value |
+| --- | --- |
+| `hint` | The sentence that sends an agent to `review` |
+| `decided` | The ADRs in force that decide traits: the ADR of the repository, then `traits`, its YAML as one text |
+| `pending` | The ADRs not yet decided |
+| `block` | The whole block, as the text form prints it |
+
+### `review --json`
+
+| Key | Value |
+| --- | --- |
+| `kind` | `import`, `sequence`, `review`, `revision`, `revisions` or `supersession`: which prompt; `none` when there is nothing to review |
+| `adrs` | The ADRs the prompt names. For `import`, `{ "path", "title" }` of each new ADR; else the ADR of the repository, with `revision` (`{ "from", "to" }`) for `revision` and `revisions` |
+| `prompt` | The prompt, as the text form prints it; `null` for `none` |
+
+### An error, with `--json`
+
+On exit code `1`, standard output is empty and standard error holds one
+document:
+
+```json
+{
+  "error": {
+    "code": "E105",
+    "message": "dependency \"platform\" is not installed; run npm install",
+    "docs": "https://trivoallan.github.io/ontrack/error-messages/#e105"
+  }
+}
+```
+
+`code` is the [code of the error](error-messages.md), and `docs` the address
+of its row. Both are `null` for a failure ontrack did not foresee.
 
 ## `ontrack apply`
 
@@ -62,12 +178,13 @@ npx ontrack apply --confirm all      # same, for every undetermined ADR
 | --- | --- |
 | `--dry-run` | Print what `apply` would do, write nothing |
 | `--prune` | Also delete ADRs the track no longer ships |
-| `--confirm <name>` | Declare that an `undetermined` verdict still holds; `--confirm all` for every one |
+| `--confirm <name>` | Declare that an `undetermined` verdict still holds; `--confirm all` for every one. Without a name, it is a usage error, with `1` |
 
 What it does, per track:
 
 | Action | When | Effect |
 | --- | --- | --- |
+| `renamed` | A `rename:` line | The old folder moved, as a whole and first, to `docs/adr/<alias>/` (`git mv` in a git repository, a plain rename otherwise); its files are unchanged |
 | `imported` | A `new` ADR | Copied, byte for byte, into `docs/adr/<alias>/` |
 | `moved` | A flat-layout file | Moved from `docs/adr/` to `docs/adr/<alias>/`, or to `docs/adr/local/` for one of your own ADRs, under a `local:` line (`git mv` in a git repository, a plain rename otherwise) |
 | `pruned` | A `removed` ADR, with `--prune` | Deleted |
@@ -91,10 +208,11 @@ something still needs a person, `1` error.
 
 ### `apply` output
 
-The output lists the actions, then every Markdown link the migration breaks
-(links to a moved file, and links held by a moved file to a file left in
-place; it lists them, it does not rewrite them), then what still needs a
-human, in the `plan` format:
+The output lists the actions, then every Markdown link a migration or a
+rename breaks (links to a moved file, and links held by a moved file to a
+file left in place), then, after a rename, every `supersedes:` entry that
+names the old namespace. It lists them, it does not rewrite them. Then comes
+what still needs a human, in the `plan` format:
 
 ```
 dry run: nothing written
@@ -108,6 +226,22 @@ remaining:
 platform: 1 revised, 2 unchanged
   revised       ADR-0010  Forge and CI (revision 3 → 4)
 ```
+
+After a rename, the actions start with the `renamed` line, and the
+`supersedes:` entries follow the links:
+
+```
+engineering: 1 renamed
+  renamed       docs/adr/trivoallan/ → docs/adr/engineering/
+links to update:
+  docs/adr/local/ADR-0001-propose.md:20  ../trivoallan/ADR-0014-work-tracking.md → ../engineering/ADR-0014-work-tracking.md
+supersedes to update:
+  docs/adr/local/ADR-0024-cooldown.md:8  trivoallan/ADR-0018 → engineering/ADR-0018
+```
+
+Until those entries are edited, they match no ADR, so the ADRs they named are
+in force again; when they decide a trait the replacing ADR decides too, the
+rules block is skipped. Fix the entries and run `apply` again.
 
 The first line only appears with `--dry-run`. With nothing to do, `apply`
 prints the same output as `plan`.
@@ -301,7 +435,7 @@ ADRs to `docs/adr/<alias>/`, your own to `docs/adr/local/`. It reports the state
 (`missing` or `out of date`).
 
 **Exit code.** `0` when every ADR is unchanged, or when there is no track at
-all. `2` for any other category, a migration, or a rules block to write.
+all. `2` for any other category, a migration, a rename, or a rules block to write.
 
 **Options.**
 
@@ -354,12 +488,13 @@ migration: 5 files docs/adr/ → docs/adr/platform/
   ```
 
   The `check:` line is the first one at column zero in the frontmatter. Only an ADR that is up to date can be `check`: a `revised` ADR gets its check once you have ruled again.
+- A rename, when the track was installed under another alias before: the track has no `docs/adr/<alias>/`, and exactly one other folder of `docs/adr/` (not `local`, not the alias of an installed track) holds at least one file the track ships. The ADRs are classified against that folder, as if the rename were done, and the ADR lines are followed by `rename: docs/adr/<old>/ → docs/adr/<alias>/`. It counts as a change to make: exit code `2`. Two folders that could be the old one for a track, or one folder that could be the old one for two tracks, make `plan` fail with exit code `1`.
 - A flat-layout migration (`docs/adr/<file>` that belongs to the track but is not under `docs/adr/<alias>/`) is always shown: `migration: <n> file(s) docs/adr/ → docs/adr/<alias>/`, then one `move` line per file.
 - Your own ADRs live in `docs/adr/local/`. Those still placed directly in `docs/adr/` (the root files no track ships) are shown the same way, after the last track: `migration: <n> file(s) docs/adr/ → docs/adr/local/`, then one `move` line per file.
 - With `--all`, the unchanged ADRs get a line too, so every ADR has one, sorted by name whatever its category. Each ADR line then carries a verdict between the category and the name: the category in its 12-character column, two spaces, the verdict in a 10-character column, two spaces, then the name and the rest of the line as above. The summary line, the `- ` and `+ ` lines, the migration lines and the exit code do not change.
 - The verdict is the `status:` of your copy, never the track's: the first `status:` line at column zero in its frontmatter, without a trailing `# comment`. It is `-` when you have no copy yet (a `new` ADR), when the copy has no recognizable frontmatter, or when it states no status.
 - When there is nothing to do, one line per track (`platform: 14 unchanged`), and the exit code is `0`. Any other category, or a migration, gives `2`.
-- With no track at all, `plan` prints `no track found` and exits with `0`, or prints the migration of your own ADRs after that line and exits with `2`.
+- With no track at all, `plan` prints `no track found` and exits with `0`, or prints the migration of your own ADRs after that line and exits with `2`. It then names the next step on standard error, so that standard output keeps this format: `next: install a track`, then `  npm i -D <alias>@npm:<track-package>`.
 
 Any change to this format goes through this page first.
 
@@ -565,12 +700,12 @@ Import the architecture decision records this repository does not hold yet, then
 
 - A new ADR is one `plan` reports as `new`: its track ships it and this repository holds no copy. Without an argument, one new ADR is enough for the import prompt, which then names no `proposed` and no revised ADR. It lists each new ADR by the path `apply` gives its copy, `docs/adr/<namespace>/<file name>`, in reference order, with its title when it has one.
 - With an argument, new ADRs are not considered: naming a `proposed` ADR rules it without importing anything, and naming an ADR that is not imported is an error, as for any unknown name.
-- The new ADRs are found by reading the tracks, as `plan` does. When they cannot be read, `review` sees no new ADR and says nothing of it.
+- The new ADRs are found by reading the tracks, as `plan` does. When they cannot be read, `review` sees no new ADR.
 - The ADRs read are those of `instructions`. Without an argument, and once no ADR is new, the prompt lists every `proposed` ADR in reference order, the order of "Not yet decided", even when there is only one.
 - An argument with a `/` is a reference (`trivoallan/ADR-0006-commits`). Any other argument is a file name without `.md` (`ADR-0006-commits`) or an `adr:` identifier (`ADR-0006`), looked up in every directory. It must name exactly one ADR, and that ADR must be `proposed`, or `accepted` and not superseded.
 - A revised ADR is one `plan` reports as `revised` and whose copy here is no longer `proposed`, whatever its status: `accepted`, `rejected`, or superseded. Named, it gets the prompt to rule again, not the supersession prompt: rule on the question as it is asked now, then supersede. Without an argument, the revised ADRs come only once no ADR is `proposed`, in reference order.
 - A `proposed` ADR whose track revised the question gets the review prompt, like any other `proposed` one.
-- The revised ADRs are found by reading the tracks, as `plan` does. When they cannot be read (no `package.json`, a dependency not installed), `review` sees no revised ADR and says nothing of it: `plan` is the command that says why.
+- The revised ADRs are found by reading the tracks, as `plan` does. When they cannot be read (no `package.json`, a dependency not installed), `review` sees no revised ADR. It still prints the prompt for the ADRs it found. With nothing to print, it does not say that nothing is left to review: it fails with the error `plan` gives, and exits with `1`.
 - An `accepted` ADR gets the supersession prompt only when named: without an argument, `review` never reopens a decision. Supersession is that of `instructions`: an ADR another `accepted` ADR names in `supersedes:` is already superseded, and naming it is an error that says which ADR supersedes it.
 - The supersession prompt does not say how a superseded ADR is marked, nor which sections the new ADR has: those are the repository's rules on recording decisions, which the agent reads. When they say nothing on marking, the superseded file is left untouched.
 - An ADR without a title is named by its path alone.

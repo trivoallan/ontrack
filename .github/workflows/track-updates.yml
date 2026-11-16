@@ -39,6 +39,6 @@ jobs:
       # Installing builds ontrack (the `prepare` script).
       - run: npm ci
       # The alias of each track this repository imports.
-      - run: npm update trivoallan
+      - run: npm update engineering
       # Exits with 2, and fails the job, when an ADR is new or revised.
       - run: node dist/bin/ontrack.js plan

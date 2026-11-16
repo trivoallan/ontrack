@@ -18,7 +18,7 @@ Key references:
 
 Copied from [openspec-schemas](https://github.com/intent-driven-dev/openspec-schemas)
 at commit `4bb6de2f57c9275a18a4106341fe4632f5026ac6`, as
-[ADR-0016](../../../docs/adr/trivoallan/ADR-0016-changes.md) rules, and
+[ADR-0016](../../../docs/adr/engineering/ADR-0016-changes.md) rules, and
 changed on three points so that it writes in the repository's decision log
 instead of starting a second one:
 

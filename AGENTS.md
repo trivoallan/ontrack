@@ -3,25 +3,7 @@
 
 When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output.
 
-### The engineering track skips the cooldown (local/ADR-0024-the-engineering-track-skips-the-cooldown)
-
-```yaml
-dependencies:
-  updater: dependabot
-  automerge: patch
-admission:
-  approver: person
-  install_scripts: ignored
-```
-
-### Record architecture decisions (trivoallan/ADR-0001-record-architecture-decisions)
-
-```yaml
-record-architecture-decisions:
-  format: nygard
-```
-
-### Localization (trivoallan/ADR-0002-localization)
+### Localization (engineering/ADR-0002-localization)
 
 ```yaml
 localization:
@@ -33,14 +15,14 @@ localization:
     comments:
 ```
 
-### Software architecture (trivoallan/ADR-0003-architecture)
+### Software architecture (engineering/ADR-0003-architecture)
 
 ```yaml
 architecture:
   pattern: monolithic
 ```
 
-### Languages (trivoallan/ADR-0004-languages)
+### Languages (engineering/ADR-0004-languages)
 
 ```yaml
 languages:
@@ -48,7 +30,7 @@ languages:
     name: TypeScript
 ```
 
-### Validation (trivoallan/ADR-0005-validation)
+### Validation (engineering/ADR-0005-validation)
 
 ```yaml
 validation:
@@ -56,7 +38,7 @@ validation:
   data_files: json-schema
 ```
 
-### Commits (trivoallan/ADR-0006-commits)
+### Commits (engineering/ADR-0006-commits)
 
 ```yaml
 commits:
@@ -64,14 +46,14 @@ commits:
   tool: commitlint
 ```
 
-### Tests (trivoallan/ADR-0007-tests)
+### Tests (engineering/ADR-0007-tests)
 
 ```yaml
 tests:
   coverage_target: 95
 ```
 
-### Documentation (trivoallan/ADR-0008-documentation)
+### Documentation (engineering/ADR-0008-documentation)
 
 ```yaml
 docs:
@@ -81,7 +63,7 @@ docs:
   channels: [release, main]
 ```
 
-### Branching (trivoallan/ADR-0009-branching)
+### Branching (engineering/ADR-0009-branching)
 
 ```yaml
 branching:
@@ -90,7 +72,7 @@ branching:
   prefixes: [feat, fix, docs, chore]
 ```
 
-### Architecture documentation (trivoallan/ADR-0010-architecture-documentation)
+### Architecture documentation (engineering/ADR-0010-architecture-documentation)
 
 ```yaml
 architecture:
@@ -99,7 +81,7 @@ architecture:
   diagrams: mermaid
 ```
 
-### Forge and continuous integration (trivoallan/ADR-0011-forge-and-ci)
+### Forge and continuous integration (engineering/ADR-0011-forge-and-ci)
 
 ```yaml
 forge:
@@ -107,7 +89,7 @@ forge:
   audit: zizmor
 ```
 
-### Delivery (trivoallan/ADR-0012-delivery)
+### Delivery (engineering/ADR-0012-delivery)
 
 ```yaml
 delivery:
@@ -122,7 +104,7 @@ deployment:
   manifests: none
 ```
 
-### Work tracking (trivoallan/ADR-0014-work-tracking)
+### Work tracking (engineering/ADR-0014-work-tracking)
 
 ```yaml
 tracking:
@@ -130,7 +112,7 @@ tracking:
   project: trivoallan/ontrack
 ```
 
-### Secrets (trivoallan/ADR-0015-secrets)
+### Secrets (engineering/ADR-0015-secrets)
 
 ```yaml
 secrets:
@@ -138,7 +120,7 @@ secrets:
   guard: gitleaks
 ```
 
-### Changes (trivoallan/ADR-0016-changes)
+### Changes (engineering/ADR-0016-changes)
 
 ```yaml
 changes:
@@ -146,14 +128,14 @@ changes:
   schema: spec-driven-with-adr
 ```
 
-### Agent tooling (trivoallan/ADR-0017-agent-tooling)
+### Agent tooling (engineering/ADR-0017-agent-tooling)
 
 ```yaml
 agent:
   hosts: [claude-code]
 ```
 
-### Vulnerabilities (trivoallan/ADR-0019-vulnerabilities)
+### Vulnerabilities (engineering/ADR-0019-vulnerabilities)
 
 ```yaml
 vulnerabilities:
@@ -162,14 +144,14 @@ vulnerabilities:
   fail_on: critical
 ```
 
-### Build provenance (trivoallan/ADR-0021-build-provenance)
+### Build provenance (engineering/ADR-0021-build-provenance)
 
 ```yaml
 supply_chain:
   build_level: 2
 ```
 
-### Review and merge (trivoallan/ADR-0022-review-and-merge)
+### Review and merge (engineering/ADR-0022-review-and-merge)
 
 ```yaml
 review:
@@ -177,14 +159,14 @@ review:
   approvals: 0
 ```
 
-### License (trivoallan/ADR-0023-license)
+### License (engineering/ADR-0023-license)
 
 ```yaml
 license:
   spdx: Apache-2.0
 ```
 
-### Code scanning (trivoallan/ADR-0024-code-scanning)
+### Code scanning (engineering/ADR-0024-code-scanning)
 
 ```yaml
 code_scanning:
@@ -192,18 +174,36 @@ code_scanning:
   fail_on: high
 ```
 
-### Tools outside the package manager (trivoallan/ADR-0025-tools)
+### Tools outside the package manager (engineering/ADR-0025-tools)
 
 ```yaml
 tools:
   manager: mise
 ```
 
-### Agent identity (trivoallan/ADR-0026-agent-identity)
+### Agent identity (engineering/ADR-0026-agent-identity)
 
 ```yaml
 agent:
   identity: maintainer
+```
+
+### A ruled ADR follows the files it references (local/ADR-0025-a-ruled-adr-follows-the-files-it-references)
+
+```yaml
+record-architecture-decisions:
+  format: nygard
+```
+
+### The engineering track skips the cooldown under its new alias (local/ADR-0026-the-engineering-track-skips-the-cooldown-under-its-new-alias)
+
+```yaml
+dependencies:
+  updater: dependabot
+  automerge: patch
+admission:
+  approver: person
+  install_scripts: ignored
 ```
 
 <!-- ontrack:end -->

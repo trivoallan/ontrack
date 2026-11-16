@@ -132,5 +132,5 @@ use it.
 
 ontrack documents itself this way because the track it imports asks every
 repository how it documents its architecture, and
-[this is what it answered](adr/trivoallan/ADR-0010-architecture-documentation.md).
+[this is what it answered](adr/engineering/ADR-0010-architecture-documentation.md).
 Another repository, asked the same question, may answer otherwise.

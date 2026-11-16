@@ -44,11 +44,12 @@ it did, and you can discard it.
    is a public one, published as `@trivoallan/ontrack-engineering`:
 
    ```bash
-   npm i -D trivoallan@npm:@trivoallan/ontrack-engineering
+   npm i -D engineering@npm:@trivoallan/ontrack-engineering
    ```
 
-   `trivoallan@npm:` is npm's alias syntax: the package is installed under the
-   name `trivoallan`, which becomes its namespace.
+   `engineering@npm:` is npm's alias syntax: the package is installed under
+   the name `engineering`, which becomes its namespace. The alias is the
+   package name without its scope and without `ontrack-`.
    [Use the ontrack-engineering track](ontrack-engineering/use-it.md) says
    how to check the package and take its later releases.
 
@@ -59,7 +60,7 @@ it did, and you can discard it.
    ```
 
    ```
-   trivoallan: 26 new, 0 unchanged
+   engineering: 26 new, 0 unchanged
      new           ADR-0001-record-architecture-decisions
      new           ADR-0002-localization
      new           ADR-0003-architecture
@@ -77,7 +78,7 @@ it did, and you can discard it.
    ```
 
    ```
-   trivoallan: 26 imported
+   engineering: 26 imported
      imported      ADR-0001-record-architecture-decisions
      imported      ADR-0002-localization
      …
@@ -91,14 +92,14 @@ it did, and you can discard it.
 
    The last four lines name the next step. Step 4 takes it for one question.
 
-   The ADRs are now in `docs/adr/trivoallan/`, and `AGENTS.md` has a block that
+   The ADRs are now in `docs/adr/engineering/`, and `AGENTS.md` has a block that
    belongs to ontrack:
 
    <FileTree>
    - AGENTS.md the rules block, created
    - docs/
      - adr/
-       - trivoallan/
+       - engineering/
          - ADR-0001-record-architecture-decisions.md
          - ADR-0002-localization.md
          - …
@@ -113,7 +114,7 @@ it did, and you can discard it.
 
    When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output.
 
-   ### Record architecture decisions (trivoallan/ADR-0001-record-architecture-decisions)
+   ### Record architecture decisions (engineering/ADR-0001-record-architecture-decisions)
 
    ```yaml
    record-architecture-decisions:
@@ -122,10 +123,10 @@ it did, and you can discard it.
 
    ### Not yet decided
 
-   - Localization (trivoallan/ADR-0002-localization)
-   - Software architecture (trivoallan/ADR-0003-architecture)
+   - Localization (engineering/ADR-0002-localization)
+   - Software architecture (engineering/ADR-0003-architecture)
    - …
-   - Agent identity (trivoallan/ADR-0026-agent-identity)
+   - Agent identity (engineering/ADR-0026-agent-identity)
 
    <!-- ontrack:end -->
    ````
@@ -135,7 +136,7 @@ it did, and you can discard it.
 
 4. **Answer one question**
 
-   Open `docs/adr/trivoallan/ADR-0006-commits.md`. It asks which commit scopes
+   Open `docs/adr/engineering/ADR-0006-commits.md`. It asks which commit scopes
    this repository uses and which tool enforces them, and it leaves two keys
    empty:
 
@@ -168,7 +169,7 @@ it did, and you can discard it.
    reads:
 
    ````markdown
-   ### Commits (trivoallan/ADR-0006-commits)
+   ### Commits (engineering/ADR-0006-commits)
 
    ```yaml
    commits:

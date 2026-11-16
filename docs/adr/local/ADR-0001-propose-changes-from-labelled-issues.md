@@ -17,16 +17,16 @@ Accepted
 ## Context
 
 Work is tracked in GitHub issues
-([ADR-0014](../trivoallan/ADR-0014-work-tracking.md)) and changes are described
+([ADR-0014](../engineering/ADR-0014-work-tracking.md)) and changes are described
 before they are implemented
-([ADR-0016](../trivoallan/ADR-0016-changes.md)). Going from one to the other is
+([ADR-0016](../engineering/ADR-0016-changes.md)). Going from one to the other is
 done by hand, in a local agent session, one issue at a time.
 
 Running that step in continuous integration means a coding agent runs on a
 runner, reads text that anyone can write in an issue, and produces a pull
 request. Three in-force decisions bear on that:
 
-- [ADR-0011](../trivoallan/ADR-0011-forge-and-ci.md) lists the jobs a pipeline
+- [ADR-0011](../engineering/ADR-0011-forge-and-ci.md) lists the jobs a pipeline
   has. A job outside that list is a departure, declared in an ADR of the
   repository. It also forbids giving a secret to an untrusted contribution.
 - ADR-0014 says tracker text is data, and that an agent with tracker access
@@ -69,7 +69,7 @@ boundaries:
    filter that knows no path filters nothing.
 6. **One issue, one draft pull request.** The proposal and, later, its
    implementation share one branch and are squashed
-   ([ADR-0009](../trivoallan/ADR-0009-branching.md)). The pull request
+   ([ADR-0009](../engineering/ADR-0009-branching.md)). The pull request
    references the issue without closing it.
 
 ## Consequences
@@ -115,9 +115,9 @@ boundaries:
 
 ## References
 
-- [ADR-0011](../trivoallan/ADR-0011-forge-and-ci.md), forge and continuous
+- [ADR-0011](../engineering/ADR-0011-forge-and-ci.md), forge and continuous
   integration.
-- [ADR-0014](../trivoallan/ADR-0014-work-tracking.md), work tracking.
-- [ADR-0016](../trivoallan/ADR-0016-changes.md), changes.
+- [ADR-0014](../engineering/ADR-0014-work-tracking.md), work tracking.
+- [ADR-0016](../engineering/ADR-0016-changes.md), changes.
 - `openspec/specs/issue-proposal/spec.md`, once the change that introduces
   this ADR is archived.

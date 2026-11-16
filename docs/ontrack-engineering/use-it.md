@@ -13,11 +13,14 @@ questions. It assumes ontrack is installed: see the
 ### 1. Install the track under its alias
 
 ```bash
-npm i -D trivoallan@npm:@trivoallan/ontrack-engineering
+npm i -D engineering@npm:@trivoallan/ontrack-engineering
 ```
 
-The alias, `trivoallan`, is the track's namespace: its questions land in
-`docs/adr/trivoallan/`, and `AGENTS.md` names them `trivoallan/ADR-…`.
+The alias, `engineering`, is the track's namespace: its questions land in
+`docs/adr/engineering/`, and `AGENTS.md` names them `engineering/ADR-…`.
+It is the package name without its scope and without `ontrack-`. If another
+track you install would get the same alias, prefix it with the author:
+`acme-engineering`.
 
 ### 2. Check where it was built
 
@@ -46,7 +49,7 @@ A release of the track can add a question, revise one, or change how one is
 checked. Update it, then see what moved:
 
 ```bash
-npm update trivoallan
+npm update engineering
 npx ontrack plan
 ```
 
@@ -63,6 +66,25 @@ To be told when the track moves, rather than remember to update it, see
 > [ADR-0018](https://github.com/trivoallan/ontrack-engineering/blob/main/adr/ADR-0018-dependencies.md), its cooldown also delays the track's
 > own releases. ontrack exempts the track from it in
 > [local/ADR-0024](../adr/local/ADR-0024-the-engineering-track-skips-the-cooldown.md).
+
+## Change the alias
+
+The alias names the folder and every reference to the track's ADRs. To
+install the track under another one, `eng` for example, reinstall it and let
+ontrack move the folder:
+
+```bash
+npm uninstall engineering
+npm i -D eng@npm:@trivoallan/ontrack-engineering
+npx ontrack plan
+npx ontrack apply
+```
+
+`plan` reads the old folder as the track's and ends with
+`rename: docs/adr/engineering/ → docs/adr/eng/`. `apply` moves it as a
+whole, so your rulings stay. It then lists the links and the `supersedes:`
+entries that still name `engineering`: edit them, and run
+`npx ontrack apply` again to write `AGENTS.md`.
 
 ## Reject a question
 

@@ -43,7 +43,7 @@ export const collections = {
       // npm installed the release this repository depends on.
       glob({
         pattern: '*.md',
-        base: '../node_modules/trivoallan/adr',
+        base: '../node_modules/engineering/adr',
         generateId: ({ entry }) => `${CATALOGUE}/${entry.replace(/\.md$/, '').toLowerCase()}`,
       }),
     ),
