@@ -866,3 +866,92 @@ weakness (unlabelled citations: 17 here, 17 in run 10). Reverting to p9
 trades that for fewer unlabelled citations, a shorter survey and the
 layout defects run 9 measured. Reverting to p8 gives the largest first
 group and the shortest survey and drops the count and layout checks.
+
+### Run 11, further analysis: where the three prompts really differ
+
+Done on the run 11 data only, no new run ([run11/analyse.py](run11/analyse.py)).
+It corrects the reading above: "0 unseen values for all three" hides most of
+the difference.
+
+**1. Most of p8's larger first group is placements that need a lenient
+reading of an absence.** The ADRs placed in the first group split into two
+kinds. The split was fixed after seeing the data, from what the scorers
+flagged as borderline:
+- **Read by absence**: 0002 (English, no rule file), 0013 (no UI, so
+  `rejected`), 0018 (no dependency bot file, though an app can run without
+  one), 0021 (a Makefile publishes by hand, provenance lives on the
+  registry), 0025 (no tool installed outside the package manager).
+- **Other**: 0004 languages, 0010, 0014 tracker, 0016 changes framework
+  (no OpenSpec file), 0023 license. Each leaves a trace in the clone.
+
+| Placements over 5 repositories | p8 | p9 | p10 |
+|---|---|---|---|
+| Read by absence | **16** | 6 | 8 |
+| Other | 19 | 17 | 17 |
+| Repositories with more than one read-by-absence placement | 4 of 5 | 2 of 5 | 3 of 5 |
+
+The scorers accepted all of these as visible, hence 0 failures. A stricter
+scorer would not. p8 has no fewer read-by-absence placements than p9 or p10
+in any repository, and strictly more in 3 of 5. The extra rules of p9 and
+p10 do what they were written to do: they move doubtful placements to the
+second group.
+
+**2. What the added rules cost is small once the doubtful ones are set
+aside.** Of the 39 (repository, ADR) pairs that at least one prompt placed,
+p9 left 16 in the second group and p10 left 14 (p8: 4).
+- **p9, 12 of 16, and p10, 10 of 14, are read-by-absence ADRs**, mostly 0002
+  (left out in 4 repositories each) and 0013.
+- **The rest are clean ADRs left out**: 0004 languages in 2 repositories
+  for both prompts, 0010 in 1 (p9) and 2 (p10), 0014 in 1 (p9).
+- **The 0004 case is over-strict.** The two surveys say "no file declares
+  the language" (async, pure JavaScript). In execa (476 `.js`, 163 `.ts`)
+  "JavaScript or TypeScript" is a real judgement. The rule "state the value
+  itself" excludes values read from the file tree, which every scorer
+  accepted.
+
+**3. The first proposal changes, which is what the PRD cares about.** Taking
+the first group in number order:
+
+| First-group ADR with the lowest number | ajv | async | moment | rollup | execa |
+|---|---|---|---|---|---|
+| p8 | 0002 | 0002 | 0002 | 0014 | 0002 |
+| p9 | 0004 | 0010 | 0004 | 0010 | 0016 |
+| p10 | 0004 | 0014 | 0004 | 0014 | 0010 |
+
+With p8 the adopter meets Localization first in 4 of 5 repositories, the
+question run 1 found to carry no information and run 4 found first in
+5 of 5 sessions. With p9 and p10 never. This is a proxy: it assumes number
+order, which most surveys proposed.
+
+**4. The three prompts agree more than the totals suggest.** Of the 39
+pairs, 18 were placed by all three prompts, 8 by two, 13 by one. The ADRs
+placed most often over the 15 surveys: 0023 (15), 0016 (14), 0014 (11),
+0025 (10), 0004 (8), 0018 (8). Whether the survey earns its cost (about
+$1.90, 40 to 60 turns and 1,000 to 1,200 words per repository) over a
+fixed "start with" list for this track is open: the 5 ADRs of the "other"
+kind account for 17 of the 23 placements of p9 and 17 of the 25 of p10. That
+list was drawn from this data, so it is a hypothesis for a held-out run, not
+a result.
+
+**5. p9 against p10.** On this data p10 adds nothing on the first-group
+criterion (8 read-by-absence placements against 6, 25 placements against
+23), costs 17 unlabelled citations against 6 and 1,192 words against 1,023.
+It has fewer false rows (2 against 4). What p10 was built for (one row per
+value, no row for a shown value) was not scored here, and is measured in
+runs 9 and 10 separately.
+
+**6. A candidate change, not applied.** The read-by-absence placements share
+one test the current wording of the prompts ("an absence counts only when
+the absence is the value") does not state: *if the thing existed, would it
+have to leave a file or a configuration in this repository?* A change
+framework, an architecture document or a workflow audit tool would; a
+dependency-update app, the registry's provenance, the English convention
+and the agents contributors use would not. The same revision would let a
+value read from the file tree (the main language) count as shown. Both
+would need a run on repositories not used here.
+
+**Limits of this analysis.** One survey per prompt per repository; the
+"read by absence" and "other" classes were fixed after seeing the data;
+the scorers differ in what they flagged as borderline, so some ADRs are
+flagged in one repository and not in another; the first-proposal table
+assumes number order.
