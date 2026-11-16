@@ -1,4 +1,4 @@
-// Keeps the ontrack rules block of the root AGENTS.md current. Everything
+// Keeps the ontrack instructions block of the root AGENTS.md current. Everything
 // between the two markers belongs to ontrack; the rest of the file does not.
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -6,7 +6,7 @@ import { buildInstructions, formatInstructions, qualify } from './instructions.t
 import type { Instructions } from './instructions.ts';
 
 // `text` is the file as read (null when there is none), `block` the lines the
-// rules block should hold, `span` the line indexes of the two markers.
+// instructions block should hold, `span` the line indexes of the two markers.
 type Block = { file: string; text: string | null; block: string[]; warning: string | null };
 type Marked = Block & { span: [number, number] };
 export type AgentsStatus =
@@ -34,7 +34,7 @@ function claudeWarning(root: string): string | null {
 }
 
 /**
- * State of the rules block: `none` (not needed), `current`, `out of date`,
+ * State of the instructions block: `none` (not needed), `current`, `out of date`,
  * `missing`, or `skipped` with a `reason`. Never throws on a trait conflict
  * or malformed markers: those only skip the AGENTS.md step.
  */
@@ -73,7 +73,7 @@ export const agentsPending = ({ state }: AgentsStatus) => state === 'missing' ||
 /** The lines `plan` prints about the block ('' when there is nothing to say). */
 export function agentsReport(status: AgentsStatus): string[] {
   const lines: string[] = [];
-  if (status.state === 'missing' || status.state === 'out of date') lines.push(`AGENTS.md: rules block ${status.state}`);
+  if (status.state === 'missing' || status.state === 'out of date') lines.push(`AGENTS.md: instructions block ${status.state}`);
   if (status.state === 'skipped') lines.push(`AGENTS.md: skipped, ${status.reason}`);
   if (status.warning) lines.push(status.warning);
   return lines;

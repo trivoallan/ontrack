@@ -252,7 +252,7 @@ test('in the ontrack repository itself, the review hint stays short: npx runs it
 
 test('nothing decided, nothing pending: the block is still printed', async () => {
   const r = await instructions(makeTree({ 'README.md': '' }));
-  assert.equal(r.stdout, `<!-- ontrack:begin -->\n## Project rules (ontrack)\n\n${REVIEW_HINT}\n\n<!-- ontrack:end -->\n`);
+  assert.equal(r.stdout, `<!-- ontrack:begin -->\n## Project instructions (ontrack)\n\n${REVIEW_HINT}\n\n<!-- ontrack:end -->\n`);
   assert.equal(r.code, 0);
 });
 

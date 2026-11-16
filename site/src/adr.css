@@ -18,7 +18,7 @@
 .adr-status.caution {
   --sl-color-border-badge: var(--sl-badge-caution-border);
 }
-/* A question that comes with a check. It has no dot to match, and bright
+/* A convention that comes with a check. It has no dot to match, and bright
    purple is unreadable under dark text: Starlight's own tip badge. */
 .adr-status.tip {
   --sl-color-border-badge: var(--sl-badge-tip-border);

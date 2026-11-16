@@ -23,9 +23,9 @@ Add `plan` to the workflow that runs on pull requests:
       - run: npx ontrack plan
 ```
 
-`plan` fails the job when the installed track ships a question the
-repository has not imported, or has revised one it answered. It fails on the
-pull request that updates the track, and keeps failing until the questions
+`plan` fails the job when the installed track ships a convention the
+repository has not imported, or has revised one it ruled on. It fails on the
+pull request that updates the track, and keeps failing until the conventions
 are imported and ruled.
 
 ## 2. Fail when the work breaks a decision
@@ -49,7 +49,7 @@ checkout:
 
 ## 3. Notice when the track has moved
 
-`plan` reads the track as it is installed. It cannot see a question revised
+`plan` reads the track as it is installed. It cannot see a convention revised
 upstream until the dependency is updated. Add a second workflow that updates
 it in a throwaway checkout, once a week:
 
@@ -86,9 +86,9 @@ It changes nothing: the checkout is discarded. The failed run is the notice.
 
 | Job | It means | Do |
 | --- | --- | --- |
-| `plan`, on a pull request | The installed track is ahead of the repository | Rule with `review`: its prompt has the agent run `npx ontrack apply` first when the track ships new questions |
+| `plan`, on a pull request | The installed track is ahead of the repository | Rule with `review`: its prompt has the agent run `npx ontrack apply` first when the track ships new conventions |
 | `check` | The work breaks a decision | Fix the work, or supersede the decision |
-| The weekly job | The track has moved upstream | Follow [Revise a question](revise-a-question.md#in-each-repository), from step 4 |
+| The weekly job | The track has moved upstream | Follow [Revise a convention](revise-a-convention.md#in-each-repository), from step 4 |
 
 ## Related
 

@@ -12,9 +12,9 @@ not repeated here.
 
 ontrack maintains that directory with ontrack. The ADRs under
 `docs/adr/<namespace>/` are imported from a track declared in the dev
-dependencies of `package.json`: `ontrack plan` says when a question moved
+dependencies of `package.json`: `ontrack plan` says when a convention moved
 upstream, `ontrack apply` imports new ones, and each is ruled in its own
 file, where the reason for the ruling is written. A decision that changes is
 not edited: a new ADR placed directly in `docs/adr/` supersedes it. The
-rulings in force are gathered in the rules block of
+rulings in force are gathered in the instructions block of
 [`AGENTS.md`](https://github.com/trivoallan/ontrack/blob/main/AGENTS.md).

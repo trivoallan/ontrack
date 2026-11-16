@@ -129,10 +129,10 @@ A revised ADR yields the prompt to rule again, whatever its status and whether o
 ### Requirement: Prompt
 The prompt SHALL be printed to standard output and follow the contract in the commands reference, `docs/commands.md`. It names each selected ADR by its path relative to the project root, with `/` separators, and by its title when it has one. For a named ADR, it names that ADR alone. Without an argument, it lists the selected ADRs in order, one per line, and tells the agent to rule them one at a time, in that order, and not to start an ADR before the previous one is ruled. In both forms of the review prompt it SHALL tell the agent, for an ADR and in this order, to:
 1. read its file in full, and edit no other ADR;
-2. start from what the repository does today on the question (its files, configuration, CI and history), say so where it does nothing, describe the repository as it is and not as the other `proposed` ADRs would make it, then compare with the recommendation the ADR makes and name every difference;
+2. start from what the repository does today on the convention (its files, configuration, CI and history), say so where it does nothing, describe the repository as it is and not as the other `proposed` ADRs would make it, then compare with the recommendation the ADR makes and name every difference;
 3. check the condition of every conditional recommendation, and cite the evidence that settles it;
 4. propose, with its evidence, a value for every trait key the ADR leaves to the repository, and mark it `observed` when the repository does it today, or `absent` when it does not and the ruling would make it do so;
-5. propose `rejected` only on evidence that the question does not apply, and say what stands in for it;
+5. propose `rejected` only on evidence that the convention does not apply, and say what stands in for it;
 6. present the proposed ruling, each trait value with its mark, then stop, ask for the user's agreement with a question tool such as `AskUserQuestion` when the agent has one, and write nothing until the user agrees;
 7. once the user agrees, fill the traits or remove the block when rejected, set the status, write in the ADR the reason for every departure from the recommendation, and run `npx ontrack apply`.
 
@@ -282,10 +282,10 @@ A revised ADR is one the `plan` capability reports as `revised` and whose copy u
 ### Requirement: Prompt to rule again
 For revised ADRs, the prompt SHALL follow the contract in the commands reference, `docs/commands.md`. It names each ADR by its path relative to the project root, with `/` separators, and by its title when it has one; next to it, the path of the track's copy, relative to the project root, the revision the repository ruled on and the revision the track asks. It SHALL say that the ruling stands until it is taken again, and that the track's copy prevails over the prompt where it says how to rule. It SHALL tell the agent, in this order, to:
 1. read both copies in full, and edit neither the track's copy nor any other ADR;
-2. list what moved in the question: trait keys added, removed or renamed, allowed values changed, recommendations changed;
+2. list what moved in the convention: trait keys added, removed or renamed, allowed values changed, recommendations changed;
 3. keep the ruled value of every trait key that did not move, with the reason written for a departure;
 4. for every trait key that moved, start from the recommendation of the track's copy and propose a value drawn from the repository, with its evidence;
-5. keep the status unless what moved settles whether the question applies, and propose `rejected` only on evidence;
+5. keep the status unless what moved settles whether the convention applies, and propose `rejected` only on evidence;
 6. present the proposed ruling, each trait value marked kept or changed, then stop and ask for the user's agreement, writing nothing before it;
 7. once the user agrees, replace the repository's copy with the track's copy, write the ruling in it, and run `npx ontrack apply`.
 

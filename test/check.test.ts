@@ -118,7 +118,7 @@ test('ONTRACK_ADR: each command gets the path of its own ADR, and the caller\'s 
   try {
     const r = await check(root);
     for (const file of ['docs/adr/ADR-0001-a.md', 'docs/adr/trivoallan/ADR-0006-commits.md']) {
-      assert.ok(r.stdout.includes(`  rule: ${file}\n  check: echo "$ONTRACK_ADR"; exit 1\n  | ${file}\n`), file);
+      assert.ok(r.stdout.includes(`  adr: ${file}\n  check: echo "$ONTRACK_ADR"; exit 1\n  | ${file}\n`), file);
     }
     assert.match(r.stdout, /^pass {7}B \(trivoallan\/ADR-0009-b\)$/m);
   } finally {

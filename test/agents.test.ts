@@ -27,7 +27,7 @@ async function run(root: string, ...argv: string[]) {
   return { code, stdout, stderr };
 }
 
-// The rules block / block state
+// The instructions block / block state
 
 test('nothing to keep: no ADR, no AGENTS.md', async () => {
   const root = makeTree({ 'package.json': '{}' });
@@ -79,15 +79,15 @@ test('trait conflict is skipped with the instructions message', async () => {
 test('plan reports a missing block and exits 2, without writing', async () => {
   const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided() });
   const r = await run(root, 'plan');
-  assert.equal(r.stdout, 'no track found\nAGENTS.md: rules block missing\n');
+  assert.equal(r.stdout, 'no track found\nAGENTS.md: instructions block missing\n');
   assert.equal(r.code, 2);
   assert.equal(existsSync(path.join(root, 'AGENTS.md')), false);
 });
 
-test('plan: only the rules block is stale gives 2', async () => {
+test('plan: only the instructions block is stale gives 2', async () => {
   const root = makeProject({ tracks: { platform: { 'A.md': adr(1) } }, local: { 'docs/adr/platform/A.md': adr(1), 'AGENTS.md': '<!-- ontrack:begin -->\nold\n<!-- ontrack:end -->\n' } });
   const r = await run(root, 'plan');
-  assert.equal(r.stdout, 'platform: 1 unchanged\nAGENTS.md: rules block out of date\n');
+  assert.equal(r.stdout, 'platform: 1 unchanged\nAGENTS.md: instructions block out of date\n');
   assert.equal(r.code, 2);
 });
 
@@ -97,7 +97,7 @@ test('block replaced, the rest untouched', async () => {
   const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'AGENTS.md': '# Mine\n\n<!-- ontrack:begin -->\nold\n<!-- ontrack:end -->\n\nMore of mine.\n' });
   const r = await run(root, 'apply');
   assert.equal(read(root), `# Mine\n\n${block(root)}\nMore of mine.\n`);
-  assert.equal(r.stdout, 'AGENTS.md: rules block updated\n');
+  assert.equal(r.stdout, 'AGENTS.md: instructions block updated\n');
   assert.equal(r.code, 0);
 });
 
@@ -106,7 +106,7 @@ test('block appended after an empty line, with or without a final newline', asyn
     const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'AGENTS.md': mine });
     const r = await run(root, 'apply');
     assert.equal(read(root), `# Mine\n\n${block(root)}`);
-    assert.equal(r.stdout, 'AGENTS.md: rules block created\n');
+    assert.equal(r.stdout, 'AGENTS.md: instructions block created\n');
   }
 });
 
@@ -174,7 +174,7 @@ test('dry run with an import announces an update and writes nothing', async () =
   const root = withAgents(makeProject({ tracks: { platform: { 'A.md': adr(1), 'N.md': adr(1) } }, local: { 'docs/adr/platform/A.md': adr(1) } }));
   const before = read(root);
   const r = await run(root, 'apply', '--dry-run');
-  assert.match(r.stdout, /^AGENTS\.md: rules block to update$/m);
+  assert.match(r.stdout, /^AGENTS\.md: instructions block to update$/m);
   assert.equal(read(root), before);
   assert.equal(r.code, 2);
 });
@@ -182,7 +182,7 @@ test('dry run with an import announces an update and writes nothing', async () =
 test('dry run with only a stale block', async () => {
   const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'AGENTS.md': '<!-- ontrack:begin -->\nold\n<!-- ontrack:end -->\n' });
   const r = await run(root, 'apply', '--dry-run');
-  assert.equal(r.stdout, 'dry run: nothing written\nAGENTS.md: rules block to update\n');
+  assert.equal(r.stdout, 'dry run: nothing written\nAGENTS.md: instructions block to update\n');
   assert.equal(read(root), '<!-- ontrack:begin -->\nold\n<!-- ontrack:end -->\n');
 });
 
@@ -215,7 +215,7 @@ test('CLAUDE.local.md alone also triggers the warning', () => {
 test('apply prints the warning after writing, and never writes CLAUDE.md', async () => {
   const root = makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'CLAUDE.md': '# Claude\n' });
   const r = await run(root, 'apply');
-  assert.equal(r.stdout, `AGENTS.md: rules block created\n${WARNING}\n`);
+  assert.equal(r.stdout, `AGENTS.md: instructions block created\n${WARNING}\n`);
   assert.equal(read(root, 'CLAUDE.md'), '# Claude\n');
   const dry = await run(makeTree({ 'package.json': '{}', 'docs/adr/local/0001.md': decided(), 'CLAUDE.md': 'x' }), 'apply', '--dry-run');
   assert.ok(dry.stdout.includes(WARNING));

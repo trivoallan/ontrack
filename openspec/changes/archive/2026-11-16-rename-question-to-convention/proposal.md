@@ -44,6 +44,9 @@ One word per level:
   old text stops matching.
 - **BREAKING** The prompts `review` prints say "convention" where they said
   "question", and no longer say "answer".
+- **BREAKING** After a `fail` line, `check` prints `adr: <path>` where it
+  printed `rule: <path>`. The line holds the path of an ADR, which is also
+  the value of `ONTRACK_ADR`.
 - The page `revise-a-question` becomes `revise-a-convention`, and
   `ontrack-engineering/questions` becomes `ontrack-engineering/conventions`,
   listed as "Conventions (X.Y.Z)". The old URLs redirect.
@@ -89,6 +92,7 @@ None.
 - `plan`: the block its exit code depends on is named the instructions
   block.
 - `review`: the prompts say "convention".
+- `check`: the line that names the failing ADR is `adr:`.
 - `track-catalogue`: the page and the navigation entry are "Conventions",
   a catalogue page shows the blank convention, and the example group is
   "how ontrack ruled".
@@ -102,7 +106,7 @@ place, with no change of requirement.
 
 - **Code**: `src/review.ts` (the prompts), `src/instructions.ts` (the
   heading), `src/agents.ts` and `src/commands/apply.ts` (the printed
-  lines), `src/commands/plan.ts` and `src/commands/apply.ts` (option
+  lines), `src/check.ts` (the `adr:` line), `src/commands/plan.ts` and `src/commands/apply.ts` (option
   descriptions), `src/documents.ts` and `src/schemas.ts` (descriptions,
   and the JSON Schema regenerated from them), comments, and their tests.
 - **Documentation**: every page of `docs/` except the imported ADRs and

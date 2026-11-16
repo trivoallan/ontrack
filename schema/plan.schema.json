@@ -45,7 +45,7 @@
                   ]
                 },
                 "status": {
-                  "description": "The verdict of the repository's copy; null when it has none or states none.",
+                  "description": "The status of the repository's copy; null when it has none or states none.",
                   "type": [
                     "string",
                     "null"

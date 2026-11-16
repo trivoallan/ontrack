@@ -45,7 +45,7 @@ jobs:
       # The tests run the sources; this is the check of what an install ships.
       - run: node dist/bin/ontrack.js --help
       # The repository's own governance: fails when the installed track asks
-      # a question this repository has not imported or ruled again. It bites
+      # a convention this repository has not imported or ruled again. It bites
       # on the pull request that updates the track; track-updates.yml is
       # what notices that an update exists.
       - run: node dist/bin/ontrack.js plan

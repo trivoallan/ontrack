@@ -10,7 +10,7 @@ export const command = 'plan';
 export const describe = 'Show what importing the tracks would change in the repository';
 
 export const builder = (y: Argv) =>
-  y.option('all', { type: 'boolean', default: false, describe: 'List every ADR, the unchanged ones too, with its verdict' });
+  y.option('all', { type: 'boolean', default: false, describe: 'List every ADR, the unchanged ones too, with its status' });
 
 export function handler({ io, all, json }: { io: Io; all: boolean; json: boolean }): number {
   const root = io.cwd();

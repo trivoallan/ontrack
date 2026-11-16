@@ -1,6 +1,6 @@
 name: track-updates
 
-# `ontrack plan` reads the track as installed: it cannot see a question
+# `ontrack plan` reads the track as installed: it cannot see a convention
 # revised upstream until the dependency is updated. This job updates it in a
 # throwaway checkout, once a week, and fails when `plan` then has something
 # to report. The failure is the notice: someone updates the track for real,

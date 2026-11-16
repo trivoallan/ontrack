@@ -1,6 +1,6 @@
 ---
 title: Concepts
-description: The few notions ontrack is built on - an ADR, a question, a track, a ruling, the rules block - and the names this site borrows from elsewhere, such as arc42 and C4.
+description: The few notions ontrack is built on - an ADR, a convention, a track, a ruling, the instructions block - and the names this site borrows from elsewhere, such as arc42 and C4.
 ---
 
 This page explains the notions the rest of the documentation takes for
@@ -28,26 +28,27 @@ An ADR has a **status**. ontrack knows three:
 
 | Status | It means |
 | --- | --- |
-| `proposed` | The question is open: nobody has decided yet |
+| `proposed` | The convention is open: nobody has decided yet |
 | `accepted` | The decision is taken, and it is in force |
-| `rejected` | The question does not apply here, and the ADR says what stands in for it |
+| `rejected` | The convention does not apply here, and the ADR says what stands in for it |
 
 A decision that is taken is not edited afterwards. When it stops fitting, a
 new ADR **supersedes** it, and the old one stays as the record of what was
 decided before.
 
-## A question
+## A convention
 
 In most uses an ADR records a decision one team already took. ontrack turns
-it around: a shared ADR is a **question**, with a recommended answer, put to
-every repository that imports it.
+it around: a shared ADR is a **convention**, proposed to every repository
+that imports it, with the values it recommends.
 
-"How do we name commit scopes, and which tool enforces them?" is such a
-question. The ADR gives the context, recommends an answer and says why. It
+"Name the commit scopes, and the tool that enforces them" is such a
+convention. The ADR gives the context, recommends values and says why. It
 does not decide: each repository does.
 
-The parts of the question a tool can read are its **traits**: a few keys in
-the frontmatter of the ADR, shipped empty.
+The parameters a convention leaves to the repository are its **traits**: a
+few keys in the frontmatter of the ADR, shipped empty, which a tool can
+read.
 
 ```yaml
 status: proposed
@@ -57,31 +58,32 @@ traits:
     tool:
 ```
 
-A question also carries a **revision**, an integer. Its author raises it when
-the question changes, so that a repository that answered the earlier
-question is told to answer again.
+A convention also carries a **revision**, an integer. Its author raises it when
+the convention changes, so that a repository that ruled on the earlier
+convention is told to rule again.
 
 ## A track
 
-A **track** is a set of questions kept in one place: a repository of ADRs,
+A **track** is a set of conventions kept in one place: a repository of ADRs,
 published as an npm package. A platform team, a security team or an open
 source project owns it.
 
-A repository that wants those questions installs the track as a dependency,
+A repository that wants those conventions installs the track as a dependency,
 the way it installs a library. The name it is installed under is its
 **namespace**: the ADRs of a track installed as `platform` live in
 `docs/adr/platform/`. A repository can install several tracks, and they do
 not collide. The ADRs a repository writes for itself live in
-`docs/adr/local/`.
+`docs/adr/local/`: those are its own **decisions**, which no track
+proposed, and they are not conventions.
 
 [Find a track](find-a-track.md) shows where to look for one, and
 [Write your own track](write-your-own-track.md) how to make one.
 
 ## A ruling
 
-A **ruling** is the answer a repository gives to a question. It is written in
+A **ruling** is what a repository decides on a convention. It is written in
 the repository's own copy of the ADR: the status becomes `accepted` or
-`rejected`, the traits are filled, and the text says why wherever the answer
+`rejected`, the traits are filled, and the text says why wherever the ruling
 departs from the recommendation.
 
 ```yaml
@@ -94,18 +96,18 @@ traits:
 
 A person rules. A coding agent can prepare the ruling, from what it finds in
 the repository, and it writes nothing until the person agrees. Two
-repositories may rule differently on the same question: that is the point,
-and both answers are on record.
+repositories may rule differently on the same convention: that is the point,
+and both rulings are on record.
 
-## The rules block
+## The instructions block
 
 A coding agent does not read ADRs before it works. It reads `AGENTS.md`, a
 file at the root of the repository that holds its instructions.
 
 So ontrack copies the traits of every accepted ADR into a marked section of
-that file, the **rules block**, and lists the questions that are still open.
-The block is rewritten from the ADRs each time: the rules an agent follows
-and the decisions on record cannot disagree.
+that file, the **instructions block**, and lists the conventions not yet ruled on.
+The block is rewritten from the ADRs each time: the instructions an agent
+follows and the rulings on record cannot disagree.
 
 ## A check
 
@@ -130,7 +132,7 @@ use it.
   and the code. The diagrams of the Architecture pages are views of one such
   model.
 
-ontrack documents itself this way because the track it imports asks every
-repository how it documents its architecture, and
-[this is what it answered](adr/engineering/ADR-0010-architecture-documentation.md).
-Another repository, asked the same question, may answer otherwise.
+ontrack documents itself this way because the track it imports proposes a
+convention on documenting the architecture, and
+[this is how it ruled](adr/engineering/ADR-0010-architecture-documentation.md).
+Another repository, given the same convention, may rule otherwise.
