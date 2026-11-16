@@ -77,6 +77,45 @@ commits:
 You can read [the whole decision](adr/engineering/ADR-0006-commits.md), and
 the others, on this site.
 
+## It governs itself, and opens an issue where it falls short
+
+ontrack is built under its own rules. This repository imports
+[ontrack-engineering](ontrack-engineering.mdx), the reference track, and every
+ruling it made is published here, starting with
+[how decisions are recorded](adr/engineering/ADR-0001-record-architecture-decisions.md).
+Its [architecture](architecture/arc42/01-introduction-and-goals.md) is
+documented the way those decisions prescribe.
+
+An answer can be ahead of the repository. Once a review is ruled, the agent
+lists the rulings the code, configuration or tooling does not match, and
+proposes one issue for each. It creates only the ones you agree to, in the
+tracker the repository named when it answered the question on
+[work tracking](adr/engineering/ADR-0014-work-tracking.md).
+
+This repository answered `fail_on: critical` to the question on
+vulnerabilities. The scan ran, but nothing required it. This is the issue
+the agent proposed:
+
+```
+[engineering/ADR-0019] vulnerabilities.fail_on: require the grype check
+
+`fail_on` is "the lowest severity of a fixable vulnerability that fails the
+required check". The `grype` job in `.github/workflows/scan.yml` fails on a
+fixable critical, but the ruleset "main requires test" requires only test,
+node-22 and commitlint, so a red `grype` does not stop a merge.
+
+Done when `grype` is a required status check in the default-branch ruleset.
+```
+
+[The issue](https://github.com/trivoallan/ontrack/issues/193) was closed the
+same day, by a change to the ruleset. No linter would have found it: the gap
+was in the repository's settings, not in its code.
+
+- Each issue carries the label `ontrack` and starts with the ruling it
+  serves, so the next review proposes nothing for a ruling already tracked.
+- A repository that answered `none` on work tracking gets the list in the
+  agent's reply, and no issue.
+
 ## When a question changes, every repository is told
 
 Each ADR carries a revision number. When you change a question in the track,
@@ -134,15 +173,6 @@ If you stop using ontrack, all three remain and read the same.
   <Card title="A track" icon="seti:npm">An npm dependency.</Card>
   <Card title="The rules" icon="list-format">A block in `AGENTS.md`.</Card>
 </CardGrid>
-
-## It governs itself
-
-ontrack is built under its own rules. This repository imports
-[ontrack-engineering](ontrack-engineering.mdx), the reference track, and every
-ruling it made is published here, starting with
-[how decisions are recorded](adr/engineering/ADR-0001-record-architecture-decisions.md).
-Its [architecture](architecture/arc42/01-introduction-and-goals.md) is
-documented the way those decisions prescribe.
 
 ## Where the project stands
 
