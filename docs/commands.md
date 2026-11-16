@@ -49,6 +49,117 @@ becomes. [Error messages](error-messages.md) lists every code.
 Every error a command prints on `1` is listed, with what to do about it, in
 [Error messages](error-messages.md).
 
+## JSON output
+
+Every command takes `--json`. It then prints one JSON document on standard
+output, in place of the text, with the same facts. Like the text, the
+document is a contract: its keys change here before they change in the code.
+
+- Every key below is always present. Where the text prints nothing, the value
+  is `null`, or an empty list.
+- A path is relative to the repository, with forward slashes.
+- The exit codes do not change.
+- Nothing else is printed: the lines the text form writes on standard error
+  (the next step of `apply` and of `plan`, the `nothing to review` line of
+  `review`) are keys of the document.
+- A key may be added in a later version. A key is not removed or given
+  another meaning without a breaking change.
+
+```bash
+npx ontrack plan --json
+```
+
+### An ADR of a track
+
+`plan` and `apply` describe an ADR of a track the same way:
+
+| Key | Value |
+| --- | --- |
+| `name` | The file name without `.md` |
+| `title` | The title, or `null` |
+| `category` | `revised`, `new`, `removed`, `undetermined`, `unreadable`, `check` or `unchanged` |
+| `status` | The verdict of your copy, as `plan --all` prints it; `null` where it prints `-` |
+| `revision` | `{ "from", "to" }` for a `revised` or `undetermined` ADR, each a number or `null`; else `null` |
+| `check` | `{ "from", "to" }` for a `check` ADR: the line of your copy and the line of the track, each `null` when absent; else `null` |
+
+### An ADR of the repository
+
+`check`, `instructions` and `review` describe an ADR under `docs/adr/` the
+same way:
+
+| Key | Value |
+| --- | --- |
+| `ref` | The reference: `<namespace>/<file name without .md>` |
+| `title` | The title, or `null` |
+| `status` | The `status:` of the file, or `null` |
+| `path` | The file |
+
+### `plan --json`
+
+| Key | Value |
+| --- | --- |
+| `tracks` | One entry per track, then one for `local` when your own ADRs have to move: `namespace`, `adrs` (every ADR of the track, the unchanged ones too), `rename` (`{ "from", "to" }`, two folders, or `null`), `migration` (the files to move) |
+| `agents` | The [lines about `AGENTS.md`](error-messages.md#lines-about-agentsmd), as the text prints them |
+| `pending` | `true` when the exit code is `2` |
+
+`--all` changes nothing: the document always holds every ADR. With no track,
+`tracks` is empty.
+
+### `apply --json`
+
+| Key | Value |
+| --- | --- |
+| `dryRun` | `true` under `--dry-run`: the document says what would be done |
+| `actions` | In the order they ran: `kind` (`renamed`, `imported`, `moved`, `confirmed`, `synced` or `pruned`), `track`, `adr` (the ADR of the track, or `null` for `renamed` and `moved`), `from` (a path, or `null` for `confirmed`, `synced` and `pruned`), `to` |
+| `links` | The links to update: `file`, `line`, `old`, `new` |
+| `supersedes` | The `supersedes:` entries to update, in the same form |
+| `agents` | The lines about `AGENTS.md` |
+| `remaining` | What `plan --json` gives under `tracks`, once the actions are done |
+| `next` | `{ "proposed", "revised" }`: how many ADRs are left to rule, and to rule again |
+| `pending` | `true` when the exit code is `2` |
+
+### `check --json`
+
+| Key | Value |
+| --- | --- |
+| `results` | One entry per ADR checked: the ADR of the repository, then `check` (the command, or `null`), `result` (`pass`, `fail` or `unchecked`) and `output` (the lines a failed command printed) |
+| `counts` | `{ "fail", "pass", "unchecked" }` |
+
+### `instructions --json`
+
+| Key | Value |
+| --- | --- |
+| `hint` | The sentence that sends an agent to `review` |
+| `decided` | The ADRs in force that decide traits: the ADR of the repository, then `traits`, its YAML as one text |
+| `pending` | The ADRs not yet decided |
+| `block` | The whole block, as the text form prints it |
+
+### `review --json`
+
+| Key | Value |
+| --- | --- |
+| `kind` | `import`, `sequence`, `review`, `revision`, `revisions` or `supersession`: which prompt; `none` when there is nothing to review |
+| `adrs` | The ADRs the prompt names. For `import`, `{ "path", "title" }` of each new ADR; else the ADR of the repository, with `revision` (`{ "from", "to" }`) for `revision` and `revisions` |
+| `prompt` | The prompt, as the text form prints it; `null` for `none` |
+
+### An error, with `--json`
+
+On exit code `1`, standard output is empty and standard error holds one
+document:
+
+```json
+{
+  "error": {
+    "code": "E105",
+    "message": "dependency \"platform\" is not installed; run npm install",
+    "docs": "https://trivoallan.github.io/ontrack/error-messages/#e105"
+  }
+}
+```
+
+`code` is the [code of the error](error-messages.md), and `docs` the address
+of its row. Both are `null` for a failure ontrack did not foresee.
+
 ## `ontrack apply`
 
 Brings the repository in line with what `plan` reports. It is the only

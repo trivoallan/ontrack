@@ -13,5 +13,8 @@ export class OntrackError extends Error {
   }
 }
 
+/** Where each code has its row: the address is this page, `#` and the code in lower case. */
+export const DOCS = 'https://trivoallan.github.io/ontrack/error-messages/';
+
 /** The code of a command line yargs refuses: an unknown command or option, a missing value. */
 export const USAGE = 'E001';
