@@ -18,7 +18,7 @@ nothing is specified here.
 To see most of it at work in one repository, follow the
 [tutorial](tutorial.mdx).
 
-## Share conventions
+## Share conventions as questions
 
 | You want to | ontrack gives you | Specified in |
 | --- | --- | --- |
@@ -40,7 +40,7 @@ To see most of it at work in one repository, follow the
 | Say a question does not apply here | `rejected`, a full answer | [A ruling](concepts.md#a-ruling) |
 | Change an answer you already gave | A new ADR that supersedes the first | [`ontrack review`](commands.md#ontrack-review-adr) |
 
-## Load the rules into the agent's harness
+## Load the answers into the agent's harness
 
 | You want to | ontrack gives you | Specified in |
 | --- | --- | --- |
