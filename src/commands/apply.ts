@@ -2,6 +2,7 @@ import { agentsPending, agentsReport, agentsStatus, writeAgents } from '../agent
 import { formatApply, planActions, planAfter, runActions } from '../apply.ts';
 import type { Action } from '../apply.ts';
 import type { Io } from '../cli.ts';
+import { actionJson, planJson, printJson } from '../json.ts';
 import path from 'node:path';
 import type { Argv } from 'yargs';
 import { findLinks } from '../links.ts';
@@ -48,9 +49,12 @@ function agentsStep(
 // ADRs are `proposed`, which the plan no longer reports, and a revised one is
 // ruled again with the same command. Both forms are given, since the reader
 // is at a shell or is a coding agent.
+// The ADRs left to rule once this run is done: the proposed ones first.
+const toRule = (root: string, plan: Plan) => ({ proposed: pendingAdrs(root).length, revised: revisedAdrs(root, plan).length });
+
 function nextStep(io: Io, root: string, plan: Plan): void {
-  const proposed = pendingAdrs(root).length;
-  const n = proposed || revisedAdrs(root, plan).length;
+  const { proposed, revised } = toRule(root, plan);
+  const n = proposed || revised;
   if (n === 0) return;
   io.stderr.write(qualify(
     root,
@@ -65,8 +69,10 @@ export function handler({
   prune,
   confirm,
   dryRun,
+  json,
 }: {
   io: Io;
+  json: boolean;
   prune: boolean;
   confirm: string[];
   dryRun: boolean;
@@ -87,6 +93,23 @@ export function handler({
   if (!dryRun) runActions(root, actions);
   const agents = agentsStep(root, actions, dryRun);
 
+  if (json) {
+    // One shape, whether or not anything was applied: no action, and the plan
+    // as what remains.
+    const left = actions.length === 0 ? plan : dryRun ? planAfter(plan, actions) : buildPlan(root);
+    const pending = hasPendingChanges(left) || agents.pending;
+    printJson(io.stdout, {
+      dryRun,
+      actions: actions.map((a) => actionJson(root, a)),
+      links,
+      supersedes,
+      agents: agents.lines,
+      remaining: planJson(left),
+      next: toRule(root, left),
+      pending,
+    });
+    return pending ? 2 : 0;
+  }
   if (actions.length === 0 && !agents.wrote) {
     io.stdout.write(formatPlan(plan) + agents.lines.map((l) => `${l}\n`).join(''));
     nextStep(io, root, plan);

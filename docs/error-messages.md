@@ -19,6 +19,10 @@ that way, and is never given to another. A script or a coding agent reads the
 code, not the sentence. Each code below is an address on this page
 (`#e105`).
 
+With `--json`, the same error is a JSON document on standard error, which
+carries the code and the address of its row: see
+[JSON output](commands.md#an-error-with---json).
+
 Nothing was written: `apply` runs every check before its first write. In the
 messages below, `<…>` stands for a name or a path of your repository.
 
