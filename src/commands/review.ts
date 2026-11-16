@@ -14,6 +14,7 @@ import {
 } from '../review.ts';
 import { buildPlan } from '../plan.ts';
 import type { Io } from '../cli.ts';
+import { schemaOf } from '../documents.ts';
 import type { ReviewDocument } from '../documents.ts';
 import { adrJson, printJson } from '../json.ts';
 import type { Revised } from '../review.ts';
@@ -61,7 +62,7 @@ export function handler({ io, adr, json }: { io: Io; adr?: string; json: boolean
   const prompt = found && qualify(root, found.prompt);
   if (json) {
     // `none`, not a sentence on standard error: the document says it.
-    const document: ReviewDocument = { kind: found?.kind ?? 'none', adrs: found?.adrs ?? [], prompt };
+    const document: ReviewDocument = { $schema: schemaOf('review'), kind: found?.kind ?? 'none', adrs: found?.adrs ?? [], prompt };
     printJson(io.stdout, document);
   } else if (prompt) {
     io.stdout.write(prompt);

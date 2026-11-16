@@ -14,7 +14,7 @@ Every `ontrack` subcommand SHALL accept `--json`. With it, the subcommand SHALL 
 
 #### Scenario: No hint on standard error
 - **WHEN** `ontrack plan --json` runs on a project with no track
-- **THEN** the document is `{ "tracks": [], "agents": [], "pending": false }` and standard error is empty
+- **THEN** the document holds, after `$schema`, `"tracks": []`, `"agents": []` and `"pending": false`, and standard error is empty
 
 ### Requirement: Stable documents
 Every key of a document SHALL be present whatever the case, with `null` or an empty list where the text prints nothing. A path SHALL be relative to the repository, with forward slashes. A later version MAY add a key; it MUST NOT remove a key or change its meaning without a breaking change.
@@ -64,7 +64,7 @@ Every key of a document SHALL be present whatever the case, with `null` or an em
 - **THEN** `block` equals the standard output of the second
 
 ### Requirement: The review document
-`review --json` SHALL print the keys `kind`, `adrs` and `prompt`. `kind` SHALL name the prompt: `import`, `sequence`, `review`, `revision`, `revisions` or `supersession`. `prompt` SHALL be the text the text form prints. When there is nothing to review, the document SHALL be `{ "kind": "none", "adrs": [], "prompt": null }`, with exit code `0`.
+`review --json` SHALL print the keys `kind`, `adrs` and `prompt`. `kind` SHALL name the prompt: `import`, `sequence`, `review`, `revision`, `revisions` or `supersession`. `prompt` SHALL be the text the text form prints. When there is nothing to review, the document SHALL hold `"kind": "none"`, `"adrs": []` and `"prompt": null`, with exit code `0`.
 
 #### Scenario: A named proposed ADR
 - **WHEN** `ontrack review ADR-0002-b --json` names a `proposed` ADR
@@ -111,3 +111,18 @@ The project SHALL publish a JSON Schema for each document of `--json`, at `schem
 #### Scenario: A file out of date
 - **WHEN** a key is added to the model of a document and `schema/` is not regenerated
 - **THEN** the test suite fails, and says to run `npm run schema`
+
+### Requirement: A document names its schema
+Every document of `--json`, the error document included, SHALL start with the key `$schema`, whose value is the address of its own published schema: `https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/<name>.schema.json`. That address SHALL be the `$id` of the schema. Each published schema SHALL require the key and fix its value to its own address.
+
+#### Scenario: The plan document
+- **WHEN** `ontrack plan --json` runs
+- **THEN** the first key of the document is `$schema`, and its value ends with `schema/plan.schema.json`
+
+#### Scenario: The error document
+- **WHEN** `ontrack plann --json` runs
+- **THEN** the document on standard error carries `$schema`, and its value ends with `schema/error.schema.json`
+
+#### Scenario: The wrong schema
+- **WHEN** the output of `ontrack plan --json` is validated against `schema/check.schema.json`
+- **THEN** it is invalid on `$schema`

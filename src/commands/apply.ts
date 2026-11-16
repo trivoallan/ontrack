@@ -2,6 +2,7 @@ import { agentsPending, agentsReport, agentsStatus, writeAgents } from '../agent
 import { formatApply, planActions, planAfter, runActions } from '../apply.ts';
 import type { Action } from '../apply.ts';
 import type { Io } from '../cli.ts';
+import { schemaOf } from '../documents.ts';
 import type { ApplyDocument } from '../documents.ts';
 import { actionJson, planJson, printJson } from '../json.ts';
 import path from 'node:path';
@@ -100,6 +101,7 @@ export function handler({
     const left = actions.length === 0 ? plan : dryRun ? planAfter(plan, actions) : buildPlan(root);
     const pending = hasPendingChanges(left) || agents.pending;
     const document: ApplyDocument = {
+      $schema: schemaOf('apply'),
       dryRun,
       actions: actions.map((a) => actionJson(root, a)),
       links,

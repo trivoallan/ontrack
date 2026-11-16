@@ -13,6 +13,7 @@ import type { Action } from './apply.ts';
 import type { CheckResult } from './check.ts';
 import type { ApplyDocument, CheckDocument, ErrorDocument, InstructionsDocument, PlanDocument, ReviewDocument } from './documents.ts';
 import type { Io } from './cli.ts';
+import { schemaOf } from './documents.ts';
 import { DOCS, OntrackError } from './errors.ts';
 import type { Adr, Instructions } from './instructions.ts';
 import { stem } from './plan.ts';
@@ -52,6 +53,7 @@ export const actionJson = (root: string, a: Action): ApplyDocument['actions'][nu
 export const adrJson = (adr: Adr): AdrJson => ({ ref: adr.ref, title: adr.title, status: adr.status, path: adr.path });
 
 export const instructionsJson = ({ decided, pending }: Instructions, hint: string, block: string): InstructionsDocument => ({
+  $schema: schemaOf('instructions'),
   hint,
   decided: decided.map((adr) => ({ ...adrJson(adr), traits: adr.traits.join('\n') })),
   pending: pending.map(adrJson),
@@ -62,6 +64,7 @@ export function checksJson(results: CheckResult[]): CheckDocument {
   const counts = { fail: 0, pass: 0, unchecked: 0 };
   for (const { status } of results) counts[status] += 1;
   return {
+    $schema: schemaOf('check'),
     results: results.map(({ adr, status, output }) => ({ ...adrJson(adr), check: adr.check, result: status, output })),
     counts,
   };
@@ -70,5 +73,5 @@ export function checksJson(results: CheckResult[]): CheckDocument {
 /** A failure, for standard error. `code` and `docs` are null when ontrack did not foresee it. */
 export function errorJson(err: unknown): ErrorDocument {
   const code = err instanceof OntrackError ? err.code : null;
-  return { error: { code, message: (err as Error).message, docs: code && `${DOCS}#${code.toLowerCase()}` } };
+  return { $schema: schemaOf('error'), error: { code, message: (err as Error).message, docs: code && `${DOCS}#${code.toLowerCase()}` } };
 }

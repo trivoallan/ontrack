@@ -4,6 +4,14 @@
 // published under schema/ are derived from them: the three cannot disagree.
 import { z } from 'zod';
 
+export const SCHEMA_BASE = 'https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/';
+/** The address of the schema of a document, which the document carries as `$schema`. */
+export const schemaOf = (name: string) => `${SCHEMA_BASE}${name}.schema.json`;
+
+// A document: its keys, after the address of its own schema.
+const document = <Name extends string, Shape extends z.ZodRawShape>(name: Name, shape: Shape) =>
+  z.strictObject({ $schema: z.literal(schemaOf(name)).describe('The address of this schema.'), ...shape });
+
 const text = z.string().nullable();
 const revision = z.strictObject({ from: z.number().nullable(), to: z.number().nullable() });
 
@@ -40,9 +48,9 @@ const agents = z.array(z.string()).describe('The lines about AGENTS.md, as the t
 const pending = z.boolean().describe('True when the exit code is 2.');
 const link = z.strictObject({ file: z.string(), line: z.number(), old: z.string(), new: z.string() });
 
-export const planDocument = z.strictObject({ tracks, agents, pending });
+export const planDocument = document('plan', { tracks, agents, pending });
 
-export const applyDocument = z.strictObject({
+export const applyDocument = document('apply', {
   dryRun: z.boolean(),
   actions: z.array(
     z.strictObject({
@@ -61,7 +69,7 @@ export const applyDocument = z.strictObject({
   pending,
 });
 
-export const checkDocument = z.strictObject({
+export const checkDocument = document('check', {
   results: z.array(
     adr.extend({
       check: text.describe('The command; null when the ADR declares none.'),
@@ -72,14 +80,14 @@ export const checkDocument = z.strictObject({
   counts: z.strictObject({ fail: z.number(), pass: z.number(), unchecked: z.number() }),
 });
 
-export const instructionsDocument = z.strictObject({
+export const instructionsDocument = document('instructions', {
   hint: z.string(),
   decided: z.array(adr.extend({ traits: z.string().describe('The decided traits, as YAML.') })),
   pending: z.array(adr),
   block: z.string().describe('The rules block, as the text form prints it.'),
 });
 
-export const reviewDocument = z.strictObject({
+export const reviewDocument = document('review', {
   kind: z.enum(['import', 'sequence', 'review', 'revision', 'revisions', 'supersession', 'none']),
   adrs: z.array(
     z.union([
@@ -91,7 +99,7 @@ export const reviewDocument = z.strictObject({
   prompt: text.describe('The prompt, as the text form prints it; null for `none`.'),
 });
 
-export const errorDocument = z.strictObject({
+export const errorDocument = document('error', {
   error: z.strictObject({
     code: text.describe('The code of the error; null for a failure ontrack did not foresee.'),
     message: z.string(),
@@ -116,8 +124,6 @@ export const documents = {
   error: { model: errorDocument, title: 'What any ontrack command prints on standard error when it fails under `--json`' },
 };
 
-export const SCHEMA_BASE = 'https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/';
-
 /**
  * The JSON Schema published for a document. The model refuses a key it does
  * not name, so that the tests catch a key added without it; the schema lets
@@ -126,7 +132,7 @@ export const SCHEMA_BASE = 'https://raw.githubusercontent.com/trivoallan/ontrack
 export function documentJsonSchema(name: keyof typeof documents): Record<string, unknown> {
   const { model, title } = documents[name];
   return {
-    $id: `${SCHEMA_BASE}${name}.schema.json`,
+    $id: schemaOf(name),
     title,
     ...z.toJSONSchema(model, {
       override: ({ jsonSchema }) => {

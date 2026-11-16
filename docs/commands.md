@@ -55,6 +55,9 @@ Every command takes `--json`. It then prints one JSON document on standard
 output, in place of the text, with the same facts. Like the text, the
 document is a contract: its keys change here before they change in the code.
 
+- A document starts with `$schema`, the address of its own schema (see the
+  table below). A validator or an editor finds the schema from the document
+  alone. The tables of keys below do not repeat it.
 - Every key below is always present. Where the text prints nothing, the value
   is `null`, or an empty list.
 - A path is relative to the repository, with forward slashes.
@@ -167,6 +170,7 @@ document:
 
 ```json
 {
+  "$schema": "https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/error.schema.json",
   "error": {
     "code": "E105",
     "message": "dependency \"platform\" is not installed; run npm install",

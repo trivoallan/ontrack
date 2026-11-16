@@ -4,6 +4,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/review.schema.json",
+      "description": "The address of this schema."
+    },
     "kind": {
       "type": "string",
       "enum": [
@@ -128,6 +133,7 @@
     }
   },
   "required": [
+    "$schema",
     "kind",
     "adrs",
     "prompt"
