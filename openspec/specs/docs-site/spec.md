@@ -164,6 +164,17 @@ The page of an architecture decision record SHALL show, on the line of its statu
 - **WHEN** `docs/index.mdx` is built
 - **THEN** its page shows no reference
 
+### Requirement: Search ranks the guides and the reference first
+For a word they share, the site search SHALL rank the tutorial, the guides and the reference pages before the pages of architecture decision records and of the architecture document. A search for the subject of a record, or for its identifier, SHALL still rank that record first.
+
+#### Scenario: A word of the product
+- **WHEN** a reader searches the built site for `exit code`, `install` or `track`
+- **THEN** the first result is a guide or a reference page, not the page of a record
+
+#### Scenario: The subject of a record
+- **WHEN** a reader searches the built site for `commits`
+- **THEN** the first results are the pages of `ADR-0006-commits`
+
 ### Requirement: ADR numbers in the navigation
 The navigation entry of a page whose frontmatter declares an `adr:` identifier SHALL be that identifier followed by the page's title. The page's own title is unchanged. The source files MUST NOT be edited to obtain it.
 

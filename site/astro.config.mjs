@@ -142,6 +142,16 @@ export default defineConfig({
       logo: { src: '../docs/assets/logo.png' },
       favicon: '/logo.png',
       customCss: ['./src/theme.css', './src/adr.css'],
+      // Search ranks the guides and the reference before the ADRs and the
+      // architecture document: see src/search.mjs. A long page is not a worse
+      // answer: the commands reference is the longest, and the one most
+      // searches are for. And a word that only starts like the one searched
+      // counts for less: "track" is not "tracking", the subject of an ADR.
+      pagefind: { ranking: { pageLength: 0.1, termSimilarity: 5 } },
+      components: {
+        PageTitle: './src/components/PageTitle.astro',
+        MarkdownContent: './src/components/MarkdownContent.astro',
+      },
       // The 404 page is site/src/pages/404.astro.
       disable404Route: true,
       // The prompts `review` prints are single lines of a thousand characters,

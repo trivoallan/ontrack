@@ -1,0 +1,9 @@
+---
+// Starlight's MarkdownContent, with one addition: the search weight of the
+// text (see search.mjs).
+import '@astrojs/starlight/style/markdown.css';
+
+import { searchWeight } from '../search.mjs';
+---
+
+<div class="sl-markdown-content" data-pagefind-weight={searchWeight(Astro.locals.starlightRoute)}><slot /></div>
