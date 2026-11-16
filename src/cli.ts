@@ -9,6 +9,7 @@ import * as review from './commands/review.ts';
 // code, where a path relative to this file would no longer reach it.
 import manifest from '../package.json' with { type: 'json' };
 import { OntrackError, USAGE } from './errors.ts';
+import { errorJson, printJson } from './json.ts';
 
 type Out = { write(text: string): unknown };
 /** Where a command reads its directory and writes its output. `process` is one. */
@@ -48,6 +49,8 @@ export async function main(argv: string[], io: Io, commands: Command[] = default
     .alias('v', 'version')
     .help()
     .alias('h', 'help')
+    // Global: every command has a JSON form, and so has every error.
+    .option('json', { type: 'boolean', default: false, global: true, describe: 'Print the result, or the error, as JSON' })
     .strict()
     .exitProcess(false)
     .fail((msg) => {
@@ -67,8 +70,11 @@ export async function main(argv: string[], io: Io, commands: Command[] = default
     cli.parse(args, (_err: Error | undefined, _parsed: unknown, out: string) => resolve(out));
   });
 
+  // Read from the arguments: a command line yargs refuses was not parsed.
+  const json = args.includes('--json');
   if (usageError !== undefined) {
-    io.stderr.write(`ontrack[${USAGE}]: ${usageError}\nSee ontrack --help.\n`);
+    if (json) printJson(io.stderr, errorJson(new OntrackError(USAGE, usageError)));
+    else io.stderr.write(`ontrack[${USAGE}]: ${usageError}\nSee ontrack --help.\n`);
     return 1;
   }
   if (output) io.stdout.write(`${output}\n`);
@@ -78,7 +84,8 @@ export async function main(argv: string[], io: Io, commands: Command[] = default
   } catch (err) {
     // A failure ontrack knows carries its code; one it did not foresee has none.
     const code = err instanceof OntrackError ? `[${err.code}]` : '';
-    io.stderr.write(`ontrack${code}: ${(err as Error).message}\n`);
+    if (json) printJson(io.stderr, errorJson(err));
+    else io.stderr.write(`ontrack${code}: ${(err as Error).message}\n`);
     return 1;
   }
 }
