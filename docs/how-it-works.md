@@ -1,6 +1,6 @@
 ---
 title: How it works
-description: The pieces ontrack is made of, what happens to a question from the track to a repository, and the cycle that keeps answers current.
+description: The pieces ontrack is made of, what happens to a convention from the track to a repository, and the cycle that keeps rulings current.
 ---
 
 This page explains the model behind ontrack: what you run, what each
@@ -9,21 +9,23 @@ ruling is, start with the [concepts](concepts.md). For what it is for, see the
 [home page](index.mdx). For each command and its options, see the
 [commands reference](commands.md).
 
-## Why questions, not rules
+## Proposed, not imposed
 
 A shared rule assumes every repository is the same. A repository that
 differs has two ways out: override the rule, or stop importing it. Either
 way the difference is silent. Nothing records that the repository departs
 from the convention, or why. That is how conventions drift.
 
-A question expects that answers differ. A repository that departs from the
+A convention is proposed, not imposed. It reaches a repository the way a
+question would: with a recommendation, and waiting for that repository to
+rule. It expects that rulings differ. A repository that departs from the
 recommendation says so in its own ADR, with the reason, and the departure is
 reviewed in a pull request like any other change. The difference is on
-record, next to the question it answers.
+record, next to the convention it rules on.
 
-This has a cost. A person rules on every question in every repository, and
+This has a cost. A person rules on every convention in every repository, and
 rules again each time the track revises one. And nothing makes two
-repositories give the same answer. When a value must be the same everywhere,
+repositories rule the same way. When a value must be the same everywhere,
 with no exception, a shared configuration does that better, and ontrack does
 not replace it.
 
@@ -33,18 +35,18 @@ ontrack has no server and no database. It works on three kinds of files.
 [Concepts](concepts.md) defines each of them; this is how they fit together.
 
 - A **track**: an npm package of architecture decision records (ADRs). Each
-  one asks a question and recommends an answer. Repositories install it as a
+  one states a convention and recommends its values. Repositories install it as a
   dependency.
 - The repository's **own copy of every ADR**, under `docs/adr/`. The
-  repository answers there: a status, and the traits it fills.
-- The **rules block** of the repository's `AGENTS.md`. ontrack writes the
+  repository rules there: a status, and the traits it fills.
+- The **instructions block** of the repository's `AGENTS.md`. ontrack writes the
   decided traits there, where coding agents read them.
 
 ```mermaid
 flowchart TD
-  track["Track<br/>ADRs as questions"]
-  adr["docs/adr/<br/>the repository's answers"]
-  agents["AGENTS.md<br/>rules block"]
+  track["Track<br/>conventions, as ADRs"]
+  adr["docs/adr/<br/>the repository's rulings"]
+  agents["AGENTS.md<br/>instructions block"]
   agent["Coding agent"]
   work["The work<br/>consistent with the decisions"]
   track -->|"plan, apply"| adr
@@ -54,66 +56,66 @@ flowchart TD
   adr -.->|"check"| work
 ```
 
-The rules block is regenerated from the ADRs each time, so the rules an agent
+The instructions block is regenerated from the ADRs each time, so the instructions an agent
 reads and the decisions on record cannot disagree. ontrack copies trait
 values and never interprets them. Everything outside the block's markers
 belongs to the repository.
 
-## The life of one question
+## The life of one convention
 
 **It arrives as `proposed`.** `ontrack apply` copies a new ADR from the
 track into `docs/adr/<namespace>/`, byte for byte. It carries the track's
 recommendation, and it is listed in `AGENTS.md` under "Not yet decided", so
-an agent knows there is no rule yet. You can run `apply` yourself, or leave
-it to `ontrack review`: when a track ships questions the repository has not
+an agent knows there is no instruction yet. You can run `apply` yourself, or leave
+it to `ontrack review`: when a track ships conventions the repository has not
 imported, its prompt has the agent run `apply` first.
 
 **A person rules.** The repository follows the recommendation, adapts it, or
 rejects it, and writes down why in its copy. The status becomes `accepted` or
-`rejected`, and the traits are filled. `rejected` is a full answer: the
-question does not apply here, and the ADR says what stands in for it.
+`rejected`, and the traits are filled. `rejected` is a full ruling: the
+convention does not apply here, and the ADR says what stands in for it.
 `ontrack review` has a coding agent prepare the ruling from the evidence in
 the repository. The agent proposes and writes nothing until you agree.
 
-**The track revises the question.** Each ADR carries an integer `revision`.
-The track raises it when the question changes. `ontrack plan` compares the
+**The track revises the convention.** Each ADR carries an integer `revision`.
+The track raises it when the convention changes. `ontrack plan` compares the
 repository's value with the track's and reports the ADR as `revised`.
 ontrack never rewrites an ADR a repository has decided on: a person rules
 again. `ontrack review` then asks the agent to prepare that ruling: it keeps
-your ruling where the question did not move, and proposes one where it did.
+your ruling where the convention did not move, and proposes one where it did.
 
 `plan` reads the track as it is installed in the repository and makes no
 network call. A revision is therefore reported once the repository has
 updated the dependency, not before.
 
-**The answer stops fitting.** A decided ADR is frozen. When a repository's
-answer no longer holds, it writes a new ADR of its own that supersedes the
-first. The rules block then carries the new decision, and the original text
+**The ruling stops fitting.** A decided ADR is frozen. When a repository's
+ruling no longer holds, it writes a new ADR of its own that supersedes the
+first. The instructions block then carries the new decision, and the original text
 stays as the record of what was decided before.
 
 ## The cycle
 
 Governance is a cycle, not a one-off import. It turns again every time a
-track revises a question, and whenever a decision stops fitting the
+track revises a convention, and whenever a decision stops fitting the
 repository.
 
 ```mermaid
 flowchart TD
   plan["plan<br/>what changed upstream"]
-  apply["apply<br/>import the questions"]
+  apply["apply<br/>import the conventions"]
   review["review<br/>you rule, with an agent"]
-  work["Coding agent<br/>works under the rules"]
+  work["Coding agent<br/>works under the instructions"]
   check["check<br/>verify the work"]
   plan --> apply --> review
   plan -.->|"or straight to review: the agent runs apply"| review
   review -->|"AGENTS.md updated"| work
   work --> check
-  check -.->|"the track revises a question"| plan
+  check -.->|"the track revises a convention"| plan
   check -.->|"a decision stops fitting: supersede it"| review
 ```
 
 A person runs `plan`, then `review`. `apply` is the step that writes: the
-agent runs it from the prompt, to import the questions and again after each
+agent runs it from the prompt, to import the conventions and again after each
 ruling. Run it yourself where there is no agent, in CI for instance.
 
 `check` closes the loop. A decision can name the command that verifies it,
@@ -132,12 +134,12 @@ can be installed under that alias.
 
 ```mermaid
 flowchart TD
-  platform["Track: platform governance<br/>one copy of each question"]
-  security["Track: security governance<br/>one copy of each question"]
+  platform["Track: platform governance<br/>one copy of each convention"]
+  security["Track: security governance<br/>one copy of each convention"]
   subgraph repos["Your repositories"]
-    a["Repository A<br/>its own answers"]
-    b["Repository B<br/>its own answers"]
-    c["Repository C<br/>its own answers"]
+    a["Repository A<br/>its own rulings"]
+    b["Repository B<br/>its own rulings"]
+    c["Repository C<br/>its own rulings"]
   end
   platform -->|"npm dependency"| a & b & c
   security -->|"npm dependency"| b & c

@@ -20,7 +20,7 @@ const plannedAdr = z.strictObject({
   name: z.string().describe('The file name without `.md`.'),
   title: text,
   category: z.enum(['revised', 'new', 'removed', 'undetermined', 'unreadable', 'check', 'unchanged']),
-  status: text.describe("The verdict of the repository's copy; null when it has none or states none."),
+  status: text.describe("The status of the repository's copy; null when it has none or states none."),
   revision: revision.nullable().describe('Set for a `revised` or `undetermined` ADR.'),
   check: z
     .strictObject({ from: text, to: text })
@@ -84,7 +84,7 @@ export const instructionsDocument = document('instructions', {
   hint: z.string(),
   decided: z.array(adr.extend({ traits: z.string().describe('The decided traits, as YAML.') })),
   pending: z.array(adr),
-  block: z.string().describe('The rules block, as the text form prints it.'),
+  block: z.string().describe('The instructions block, as the text form prints it.'),
 });
 
 export const reviewDocument = document('review', {

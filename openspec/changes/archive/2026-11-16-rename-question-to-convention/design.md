@@ -67,6 +67,11 @@ The heading becomes `## Project instructions (ontrack)`. Alternative: keep
 "rules" and change the verb; rejected, "rule" and "ruling" are in every
 prompt and "arbitrate" or "decide" say less.
 
+**`check` names the failing ADR with `adr:`.** The line read `rule:`, the
+last place a command printed the old noun. What follows is the path of an
+ADR, the value the command also receives as `ONTRACK_ADR`, so the label
+says what the line holds. Found while applying the change, and added to it.
+
 **No migration for the block.** The block is found by its markers, not by
 its heading. An existing block differs from the new text by one line, so
 `plan` reports it `out of date` and `apply` rewrites it: the mechanism that

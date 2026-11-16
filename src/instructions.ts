@@ -236,7 +236,7 @@ export const REVIEW_HINT = 'When asked to review, rule on or supersede an ADR, r
 
 /** The contract output (see docs/commands.md). */
 export function formatInstructions({ decided, pending }: Instructions): string {
-  const lines = ['<!-- ontrack:begin -->', '## Project rules (ontrack)', '', REVIEW_HINT, ''];
+  const lines = ['<!-- ontrack:begin -->', '## Project instructions (ontrack)', '', REVIEW_HINT, ''];
   for (const adr of decided) lines.push(`### ${heading(adr)}`, '', '```yaml', ...adr.traits, '```', '');
   if (pending.length > 0) {
     lines.push('### Not yet decided', '', ...pending.map((adr) => `- ${heading(adr)}`), '');

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Reads the `revision:` of an inherited ADR from files ontrack did not write, and classifies an imported ADR against its upstream copy so that `plan` can say whether a verdict must be revisited.
+Reads the `revision:` of an inherited ADR from files ontrack did not write, and classifies an imported ADR against its upstream copy so that `plan` can say whether a ruling must be taken again.
 
 ## Requirements
 
@@ -43,13 +43,13 @@ The system SHALL classify an imported ADR against its upstream copy, in this ord
 3. `stale` when the imported revision is lower than the upstream revision;
 4. `up-to-date` otherwise.
 
-Only `revision:` SHALL be compared. The files' bytes, the ADR's status, its filled-in fields and its local verdict MUST NOT influence the result.
+Only `revision:` SHALL be compared. The files' bytes, the ADR's status, its filled-in fields and its local ruling MUST NOT influence the result.
 
-#### Scenario: Upstream moved the question
+#### Scenario: Upstream moved the convention
 - **WHEN** the imported ADR has `revision: 1` and the upstream copy has `revision: 2`
 - **THEN** the ADR is `stale`
 
-#### Scenario: Only the local verdict changed
+#### Scenario: Only the local ruling changed
 - **WHEN** both copies have `revision: 2`, and the imported one has `status: accepted` and filled-in fields that the upstream copy lacks
 - **THEN** the ADR is `up-to-date`
 

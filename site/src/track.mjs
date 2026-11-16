@@ -12,15 +12,15 @@ const read = (path) => readFileSync(new URL(path, root), 'utf8');
 
 export const version = JSON.parse(read('package.json')).version;
 
-// The README groups the questions by domain, in its "What you get" table:
-// `| **Agents** (0017, 0022, 0026) | …`. A question it does not place goes
+// The README groups the conventions by domain, in its "What you get" table:
+// `| **Agents** (0017, 0022, 0026) | …`. A convention it does not place goes
 // under "Other".
 const domainOf = new Map();
 for (const [, name, numbers] of read('README.md').matchAll(/^\| \*\*(.+?)\*\* \(([\d, ]+)\) \|/gm)) {
   for (const number of numbers.split(/,\s*/)) domainOf.set(`ADR-${number}`, name);
 }
 
-export const questions = readdirSync(new URL('adr/', root))
+export const conventions = readdirSync(new URL('adr/', root))
   .filter((name) => name.endsWith('.md'))
   .sort()
   .map((file) => {
@@ -39,12 +39,12 @@ export const questions = readdirSync(new URL('adr/', root))
 // matches its card in "What you get", which lists the domains in this order.
 const cardColour = (index) => ['orange', 'purple', 'green', 'red', 'blue', 'purple', 'green', 'red'][index % 8];
 
-// The domains in the README's order, each with its questions in number order.
-export const domains = [...new Set([...domainOf.values(), ...questions.map((q) => q.domain)])]
+// The domains in the README's order, each with its conventions in number order.
+export const domains = [...new Set([...domainOf.values(), ...conventions.map((q) => q.domain)])]
   .map((name, index) => ({
     name,
     slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
     color: cardColour(index),
-    questions: questions.filter((q) => q.domain === name),
+    conventions: conventions.filter((q) => q.domain === name),
   }))
-  .filter((domain) => domain.questions.length);
+  .filter((domain) => domain.conventions.length);

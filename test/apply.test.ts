@@ -58,7 +58,7 @@ test('new ADR imported byte for byte', async () => {
   const root = makeProject({ tracks: { platform: { 'ADR-0015.md': content } } });
   const r = await run(root, 'apply');
   assert.equal(read(root, 'docs/adr/platform/ADR-0015.md'), content);
-  assert.equal(r.stdout, 'platform: 1 imported\n  imported      ADR-0015  Observability\nAGENTS.md: rules block created\n');
+  assert.equal(r.stdout, 'platform: 1 imported\n  imported      ADR-0015  Observability\nAGENTS.md: instructions block created\n');
   assert.equal(r.code, 0);
 });
 
@@ -139,7 +139,7 @@ test('links broken by the migration are listed, files untouched', async () => {
   assert.equal(read(root, 'docs/arc42.md'), arc42);
 });
 
-// Verdicts are never overwritten
+// Rulings are never overwritten
 
 test('revised ADR left alone, exit 2, listed under remaining', async () => {
   const root = makeProject({
@@ -258,7 +258,7 @@ test('dry run of confirm all names both ADRs and writes nothing', async () => {
     '  moved         B.md',
     '  confirmed     A (revision 2)',
     '  confirmed     B (revision 4)',
-    'AGENTS.md: rules block to create',
+    'AGENTS.md: instructions block to create',
     '',
   ].join('\n'));
   assert.equal(r.code, 2);

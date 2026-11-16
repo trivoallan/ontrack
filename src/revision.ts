@@ -112,7 +112,7 @@ export function setCheckLine(text: string, line: string | null): string {
   return lines.join('\n');
 }
 
-/** The ADR's verdict: its first frontmatter `status:` value, or null when unreadable, absent or empty. */
+/** The ADR's status: its first frontmatter `status:` value, or null when unreadable, absent or empty. */
 export function readStatus(text: string): string | null {
   return values(frontmatter(text) ?? [], 'status')[0] ?? null;
 }
@@ -125,7 +125,7 @@ export function readRevision(text: string): number | null {
 
 /**
  * Classifies an imported ADR against its upstream copy.
- * Only `revision:` is compared; status, fields and verdict never count.
+ * Only `revision:` is compared; status, fields and ruling never count.
  */
 export function compareRevision(importedText: string, upstreamText: string): Comparison {
   const lines = frontmatter(importedText);

@@ -15,9 +15,9 @@ the test file of the module named beside it.
 | --- | --- | --- |
 | The track raises the revision of an ADR the repository ruled: `apply` reports it and leaves the file as it is. | [apply, "Revised ADR left alone"](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/apply/spec.md#scenario-revised-adr-left-alone) | `test/apply.test.ts` |
 | `apply --confirm` names an ADR it cannot confirm: `apply` fails before writing any file. | [apply, "Confirm a name that is not undetermined"](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/apply/spec.md#scenario-confirm-a-name-that-is-not-undetermined) | `test/apply.test.ts` |
-| Only the local verdict differs from the track's copy: the ADR is `unchanged`. | [adr-revision, "Only the local verdict changed"](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/adr-revision/spec.md#scenario-only-the-local-verdict-changed) | `test/revision.test.ts` |
+| Only the local ruling differs from the track's copy: the ADR is `unchanged`. | [adr-revision, "Only the local ruling changed"](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/adr-revision/spec.md#scenario-only-the-local-ruling-changed) | `test/revision.test.ts` |
 | `apply --confirm` on an undetermined ADR changes its `revision:` line and nothing else. | [apply, "Confirm one ADR"](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/apply/spec.md#scenario-confirm-one-adr) | `test/apply.test.ts` |
-| `apply` rewrites the rules block of `AGENTS.md` and leaves the rest of the file untouched. | [agents-file, "Block replaced, the rest untouched"](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/agents-file/spec.md#scenario-block-replaced-the-rest-untouched) | `test/agents.test.ts` |
+| `apply` rewrites the instructions block of `AGENTS.md` and leaves the rest of the file untouched. | [agents-file, "Block replaced, the rest untouched"](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/agents-file/spec.md#scenario-block-replaced-the-rest-untouched) | `test/agents.test.ts` |
 
 ## Repeatable imports
 

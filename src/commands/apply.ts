@@ -19,7 +19,7 @@ export const describe = 'Import new ADRs, move flat-layout files and update AGEN
 export const builder = (y: Argv) =>
   y
     .option('prune', { type: 'boolean', default: false, describe: 'Delete ADRs the track no longer ships' })
-    .option('confirm', { type: 'string', array: true, requiresArg: true, default: [], describe: 'Declare an undetermined verdict still holds (a name, or "all")' })
+    .option('confirm', { type: 'string', array: true, requiresArg: true, default: [], describe: 'Declare an undetermined ruling still holds (a name, or "all")' })
     .option('dry-run', { type: 'boolean', default: false, describe: 'Print what apply would do, write nothing' });
 
 const CHANGES_BLOCK: Action['kind'][] = ['renamed', 'imported', 'moved', 'pruned'];
@@ -37,14 +37,14 @@ function agentsStep(
   if (!dryRun) {
     if (!writable) return { lines: agentsReport(status), pending: agentsPending(status) };
     const verb = writeAgents(status);
-    return { lines: [`AGENTS.md: rules block ${verb}`, ...(status.warning ? [status.warning] : [])], pending: false, wrote: true };
+    return { lines: [`AGENTS.md: instructions block ${verb}`, ...(status.warning ? [status.warning] : [])], pending: false, wrote: true };
   }
   const touched = actions.some((a) => CHANGES_BLOCK.includes(a.kind));
   if (status.state === 'skipped' || (!writable && !touched)) {
     return { lines: agentsReport(status), pending: agentsPending(status) };
   }
   const verb = status.state === 'missing' || status.state === 'none' ? 'create' : 'update';
-  return { lines: [`AGENTS.md: rules block to ${verb}`, ...(status.warning ? [status.warning] : [])], pending: true, wrote: true };
+  return { lines: [`AGENTS.md: instructions block to ${verb}`, ...(status.warning ? [status.warning] : [])], pending: true, wrote: true };
 }
 
 // The next step, on stderr so that stdout keeps its documented format: imported

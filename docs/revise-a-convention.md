@@ -1,10 +1,10 @@
 ---
-title: Revise a question
-description: Change a question in your track, and take each repository that answered it through ruling again.
+title: Revise a convention
+description: Change a convention in your track, and take each repository that ruled on it through ruling again.
 ---
 
-This guide shows how to change a question in a track you maintain, then how
-a repository that answered the earlier version takes its ruling again.
+This guide shows how to change a convention in a track you maintain, then how
+a repository that ruled on the earlier version takes its ruling again.
 
 It follows [Write your own track](write-your-own-track.md) and uses the
 same names: the track `platform-governance`, installed under the alias
@@ -12,10 +12,10 @@ same names: the track `platform-governance`, installed under the alias
 
 ## In the track
 
-### 1. Change the question
+### 1. Change the convention
 
 Edit the ADR: its text, its recommendation, or its trait keys. Leave the
-status `proposed` and the trait values empty, as for any shipped question.
+status `proposed` and the trait values empty, as for any shipped convention.
 
 ### 2. Raise the revision
 
@@ -25,8 +25,8 @@ Add one to `revision` in the ADR's frontmatter:
 revision: 2
 ```
 
-This is what tells a repository that its answer is to be taken again. Raise
-it only when the question itself moves, so that a repository is never asked
+This is what tells a repository that its ruling is to be taken again. Raise
+it only when the convention itself moves, so that a repository is never asked
 to rule again on a fixed typo.
 
 ### 3. Publish
@@ -59,7 +59,7 @@ platform: 1 revised, 0 unchanged
 until it is taken again: `AGENTS.md` still carries it.
 
 No `apply` step comes next. `apply` does not write to a `revised` ADR, so
-there is nothing for it to do until the question is ruled again. The agent
+there is nothing for it to do until the convention is ruled again. The agent
 runs it at the end of the next step.
 
 ### 6. Rule again
@@ -69,7 +69,7 @@ claude "$(npx ontrack review)"
 ```
 
 The agent reads the repository's copy and the track's, keeps your ruling
-where the question did not move, and proposes one where it did. It writes
+where the convention did not move, and proposes one where it did. It writes
 nothing until you agree. This needs a version of ontrack later than 0.3.0.
 
 Once you agree, the agent replaces the repository's copy with the track's,
@@ -96,9 +96,9 @@ together.
 
 | You | The repository sees in `plan` | What it does |
 | --- | --- | --- |
-| Add a question | `new` | Rules it with `review`, whose prompt has the agent run `npx ontrack apply` first |
+| Add a convention | `new` | Rules it with `review`, whose prompt has the agent run `npx ontrack apply` first |
 | Change the `check` line only | `check` | `npx ontrack apply` copies the new line |
-| Remove a question | `removed` | `npx ontrack apply --prune` deletes its copy |
+| Remove a convention | `removed` | `npx ontrack apply --prune` deletes its copy |
 
 None of these needs a new revision.
 

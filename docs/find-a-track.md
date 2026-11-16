@@ -32,15 +32,15 @@ to install it and follow its releases.
 
 ## Read it before you install it
 
-A repository installs a whole track. Each of its questions then waits for
-an answer. Before you install, read in the README and in the ADRs of the
+A repository installs a whole track. Each of its conventions then waits for
+a ruling. Before you install, read in the README and in the ADRs of the
 track:
 
-- how many questions it asks, and on which subjects;
-- which questions carry a `check` key. The command it names runs in your
+- how many conventions it ships, and on which subjects;
+- which conventions carry a `check` key. The command it names runs in your
   repository, with [`ontrack check`](commands.md#ontrack-check), once you
   accept the ADR;
-- how often its questions are revised.
+- how often its conventions are revised.
 
 ## Install it
 
@@ -53,22 +53,22 @@ npm i -D <alias>@npm:<package>
 npx ontrack plan
 ```
 
-`plan` lists the questions and changes no file. `npx ontrack apply` then
+`plan` lists the conventions and changes no file. `npx ontrack apply` then
 imports them. The [tutorial](tutorial.mdx) goes through these steps with a
 track.
 
 ## Keep what applies, reject the rest
 
-You cannot install part of a track. You answer each question instead:
+You cannot install part of a track. You rule on each convention instead:
 
-- Every question arrives as `proposed`, and is listed in `AGENTS.md` under
+- Every convention arrives as `proposed`, and is listed in `AGENTS.md` under
   "Not yet decided" until you rule.
-- `rejected` is a full answer: the question does not apply here, and the ADR
+- `rejected` is a full ruling: the convention does not apply here, and the ADR
   says what stands in for it.
-- When the author revises a question, it comes back for a ruling, even when
+- When the author revises a convention, it comes back for a ruling, even when
   you rejected it.
 
-[How ontrack works](how-it-works.md#the-life-of-one-question) follows a
-question from its arrival to its revision. A repository may install
+[How ontrack works](how-it-works.md#the-life-of-one-convention) follows a
+convention from its arrival to its revision. A repository may install
 [several tracks](how-it-works.md#several-tracks), each under its own
 alias.

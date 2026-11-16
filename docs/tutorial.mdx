@@ -1,6 +1,6 @@
 ---
 title: Get started
-description: Import a public track of ADRs into a repository, answer one question with a coding agent, and read the rule in AGENTS.md.
+description: Import a public track of ADRs into a repository, rule on one convention with a coding agent, and read the instruction in AGENTS.md.
 sidebar:
   order: 1
 ---
@@ -8,11 +8,11 @@ sidebar:
 import { Aside, CardGrid, FileTree, LinkCard, Steps } from '@astrojs/starlight/components';
 
 In this tutorial you import a public track of architecture decision records
-(ADRs) into one repository, let a coding agent propose an answer to one of
-them, and read the resulting rule in `AGENTS.md`.
+(ADRs) into one repository, let a coding agent propose a ruling on one of
+them, and read the resulting instruction in `AGENTS.md`.
 
 **Time.** On a fresh repository, steps 1 to 3 ran in 14 seconds. In step 4,
-the agent took about a minute to propose an answer.
+the agent took about a minute to propose a ruling.
 
 ## Before you start
 
@@ -83,19 +83,19 @@ it did, and you can discard it.
      imported      ADR-0002-localization
      …
      imported      ADR-0026-agent-identity
-   AGENTS.md: rules block created
+   AGENTS.md: instructions block created
    next: 25 proposed ADRs to rule
      from a shell:  claude "$(npx ontrack review)"
      as a prompt:   Run `npx ontrack review` and follow its output.
    ```
 
-   The last three lines name the next step. Step 4 takes it for one question.
+   The last three lines name the next step. Step 4 takes it for one convention.
 
    The ADRs are now in `docs/adr/engineering/`, and `AGENTS.md` has a block that
    belongs to ontrack:
 
    <FileTree>
-   - AGENTS.md the rules block, created
+   - AGENTS.md the instructions block, created
    - docs/
      - adr/
        - engineering/
@@ -109,7 +109,7 @@ it did, and you can discard it.
 
    ````markdown
    <!-- ontrack:begin -->
-   ## Project rules (ontrack)
+   ## Project instructions (ontrack)
 
    When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output.
 
@@ -130,14 +130,13 @@ it did, and you can discard it.
    <!-- ontrack:end -->
    ````
 
-   One ADR came already decided by its track. The others are questions your
-   repository has not answered yet.
+   One ADR came already decided by its track. The others are conventions your
+   repository has not ruled on yet.
 
-4. **Answer one question**
+4. **Rule on one convention**
 
-   Open `docs/adr/engineering/ADR-0006-commits.md`. It asks which commit scopes
-   this repository uses and which tool enforces them, and it leaves two keys
-   empty:
+   Open `docs/adr/engineering/ADR-0006-commits.md`. It is the convention on commit
+   scopes and the tool that enforces them, and it leaves two keys empty:
 
    ```yaml
    status: proposed
@@ -147,7 +146,7 @@ it did, and you can discard it.
        tool:
    ```
 
-   Ask a coding agent to propose the answer:
+   Ask a coding agent to propose the ruling:
 
    ```bash
    claude "$(npx ontrack review ADR-0006)"
@@ -163,8 +162,8 @@ it did, and you can discard it.
    use.
 
    Agree, or change a value. The agent then fills the keys, sets the status and
-   runs `npx ontrack apply`, which moves the ADR from "Not yet decided" to a rule
-   of its own in `AGENTS.md`. In the repository of ontrack itself, that rule
+   runs `npx ontrack apply`, which moves the ADR from "Not yet decided" to an instruction
+   of its own in `AGENTS.md`. In the repository of ontrack itself, that instruction
    reads:
 
    ````markdown
@@ -184,14 +183,14 @@ it did, and you can discard it.
 
 ## Where to go next
 
-Answer the remaining questions, one at a time, with
+Rule on the remaining conventions, one at a time, with
 `claude "$(npx ontrack review)"`.
 
 <CardGrid>
-  <LinkCard title="Run ontrack in CI" href="../run-ontrack-in-ci/" description="plan exits with 2 when the track asks a new question or changes one you answered." />
+  <LinkCard title="Run ontrack in CI" href="../run-ontrack-in-ci/" description="plan exits with 2 when the track ships a new convention or changes one you ruled on." />
   <LinkCard title="Write your own track" href="../write-your-own-track/" description="A package.json with an ontrack key that points to a directory of ADRs." />
-  <LinkCard title="Concepts" href="../concepts/" description="One notion at a time: an ADR, a question, a track, a ruling, the rules block." />
-  <LinkCard title="How it works" href="../how-it-works/" description="The pieces, the life of a question, and the cycle." />
+  <LinkCard title="Concepts" href="../concepts/" description="One notion at a time: an ADR, a convention, a track, a ruling, the instructions block." />
+  <LinkCard title="How it works" href="../how-it-works/" description="The pieces, the life of a convention, and the cycle." />
   <LinkCard title="Commands" href="../commands/" description="Every command, its options and its exit codes." />
   <LinkCard title="File formats" href="../file-formats/" description="What ontrack reads in a track and in a repository." />
 </CardGrid>

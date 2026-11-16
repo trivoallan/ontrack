@@ -46,7 +46,7 @@
   font-size: var(--sl-text-lg);
 }
 
-/* A domain card of the track page links to its questions: the link covers
+/* A domain card of the track page links to its conventions: the link covers
    the card, which keeps the colour Starlight gives it by position. */
 .card:has(.card-link) {
   position: relative;
@@ -80,8 +80,8 @@
   inset: 0;
 }
 
-/* A question card's arrow sits at its foot, as the domain cards' link. */
-.question-cards .sl-link-card .icon {
+/* A convention card's arrow sits at its foot, as the domain cards' link. */
+.convention-cards .sl-link-card .icon {
   align-self: end;
 }
 

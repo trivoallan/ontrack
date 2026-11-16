@@ -39,7 +39,7 @@ export const collections = {
         // ADR's frontmatter, which would serve every ADR at the site root.
         generateId: ({ entry }) => entry.replace(/\.mdx?$/, '').toLowerCase(),
       }),
-      // The catalogue: the blank questions of the reference track, read where
+      // The catalogue: the blank conventions of the reference track, read where
       // npm installed the release this repository depends on.
       glob({
         pattern: '*.md',

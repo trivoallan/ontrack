@@ -68,7 +68,7 @@ An ADR that carries decided traits (see `instructions`) and no check SHALL be re
 
 #### Scenario: One path per command
 - **WHEN** `docs/adr/ADR-0001-a.md` and `docs/adr/trivoallan/ADR-0006-commits.md` both carry the check `echo "$ONTRACK_ADR"; exit 1`
-- **THEN** the output lines of each `fail` hold that ADR's own path, equal to its `rule:` line
+- **THEN** the output lines of each `fail` hold that ADR's own path, equal to its `adr:` line
 
 #### Scenario: The caller's environment is kept
 - **WHEN** the caller's environment holds `ONTRACK_TEST_MARK=kept` and an ADR carries the check `test "$ONTRACK_TEST_MARK" = kept`
@@ -84,7 +84,7 @@ When `instructions` would fail on a trait conflict or on an inline `traits:` val
 ### Requirement: Output format
 The output SHALL follow the contract in the commands reference, `docs/commands.md`, as lines on standard output:
 1. one line per reported ADR, sorted by reference: the status (`pass`, `fail` or `unchecked`) padded with spaces to 11 characters, then `<title> (<reference>)`. The title is read as in `adr-revision`; without one, the reference stands alone, without parentheses;
-2. after each `fail` line: `  rule: <path of the ADR's file relative to the project root, with forward slashes>`, then `  check: <command>`, then each line of the command's standard output followed by each line of its standard error, prefixed with `  | `, with trailing blank lines removed;
+2. after each `fail` line: `  adr: <path of the ADR's file relative to the project root, with forward slashes>`, then `  check: <command>`, then each line of the command's standard output followed by each line of its standard error, prefixed with `  | `, with trailing blank lines removed;
 3. a last line `<f> failed, <p> passed, <u> unchecked`.
 
 The output of a passing command SHALL NOT be printed. With no ADR to report, the output SHALL be the last line alone, with three zeros.

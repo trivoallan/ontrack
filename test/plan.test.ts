@@ -284,7 +284,7 @@ test('check added, changed or removed upstream: check', () => {
   }
 });
 
-test('same check with a different verdict, or a check line only in the body: unchanged', () => {
+test('same check with a different ruling, or a check line only in the body: unchanged', () => {
   assert.equal(buildPlan(one(ruled('check: exit 0'), shipped(1, 'check: exit 0  ')))[0].adrs[0].category, 'unchanged');
   assert.equal(buildPlan(one(ruled(), shipped(1)))[0].adrs[0].category, 'unchanged');
 });
@@ -318,7 +318,7 @@ const listing = (tracks: Files, local: Files) =>
   formatPlan(buildPlan(makeProject({ tracks: { platform: tracks }, local })), { all: true });
 const at = (file: string) => `docs/adr/platform/${file}`;
 
-test('--all lists the unchanged ADRs with their verdict', () => {
+test('--all lists the unchanged ADRs with their status', () => {
   const out = listing(
     { 'ADR-0001.md': fm('proposed'), 'ADR-0002.md': fm('proposed') },
     { [at('ADR-0001.md')]: fm('accepted'), [at('ADR-0002.md')]: fm('accepted') },
@@ -338,7 +338,7 @@ test('--all interleaves the categories by name', () => {
   ]);
 });
 
-test('without --all: no unchanged line, no verdict column', () => {
+test('without --all: no unchanged line, no status column', () => {
   const root = makeProject({
     tracks: { platform: { 'ADR-0001.md': fm('proposed'), 'ADR-0002.md': fm('proposed', 2), 'ADR-0003.md': fm('proposed') } },
     local: { [at('ADR-0001.md')]: fm('accepted'), [at('ADR-0002.md')]: fm('accepted') },
@@ -359,12 +359,12 @@ test('--all: a rejected ADR', () => {
   assert.match(out, /^ {2}unchanged {5}rejected {4}ADR-0013-frontend$/m);
 });
 
-test('the verdict is the local one, not the track\'s', () => {
+test('the status is the local one, not the track\'s', () => {
   const root = makeProject({ tracks: { platform: { 'A.md': fm('proposed') } }, local: { [at('A.md')]: fm('accepted') } });
   assert.equal(buildPlan(root)[0].adrs[0].status, 'accepted');
 });
 
-test('--all: a trailing comment is not part of the verdict', () => {
+test('--all: a trailing comment is not part of the status', () => {
   const out = listing(
     { 'A.md': fm('proposed') },
     { [at('A.md')]: fm('accepted     # proposed as shipped; accepted or rejected once ruled') },
@@ -372,11 +372,11 @@ test('--all: a trailing comment is not part of the verdict', () => {
   assert.match(out, /^ {2}unchanged {5}accepted {4}A$/m);
 });
 
-test('--all: a new ADR has no verdict', () => {
+test('--all: a new ADR has no status', () => {
   assert.match(listing({ 'A.md': fm('proposed') }, {}), /^ {2}new {11}- {11}A$/m);
 });
 
-test('--all: an unreadable copy, or one without status, has no verdict', () => {
+test('--all: an unreadable copy, or one without status, has no status', () => {
   const out = listing(
     { 'A.md': fm('proposed'), 'B.md': fm('proposed') },
     { [at('A.md')]: 'no frontmatter\n', [at('B.md')]: fm(null) },
@@ -385,7 +385,7 @@ test('--all: an unreadable copy, or one without status, has no verdict', () => {
   assert.match(out, /^ {2}unchanged {5}- {11}B$/m);
 });
 
-test('--all: a removed ADR keeps its verdict and title', () => {
+test('--all: a removed ADR keeps its status and title', () => {
   const out = listing({ 'ADR-0001.md': fm('proposed') }, { [at('ADR-0012.md')]: fm('accepted', 1, 'title: Hosting') });
   assert.match(out, /^ {2}removed {7}accepted {4}ADR-0012 {2}Hosting$/m);
 });

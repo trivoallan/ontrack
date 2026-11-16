@@ -6,9 +6,9 @@ title: Introduction and Goals
 
 ontrack is a command-line tool that imports shared architecture decision
 records (ADRs) into a repository. The ADRs come from *tracks*: npm
-dependencies whose `package.json` carries an `ontrack` key. Each ADR asks a
-question and recommends an answer; the repository answers it in its own
-copy, and ontrack writes the answers to `AGENTS.md` so that coding agents
+dependencies whose `package.json` carries an `ontrack` key. Each ADR carries a
+convention and recommends its values; the repository rules on it in its own
+copy, and ontrack writes the rulings to `AGENTS.md` so that coding agents
 follow them. The
 [documentation site](../../index.mdx) is the user's guide;
 this document describes how the tool is built.
@@ -23,8 +23,8 @@ and does not repeat them.
 | Command | What it is for | Specification |
 | --- | --- | --- |
 | `ontrack plan` | say what importing the tracks would change, without writing | [plan](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/plan/spec.md), [tracks](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/tracks/spec.md), [adr-revision](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/adr-revision/spec.md) |
-| `ontrack apply` | do what `plan` reports, and keep the rules block of `AGENTS.md` current | [apply](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/apply/spec.md), [agents-file](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/agents-file/spec.md) |
-| `ontrack instructions` | print the decided traits as the rules block | [instructions](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/instructions/spec.md) |
+| `ontrack apply` | do what `plan` reports, and keep the instructions block of `AGENTS.md` current | [apply](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/apply/spec.md), [agents-file](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/agents-file/spec.md) |
+| `ontrack instructions` | print the decided traits as the instructions block | [instructions](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/instructions/spec.md) |
 | `ontrack review` | print a prompt asking a coding agent to rule proposed ADRs, or to supersede an accepted one | [review](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/review/spec.md) |
 | `ontrack check` | run the check command each decided ADR declares | [output contract](../../commands.md#check-output-contract) |
 
@@ -48,4 +48,4 @@ scenarios.
 | --- | --- |
 | Repository maintainer | to see which shared ADRs are new or need a ruling again, to import them in one command, and to rely on an exit code in CI |
 | Track author | that a track is a plain npm package with an `ontrack` key, and that raising an ADR's `revision:` reaches every repository that depends on it |
-| Coding agent | to read the repository's decided rules in `AGENTS.md`, and to receive a prompt that says how to propose a ruling |
+| Coding agent | to read the repository's instructions in `AGENTS.md`, and to receive a prompt that says how to propose a ruling |

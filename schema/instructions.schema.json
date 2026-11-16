@@ -85,7 +85,7 @@
     },
     "block": {
       "type": "string",
-      "description": "The rules block, as the text form prints it."
+      "description": "The instructions block, as the text form prints it."
     }
   },
   "required": [

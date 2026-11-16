@@ -4,24 +4,24 @@ description: The reference track ontrack is built with, and what a repository ge
 ---
 
 import { Aside, Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
-import { domains, questions, version } from '../site/src/track.mjs';
+import { domains, conventions, version } from '../site/src/track.mjs';
 
 export const DomainLink = ({ name }) => {
   const domain = domains.find((d) => d.name === name);
-  return <a class="card-link" href={`questions/#${domain.slug}`}>{domain.questions.length} questions <span aria-hidden="true">→</span></a>;
+  return <a class="card-link" href={`conventions/#${domain.slug}`}>{domain.conventions.length} conventions <span aria-hidden="true">→</span></a>;
 };
 
 [`@trivoallan/ontrack-engineering`](https://www.npmjs.com/package/@trivoallan/ontrack-engineering)
-is the reference track: 26 questions on how a Python or TypeScript
-repository on GitHub is engineered, each with the answer it recommends.
-ontrack is built with it, and answers every one of its questions in
+is the reference track: 26 conventions on how a Python or TypeScript
+repository on GitHub is engineered, each with the values it recommends.
+ontrack is built with it, and rules on every one of its conventions in
 [its own decisions](adr/engineering/ADR-0001-record-architecture-decisions.md).
 
 ## What you get
 
 <CardGrid>
   <Card title="Agents" icon="laptop">
-    The rules you accepted, written into a managed block of `AGENTS.md`, which Claude Code, opencode and Copilot CLI read on every session; plugins pinned; the agent opens the pull request and never approves one; a person merges it, or approves it so the agent can; if you choose, the agent acts under its own GitHub identity.
+    The conventions you accepted, written into the instructions block of `AGENTS.md`, which Claude Code, opencode and Copilot CLI read on every session; plugins pinned; the agent opens the pull request and never approves one; a person merges it, or approves it so the agent can; if you choose, the agent acts under its own GitHub identity.
 
     <DomainLink name="Agents" />
   </Card>
@@ -59,12 +59,12 @@ ontrack is built with it, and answers every one of its questions in
 
 <Aside type="note">
 A check confirms the wiring is there, not that it is right. Reject any
-question that does not fit your repository: a rejection is a full answer.
+convention that does not fit your repository: a rejection is a full ruling.
 </Aside>
 
 ## Go on
 
 <CardGrid>
-  <LinkCard title="Use it" href="use-it/" description="Install the track, take its new releases, and reject a question that does not fit." />
-  <LinkCard title="Questions" href="questions/" description={`The ${questions.length} questions of ontrack-engineering ${version}, by domain.`} />
+  <LinkCard title="Use it" href="use-it/" description="Install the track, take its new releases, and reject a convention that does not fit." />
+  <LinkCard title="Conventions" href="conventions/" description={`The ${conventions.length} conventions of ontrack-engineering ${version}, by domain.`} />
 </CardGrid>

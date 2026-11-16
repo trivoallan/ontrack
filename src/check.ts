@@ -23,13 +23,13 @@ export function runChecks(root: string): CheckResult[] {
       const r = spawnSync(adr.check, {
         shell: true,
         cwd: root,
-        // The command learns which ADR it enforces: the path of the `rule:` line.
+        // The command learns which ADR it enforces: the path of the `adr:` line.
         env: { ...process.env, ONTRACK_ADR: adr.path },
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
       });
       if (r.status === 0) return { adr, status: 'pass', output: [] };
-      // Reserved (EX_CONFIG): the command had nothing to verify for this verdict.
+      // Reserved (EX_CONFIG): the command had nothing to verify for this ruling.
       if (r.status === 78) return { adr, status: 'unchecked', output: [] };
       const output = [r.stdout, r.stderr].join('').split('\n');
       while (output.length > 0 && output[output.length - 1].trim() === '') output.pop();
@@ -45,7 +45,7 @@ export function formatChecks(results: CheckResult[]): string {
     count[status] += 1;
     lines.push(`${status.padEnd(11)}${heading(adr)}`);
     if (status !== 'fail') continue;
-    lines.push(`  rule: ${adr.path}`, `  check: ${adr.check}`, ...output.map((l) => `  | ${l}`));
+    lines.push(`  adr: ${adr.path}`, `  check: ${adr.check}`, ...output.map((l) => `  | ${l}`));
   }
   lines.push(`${count.fail} failed, ${count.pass} passed, ${count.unchecked} unchecked`);
   return `${lines.join('\n')}\n`;

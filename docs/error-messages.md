@@ -90,7 +90,7 @@ not errors, but `plan` exits with `2` while one of the first two stands.
 
 | Line | It means | Do |
 | --- | --- | --- |
-| `AGENTS.md: skipped, expected one <!-- ontrack:begin --> line followed by one <!-- ontrack:end --> line` | The markers of the rules block are doubled, lone or in the wrong order, so ontrack does not know what it may rewrite | Leave one `begin` line followed by one `end` line, or delete both: `apply` then writes a new block |
+| `AGENTS.md: skipped, expected one <!-- ontrack:begin --> line followed by one <!-- ontrack:end --> line` | The markers of the instructions block are doubled, lone or in the wrong order, so ontrack does not know what it may rewrite | Leave one `begin` line followed by one `end` line, or delete both: `apply` then writes a new block |
 | `AGENTS.md: skipped, trait "<key>" is decided by both …` | Two ADRs decide the same key, so there is no block to write | Settle the conflict, as above |
 | `AGENTS.md: not read by Claude Code while CLAUDE.md exists; add a line "@AGENTS.md" to CLAUDE.md` | Claude Code reads `AGENTS.md` only when the repository has no `CLAUDE.md` | Add the line `@AGENTS.md` to `CLAUDE.md` |
 

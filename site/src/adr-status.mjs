@@ -1,5 +1,5 @@
 // How the status of an ADR is shown, in the sidebar and in its page.
-// `rejected` is a full answer, not a failure: it is neutral, never red.
+// `rejected` is a full ruling, not a failure: it is neutral, never red.
 const tones = { accepted: 'success', proposed: 'caution' };
 
 /** The colour class of a status, shared by the sidebar dot and the page badge. */

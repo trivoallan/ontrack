@@ -6,8 +6,8 @@ description: Read what a new version of ontrack changes, install it, and check t
 This guide shows how to move a repository to a newer version of ontrack: the
 changelog to read, the command to run, and what to check afterwards.
 
-It is about ontrack itself. To follow a track whose questions changed, see
-[Revise a question](revise-a-question.md#in-each-repository).
+It is about ontrack itself. To follow a track whose conventions changed, see
+[Revise a convention](revise-a-convention.md#in-each-repository).
 
 ## 1. Read what changed
 

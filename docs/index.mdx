@@ -1,12 +1,12 @@
 ---
 title: Shared conventions that don't drift
-description: ontrack turns your engineering conventions into questions each repository answers, and tells you when an answer is out of date.
+description: ontrack proposes your engineering conventions to each repository, records how it ruled, and tells you when a convention has changed.
 template: splash
 sidebar:
   label: Home
   order: 0
 hero:
-  tagline: Write your engineering conventions once, as questions. Each repository answers them for itself, coding agents follow the answers, and CI tells you when an answer is out of date.
+  tagline: "Write your engineering conventions once. They are proposed, not imposed: each repository rules on them for itself, coding agents follow its rulings, and CI tells you when a convention has changed."
   image:
     file: ./assets/logo.png
     alt: ""
@@ -29,15 +29,15 @@ import { Aside, Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
 <div class="features">
 
-- **[Share conventions](features.md#share-conventions-as-questions)**
-  Each one written as a question.
-- **[Rule on each question](features.md#rule-on-each-question)**
-  Your answer, drafted by an agent.
-- **[Answers in the harness](features.md#load-the-answers-into-the-agents-harness)**
+- **[Share conventions](features.md#share-conventions)**
+  Written once, in a track.
+- **[Rule on each convention](features.md#rule-on-each-convention)**
+  Your ruling, drafted by an agent.
+- **[Instructions in the harness](features.md#load-the-instructions-into-the-agents-harness)**
   One block in `AGENTS.md`.
-- **[A compliance backlog](features.md#keep-the-repository-true-to-its-answers)**
+- **[A compliance backlog](features.md#keep-the-repository-true-to-its-rulings)**
   One issue per ruling not followed yet.
-- **[Question changes reported](features.md#know-when-a-question-changes)**
+- **[Convention changes reported](features.md#know-when-a-convention-changes)**
   `ontrack plan` exits with `2`.
 - **[No lock-in](features.md#no-lock-in)**
   Markdown files, an npm dependency, no server.
@@ -51,25 +51,26 @@ copied: into a template, a wiki page, thirty repositories.
 
 - Each copy changes on its own, and nothing tells you which ones did.
 - When the convention itself changes, nothing tells the repositories.
-- A coding agent that finds no rule invents one: `fix(api)`, then
+- A coding agent that finds no instruction invents one: `fix(api)`, then
   `fix(backend)`, then `fix(server)` for the same place.
 
-## A question, an answer, a rule the agent reads
+## A convention, a ruling, an instruction the agent reads
 
-With ontrack, a convention is an architecture decision record (ADR) that asks
-a question and recommends an answer. You keep these ADRs in one repository,
-the **track**. Every other repository imports them and answers.
+With ontrack, a convention is an architecture decision record (ADR) that
+recommends values and decides nothing. You keep these ADRs in one
+repository, the **track**. Every other repository imports them and rules on
+each: it follows the recommendation, departs from it, or rejects it.
 
-A coding agent does the legwork. It reads the question, looks in the
-repository for evidence, proposes an answer, and writes nothing until you
+A coding agent does the legwork. It reads the convention, looks in the
+repository for evidence, proposes a ruling, and writes nothing until you
 agree:
 
 ```bash
 claude "$(npx ontrack review ADR-0006)"
 ```
 
-This is what the repository of ontrack itself answered to the question on
-commits. The answer lives in its copy of the ADR:
+This is how the repository of ontrack itself ruled on the convention on
+commits. The ruling lives in its copy of the ADR:
 
 ```yaml
 status: accepted
@@ -79,7 +80,7 @@ traits:
     tool: commitlint
 ```
 
-And ontrack wrote it to `AGENTS.md`, where coding agents look for rules:
+And ontrack wrote it to `AGENTS.md`, where coding agents look for instructions:
 
 ````markdown
 ### Commits (engineering/ADR-0006-commits)
@@ -94,10 +95,10 @@ commits:
 You can read [the whole decision](adr/engineering/ADR-0006-commits.md), and
 the others, on this site.
 
-## When a question changes, every repository is told
+## When a convention changes, every repository is told
 
-Each ADR carries a revision number. When you change a question in the track,
-`ontrack plan` reports it in every repository that answered the earlier
+Each ADR carries a revision number. When you change a convention in the track,
+`ontrack plan` reports it in every repository that ruled on the earlier
 revision. This is the format it follows:
 
 ```
@@ -108,11 +109,11 @@ platform: 2 revised, 1 new, 3 unchanged
 ```
 
 `plan` then exits with `2`. A CI job fails on that code without parsing the
-output, and the repository knows which answers to take again. `plan` changes
+output, and the repository knows which rulings to take again. `plan` changes
 no file and makes no network call.
 
 `plan` reads the track as the repository has installed it. A weekly job
-that updates the track is what tells a repository the question moved:
+that updates the track is what tells a repository the convention moved:
 [Run ontrack in CI](run-ontrack-in-ci.md) gives it to copy.
 
 ## Next to what you already have
@@ -122,25 +123,25 @@ that updates the track is what tells a repository the question moved:
 | A template repository or a project generator | Copies the conventions when the repository is created | Nothing links the copy to the original afterwards |
 | A shared configuration (lint rules, presets) | Applies the same values everywhere | A repository that differs has to override or opt out |
 | A rules sync tool, such as Ruler or rulesync | Writes one set of agent rules to the file each coding agent reads | Where the rules come from, and whether they still match what was agreed |
-| A tool that runs ADRs as checks, such as Archgate | Fails CI when the code departs from a decision | A shared ADR carries the decision, not a question: a repository that differs keeps an edited copy |
+| A tool that runs ADRs as checks, such as Archgate | Fails CI when the code departs from a decision | A shared ADR carries the decision, not a proposal: a repository that differs keeps an edited copy |
 | A standards platform, such as Packmind | Sends one playbook from a server to every repository and agent | A repository can pin a version or leave a package out, but has no place to record why it differs |
-| ontrack | Asks each repository a question and records its answer | The answer itself: that is the repository's call |
+| ontrack | Proposes each convention to each repository and records its ruling | The ruling itself: that is the repository's call |
 
 <Aside type="note">
 ontrack does not replace your linters. An ADR can name the command that
 checks its decision, and `ontrack check` runs it.
 </Aside>
 
-## Your teams keep their answers
+## Your teams keep their rulings
 
-The platform team owns the questions. Each repository owns its answers.
+The platform team owns the conventions. Each repository owns its rulings.
 
 - An ADR arrives as `proposed`, with a recommendation. The repository may
   follow it or depart from it, and writes down why.
-- `rejected` is a full answer: the question does not apply here, and the ADR
+- `rejected` is a full ruling: the convention does not apply here, and the ADR
   says what stands in for it.
 - ontrack never rewrites an ADR a repository has decided on. When the
-  question changes, a person rules again.
+  convention changes, a person rules again.
 
 ## Nothing to migrate away from
 
@@ -149,12 +150,12 @@ If you stop using ontrack, all three remain and read the same.
 <CardGrid>
   <Card title="An ADR" icon="document">A Markdown file in `docs/adr/`.</Card>
   <Card title="A track" icon="seti:npm">An npm dependency.</Card>
-  <Card title="The rules" icon="list-format">A block in `AGENTS.md`.</Card>
+  <Card title="The instructions" icon="list-format">A block in `AGENTS.md`.</Card>
 </CardGrid>
 
 ## It governs itself
 
-ontrack is built under its own rules. This repository imports
+ontrack is built under its own conventions. This repository imports
 [ontrack-engineering](ontrack-engineering.mdx), the reference track, and every
 ruling it made is published here, starting with
 [how decisions are recorded](adr/engineering/ADR-0001-record-architecture-decisions.md).
@@ -175,7 +176,7 @@ ontrack is at version 0.5.0. It is young, and it changes.
 - Each version says what it changes, and which changes break:
   [Upgrade ontrack](upgrade-ontrack.md) shows where to read it.
 
-## Questions
+## Common questions
 
 ### Does it need a server, an account or a network call?
 
@@ -209,11 +210,11 @@ you install one.
 ## Try it on one repository
 
 The tutorial takes four commands. On a fresh repository, the first three ran
-in 14 seconds and left an `AGENTS.md` with its first rule. The agent then
-took about a minute to propose its first answer.
+in 14 seconds and left an `AGENTS.md` with its first instruction. The agent then
+took about a minute to propose its first ruling.
 
 <CardGrid>
-  <LinkCard title="Get started" href="tutorial/" description="Import a track, answer one question with a coding agent." />
-  <LinkCard title="How it works" href="how-it-works/" description="The model first: the pieces, the life of a question, the cycle." />
+  <LinkCard title="Get started" href="tutorial/" description="Import a track, rule on one convention with a coding agent." />
+  <LinkCard title="How it works" href="how-it-works/" description="The model first: the pieces, the life of a convention, the cycle." />
   <LinkCard title="Commands" href="commands/" description="What each command does, its options and exit codes." />
 </CardGrid>
