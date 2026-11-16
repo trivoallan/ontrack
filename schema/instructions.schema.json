@@ -1,0 +1,92 @@
+{
+  "$id": "https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/instructions.schema.json",
+  "title": "What `ontrack instructions --json` prints",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "hint": {
+      "type": "string"
+    },
+    "decided": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ref": {
+            "type": "string",
+            "description": "`<namespace>/<file name without .md>`."
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "path": {
+            "type": "string"
+          },
+          "traits": {
+            "type": "string",
+            "description": "The decided traits, as YAML."
+          }
+        },
+        "required": [
+          "ref",
+          "title",
+          "status",
+          "path",
+          "traits"
+        ]
+      }
+    },
+    "pending": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ref": {
+            "type": "string",
+            "description": "`<namespace>/<file name without .md>`."
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref",
+          "title",
+          "status",
+          "path"
+        ]
+      }
+    },
+    "block": {
+      "type": "string",
+      "description": "The rules block, as the text form prints it."
+    }
+  },
+  "required": [
+    "hint",
+    "decided",
+    "pending",
+    "block"
+  ]
+}

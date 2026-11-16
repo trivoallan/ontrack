@@ -1,0 +1,38 @@
+{
+  "$id": "https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/error.schema.json",
+  "title": "What any ontrack command prints on standard error when it fails under `--json`",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "error": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "description": "The code of the error; null for a failure ontrack did not foresee.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "message": {
+          "type": "string"
+        },
+        "docs": {
+          "description": "The address of the code's row on the Error messages page.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "docs"
+      ]
+    }
+  },
+  "required": [
+    "error"
+  ]
+}

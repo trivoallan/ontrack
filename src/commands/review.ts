@@ -14,6 +14,7 @@ import {
 } from '../review.ts';
 import { buildPlan } from '../plan.ts';
 import type { Io } from '../cli.ts';
+import type { ReviewDocument } from '../documents.ts';
 import { adrJson, printJson } from '../json.ts';
 import type { Revised } from '../review.ts';
 import { qualify } from '../instructions.ts';
@@ -26,7 +27,7 @@ export const builder = (y: Argv) =>
   y.positional('adr', { type: 'string', describe: 'A reference, file name or identifier: a proposed ADR to rule, a revised one to rule again, or an accepted one to supersede (default: the new ADRs to import, or else every proposed ADR, in sequence, or else every revised one)' });
 
 /** What `review` found to print: the kind of prompt, the ADRs it names, and the prompt. */
-type Found = { kind: 'import' | 'sequence' | 'review' | 'revision' | 'revisions' | 'supersession'; adrs: object[]; prompt: string };
+type Found = { kind: Exclude<ReviewDocument['kind'], 'none'>; adrs: ReviewDocument['adrs']; prompt: string };
 
 const revisedJson = ({ adr, from, to }: Revised) => ({ ...adrJson(adr), revision: { from, to } });
 
@@ -60,7 +61,8 @@ export function handler({ io, adr, json }: { io: Io; adr?: string; json: boolean
   const prompt = found && qualify(root, found.prompt);
   if (json) {
     // `none`, not a sentence on standard error: the document says it.
-    printJson(io.stdout, { kind: found?.kind ?? 'none', adrs: found?.adrs ?? [], prompt });
+    const document: ReviewDocument = { kind: found?.kind ?? 'none', adrs: found?.adrs ?? [], prompt };
+    printJson(io.stdout, document);
   } else if (prompt) {
     io.stdout.write(prompt);
   } else {

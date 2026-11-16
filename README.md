@@ -103,7 +103,7 @@ node bin/ontrack.ts plan   # the CLI, from the sources
 npm test                   # tests and coverage; fails below 95% lines, branches or functions
 npm run typecheck          # strict type check of bin/, src/ and test/
 npm run build              # compiles bin/ and src/ to dist/, what an install ships
-npm run schema             # regenerates schema/ontrack.schema.json from its model
+npm run schema             # regenerates the files of schema/ from their models
 ```
 
 Node does not run TypeScript from `node_modules`, so the installed package is

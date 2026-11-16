@@ -1,0 +1,398 @@
+{
+  "$id": "https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/apply.schema.json",
+  "title": "What `ontrack apply --json` prints",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "dryRun": {
+      "type": "boolean"
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "renamed",
+              "imported",
+              "moved",
+              "confirmed",
+              "synced",
+              "pruned"
+            ]
+          },
+          "track": {
+            "type": "string"
+          },
+          "adr": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The file name without `.md`."
+                  },
+                  "title": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "revised",
+                      "new",
+                      "removed",
+                      "undetermined",
+                      "unreadable",
+                      "check",
+                      "unchanged"
+                    ]
+                  },
+                  "status": {
+                    "description": "The verdict of the repository's copy; null when it has none or states none.",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "revision": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "from": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "to": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "from",
+                          "to"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "Set for a `revised` or `undetermined` ADR."
+                  },
+                  "check": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "from": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "to": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "from",
+                          "to"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "Set for a `check` ADR: the check line of the repository's copy, and the track's."
+                  }
+                },
+                "required": [
+                  "name",
+                  "title",
+                  "category",
+                  "status",
+                  "revision",
+                  "check"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null for `renamed` and `moved`."
+          },
+          "from": {
+            "description": "A path; null for `confirmed`, `synced` and `pruned`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "to": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "track",
+          "adr",
+          "from",
+          "to"
+        ]
+      }
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "line": {
+            "type": "number"
+          },
+          "old": {
+            "type": "string"
+          },
+          "new": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "file",
+          "line",
+          "old",
+          "new"
+        ]
+      }
+    },
+    "supersedes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "line": {
+            "type": "number"
+          },
+          "old": {
+            "type": "string"
+          },
+          "new": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "file",
+          "line",
+          "old",
+          "new"
+        ]
+      }
+    },
+    "agents": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The lines about AGENTS.md, as the text form prints them."
+    },
+    "remaining": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "namespace": {
+            "type": "string"
+          },
+          "adrs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The file name without `.md`."
+                },
+                "title": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "category": {
+                  "type": "string",
+                  "enum": [
+                    "revised",
+                    "new",
+                    "removed",
+                    "undetermined",
+                    "unreadable",
+                    "check",
+                    "unchanged"
+                  ]
+                },
+                "status": {
+                  "description": "The verdict of the repository's copy; null when it has none or states none.",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "revision": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "from": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "to": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "from",
+                        "to"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Set for a `revised` or `undetermined` ADR."
+                },
+                "check": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "from": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "to": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "from",
+                        "to"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Set for a `check` ADR: the check line of the repository's copy, and the track's."
+                }
+              },
+              "required": [
+                "name",
+                "title",
+                "category",
+                "status",
+                "revision",
+                "check"
+              ]
+            },
+            "description": "Every ADR of the track, the unchanged ones too."
+          },
+          "rename": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "string"
+                  },
+                  "to": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "migration": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The files to move into the folder of the namespace."
+          }
+        },
+        "required": [
+          "namespace",
+          "adrs",
+          "rename",
+          "migration"
+        ]
+      },
+      "description": "The tracks of `plan --json`, once the actions are done."
+    },
+    "next": {
+      "type": "object",
+      "properties": {
+        "proposed": {
+          "type": "number"
+        },
+        "revised": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "proposed",
+        "revised"
+      ],
+      "description": "The ADRs left to rule, and to rule again."
+    },
+    "pending": {
+      "type": "boolean",
+      "description": "True when the exit code is 2."
+    }
+  },
+  "required": [
+    "dryRun",
+    "actions",
+    "links",
+    "supersedes",
+    "agents",
+    "remaining",
+    "next",
+    "pending"
+  ]
+}

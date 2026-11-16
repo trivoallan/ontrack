@@ -1,0 +1,135 @@
+{
+  "$id": "https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/review.schema.json",
+  "title": "What `ontrack review --json` prints",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "import",
+        "sequence",
+        "review",
+        "revision",
+        "revisions",
+        "supersession",
+        "none"
+      ]
+    },
+    "adrs": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "title": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "path",
+              "title"
+            ],
+            "description": "A new ADR, for `import`."
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ref": {
+                "type": "string",
+                "description": "`<namespace>/<file name without .md>`."
+              },
+              "title": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "status": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "path": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "ref",
+              "title",
+              "status",
+              "path"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ref": {
+                "type": "string",
+                "description": "`<namespace>/<file name without .md>`."
+              },
+              "title": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "status": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "path": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "number"
+                  },
+                  "to": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to"
+                ]
+              }
+            },
+            "required": [
+              "ref",
+              "title",
+              "status",
+              "path",
+              "revision"
+            ],
+            "description": "For `revision` and `revisions`."
+          }
+        ]
+      }
+    },
+    "prompt": {
+      "description": "The prompt, as the text form prints it; null for `none`.",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "kind",
+    "adrs",
+    "prompt"
+  ]
+}

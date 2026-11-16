@@ -65,6 +65,24 @@ document is a contract: its keys change here before they change in the code.
 - A key may be added in a later version. A key is not removed or given
   another meaning without a breaking change.
 
+Each document has a JSON Schema, published in the repository and shipped in
+the package under `schema/`:
+
+| Document | Schema |
+| --- | --- |
+| `plan --json` | [`schema/plan.schema.json`](https://github.com/trivoallan/ontrack/blob/main/schema/plan.schema.json) |
+| `apply --json` | [`schema/apply.schema.json`](https://github.com/trivoallan/ontrack/blob/main/schema/apply.schema.json) |
+| `check --json` | [`schema/check.schema.json`](https://github.com/trivoallan/ontrack/blob/main/schema/check.schema.json) |
+| `instructions --json` | [`schema/instructions.schema.json`](https://github.com/trivoallan/ontrack/blob/main/schema/instructions.schema.json) |
+| `review --json` | [`schema/review.schema.json`](https://github.com/trivoallan/ontrack/blob/main/schema/review.schema.json) |
+| An error | [`schema/error.schema.json`](https://github.com/trivoallan/ontrack/blob/main/schema/error.schema.json) |
+
+A validator reads one from
+`https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/<name>.schema.json`,
+or from `node_modules/@trivoallan/ontrack/schema/`, which is the one of the
+version you run. A schema requires every key below and refuses none: a
+document of a later version, with a key more, is still valid.
+
 ```bash
 npx ontrack plan --json
 ```
