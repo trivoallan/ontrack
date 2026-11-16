@@ -48,13 +48,17 @@ To see most of it at work in one repository, follow the
 | See the block before it is written | `ontrack instructions` | [`ontrack instructions`](commands.md#ontrack-instructions) |
 | Know when Claude Code would not read it | A warning while a `CLAUDE.md` exists without importing `AGENTS.md` | [The rules block](file-formats.md#the-rules-block-in-agentsmd) |
 
-## Turn gaps into a compliance backlog
+## Keep the repository true to its answers
 
-An answer can be ahead of the repository. Once a review is ruled, the agent
-lists the rulings the code, configuration or tooling does not match, and
-proposes one issue for each. It creates only the ones you agree to, in the
-tracker the repository named when it answered the question on
-[work tracking](adr/engineering/ADR-0014-work-tracking.md).
+An answer can be ahead of the repository, or the repository can move away
+from it later. ontrack looks at both moments.
+
+### When you rule: a compliance backlog
+
+Once a review is ruled, the agent lists the rulings the code, configuration
+or tooling does not match, and proposes one issue for each. It creates only
+the ones you agree to, in the tracker the repository named when it answered
+the question on [work tracking](adr/engineering/ADR-0014-work-tracking.md).
 
 The repository of ontrack answered `fail_on: critical` to the question on
 vulnerabilities. The scan ran, but nothing required it. This is the issue
@@ -83,22 +87,30 @@ was in the repository's settings, not in its code.
 The [`review` prompt contract](commands.md#review-prompt-contract) specifies
 this step.
 
-## Detect drift
+### From then on: a check
 
 | You want to | ontrack gives you | Specified in |
 | --- | --- | --- |
-| Learn that a question changed | `ontrack plan` names each revised ADR and exits with `2` | [`ontrack plan`](commands.md#ontrack-plan) |
-| See every ADR with your verdict | `plan --all` | [`ontrack plan`](commands.md#ontrack-plan) |
 | Verify the repository still follows a decision | `ontrack check` runs the command the ADR names | [`ontrack check`](commands.md#ontrack-check) |
-| Read a result without parsing output | One exit-code scheme for every command | [Exit codes](commands.md#exit-codes) |
+| Use the check a track ships with its question | `apply` writes the track's `check:` line into your copy | [`ontrack apply`](commands.md#ontrack-apply) |
+| Fail a build that breaks a decision | A job to copy | [Run ontrack in CI](run-ontrack-in-ci.md#2-fail-when-the-work-breaks-a-decision) |
+
+## Know when a question changes
+
+| You want to | ontrack gives you | Specified in |
+| --- | --- | --- |
+| Learn that a question you answered was revised | `ontrack plan` names each revised ADR and exits with `2` | [`ontrack plan`](commands.md#ontrack-plan) |
+| See every ADR with your verdict | `plan --all` | [`ontrack plan`](commands.md#ontrack-plan) |
+| Be told when the track itself has moved | A weekly job to copy, which updates the installed track | [Run ontrack in CI](run-ontrack-in-ci.md#3-notice-when-the-track-has-moved) |
+| Fail a build that is behind its track | A job to copy | [Run ontrack in CI](run-ontrack-in-ci.md#1-fail-when-the-repository-is-behind-its-track) |
 | Answer a revised question again | The steps, in the track and in each repository | [Revise a question](revise-a-question.md) |
 
 ## Automate it
 
 | You want to | ontrack gives you | Specified in |
 | --- | --- | --- |
-| Fail a build that is behind its track, or breaks a decision | Two jobs to copy | [Run ontrack in CI](run-ontrack-in-ci.md) |
-| Be told when the track itself has moved | A weekly job to copy | [Run ontrack in CI](run-ontrack-in-ci.md#3-notice-when-the-track-has-moved) |
+| Read a result without parsing output | One exit-code scheme for every command | [Exit codes](commands.md#exit-codes) |
+| Run all of it on GitHub Actions | Three jobs to copy | [Run ontrack in CI](run-ontrack-in-ci.md) |
 | Draft a change proposal from an issue | A label on the issue starts a workflow you call | [Draft a change from a labelled issue](draft-a-change-from-an-issue.md) |
 
 ## No lock-in
