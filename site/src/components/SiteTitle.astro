@@ -1,0 +1,39 @@
+---
+// Starlight's SiteTitle, with one addition: which version of ontrack these
+// pages document. The release channel is built from the release's checkout,
+// so the number is that release's. On `next`, package.json still names the
+// last release, which is not what the pages describe: the mark says `next`,
+// and gives the way back to the released pages (a full URL: they are outside
+// this build's base, as the banner's link is).
+import Default from '@astrojs/starlight/components/SiteTitle.astro';
+import pkg from '../../../package.json';
+
+const next = process.env.SITE_CHANNEL === 'next';
+const mark = next
+  ? { text: 'next', href: 'https://trivoallan.github.io/ontrack/', more: ': these pages document main. Read the documentation of the latest release' }
+  : { text: `v${pkg.version}`, href: `https://github.com/trivoallan/ontrack/releases/tag/v${pkg.version}`, more: ', release notes' };
+---
+
+<Default />
+<a class="site-version" href={mark.href}>{mark.text}<span class="sr-only">{mark.more}</span></a>
+
+<style>
+  .site-version {
+    flex-shrink: 0;
+    align-self: center;
+    margin-inline-start: 0.625rem;
+    padding: 0 0.5rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 999px;
+    font-size: var(--sl-text-xs);
+    font-family: var(--__sl-font-mono);
+    line-height: 1.5;
+    color: var(--sl-color-gray-2);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .site-version:hover {
+    color: var(--sl-color-white);
+    border-color: var(--sl-color-gray-3);
+  }
+</style>
