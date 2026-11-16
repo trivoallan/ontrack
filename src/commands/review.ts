@@ -17,7 +17,7 @@ import { qualify } from '../instructions.ts';
 import type { Argv } from 'yargs';
 
 export const command = 'review [adr]';
-export const describe = 'Print a prompt asking a coding agent to import the new ADRs, then rule the proposed ones, then the revised ones, or one of them, or to supersede an accepted one';
+export const describe = 'Print the prompt a coding agent follows to rule the ADRs that await a ruling, or the one you name';
 
 export const builder = (y: Argv) =>
   y.positional('adr', { type: 'string', describe: 'A reference, file name or identifier: a proposed ADR to rule, a revised one to rule again, or an accepted one to supersede (default: the new ADRs to import, or else every proposed ADR, in sequence, or else every revised one)' });
