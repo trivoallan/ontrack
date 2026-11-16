@@ -1151,3 +1151,82 @@ criterion is still the rule itself: it shows whether the agent applies the
 trace test, not that adopters are better served. The scorers differ on
 borderline keys, as run 12 showed (the same `none` for a dependency updater
 was A2 in one repository and A1 in another).
+
+### Run 13, results
+
+Conditions and scoring as pre-registered above, on marked, postcss, gulp,
+zod and qs ([run13/repos-at.txt](run13/repos-at.txt)), none of them used in
+runs 4 to 12. 10 runs, $8.72, Sonnet 5.5. Raw: [run13/surveys-raw/](run13/surveys-raw/);
+blind batches [run13/surveys-blind/](run13/surveys-blind/); scores
+[run13/scores/](run13/scores/); scorer instructions
+[run13/scorer-prompt.txt](run13/scorer-prompt.txt); prompts
+[run13/prompts/](run13/prompts/) (they differ by the two pre-registered
+edits, 4 lines). The key was opened after the five reports: **label A was
+p11 and label B was p10 in all five repositories**. The draw was random;
+five equal draws out of two have 1 chance in 16. No scorer saw more than one
+repository, so it did not reveal anything to any of them, but it is not the
+spread across labels that I expected.
+
+| Over 5 repositories | p10 (in the PR) | p11 |
+|---|---|---|
+| ADRs in the first group | 28 | 31 |
+| **Failing** | **1** (postcss 0018) | **1** (postcss 0019) |
+| **Doubtful** | 4 (marked 0018, gulp 0010 and 0018, postcss 0018) | **1** (postcss 0019) |
+| Other | 24 | 30 |
+| ADR-0004 in the first group (the scorer found one main language in all 5) | 2 of 5 | **5 of 5** |
+| Mislabels | 6 | 1 |
+| Unlabelled citations in the first group | 0 | 0 |
+| Rows with false evidence or a false count | 2 | 3 (2 in gulp's second group) |
+| Group headings with a wrong count | 0 | 0 |
+| First-group ADR with the lowest number (marked, postcss, gulp, zod, qs) | 0004, 0007, 0010, 0004, 0016 | 0004 in all 5 |
+
+**Against the pre-registered rule, p11 is not adopted.**
+1. At most 1 doubtful ADR: **met** (1). p10 had 4, so this criterion did
+   tell the two apart this time.
+2. No failing ADR: **not met**. postcss 0019 is failing in p11.
+3. Other placements at least those of p10 minus 3: **met** (30 against 24).
+4. ADR-0004 in the first group wherever the scorer found one main language:
+   **met** (5 of 5).
+
+**The failing ADR, and p10's.** Both surveys of postcss say `none` for
+something the history shows: the clone has 12 `dependabot[bot]` commits
+(the last, "Bump nanoid ... (#1989)", on 2024-12-10). p10 says
+`dependencies.updater: none` after looking at files only; p11 says
+`vulnerabilities.scanner: none`, which the scorer failed because Dependabot
+exists in the history, and called its own judgement ("the classification is
+mine, not mechanical"): version-update commits do not show that alerts are
+on. The trace test does not catch either: the thing leaves a trace, in the
+history, which neither survey read. A check of the history before a `none`
+(bot-authored commits, for instance) is the candidate edit for a next
+version. It has not been tried.
+
+**Over the two runs where p11 was scored** (run 12 on the repositories it
+came from, run 13 on repositories it had not seen):
+
+| | p10 run 12 | p10 bis run 12 | p10 run 13 | p11 run 12 | p11 run 13 |
+|---|---|---|---|---|---|
+| First-group ADRs | 25 | 31 | 28 | 30 | 31 |
+| Failing | 0 | 1 | 1 | 0 | 1 |
+| Doubtful | 1 | 4 | 4 | 0 | 1 |
+| ADR-0004 in the first group | 2 of 5 | 2 of 5 | 2 of 5 | 5 of 5 | 5 of 5 |
+| Mislabels | 1 | 4 | 6 | 0 | 1 |
+
+p11 is lower than every p10 run on doubtful ADRs and on mislabels, and
+places the main language in 10 of 10 repositories against 6 of 15 for p10.
+It is not lower on failing ADRs: 1 in the unseen repositories, as p10. The
+language edit does what it was written for in both runs. The scorer found
+one main language in the repositories where p10 left the question to a
+discussion (qs, gulp, postcss in this run).
+
+**Limits.** One survey per condition and repository. The criterion is the
+rule itself: it shows that the agent applies the trace test, not that
+adopters are better served. The scorers decide the borderline classes
+(`none` for a dependency updater was A2 for one scorer and A1 for another in
+run 12), and the failing placement of p11 rests on such a call.
+
+**For the maintainer.** The rule says not to adopt p11, and I keep it: the
+failing ADR is the one criterion it did not forgive. The evidence points the
+same way as run 12 on the other axes. Options: leave p10 in this pull
+request and make p11, with a history check before `none`, a separate change
+with its own pre-registered run; or adopt p11 now as a decision of yours,
+recorded as an exception to the rule.

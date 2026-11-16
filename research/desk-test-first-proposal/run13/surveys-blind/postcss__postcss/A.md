@@ -1,0 +1,71 @@
+I'll start the survey by reading every ADR and looking at the repository.
+---
+Reading the remaining ADRs (ADR-0008 to ADR-0026) so I can build the survey. Nothing is written yet.
+---
+Now the repository evidence: manifest, CI, config and history.
+---
+I have the repository evidence. I'm checking the allowed values for a few keys before I classify the ADRs.
+---
+I've read all 25 ADRs and checked the repository. Nothing has been written. Commands I ran are named in each citation.
+
+## Group 1: every value is shown (8 ADRs)
+
+| ADR | Key | Value | Citation |
+|---|---|---|---|
+| 0004 Languages | `languages.main.name` | JavaScript | `git ls-files lib \| grep -c '\.js$'` → 28 hand-written `.js` files, against 22 `.d.ts` declarations. **shows the value** |
+| 0007 Tests | `tests.coverage_target` | 100 | `package.json` `c8`: `"check-coverage": true, "lines": 100`. **shows the value** |
+| 0013 Frontend | `frontend.framework` | none (no UI; this would be ruled `rejected`) | `package.json` lists three runtime dependencies (`nanoid`, `picocolors`, `source-map-js`), and the file tree has no UI or framework file. **shows the value** |
+| 0014 Work tracking | `tracking.tool` | github-issues | `package.json` `bugs.url: https://github.com/postcss/postcss/issues`. **shows the value** |
+| 0014 Work tracking | `tracking.project` | postcss/postcss | `package.json` `"repository": "postcss/postcss"`. **shows the value** |
+| 0016 Changes | `changes.framework` | none | `ls -a` shows no `openspec/` directory. **shows the value** |
+| 0016 Changes | `changes.schema` | none | Same absence; the ADR allows `none` with `framework: none`. **shows the value** |
+| 0019 Vulnerabilities | `vulnerabilities.scanner` | none | `.github/workflows/` holds only `test.yml` and `release.yml`, and neither runs a scanner. **shows the value** |
+| 0019 Vulnerabilities | `vulnerabilities.sbom` | none | `release.yml` attaches no SBOM, and `git ls-files \| grep -ciE 'sbom\|grype\|trivy\|snyk'` → 0. **shows the value** |
+| 0019 Vulnerabilities | `vulnerabilities.fail_on` | none | Same absence of a scan job. **shows the value** |
+| 0023 License | `license.spdx` | MIT | `package.json` `"license": "MIT"`, and `LICENSE` begins "The MIT License (MIT)". **shows the value** |
+| 0025 Tools | `tools.manager` | none | There is no `mise.toml`, `aqua.yaml` or install script. The ADR allows `none` only if no accepted ADR names such a tool. **shows the value** |
+
+## Group 2: at least one value is held outside the repository or inferred (17 ADRs)
+
+| ADR | Key | Where it lives | Citation |
+|---|---|---|---|
+| 0002 Localization | `language.default` (and the 4 overrides) | A convention people follow | `README.md` and the code comments are in English, and `docs/README-cn.md` is a Chinese translation. **next to it** |
+| 0003 Architecture | `architecture.pattern` | A choice, stated nowhere | `lib/` is a flat set of classes (`Container`, `Node`, `Rule`, `Parser`…), and `docs/architecture.md` describes them. **next to it** |
+| 0005 Validation | `validation.boundary` | A choice | The dependencies include no validation library, and the parser checks input by hand. **next to it** |
+| 0006 Commits | `commits.scopes` | A choice | `git log -300 --format=%s \| grep -cE '^(feat\|fix\|docs\|…)(\(.*\))?!?:'` → 18 of 300 are Conventional Commits. **next to it** |
+| 0008 Documentation | `docs.tool` | Unknown | `docs/` holds Markdown, and no site-generator config is in the repository. `homepage` is `postcss.org`, and an `origin/gh-pages` branch exists. **next to it** |
+| 0008 Documentation | `docs.audience` | A choice | The repository is public, and `docs/SECURITY.md` points readers to Tidelift. **next to it** |
+| 0008 Documentation | `docs.channels` | Held by the site's deployment, outside this repository | No file settles it. **next to it** |
+| 0009 Branching | `branching.model` | A choice | The remote branches `main`, `v7`, `ose` and `feature/esm-plugins` exist. **next to it** |
+| 0009 Branching | `branching.merge` | A GitHub repository setting | `git log -100 --format=%s \| grep -cE '\(#[0-9]+\)$'` → 36 of 100. **next to it** |
+| 0009 Branching | `branching.prefixes` | A choice | No branch-name rule is in the repository. **next to it** |
+| 0010 Architecture docs | `architecture.document` | A choice | `docs/architecture.md` is a single non-arc42 file, and `docs/architecture/` does not exist. **next to it** |
+| 0011 Forge and CI | `forge.gate` | A GitHub ruleset | Unknown. `test.yml` runs on `pull_request`, but that does not make it required. **next to it** |
+| 0012 Delivery | `delivery.release_tool` | A maintainer process | `CHANGELOG.md` is hand-written, `test/version.js` checks the version, and the history has "Release 8.5.33 version" commits. No release-tool config exists. **next to it** |
+| 0015 Secrets | `secrets.storage` | The maintainer's machine | `docs/THREAT_MODEL.md` says work happens in a Dev Container. `.devcontainer.json` is in the repository, and no `.env` or `.envrc` is tracked. **next to it** |
+| 0017 Agent tooling | `agent.hosts` | A choice of the contributors | There is no `.claude/` directory and no `.mcp.json`. `AGENTS.md` is untracked. **next to it** |
+| 0018 Dependencies | `dependencies.updater` | A GitHub app or setting that leaves no file | There is no `dependabot.yml` or `renovate.json`, and the history has "Update dependencies" commits. **next to it** |
+| 0018 Dependencies | `dependencies.automerge` | Same | Unknown. **next to it** |
+| 0020 Adding a dependency | `admission.approver` | A choice | Unknown. `docs/THREAT_MODEL.md` says the project keeps dependencies to a minimum. **next to it** |
+| 0021 Build provenance | `supply_chain.build_level` | The npm registry | `release.yml` has `id-token: write` and runs `npm stage publish`. The registry holds the attestation. **next to it** |
+| 0022 Review and merge | `review.by` | A GitHub ruleset | Unknown. **next to it** |
+| 0022 Review and merge | `review.approvals` | A GitHub ruleset | Unknown. |
+| 0024 Code scanning | `code_scanning.tool` | A GitHub setting (CodeQL "default setup" leaves no file) | No scan workflow is in `.github/workflows/`. **next to it** |
+| 0024 Code scanning | `code_scanning.fail_on` | A GitHub ruleset | Unknown. |
+| 0026 Agent identity | `agent.identity` | Credentials on the maintainer's machine | Commits are authored by people (`git log -300 --format=%an` → 212 by one maintainer). **next to it** |
+
+Group 2 has some values I could show:
+- `validation.data_files` is `none`, since `git ls-files | grep -i schema` → no files.
+- `commits.tool` is `none`, since there is no commitlint and the only hook is `test/version.js`.
+- `docs.root` is `docs/`.
+- `forge.audit` is `none`, since no workflow runs zizmor.
+- `delivery.target` is `package`.
+- `delivery.release_notes` is `changelog`.
+- `deployment.manifests` is `none`.
+- `architecture.model` and `architecture.diagrams` are `none`.
+- `secrets.guard` is `none`.
+- `admission.install_scripts` is `ignored`, since `pnpm-workspace.yaml` sets `allowBuilds` to false for `esbuild` and `unrs-resolver` and true for `simple-git-hooks`.
+
+**Proposed order:** Group 1 first, in numeric order: 0004, 0007, 0013, 0014, 0016, 0019, 0023, 0025. Group 2 after that, in numeric order. Each ruling is shown to you before anything is written.
+
+Do you agree with that order, or do you want another? I couldn't load a question tool here, so please answer in your next message. I'll start with ADR-0004 once you reply.

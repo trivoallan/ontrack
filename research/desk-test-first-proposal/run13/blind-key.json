@@ -1,0 +1,12 @@
+{
+ "colinhacks__zod/A": "p11c",
+ "colinhacks__zod/B": "p10c",
+ "gulpjs__gulp/A": "p11c",
+ "gulpjs__gulp/B": "p10c",
+ "ljharb__qs/A": "p11c",
+ "ljharb__qs/B": "p10c",
+ "markedjs__marked/A": "p11c",
+ "markedjs__marked/B": "p10c",
+ "postcss__postcss/A": "p11c",
+ "postcss__postcss/B": "p10c"
+}
