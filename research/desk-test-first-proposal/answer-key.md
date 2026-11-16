@@ -130,3 +130,39 @@ Recorded here rather than edited above, so the pre-run key stays readable.
   `.github/sync-repo-settings.yaml` declares its branch protection, so "the
   clone holds no trace of it" is wrong for that repository. `forge.gate`
   stays unscored.
+
+## Held-out repositories (run 4)
+
+Written 2026-11-15, before any run on them, from each repository's files and
+its last 300 first-parent commits (no GitHub metadata this time). Same rules
+and track as above. These three were not used while the prompt was tuned.
+
+| Repository | Key | Expected | D | Alt / evidence |
+|---|---|---|---|---|
+| pinojs/pino `8d6927c` | languages.main.name | JavaScript | D | 157 .js, 16 .ts |
+| | commits.scopes | `[deps, types]` | | Alt: `[]`, `[deps, deps-dev, types]`. 180/300 conventional; scopes `deps-dev` 38, `deps` 27, `types` 7 |
+| | commits.tool | none | D | no hook, no CI check on messages |
+| | branching.model | github-flow | | 171/200 first-parent commits end in `(#N)` |
+| | branching.merge | squash | | |
+| | branching.prefixes | `[]` | D | Alt: `[feat]`. Branch names mostly free (`avoid-megamorphism`, `cov-100`), one `feat/` |
+| | forge.audit | none | D | workflows: bench, ci, lock-threads, publish-release, target-main |
+| | license.spdx | MIT | | |
+| | tools.manager | none | D | no tool outside npm |
+| tj/commander.js `a5a7dc0` | languages.main.name | JavaScript | D | 168 .js, 2 .ts |
+| | commits.scopes | `[]` | | 19/300 conventional |
+| | commits.tool | none | D | |
+| | branching.model | gitflow | D | Alt: github-flow. `develop` plus `release/13.x`…`release/16.x` branches |
+| | branching.merge | squash | | 187/200 `(#N)` |
+| | branching.prefixes | `[]` | D | no human branch on the remote but `develop` and `release/*` |
+| | forge.audit | none | D | workflows: codeql-analysis, tests (CodeQL is not a workflow audit) |
+| | license.spdx | MIT | | |
+| | tools.manager | none | D | |
+| vuejs/pinia `4817135a` | languages.main.name | TypeScript | | 114 .ts, 10 .js |
+| | commits.scopes | `[nuxt, types, …]` | | Alt: any list headed by `nuxt` or `types`. 298/300 conventional |
+| | commits.tool | hook | D | `simple-git-hooks` `commit-msg` runs `scripts/verifyCommit.mjs` |
+| | branching.model | trunk-based | D | Alt: github-flow. 73/200 first-parent commits via PR, the rest pushed to main |
+| | branching.merge | squash | | no merge commit among the PR commits |
+| | branching.prefixes | `[feat, fix, docs]` | | Alt: `[feat, fix, docs, test]` (`feat/`, `fix/`, `docs/`, `test/` branches) |
+| | forge.audit | none | D | workflows: ci, pkg.pr.new, release, update-sponsors |
+| | license.spdx | MIT | | |
+| | tools.manager | none | D | pnpm is the package manager, not a tool outside it |

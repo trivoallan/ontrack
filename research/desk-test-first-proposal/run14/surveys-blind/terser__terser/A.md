@@ -1,0 +1,76 @@
+I'll start by reading the ADRs and surveying the repository.
+---
+Surveying: I'm reading each ADR's `traits:` block and checking the repo for evidence. I'm reading the remaining ADRs' frontmatter now.
+---
+Now the repository evidence.
+---
+Still surveying: checking the last few repo facts (hooks, coverage, registry config, gitleaks and similar) before I write the groups.
+---
+Use paths relative to the repo root with `../../../`.
+---
+I surveyed all 25 ADRs and wrote nothing. `AskUserQuestion` isn't available in this session, so I'm asking in plain text at the end.
+
+## Group 1: every value shown by this repository (5 ADRs)
+
+| ADR | Key | Value | Citation |
+| --- | --- | --- | --- |
+| 0004 Languages | `languages.main.name` | JavaScript | `shows the value`: `git ls-files -- '*.js' '*.cjs' '*.mjs' \| wc -l` gives 288 files, and `git ls-files -- '*.ts'` gives 1 (`tools/terser.d.ts`). |
+| 0007 Tests | `tests.coverage_target` | none | `shows the value`: `package.json` has no coverage tool, and `grep -c -i 'coverage\|nyc\|c8' package.json` returns 0. `git ls-files` lists no nyc, c8, codecov or coveralls config. `ci.yml` has no coverage step. |
+| 0016 Changes | `changes.framework` | none | `shows the value`: `git ls-files` lists no `openspec` path. |
+| 0016 Changes | `changes.schema` | none | `shows the value`: same absence. The ADR requires `none` when the framework is `none`. |
+| 0023 License | `license.spdx` | BSD-2-Clause | `shows the value`: `"license": "BSD-2-Clause"` in `package.json`. |
+| 0025 Tools | `tools.manager` | none | `shows the value`: `git ls-files` lists no mise, aqua or `.tool-versions` file. `ci.yml` installs only through actions and `npm ci`. `test/functional.sh` has no install command. |
+
+## Group 2: at least one value not shown (20 ADRs)
+
+Only the values I could not show have a row.
+
+| ADR | Key | Where it lives | Citation |
+| --- | --- | --- | --- |
+| 0002 | `localization.language.default` | a convention people follow | `next to it`: `CONTRIBUTING.md`, `README.md` and the commit subjects are in English. |
+| 0003 | `architecture.pattern` | a choice | `next to it`: `lib/` is one package with `lib/compress/` submodules, which suggests `monolithic`. |
+| 0005 | `validation.boundary` | a choice | `next to it`: the runtime dependencies are `acorn`, `commander`, `@jridgewell/source-map` and `source-map-support`, with no validation library. |
+| 0006 | `commits.scopes` | a choice | `next to it`: `git log --format=%s` shows 69 of 3546 subjects in conventional form, and only `deps` and `contributing` as scopes. |
+| 0008 | `docs.tool` | outside this repository | `next to it`: `homepage` is `terser.org`, and no starlight, docusaurus or mkdocs config is here. |
+| 0008 | `docs.root` | a choice | `next to it`: `docs/` holds only `docs/adr/`. The user docs are `README.md`. |
+| 0008 | `docs.audience` | a choice | `next to it`: the repository and the npm package are public. |
+| 0008 | `docs.channels` | depends on `docs.tool` | none. |
+| 0009 | `branching.model` | a choice | `next to it`: `git log --merges` shows 281 merges, and the remote has long-lived branches such as `main`, `master` and `terser-4`. |
+| 0009 | `branching.merge` | a forge setting | `next to it`: `git log --no-merges --format=%s \| grep -c '(#[0-9]*)$'` gives 1058 subjects ending in a PR number. |
+| 0009 | `branching.prefixes` | a choice | `next to it`: remote branches use `feature/`, `fix-`, `issue-`, `renovate/` and `dependabot/`. |
+| 0010 | `architecture.document` | possibly elsewhere | `next to it`: there is no `docs/architecture/`. |
+| 0011 | `forge.gate` | a forge setting (ruleset) | `next to it`: `ci.yml` runs on `pull_request` to `master`. |
+| 0012 | `delivery.target` | a choice | `next to it`: `package.json` has `main`, `exports`, `files` and `bin`. |
+| 0012 | `delivery.environments` | a choice | `next to it`: `git tag \| wc -l` gives 463 version tags. |
+| 0012 | `delivery.release_tool` | outside this repository | `next to it`: `ci.yml` is the only workflow, and a `postversion` script says "Remember to update the changelog!". |
+| 0012 | `delivery.release_notes` | a choice | `next to it`: a hand-edited `CHANGELOG.md` and "update changelog" commits. |
+| 0012 | `delivery.registry` | outside this repository | `next to it`: npm, since it is a package. |
+| 0012 | `deployment.manifests` | a choice | `next to it`: no manifests in the file tree. |
+| 0013 | `frontend.framework` | a choice | `next to it`: no frontend framework in `package.json`, so `rejected` is likely. |
+| 0014 | `tracking.tool` | outside this repository | `next to it`: `.github/ISSUE_TEMPLATE.md`. |
+| 0014 | `tracking.project` | outside this repository | `next to it`: `"repository": "https://github.com/terser/terser"` in `package.json`. |
+| 0015 | `secrets.storage` | on contributors' machines | none. |
+| 0015 | `secrets.guard` | local hooks | `next to it`: the `pre-commit` list in `package.json` is build, lint-fix, ls-lint and test, with no secret scanner. |
+| 0017 | `agent.hosts` | a choice | `next to it`: `AGENTS.md` is untracked, and no `.claude/`, copilot or opencode files are tracked. |
+| 0018 | `dependencies.automerge` | the Renovate preset | `next to it`: `renovate.json` extends `config:base` and has no `automerge` key. |
+| 0019 | `vulnerabilities.sbom` | a release process | `next to it`: no release workflow. |
+| 0019 | `vulnerabilities.scanner` | forge settings | `next to it`: only `ci.yml` exists, and a GitHub alerts setting would leave no file. |
+| 0019 | `vulnerabilities.fail_on` | forge settings | none. |
+| 0020 | `admission.approver` | a choice | none. |
+| 0020 | `admission.install_scripts` | a choice | `next to it`: no `.npmrc`, and the `prepare` script runs the build. |
+| 0021 | `supply_chain.build_level` | the npm registry | `next to it`: no publish workflow. |
+| 0022 | `review.by` | forge ruleset | none. |
+| 0022 | `review.approvals` | forge ruleset | none. |
+| 0024 | `code_scanning.tool` | forge settings | `next to it`: no CodeQL workflow, but GitHub's default setup would leave no file. |
+| 0024 | `code_scanning.fail_on` | forge settings | none. |
+| 0026 | `agent.identity` | a choice | none. |
+
+Four values were shown, so they have no row:
+- 0006 `commits.tool` is `none`: no commitlint config and no `commit-msg` hook in the `pre-commit` list.
+- 0005 `validation.data_files` is `none`: no schema file in `git ls-files`.
+- 0010 `architecture.model` and `architecture.diagrams` are `none`: `git grep -il -e mermaid -e plantuml` over `*.md` and `*.mdx` finds 0 files, and there are no `.c4` or likec4 files.
+- 0018 `dependencies.updater` is `renovate`: `renovate.json` is tracked, and `git log --format=%an` shows 23 commits by `renovate[bot]`. I did not count the 7 dependabot-authored commits.
+
+**Proposed order:** group 1 first (0004, 0007, 0016, 0023, 0025), then group 2 by ADR number (0002, 0003, 0005, and so on).
+
+Do you agree with this order, or do you want another? You can also name ADRs to skip.

@@ -1,0 +1,22 @@
+{
+ "ajv-validator__ajv/A": "p10b",
+ "ajv-validator__ajv/B": "p11",
+ "ajv-validator__ajv/C": "p9",
+ "ajv-validator__ajv/D": "p10",
+ "caolan__async/A": "p9",
+ "caolan__async/B": "p10",
+ "caolan__async/C": "p11",
+ "caolan__async/D": "p10b",
+ "moment__moment/A": "p10",
+ "moment__moment/B": "p11",
+ "moment__moment/C": "p10b",
+ "moment__moment/D": "p9",
+ "rollup__rollup/A": "p11",
+ "rollup__rollup/B": "p10",
+ "rollup__rollup/C": "p10b",
+ "rollup__rollup/D": "p9",
+ "sindresorhus__execa/A": "p9",
+ "sindresorhus__execa/B": "p11",
+ "sindresorhus__execa/C": "p10b",
+ "sindresorhus__execa/D": "p10"
+}

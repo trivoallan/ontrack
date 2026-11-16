@@ -50,7 +50,8 @@ function agentsStep(
 // The next step, on stderr so that stdout keeps its documented format: imported
 // ADRs are `proposed`, which the plan no longer reports, and a revised one is
 // ruled again with the same command. Both forms are given, since the reader
-// is at a shell or is a coding agent.
+// is at a shell or is a coding agent. Proposed ADRs do not make `plan` or
+// `check` fail, so the hint says the repository works with them open.
 // The ADRs left to rule once this run is done: the proposed ones first.
 const toRule = (root: string, plan: Plan) => ({ proposed: pendingAdrs(root).length, revised: revisedAdrs(root, plan).length });
 
@@ -58,9 +59,13 @@ function nextStep(io: Io, root: string, plan: Plan): void {
   const { proposed, revised } = toRule(root, plan);
   const n = proposed || revised;
   if (n === 0) return;
+  const s = n > 1 ? 's' : '';
   io.stderr.write(qualify(
     root,
-    `next: ${n} ${proposed ? 'proposed' : 'revised'} ADR${n > 1 ? 's' : ''} to rule${proposed ? '' : ' again'}\n` +
+    (proposed
+      ? `next: ${n} proposed ADR${s}, ruled when you choose: the repository works as it is\n` +
+        '  check runs only the decided ADRs. Start with a few:\n'
+      : `next: ${n} revised ADR${s} to rule again\n`) +
       '  from a shell:  claude "$(npx ontrack review)"\n' +
       '  as a prompt:   Run `npx ontrack review` and follow its output.\n',
   ));

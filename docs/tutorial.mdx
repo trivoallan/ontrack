@@ -84,12 +84,13 @@ it did, and you can discard it.
      …
      imported      ADR-0026-agent-identity
    AGENTS.md: instructions block created
-   next: 25 proposed ADRs to rule
+   next: 25 proposed ADRs, ruled when you choose: the repository works as it is
+     check runs only the decided ADRs. Start with a few:
      from a shell:  claude "$(npx ontrack review)"
      as a prompt:   Run `npx ontrack review` and follow its output.
    ```
 
-   The last three lines name the next step. Step 4 takes it for one convention.
+   The last four lines name the next step. Step 4 takes it for one convention.
 
    The ADRs are now in `docs/adr/engineering/`, and `AGENTS.md` has a block that
    belongs to ontrack:
@@ -183,8 +184,9 @@ it did, and you can discard it.
 
 ## Where to go next
 
-Rule on the remaining conventions, one at a time, with
-`claude "$(npx ontrack review)"`.
+Rule on more conventions when you choose, with
+`claude "$(npx ontrack review)"`. The agent starts with those your history
+already answers, and you can skip one or stop at any time.
 
 <CardGrid>
   <LinkCard title="Run ontrack in CI" href="../run-ontrack-in-ci/" description="plan exits with 2 when the track ships a new convention or changes one you ruled on." />

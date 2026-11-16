@@ -24,8 +24,9 @@ const STEPS = `1. Read its file in full. Do not edit any other ADR.
 `;
 
 // Rulings ahead of the repository become tracking items, proposed once the
-// whole review is ruled, since the tracker may be one of the ADRs ruled.
-const TRACKING = `Once every ADR is ruled, list the rulings this repository does not follow yet: a value its code, configuration or tooling does not match, or a tool the ruling names that is not set up. A ruling is identified by its ADR's reference without the slug, in brackets, and its trait key, as in \`[trivoallan/ADR-0015] secrets.guard\`. The tracker is the one named by the decided \`tracking\` trait in AGENTS.md. Before proposing, list the items in that tracker that carry the label \`ontrack\`, open and closed: propose nothing for a ruling whose identifier starts the title of one of those items, and say in one line which closed items name a ruling this repository still does not follow. When you cannot list the tracker's items, propose every ruling and say that duplicates were not checked. For each ruling left, propose a tracking item: its title starts with the ruling's identifier, as in \`[trivoallan/ADR-0015] secrets.guard: install gitleaks\`, and it names the ADR it serves. Create in the tracker (\`tracking.tool\`, in \`tracking.project\`) only the items the user agrees to, asked with a question tool such as \`AskUserQuestion\` when you have one, each with the label \`ontrack\`, creating the label first when the tracker requires it. When no \`tracking\` trait is decided, or \`tracking.tool\` is \`none\`, give the list in your reply and create nothing.
+// review ends (every ADR ruled, or the user stops), since the tracker may be
+// one of the ADRs ruled.
+const TRACKING = `Once the review ends, whether every ADR is ruled or the user stops, list the rulings this repository does not follow yet: a value its code, configuration or tooling does not match, or a tool the ruling names that is not set up. A ruling is identified by its ADR's reference without the slug, in brackets, and its trait key, as in \`[trivoallan/ADR-0015] secrets.guard\`. The tracker is the one named by the decided \`tracking\` trait in AGENTS.md. Before proposing, list the items in that tracker that carry the label \`ontrack\`, open and closed: propose nothing for a ruling whose identifier starts the title of one of those items, and say in one line which closed items name a ruling this repository still does not follow. When you cannot list the tracker's items, propose every ruling and say that duplicates were not checked. For each ruling left, propose a tracking item: its title starts with the ruling's identifier, as in \`[trivoallan/ADR-0015] secrets.guard: install gitleaks\`, and it names the ADR it serves. Create in the tracker (\`tracking.tool\`, in \`tracking.project\`) only the items the user agrees to, asked with a question tool such as \`AskUserQuestion\` when you have one, each with the label \`ontrack\`, creating the label first when the tracker requires it. When no \`tracking\` trait is decided, or \`tracking.tool\` is \`none\`, give the list in your reply and create nothing.
 `;
 
 // How a superseded ADR is marked, and the sections of the new one, are the
@@ -201,17 +202,45 @@ ${TRACKING}`;
 }
 
 /** The contract prompt for every pending ADR, ruled one at a time (see docs/commands.md). */
+// The order is the agent's reading of the repository, agreed by the user:
+// the CLI lists in reference order and judges nothing. The survey, skip,
+// stop and summary stay outside STEPS, which both forms share.
 export function formatSequence(adrs: Adr[]): string {
-  return `Review the architecture decision records of this repository that are still \`proposed\`, one at a time, in this order:
+  return `Review the architecture decision records of this repository that are still \`proposed\`, one at a time, in the order agreed with the user:
 
 ${adrs.map((adr) => `- ${named(adr)}`).join('\n')}
 
 Each is a convention this repository has not ruled on yet, shipped with the values its track recommends. Propose a ruling; the user decides. Where an ADR itself says how to rule, it prevails over this prompt.
 
-For each ADR, in turn:
+None of them has to be ruled now: the repository works with them open, and \`npx ontrack check\` runs only the decided ADRs. The user rules as many as they choose.
+
+First, when the list holds more than one ADR, survey them, writing nothing. The survey decides which conventions the user meets first: those this repository already answers, which the user can check against what they know, come before those that need a discussion.
+
+Read every ADR in the list and look at this repository's files, configuration, CI and history. For each ADR, take every value it asks for (every key under \`traits:\`) and look for a citation: a file, a configuration entry or a command output in this repository. Give a count only when it comes from a command you ran, and name the command. Label each citation with exactly one of these two labels, word for word:
+- \`shows the value\`: the citation states the value itself. For instance, \`"license": "MIT"\` in \`package.json\` shows \`license.spdx: MIT\`. A value read from the file tree also shows the value: the main language, counted from the source files listed by \`git ls-files\`.
+- \`next to it\`: the citation shows something from which you would infer the value. For instance, a \`renovate.json\` that extends a preset and has no \`automerge\` key does not show the automerge setting, which the preset holds; a contributing guide that says releases are published by hand does not show the build provenance, which the registry holds. A citation drawn from history alone, such as scopes read from past commits, is \`next to it\`.
+
+An absence counts as a citation only when the thing, if it existed, would have to leave a file or a configuration in this repository, and none is there: no workflow that runs an audit tool shows \`forge.audit: none\`, and no OpenSpec directory shows \`changes.framework: none\`. An absence does not count for a thing that could exist without leaving a trace in this repository, such as a dependency-update app, the provenance a registry records, a convention like the language of the documentation, or which agents contributors use: an ADR that rests on such an absence goes to the second group.
+
+Put an ADR in the first group only when every one of its values has a citation labelled \`shows the value\`. Put every other ADR in the second group, including one where a single value is held outside this repository or is inferred.
+
+Do not put an ADR in the first group on a \`next to it\` citation, however likely the value seems. Do not leave a value you could not show without saying where it lives: a forge setting, a file outside this repository, a choice people make, or "unknown".
+
+Present the survey in this form, the first group first:
+- a heading per group with its number of ADRs, equal to the ADRs listed under it;
+- for the first group, one row per value: ADR, key, value, citation;
+- for the second group, one row per value you could not show, and no row for the values you could: ADR, key, where the value lives or "unknown", and any citation you have, with its label.
+
+Then ask the user to agree to that order or give another, with a question tool such as \`AskUserQuestion\` when you have one.
+
+Then, for each ADR, in the agreed order:
 
 ${STEPS}
-Then take the next ADR in the list. Do not start an ADR before the previous one is ruled.
+When you present a ruling, the user can also skip the ADR: leave its file untouched and take the next one. The user can stop the review at any time: then write nothing more for the open ADR.
+
+Then take the next ADR in the list. Do not start an ADR before the previous one is ruled or skipped.
+
+When the list is done or the user stops, give a summary: the ADRs ruled in this review, the ADRs still \`proposed\` with the group each belongs to, and a sentence saying the repository works with them open.
 
 ${TRACKING}`;
 }

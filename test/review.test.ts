@@ -203,7 +203,7 @@ test('prompt: same text for every ADR, and an untitled ADR is named by its path'
 test('sequence: lists every ADR in order and holds the steps once', () => {
   const out = formatSequence(pendingAdrs(tree()));
   assert.ok(out.includes(`- \`${LOCALIZATION}\` (Localization)\n- \`${COMMITS}\` (Commits)\n`));
-  assert.ok(out.includes('one at a time, in this order'));
+  assert.ok(out.includes('one at a time, in the order agreed with the user'));
   assert.deepEqual(out.match(/^\d\./gm), ['1.', '2.', '3.', '4.', '5.', '6.', '7.']);
   assert.ok(!out.includes(RECORD));
 });
@@ -221,7 +221,48 @@ test('sequence: same steps as the single prompt, and a list of one', () => {
   const root = makeTree({ [LOCALIZATION]: adr('Localization', 'status: proposed') });
   const sequence = formatSequence(pendingAdrs(root));
   assert.equal(steps(sequence), steps(formatReview(selectAdr(root, 'ADR-0002-localization'))));
-  assert.ok(sequence.includes('one at a time, in this order'));
+  assert.ok(sequence.includes('one at a time, in the order agreed with the user'));
+});
+
+test('sequence: rulings are optional, and check runs only the decided ADRs', () => {
+  const out = formatSequence(pendingAdrs(tree()));
+  assert.match(out, /None of them has to be ruled now: the repository works with them open, and `npx ontrack check` runs only the decided ADRs\./);
+});
+
+test('sequence: a survey in two groups, agreed before the first ruling, writing nothing', () => {
+  const out = formatSequence(pendingAdrs(tree()));
+  const survey = out.indexOf('First, when the list holds more than one ADR, survey them');
+  assert.ok(survey > 0 && survey < out.indexOf('1. '));
+  assert.match(out, /survey them, writing nothing\./);
+  assert.match(out, /For each ADR, take every value it asks for \(every key under `traits:`\) and look for a citation/);
+  assert.match(out, /- `shows the value`: the citation states the value itself\./);
+  assert.match(out, /- `next to it`: the citation shows something from which you would infer the value\./);
+  assert.match(out, /An absence counts as a citation only when the thing, if it existed, would have to leave a file or a configuration in this repository, and none is there/);
+  assert.match(out, /An absence does not count for a thing that could exist without leaving a trace in this repository, such as a dependency-update app, the provenance a registry records, a convention like the language of the documentation, or which agents contributors use: an ADR that rests on such an absence goes to the second group\./);
+  assert.match(out, /A value read from the file tree also shows the value: the main language, counted from the source files listed by `git ls-files`\./);
+  assert.match(out, /Put an ADR in the first group only when every one of its values has a citation labelled `shows the value`\. Put every other ADR in the second group, including one where a single value is held outside this repository or is inferred\./);
+  assert.match(out, /Do not put an ADR in the first group on a `next to it` citation, however likely the value seems\. Do not leave a value you could not show without saying where it lives/);
+  assert.match(out, /a heading per group with its number of ADRs, equal to the ADRs listed under it;\n- for the first group, one row per value: ADR, key, value, citation;\n- for the second group, one row per value you could not show, and no row for the values you could: ADR, key, where the value lives or "unknown", and any citation you have, with its label\./);
+  assert.match(out, /Give a count only when it comes from a command you ran, and name the command\. Label each citation with exactly one of these two labels, word for word:/);
+  assert.match(out, /A citation drawn from history alone, such as scopes read from past commits, is `next to it`\./);
+  assert.match(out, /Then ask the user to agree to that order or give another, with a question tool such as `AskUserQuestion`/);
+  assert.match(out, /ask the user to agree to that order or give another, with a question tool such as `AskUserQuestion`/);
+});
+
+test('sequence: skip and stop, then a summary, before the tracking items', () => {
+  const out = formatSequence(pendingAdrs(tree()));
+  const skip = out.indexOf('the user can also skip the ADR: leave its file untouched');
+  assert.ok(skip > out.indexOf('npx ontrack apply'));
+  assert.match(out, /The user can stop the review at any time: then write nothing more for the open ADR\./);
+  assert.match(out, /Do not start an ADR before the previous one is ruled or skipped\./);
+  const summary = out.indexOf('When the list is done or the user stops, give a summary');
+  assert.ok(skip < summary && summary < out.indexOf('Once the review ends'));
+  assert.match(out, /the ADRs still `proposed` with the group each belongs to, and a sentence saying the repository works with them open\./);
+});
+
+test('named ADR: no survey, no skip, no summary', () => {
+  const out = formatReview(selectAdr(tree(), 'ADR-0006'));
+  for (const text of ['survey them', 'skip the ADR', 'give a summary', 'None of them has to be ruled']) assert.ok(!out.includes(text), text);
 });
 
 test('prompt: both forms ask for agreement with a question tool when there is one', () => {
@@ -233,20 +274,20 @@ test('prompt: both forms ask for agreement with a question tool when there is on
 test('prompt: both forms end with tracking items, proposed after the whole review', () => {
   const single = formatReview(selectAdr(tree(), 'ADR-0006'));
   const sequence = formatSequence(pendingAdrs(tree()));
-  const tail = (out: string) => out.slice(out.indexOf('Once every ADR is ruled'));
+  const tail = (out: string) => out.slice(out.indexOf('Once the review ends'));
   for (const out of [single, sequence]) {
-    const at = out.indexOf('Once every ADR is ruled');
+    const at = out.indexOf('Once the review ends');
     assert.ok(at > out.indexOf('npx ontrack apply'));
     assert.match(tail(out), /propose a tracking item/);
     assert.match(tail(out), /`tracking\.tool`, in `tracking\.project`\) only the items the user agrees to/);
     assert.match(tail(out), /`tracking\.tool` is `none`, give the list in your reply and create nothing\.\n$/);
   }
-  assert.ok(sequence.indexOf('Then take the next ADR in the list') < sequence.indexOf('Once every ADR is ruled'));
+  assert.ok(sequence.indexOf('Then take the next ADR in the list') < sequence.indexOf('Once the review ends'));
   assert.equal(tail(single), tail(sequence));
 });
 
 test('prompt: tracking items are labelled ontrack, titled by ruling, and checked for duplicates first', () => {
-  const tail = (out: string) => out.slice(out.indexOf('Once every ADR is ruled'));
+  const tail = (out: string) => out.slice(out.indexOf('Once the review ends'));
   for (const out of [formatReview(selectAdr(tree(), 'ADR-0006')), formatSequence(pendingAdrs(tree()))].map(tail)) {
     const list = out.indexOf('list the items in that tracker that carry the label `ontrack`, open and closed');
     assert.ok(list > 0 && list < out.indexOf('propose a tracking item'));
@@ -308,9 +349,9 @@ test('supersession: no trait key left out, marking left to the repository rules'
 });
 
 test('supersession: ends with the tracking items of the review prompt', () => {
-  const tail = (out: string) => out.slice(out.indexOf('Once every ADR is ruled'));
+  const tail = (out: string) => out.slice(out.indexOf('Once the review ends'));
   const out = formatSupersession(selectAdr(tree(), 'ADR-0001'));
-  assert.ok(out.indexOf('Once every ADR is ruled') > out.indexOf('npx ontrack apply'));
+  assert.ok(out.indexOf('Once the review ends') > out.indexOf('npx ontrack apply'));
   assert.equal(tail(out), tail(formatReview(selectAdr(tree(), 'ADR-0006'))));
 });
 
@@ -442,7 +483,7 @@ test('revised prompt: names both copies and both revisions, seven steps, the tra
   assert.ok(out.includes('ruled on revision 1, and `node_modules/trivoallan/adr/ADR-0012-delivery.md` asks revision 2'));
   assert.ok(!out.includes(RECORD));
   assert.deepEqual(out.match(/^\d\./gm), ['1.', '2.', '3.', '4.', '5.', '6.', '7.']);
-  assert.ok(out.includes('Once every ADR is ruled'));
+  assert.ok(out.includes('Once the review ends'));
 });
 
 test('command: a revised name prints the prompt to rule again, even rejected, and leaves the tree unchanged', async () => {

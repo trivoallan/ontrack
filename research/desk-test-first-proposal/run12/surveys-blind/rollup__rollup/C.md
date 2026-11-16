@@ -1,0 +1,80 @@
+I'll start the survey by reading all 25 ADRs and checking the repository.
+---
+I'm partway through the survey, which writes nothing. I've read ADR-0002 to ADR-0020. Next I'll read ADR-0021 to ADR-0026, then gather evidence from the repository's files, CI and history.
+---
+All 25 ADRs are read. Next I'll gather the repository evidence, again without writing anything.
+---
+The working directory is back at the repo root. I'll rerun the commands that failed, this time as separate calls without `cd`.
+---
+Evidence for most ADRs is in hand. I'll check a few specific values before classifying: the licence text, the audit tooling, the UI framework and absences such as SBOM, CodeQL and OpenSpec.
+---
+## Survey
+
+The survey is read-only, and I've written nothing. 25 ADRs are `proposed`. I could not query GitHub in this session, so anything held in repository settings, such as rulesets, is marked as lives on the forge.
+
+### Group 1: every value is shown by this repository (3 ADRs)
+
+| ADR | Key | Value | Citation |
+| --- | --- | --- | --- |
+| ADR-0014 | `tracking.tool` | `github-issues` | `package.json` has `"bugs": {"url": "https://github.com/rollup/rollup/issues"}`, and `.github/ISSUE_TEMPLATE/` holds GitHub issue forms (`bug.yaml`, `docs.yaml`, `feature.yaml`, `modification.yaml`). `shows the value` |
+| ADR-0014 | `tracking.project` | `rollup/rollup` | The same `bugs.url`; `git remote -v` gives `origin https://github.com/rollup/rollup.git`. `shows the value` |
+| ADR-0016 | `changes.framework` | `none` | `ls -d openspec` returns "No such file", and a search of `.github` for `openspec` finds 0 matches. The absence is the value. `shows the value` |
+| ADR-0016 | `changes.schema` | `none` | Same two commands, with `changes.framework: none`. `shows the value` |
+| ADR-0023 | `license.spdx` | `MIT` | `package.json` has `"license": "MIT"`, and `LICENSE.md` says "Rollup is released under the MIT license". `shows the value` |
+
+### Group 2: at least one value is held elsewhere or inferred (22 ADRs)
+
+I list only the values I could not show.
+
+| ADR | Key | Where the value lives | Citation |
+| --- | --- | --- | --- |
+| 0002 | `default` | A choice people make | AGENTS.md, docs and commit subjects are all in English. `next to it` |
+| 0002 | `documentation`, `commits`, `code`, `comments` | A choice people make | Nothing states an override. Empty means same as default. `next to it` |
+| 0003 | `architecture.pattern` | A choice people make | `ARCHITECTURE.md` describes packages and build, and names no pattern. `next to it` |
+| 0004 | `languages.main.name` | A choice people make | `typescript` is a devDependency (`package.json:208`), `src/` holds `.ts` files, and AGENTS.md says "TypeScript + Rust hybrid" without naming a main language. `next to it` |
+| 0005 | `validation.boundary` | A choice people make | `package.json` has no `zod`, `pydantic` or `ajv`. The CLI and config loader do read input at run time, so `none` does not fit. `next to it` |
+| 0005 | `validation.data_files` | A choice people make | Only `renovate.json` carries a `$schema`. `next to it` |
+| 0006 | `commits.scopes` | A choice people make | In `git log -200 --pretty=%s`, a few subjects use `fix(browser):`, `fix(watch):`, `chore(ci):` or `fix(deps):`, and most carry no type. `next to it` |
+| 0007 | `tests.coverage_target` | A choice people make, plus Codecov's own defaults | `codecov.yml` sets only `require_ci_to_pass: no`, and `.nycrc` has no threshold. `next to it` |
+| 0008 | `docs.tool` | Shown, but outside the allowed values | `"build:docs": "vitepress build docs"` (`package.json:59`). The allowed list is `starlight`, `docusaurus`, `mkdocs`, `none`. `shows the value` |
+| 0008 | `docs.audience` | A choice people make | `homepage` is `https://rollupjs.org/`, and the repository is public. `next to it` |
+| 0008 | `docs.channels` | Deployment, outside this repository (Vercel) | The `release:docs` script force-pushes `master` to a `documentation-published` branch, and `docs/AGENTS.md` mentions Vercel previews. `next to it` |
+| 0009 | `branching.model` | GitHub settings and a choice | Recent subjects end in `(#NNNN)`. `git log --merges --oneline \| wc -l` gives 762 merge commits over the whole history. `next to it` |
+| 0009 | `branching.merge` | GitHub repository settings | The `(#NNNN)` suffix on recent subjects suggests squash merges. `next to it` |
+| 0009 | `branching.prefixes` | A choice people make | Branch names are not in the repository. Unknown. |
+| 0010 | `architecture.document` | A choice people make | `ARCHITECTURE.md` exists at the root, and `docs/architecture/` does not. `next to it` |
+| 0010 | `architecture.model` | A choice people make | `docs/architecture/model/` does not exist. `next to it` |
+| 0010 | `architecture.diagrams` | A choice people make | `docs/.vitepress/graphs/` holds committed Mermaid SVGs, but they belong to the user docs. `next to it` |
+| 0011 | `forge.gate` | A GitHub ruleset | The `CI` workflow runs on `pull_request` and on push (`build-and-tests.yml:7-13`). `next to it` |
+| 0012 | `delivery.environments` | A choice people make | The `publish` job runs for `v4*` refs after a tag push (`build-and-tests.yml`). `next to it` |
+| 0012 | `delivery.release_tool` | A choice people make | `"release": "node scripts/prepare-release.js"`, and no `release-please` anywhere in `.github`. `next to it` |
+| 0012 | `delivery.release_notes` | GitHub releases page, outside this repository | `CHANGELOG.md` has a structured entry per version. `next to it` |
+| 0012 | `deployment.manifests` | A choice people make | My glob for Dockerfile, Containerfile, compose, Vercel and Netlify files found nothing, but it did not cover every manifest type. `next to it` |
+| 0013 | `frontend.framework` | A choice, or `rejected` | `vue ^3.5.45` and `vitepress` are devDependencies, and `react ^18.3.1` is kept for Linux ARM installs. `next to it` |
+| 0015 | `secrets.storage` | The maintainer's machine | Nothing in the repository. Unknown. |
+| 0017 | `agent.hosts` | Contributors' machines | `CLAUDE.md` contains `@AGENTS.md`. `.claude/`, `opencode.json` and `.opencode/` do not exist. `next to it` |
+| 0018 | `dependencies.updater` | Ambiguous | `renovate.json` covers everything, and `.github/dependabot.yml` covers `github-actions` only. `next to it` |
+| 0019 | `vulnerabilities.scanner` | A choice people make | CI runs `npm run check-audit` (`build-and-tests.yml:44`), which comes from `npm-audit-resolver`. It is not one of the listed scanners. `next to it` |
+| 0019 | `vulnerabilities.fail_on` | A choice people make | `audit-resolve.json` holds ignore decisions but no severity threshold. `next to it` |
+| 0020 | `admission.approver` | A choice people make | Nothing in the repository. Unknown. |
+| 0020 | `admission.install_scripts` | A choice people make | There is no `.npmrc`, and `.tool-versions` pins npm 11.15.0, which runs install scripts. `next to it` |
+| 0021 | `supply_chain.build_level` | The npm registry and trusted-publishing settings | The `publish` job has `id-token: write` (`build-and-tests.yml:665`), runs `npm publish --access public` with no `--provenance` flag, and also passes `NPM_TOKEN`. `next to it` |
+| 0022 | `review.by` | A GitHub ruleset | `copilot-review.yml` requests Copilot review. `next to it` |
+| 0022 | `review.approvals` | A GitHub ruleset | Nothing in the repository. Unknown. |
+| 0024 | `code_scanning.tool` | GitHub default setup would leave no file | A search of `.github` for `codeql`, `semgrep` and similar finds 0 matches. ADR-0024 says default setup is a setting no file records. `next to it` |
+| 0024 | `code_scanning.fail_on` | A GitHub ruleset | Nothing in the repository. Unknown. |
+| 0025 | `tools.manager` | A choice people make | There is no `mise.toml` or `aqua.yaml`, and `.tool-versions` holds only `npm 11.15.0`. CI installs `cargo-zigbuild` and `cargo-llvm-cov@0.8.7` through `taiki-e/install-action`. `next to it` |
+| 0026 | `agent.identity` | GitHub accounts and the maintainer's machine | Nothing in the repository. Unknown. |
+
+Four things you should know before ruling:
+- **Absence-based citations:** ADR-0016 rests on an absence, and so would `commits.tool: none`, `forge.audit: none`, `secrets.guard: none` and `vulnerabilities.sbom: none`, which I found by the same method. ADR-0016 is the one I'd ask you to confirm.
+- **Remote:** `origin` is the public upstream `rollup/rollup`. A ruling for ADR-0014 points work tracking, and any `ontrack`-labelled issue I propose at the end, at that project.
+- **Updater:** two update tools are configured, which is why ADR-0018 is in group 2.
+- **Uncommitted changes:** your worktree already has uncommitted changes (`AGENTS.md`, `package.json`, `docs/adr/`). I will not touch them except through the ADR files and `ontrack apply`.
+
+### Proposed order
+
+1. Group 1: ADR-0023 (License), ADR-0014 (Work tracking), ADR-0016 (Changes).
+2. Group 2 in the order of your list: ADR-0002 to ADR-0013, then ADR-0015, ADR-0017 to ADR-0022, then ADR-0024 to ADR-0026.
+
+I have no question tool in this session, so please answer here. Do you agree to this order, or do you want another? Tell me if you want to skip or stop anywhere. I start on the first ADR once you reply.
