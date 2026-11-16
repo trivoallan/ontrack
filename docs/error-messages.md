@@ -19,7 +19,10 @@ See [exit codes](commands.md#exit-codes).
 | Message | It means | Do |
 | --- | --- | --- |
 | `Unknown argument: <word>` | The command or the option does not exist | Run `npx ontrack --help`, or `npx ontrack <command> --help`. The [commands reference](commands.md) lists every option |
-| `cannot read <directory>/package.json` | There is no `package.json` in the directory ontrack runs in, or it is not valid JSON, or its `dependencies` are not a map of names to versions | Run ontrack from the root of the npm project |
+| `Not enough arguments following: confirm` | `--confirm` came without a name | Give the name of an `undetermined` ADR, or `all`: `npx ontrack apply --confirm ADR-0003` |
+| `cannot read <directory>/package.json; run ontrack from the root of an npm project` | There is no `package.json` in the directory ontrack runs in | Run ontrack from the root of the npm project |
+| `cannot read <directory>/package.json: it is not valid JSON (<reason>)` | The `package.json` does not parse; `<reason>` is what the parser found, with the position | Correct the file where `<reason>` points |
+| `cannot read <directory>/package.json: "<field>" must map names to versions` | `dependencies` or `devDependencies` is not a map of names to versions | Correct `<field>`, or let npm rewrite it: `npm install` |
 
 ## Tracks
 

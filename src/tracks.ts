@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
+import { ZodError } from 'zod';
 import { ontrackKey, projectManifest, trackManifest } from './schemas.ts';
 
 /** An installed package that ships ADRs. The npm alias is the namespace. */
@@ -26,9 +27,14 @@ export function discoverTracks(projectRoot: string): Track[] {
     aliases = Object.keys({ ...project.dependencies, ...project.devDependencies });
   } catch (err) {
     // A missing file is a wrong directory far more often than a missing
-    // manifest: say where to run from. Any other cause is the file's content.
-    const missing = (err as NodeJS.ErrnoException).code === 'ENOENT';
-    throw new Error(`cannot read ${manifest}${missing ? '; run ontrack from the root of an npm project' : ''}`);
+    // manifest: say where to run from. Any other cause is the file's content,
+    // and the reader fixes it only when told which.
+    const why =
+      (err as NodeJS.ErrnoException).code === 'ENOENT' ? '; run ontrack from the root of an npm project'
+      : err instanceof SyntaxError ? `: it is not valid JSON (${err.message})`
+      : err instanceof ZodError ? `: "${err.issues[0].path.join('.')}" must map names to versions`
+      : '';
+    throw new Error(`cannot read ${manifest}${why}`);
   }
 
   const tracks: Track[] = [];

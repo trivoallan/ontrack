@@ -173,6 +173,14 @@ test('removed ADRs stay without --prune and go with it', async () => {
 
 // Confirming
 
+test('confirm without a name is a usage error, and writes nothing', async () => {
+  const root = makeProject({ tracks: { platform: { 'ADR-0003.md': adr(2, 'proposed') } } });
+  const r = await run(root, 'apply', '--confirm');
+  assert.match(r.stderr, /^ontrack: Not enough arguments following: confirm$/m);
+  assert.equal(r.code, 1);
+  assert.equal(existsSync(path.join(root, 'docs/adr/platform/ADR-0003.md')), false);
+});
+
 test('confirm one ADR: only the revision line changes', async () => {
   const local = '---\nstatus: accepted\nrevision: 0\nauthors:\n- Jane\n---\n\nDecision text.\n';
   const root = makeProject({

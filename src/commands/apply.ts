@@ -16,7 +16,7 @@ export const describe = 'Import new ADRs, move flat-layout files and update AGEN
 export const builder = (y: Argv) =>
   y
     .option('prune', { type: 'boolean', default: false, describe: 'Delete ADRs the track no longer ships' })
-    .option('confirm', { type: 'string', array: true, default: [], describe: 'Declare an undetermined verdict still holds (a name, or "all")' })
+    .option('confirm', { type: 'string', array: true, requiresArg: true, default: [], describe: 'Declare an undetermined verdict still holds (a name, or "all")' })
     .option('dry-run', { type: 'boolean', default: false, describe: 'Print what apply would do, write nothing' });
 
 const CHANGES_BLOCK: Action['kind'][] = ['renamed', 'imported', 'moved', 'pruned'];

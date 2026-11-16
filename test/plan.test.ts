@@ -182,6 +182,7 @@ test('tracks are sorted by alias', () => {
 test('no track', async () => {
   const r = await plan(makeTree({ 'package.json': '{}' }));
   assert.equal(r.stdout, 'no track found\n');
+  assert.equal(r.stderr, 'next: install a track\n  npm i -D <alias>@npm:<track-package>\n');
   assert.equal(r.code, 0);
 });
 

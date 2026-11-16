@@ -126,7 +126,14 @@ test('dependencies that are not a string map make the manifest unreadable', () =
   const root = project({ manifest: false });
   const manifest = path.join(root, 'package.json');
   writeFileSync(manifest, JSON.stringify({ name: 'project', dependencies: ['platform'] }));
-  assert.throws(() => discoverTracks(root), { message: `cannot read ${manifest}` });
+  assert.throws(() => discoverTracks(root), { message: `cannot read ${manifest}: "dependencies" must map names to versions` });
+});
+
+test('a manifest that is not JSON says so, with the parser\'s reason', () => {
+  const root = project({ manifest: false });
+  const manifest = path.join(root, 'package.json');
+  writeFileSync(manifest, '{bad');
+  assert.throws(() => discoverTracks(root), (err: Error) => err.message.startsWith(`cannot read ${manifest}: it is not valid JSON (`));
 });
 
 test('an installed manifest without a name is rejected', () => {

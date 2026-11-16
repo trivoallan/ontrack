@@ -91,7 +91,7 @@ The output SHALL follow the contract in the commands reference, `docs/commands.m
 4. the rename line, when there is one: `rename: docs/adr/<old>/ → docs/adr/<alias>/`;
 5. the migration lines, when there are any: `migration: <n> file(s) docs/adr/ → docs/adr/<alias>/`, then one line per file laid out like an ADR line, with `move` as the category and the full file name.
 
-When the project has no track, `plan` SHALL print `no track found`. After the track lines, `plan` SHALL print the `AGENTS.md` lines described in `agents-file`, when there are any.
+When the project has no track, `plan` SHALL print `no track found`, and SHALL write to stderr `next: install a track`, then `  npm i -D <alias>@npm:<track-package>`; standard output and the exit code are what they are without it. After the track lines, `plan` SHALL print the `AGENTS.md` lines described in `agents-file`, when there are any.
 
 #### Scenario: Nothing to do
 - **WHEN** every ADR of track `platform` is up to date, nothing needs to move, and the `AGENTS.md` rules block is current
@@ -105,6 +105,7 @@ When the project has no track, `plan` SHALL print `no track found`. After the tr
 #### Scenario: No track
 - **WHEN** the project has no dependency carrying an `ontrack` key
 - **THEN** the output starts with `no track found`
+- **AND** stderr reads `next: install a track`, then `  npm i -D <alias>@npm:<track-package>`
 - **AND** the exit code is `0` when the project has no ADR of its own
 
 #### Scenario: New ADR with its title

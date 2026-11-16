@@ -62,7 +62,7 @@ npx ontrack apply --confirm all      # same, for every undetermined ADR
 | --- | --- |
 | `--dry-run` | Print what `apply` would do, write nothing |
 | `--prune` | Also delete ADRs the track no longer ships |
-| `--confirm <name>` | Declare that an `undetermined` verdict still holds; `--confirm all` for every one |
+| `--confirm <name>` | Declare that an `undetermined` verdict still holds; `--confirm all` for every one. Without a name, it is a usage error, with `1` |
 
 What it does, per track:
 
@@ -376,7 +376,7 @@ migration: 5 files docs/adr/ → docs/adr/platform/
 - With `--all`, the unchanged ADRs get a line too, so every ADR has one, sorted by name whatever its category. Each ADR line then carries a verdict between the category and the name: the category in its 12-character column, two spaces, the verdict in a 10-character column, two spaces, then the name and the rest of the line as above. The summary line, the `- ` and `+ ` lines, the migration lines and the exit code do not change.
 - The verdict is the `status:` of your copy, never the track's: the first `status:` line at column zero in its frontmatter, without a trailing `# comment`. It is `-` when you have no copy yet (a `new` ADR), when the copy has no recognizable frontmatter, or when it states no status.
 - When there is nothing to do, one line per track (`platform: 14 unchanged`), and the exit code is `0`. Any other category, or a migration, gives `2`.
-- With no track at all, `plan` prints `no track found` and exits with `0`, or prints the migration of your own ADRs after that line and exits with `2`.
+- With no track at all, `plan` prints `no track found` and exits with `0`, or prints the migration of your own ADRs after that line and exits with `2`. It then names the next step on standard error, so that standard output keeps this format: `next: install a track`, then `  npm i -D <alias>@npm:<track-package>`.
 
 Any change to this format goes through this page first.
 
