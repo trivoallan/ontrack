@@ -1280,3 +1280,83 @@ criterion is the rule itself; the scorers decide the borderline classes. With
 two of five repositories without any bot commit, the edit can only show an
 effect in three. The edit was written after seeing postcss, which is not
 among these five.
+
+### Run 14, results
+
+Conditions and scoring as pre-registered above, on chokidar, nock,
+superagent, terser and grunt ([run14/repos-at.txt](run14/repos-at.txt)). 10
+runs, $8.41, Sonnet 5.5. Raw: [run14/surveys-raw/](run14/surveys-raw/);
+blind batches [run14/surveys-blind/](run14/surveys-blind/); scores
+[run14/scores/](run14/scores/); scorer instructions
+[run14/scorer-prompt.txt](run14/scorer-prompt.txt); key
+[run14/blind-key.json](run14/blind-key.json), opened after the five reports.
+The labels were balanced this time (A was p11 in three repositories and p12
+in two). The two prompts differ by one paragraph
+([run14/prompts/](run14/prompts/)).
+
+**The edit was applied.** p12 ran `git log --format=%an` 3 to 5 times per
+repository (22 times in all); p11 ran it 0 or 1 times (4 in all). The scorers
+did not find a first-group `none` contradicted by the history in either
+condition.
+
+| Over 5 repositories | p11 | p12 |
+|---|---|---|
+| ADRs in the first group | 32 | 33 |
+| Failing | 0 | 0 |
+| **Doubtful** | 1 (chokidar 0007) | **2** (chokidar 0007, nock 0018) |
+| Other | 31 | 31 |
+| ADR-0004 in the first group | 5 of 5 | 5 of 5 |
+| Mislabels | 1 | 1 |
+| Unlabelled citations in the first group | 0 | 0 |
+| Rows with false evidence or a false count | 1 (grunt, second group) | 0 |
+| Group headings with a wrong count | 0 | 0 |
+
+**Against the pre-registered rule, p12 is not adopted.**
+1. No failing ADR: met (0).
+2. At most 1 doubtful ADR: **not met** (2).
+3. Other placements at least those of p11 minus 3: met (31 and 31).
+4. ADR-0004 in the first group wherever the scorer finds one main language:
+   met (5 of 5).
+5. p11 does not meet criteria 1 to 4: **not met**. p11 has no failing ADR, 1
+   doubtful ADR and the language in 5 of 5, so it meets them, and the rule
+   prefers the simpler prompt.
+
+**What the run shows about the history check.** The test could not show a
+gain: neither condition had a failing ADR, so there was nothing for the check
+to prevent. Postcss, where the blind spot appeared, was not among these five.
+The check changed the survey of nock, the repository with 269 bot-authored
+commits: p12 put ADR-0018 in the first group on the Dependabot file and 199
+Dependabot commits, and the scorer called `dependencies.automerge: none`
+doubtful (GitHub's own auto-merge leaves no file); p11 left 0018 in the
+second group. So in the one repository where the check bit, it grew the first
+group by an ADR with a doubtful key.
+
+**The control, p11, meets the rule of run 13 on these repositories** (no
+failing ADR, 1 doubtful, the language in 5 of 5), which it did not in run 13
+because of postcss 0019. The rules were fixed per run and are not pooled here;
+the summary below is a reading, not a test.
+
+| Repository-samples, runs 12 to 14 | p10 (run 12, run 12 bis, run 13) | p11 (runs 12, 13, 14) |
+|---|---|---|
+| Surveys scored | 15 | 15 |
+| First-group ADRs | 84 | 93 |
+| Failing | 2 | 1 |
+| Doubtful | 9 | 2 |
+| ADR-0004 in the first group | 6 of 15 | 15 of 15 |
+| Mislabels | 11 | 2 |
+
+Three sets of repositories, three sets of scorers who differ on borderline
+keys, one survey per condition and repository: the direction is the same in
+the three runs, the size of the gaps is not a rate.
+
+**Limits.** The criterion is the rule itself: this shows that the agent
+applies the trace test, not that adopters are better served. Two of the five
+repositories had no bot commit, so the history check could act in three.
+
+**For the maintainer.** Nothing here supports the history check. p11 has
+been scored in three runs, on 15 repositories, 10 of them never seen, with
+fewer doubtful ADRs and mislabels than p10 each time and the main language
+placed every time. Its one failing ADR (postcss, run 13) was a blind spot p10
+shared. Adopting p11 in the pull request would be a decision of yours against
+the rule of run 13, with the support of runs 12 and 14; the history check
+would stay out.
