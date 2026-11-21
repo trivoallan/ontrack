@@ -14,7 +14,7 @@
 
 - [x] 3.1 Rule on ADR-0002 to ADR-0005 with `ontrack review`, one at a time, with the maintainer deciding each value
 - [x] 3.2 `npx ontrack check` passes, including `ontrack-product-check` for each accepted ADR, and the engineering track's checks still pass with ADR-0028 in force
-- [ ] 3.3 CI runs the product track's checks (the existing `ontrack check` step picks them up; confirm on the pull request)
+- [x] 3.3 CI runs the product track's checks (the existing `ontrack check` step picks them up; confirm on the pull request)
 
 ## 4. Serve every track in the site
 
