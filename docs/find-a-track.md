@@ -20,11 +20,19 @@ A track was called a source before ontrack 0.5. A package published then
 may still carry the earlier keyword:
 [search npm for `keywords:ontrack-source`](https://www.npmjs.com/search?q=keywords%3Aontrack-source).
 
-[`@trivoallan/ontrack-engineering`](https://www.npmjs.com/package/@trivoallan/ontrack-engineering)
-is the track ontrack uses on itself. Its ADRs are in
-[trivoallan/ontrack-engineering](https://github.com/trivoallan/ontrack-engineering);
-[Use the ontrack-engineering track](ontrack-engineering/use-it.md) shows how
-to install it and follow its releases.
+ontrack uses two tracks on itself:
+
+- [`@trivoallan/ontrack-engineering`](https://www.npmjs.com/package/@trivoallan/ontrack-engineering),
+  how a repository is engineered. Its ADRs are in
+  [trivoallan/ontrack-engineering](https://github.com/trivoallan/ontrack-engineering);
+  [Use the ontrack-engineering track](ontrack-engineering/use-it.md) shows how
+  to install it and follow its releases.
+- [`@trivoallan/ontrack-product`](https://www.npmjs.com/package/@trivoallan/ontrack-product),
+  how a repository keeps its product work and the evidence a change builds
+  on. Its ADRs are in
+  [trivoallan/ontrack-product](https://github.com/trivoallan/ontrack-product);
+  [Use the ontrack-product track](ontrack-product/use-it.md) shows how to
+  install it and follow its releases.
 
 > [!WARNING]
 > ontrack does not review the tracks the search returns. A track is a

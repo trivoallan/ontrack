@@ -10,9 +10,10 @@ updates:
       default-days: 3
     commit-message:
       prefix: chore
-  # npm at the root: version updates for the engineering track only, security
-  # updates for everything. A convention governance revises must reach this
-  # repository as soon as it is released, so its bump comes as a pull request.
+  # npm at the root: version updates for the tracks (engineering, product)
+  # only, security updates for everything. A convention a track revises must
+  # reach this repository as soon as it is released, so its bump comes as a
+  # pull request.
   # `allow` would also filter security updates, so the other direct
   # dependencies are ignored by update type instead, which only affects
   # version updates.
@@ -27,10 +28,10 @@ updates:
     open-pull-requests-limit: 1
     cooldown:
       default-days: 3
-      # The engineering track is left out of the cooldown, as in .npmrc
-      # (local/ADR-0026).
+      # The tracks are left out of the cooldown, as in .npmrc
+      # (local/ADR-0028).
       # Dependabot names an aliased dependency by its key in package.json.
-      exclude: ["engineering"]
+      exclude: ["engineering", "product"]
     ignore:
       - dependency-name: "yargs"
         update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]

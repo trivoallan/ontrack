@@ -42,8 +42,9 @@ and when a shared configuration does better.
 ## It governs itself
 
 ontrack is built under its own conventions. This repository imports
-[ontrack-engineering](ontrack-engineering.mdx), the reference track, and every
-ruling it made is published here, starting with
+[ontrack-engineering](ontrack-engineering.mdx) and
+[ontrack-product](ontrack-product.mdx), and every ruling it made is published
+here, starting with
 [how decisions are recorded](adr/engineering/ADR-0001-record-architecture-decisions.md).
 Its [architecture](architecture/arc42/01-introduction-and-goals.md) is
 documented the way those decisions prescribe.

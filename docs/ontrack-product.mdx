@@ -1,0 +1,46 @@
+---
+title: The ontrack-product track
+description: A track of product-management conventions, and what a repository gets from it.
+---
+
+import { Aside, Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { trackNamed } from '../site/src/track.mjs';
+
+export const { conventions, version } = trackNamed('ontrack-product');
+
+[`@trivoallan/ontrack-product`](https://www.npmjs.com/package/@trivoallan/ontrack-product)
+is the product track: {conventions.length} conventions on how a repository
+keeps its product work, the problem statements, hypotheses and PRDs an agent
+writes before a change, each with the values it recommends. It needs no
+other track installed. ontrack rules on its conventions in
+[its own decisions](adr/product/ADR-0001-record-product-decisions.md).
+
+## What you get
+
+<CardGrid>
+  <Card title="Toolkit" icon="puzzle">
+    One toolkit agents write product artifacts with, so that every artifact says what kind it is in its frontmatter.
+  </Card>
+  <Card title="Location" icon="open-book">
+    One directory for product artifacts, and none outside it.
+  </Card>
+  <Card title="Evidence" icon="magnifier">
+    An `evidence:` level on every artifact, from a list you rule on, and the level a change needs before it builds on a PRD.
+  </Card>
+  <Card title="Handoff" icon="right-arrow">
+    An OpenSpec change that cites a PRD below that level fails its check, unless its proposal says, in a `Probe:` line, which hypothesis it tests.
+  </Card>
+</CardGrid>
+
+<Aside type="note">
+Each convention has a check: it reads frontmatter and the `PRD:` and
+`Probe:` lines of open proposals, never the prose of an artifact. Reject any
+convention that does not fit your repository: a rejection is a full ruling.
+</Aside>
+
+## Go on
+
+<CardGrid>
+  <LinkCard title="Use it" href="use-it/" description="Install the track, take its new releases, and reject a convention that does not fit." />
+  <LinkCard title="Conventions" href="conventions/" description={`The ${conventions.length} conventions of ontrack-product ${version}.`} />
+</CardGrid>

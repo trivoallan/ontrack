@@ -3,6 +3,7 @@ artifact: experiment-results
 created: 2026-11-15
 hypothesis: research/hypothesis-first-proposal.md (H1)
 status: final
+evidence: validated
 ---
 
 # Desk test results: can the agent find the practice? (H1)
@@ -38,13 +39,13 @@ proposal it makes is the track's answer, not the team's practice.
 
 - Track `@trivoallan/ontrack-engineering` 0.6.0. ADRs 0002, 0004, 0006, 0009,
   0011, 0023, 0025.
-- 10 public repositories, at the commits in [repos-at.txt](repos-at.txt).
+- 10 public repositories, at the commits in [repos-at.txt](../../experiments/desk-test-first-proposal/repos-at.txt).
 - One headless Claude Code run per repository and ADR (70 runs), with the
   exact prompt `ontrack review ADR-xxxx` prints, read-only tools, no MCP
-  servers, no `gh`. Script: [run-one.sh](run-one.sh). Cost $15.84, about 45
+  servers, no `gh`. Script: [run-one.sh](../../experiments/desk-test-first-proposal/run-one.sh). Cost $15.84, about 45
   agent-minutes.
-- [Answer key](answer-key.md) written before any run. Raw proposals:
-  [proposals/](proposals/).
+- [Answer key](../../experiments/desk-test-first-proposal/answer-key.md) written before any run. Raw proposals:
+  [proposals/](../../experiments/desk-test-first-proposal/proposals/).
 - Scoring by two independent scorers (subagents with no access to the
   runs' setup or this verdict), 5 repositories each, against the key and
   fixed rules.
@@ -132,8 +133,8 @@ unchanged):
 | v1 (shipped) | Start from the recommendation the ADR makes. Look in this repository for evidence that it does not apply here. If you find none, say so in one line. |
 | v2 (tested) | Start from what this repository does today on this question: its files, configuration, CI and history. Where it does nothing, say so: an absence is evidence too. Describe the repository as it is, not as the other `proposed` ADRs would make it. Then compare with the recommendation the ADR makes, and name every difference. |
 
-Example full prompt: [prompt-v2-example.txt](prompt-v2-example.txt). Raw
-proposals: [proposals-v2/](proposals-v2/). This time the harness kept every
+Example full prompt: [prompt-v2-example.txt](../../experiments/desk-test-first-proposal/prompt-v2-example.txt). Raw
+proposals: [proposals-v2/](../../experiments/desk-test-first-proposal/proposals-v2/). This time the harness kept every
 agent message, so no value was unscorable. Cost $19.90, about 64
 agent-minutes. Scored by two new scorers who saw neither the v1 results nor
 this write-up.
@@ -324,26 +325,26 @@ Evaluation of the `review-history-first` change, against the behaviour
 requirements of [the PRD](../prd-backlog-reveal.md#ai-behavior-and-evaluation).
 Same track (0.6.0), same 10 repositories and commits, plus 3 held-out
 repositories that were never used to tune the prompt
-([held-out-at.txt](run4/held-out-at.txt), key in the
-[answer key](answer-key.md#held-out-repositories-run-4), written before any
+([held-out-at.txt](../../experiments/desk-test-first-proposal/run4/held-out-at.txt), key in the
+[answer key](../../experiments/desk-test-first-proposal/answer-key.md#held-out-repositories-run-4), written before any
 run). Prompts are the exact output of this branch's `ontrack review`.
 
 - **Survey** (AB-1, AB-4): `review` without an argument, 25 proposed ADRs, one
   headless read-only run per repository (13 runs, $23.56). Script:
-  [run4/run-survey.sh](run4/run-survey.sh). Raw: [run4/surveys/](run4/surveys/).
+  [run4/run-survey.sh](../../experiments/desk-test-first-proposal/run4/run-survey.sh). Raw: [run4/surveys/](../../experiments/desk-test-first-proposal/run4/surveys/).
 - **Proposals** (AB-2, AB-3): `review ADR-xxxx` for the 7 scored ADRs, 91
   read-only runs ($25.67). The seven steps are those already on `main`
   (#205: practice first, `observed` / `absent`). Raw:
-  [run4/proposals/](run4/proposals/). Scored by two independent scorers
+  [run4/proposals/](../../experiments/desk-test-first-proposal/run4/proposals/). Scored by two independent scorers
   (subagents with no access to the runs' setup), who also checked the cited
-  evidence in the clones: [run4/score-A.md](run4/score-A.md),
-  [run4/score-B.md](run4/score-B.md).
+  evidence in the clones: [run4/score-A.md](../../experiments/desk-test-first-proposal/run4/score-A.md),
+  [run4/score-B.md](../../experiments/desk-test-first-proposal/run4/score-B.md).
 - **Scripted sessions** (AB-4, AB-5): 5 sessions on writable copies (ky,
   express, release-please, and the held-out pino and commander.js), five
   turns each: the sequence prompt; "I agree to that order"; "Skip this one";
   "I agree with this ruling. Write it."; "Let's stop the review here".
   File changes checked after every turn ($8.95). Raw:
-  [run4/sessions/](run4/sessions/).
+  [run4/sessions/](../../experiments/desk-test-first-proposal/run4/sessions/).
 
 Total about $58. Counts per slice, no rates: these sets are curated, not
 sampled.
@@ -425,7 +426,7 @@ history already uses it (biome).
   prompt.
 - **Writes follow the ADR's own "how to rule" block**: the ruled ADR loses
   its instructions and recommendation table, as the ADR asks
-  ([run4/sessions/](run4/sessions/) `.diff` files).
+  ([run4/sessions/](../../experiments/desk-test-first-proposal/run4/sessions/) `.diff` files).
 - `npx ontrack apply` failed in every session (dependencies not installed in
   the clones); the agents reported it and did not try to install anything.
 
@@ -433,12 +434,12 @@ history already uses it (biome).
 
 The survey alone (`review` without an argument, 25 proposed ADRs), on 5
 public repositories none of the earlier runs used, at the commits in
-[run5/repos-at.txt](run5/repos-at.txt): axios, hono, date-fns, undici,
+[run5/repos-at.txt](../../experiments/desk-test-first-proposal/run5/repos-at.txt): axios, hono, date-fns, undici,
 msw. Same track (0.6.0), same prompt as run 4, one headless read-only run
-each ($9.36). Raw: [run5/surveys/](run5/surveys/). Every first-group row
+each ($9.36). Raw: [run5/surveys/](../../experiments/desk-test-first-proposal/run5/surveys/). Every first-group row
 read against the clone by an independent scorer (a subagent that saw
 neither run 4 nor this write-up), who opened each ADR's `traits:` keys and
-checked where each value lives: [run5/score.md](run5/score.md).
+checked where each value lives: [run5/score.md](../../experiments/desk-test-first-proposal/run5/score.md).
 
 Scoring rule, stricter than run 4's keyword scan: a value held by the forge
 (ruleset, required approvals, trusted publishing) fails even when a
@@ -489,10 +490,10 @@ drawn from history alone, and asks the agent to say which value and where
 it lives.
 
 The repositories are zustand, immer, koa, remark and swr, at the commits in
-[run6/repos-at.txt](run6/repos-at.txt); no earlier run used them. Same
+[run6/repos-at.txt](../../experiments/desk-test-first-proposal/run6/repos-at.txt); no earlier run used them. Same
 track, same harness, one read-only run each ($8.79). Raw:
-[run6/surveys/](run6/surveys/). A new independent scorer applied run 5's
-strict rule: [run6/score.md](run6/score.md).
+[run6/surveys/](../../experiments/desk-test-first-proposal/run6/surveys/). A new independent scorer applied run 5's
+strict rule: [run6/score.md](../../experiments/desk-test-first-proposal/run6/score.md).
 
 | Repository | First-group rows | Values not visible | Left unstated |
 |---|---|---|---|
@@ -541,10 +542,10 @@ the repository, inferred, or drawn from history alone goes to the second
 group, naming that value and where it lives.
 
 The repositories are dotenv, node-glob, yargs, jquery and mocha, at the
-commits in [run7/repos-at.txt](run7/repos-at.txt); no earlier run used
+commits in [run7/repos-at.txt](../../experiments/desk-test-first-proposal/run7/repos-at.txt); no earlier run used
 them. One read-only run each ($10.26); the answers are about a fifth longer
-than in run 6. Raw: [run7/surveys/](run7/surveys/). A new independent
-scorer applied the same strict rule: [run7/score.md](run7/score.md).
+than in run 6. Raw: [run7/surveys/](../../experiments/desk-test-first-proposal/run7/surveys/). A new independent
+scorer applied the same strict rule: [run7/score.md](../../experiments/desk-test-first-proposal/run7/score.md).
 
 | Repository | First-group rows | Values not visible | Left unstated |
 |---|---|---|---|
@@ -598,10 +599,10 @@ it from which the agent would infer the value. Each citation, in either
 group, is labelled one way or the other.
 
 The repositories are node-fetch, winston, socket.io, handlebars.js and
-cheerio, at the commits in [run8/repos-at.txt](run8/repos-at.txt); no
+cheerio, at the commits in [run8/repos-at.txt](../../experiments/desk-test-first-proposal/run8/repos-at.txt); no
 earlier run used them. One read-only run each ($9.55). Raw:
-[run8/surveys/](run8/surveys/). A new independent scorer applied the same
-strict rule and checked every label: [run8/score.md](run8/score.md).
+[run8/surveys/](../../experiments/desk-test-first-proposal/run8/surveys/). A new independent scorer applied the same
+strict rule and checked every label: [run8/score.md](../../experiments/desk-test-first-proposal/run8/score.md).
 
 | Repository | First-group rows | Values not visible | Left unstated | Mislabels |
 |---|---|---|---|---|
@@ -654,10 +655,10 @@ rules-first structure:
   group, one row per ADR in the second.
 
 The repositories are pug, nodemailer, underscore, morgan and debug, at the
-commits in [run9/repos-at.txt](run9/repos-at.txt); no earlier run used
-them. One read-only run each ($9.08). Raw: [run9/surveys/](run9/surveys/).
+commits in [run9/repos-at.txt](../../experiments/desk-test-first-proposal/run9/repos-at.txt); no earlier run used
+them. One read-only run each ($9.08). Raw: [run9/surveys/](../../experiments/desk-test-first-proposal/run9/surveys/).
 A new independent scorer applied the same strict rule, key by key, and
-checked the labels and the layout: [run9/score.md](run9/score.md).
+checked the labels and the layout: [run9/score.md](../../experiments/desk-test-first-proposal/run9/score.md).
 
 | Repository | First-group ADRs | Values not visible | Mislabels | Second-group rows saying where the value lives |
 |---|---|---|---|---|
@@ -709,10 +710,10 @@ defects run 9 left:
   agent names the command.
 
 The repositories are lodash, body-parser, sinon, chalk and uuid, at the
-commits in [run10/repos-at.txt](run10/repos-at.txt); no earlier run used
-them. One read-only run each ($8.32). Raw: [run10/surveys/](run10/surveys/).
+commits in [run10/repos-at.txt](../../experiments/desk-test-first-proposal/run10/repos-at.txt); no earlier run used
+them. One read-only run each ($8.32). Raw: [run10/surveys/](../../experiments/desk-test-first-proposal/run10/surveys/).
 A new independent scorer applied the same strict rule and checked the
-layout: [run10/score.md](run10/score.md).
+layout: [run10/score.md](../../experiments/desk-test-first-proposal/run10/score.md).
 
 | Repository | First-group ADRs | ADRs with an unseen value | Mislabels |
 |---|---|---|---|
@@ -783,18 +784,18 @@ not comparable with those runs).
 | p10 | p9, with one row per value not shown, exact label words, history alone is `next to it`, counts from a named command | run 10, commit `58adf6e` (current) |
 
 The repositories are ajv, async, moment, rollup and execa, at the commits in
-[run11/repos-at.txt](run11/repos-at.txt); no earlier run used them. 15 runs
+[run11/repos-at.txt](../../experiments/desk-test-first-proposal/run11/repos-at.txt); no earlier run used them. 15 runs
 (3 prompts × 5 repositories), one read-only run each, $13.04. Raw:
-[run11/surveys-raw/](run11/surveys-raw/), prompts in
-[run11/prompts/](run11/prompts/).
+[run11/surveys-raw/](../../experiments/desk-test-first-proposal/run11/surveys-raw/), prompts in
+[run11/prompts/](../../experiments/desk-test-first-proposal/run11/prompts/).
 
 **Scoring was blind.** Per repository, the three surveys were renamed X, Y
-and Z in a random order ([run11/surveys-blind/](run11/surveys-blind/)); one
+and Z in a random order ([run11/surveys-blind/](../../experiments/desk-test-first-proposal/run11/surveys-blind/)); one
 independent scorer per repository scored all three with the strict rule of
 runs 5 to 10 and did not know which prompt produced which
-([run11/scorer-prompt.txt](run11/scorer-prompt.txt),
-[run11/scores/](run11/scores/)). The key was opened after the five reports
-came back ([run11/blind-key.json](run11/blind-key.json)). The layout
+([run11/scorer-prompt.txt](../../experiments/desk-test-first-proposal/run11/scorer-prompt.txt),
+[run11/scores/](../../experiments/desk-test-first-proposal/run11/scores/)). The key was opened after the five reports
+came back ([run11/blind-key.json](../../experiments/desk-test-first-proposal/run11/blind-key.json)). The layout
 instructions differ between prompts, so only checks that apply to all three
 were scored.
 
@@ -869,7 +870,7 @@ group and the shortest survey and drops the count and layout checks.
 
 ### Run 11, further analysis: where the three prompts really differ
 
-Done on the run 11 data only, no new run ([run11/analyse.py](run11/analyse.py)).
+Done on the run 11 data only, no new run ([run11/analyse.py](../../experiments/desk-test-first-proposal/run11/analyse.py)).
 It corrects the reading above: "0 unseen values for all three" hides most of
 the difference.
 
@@ -1019,15 +1020,15 @@ worth a held-out run.
 Conditions and scoring as pre-registered above. 10 runs (p11 and a second
 p10), $10.40, a little over the $8 announced. p9 and the first p10 are the
 surveys of run 11, scored again in the same batch. Raw:
-[run12/surveys-raw/](run12/surveys-raw/); blind batches
-[run12/surveys-blind/](run12/surveys-blind/); scorer instructions
-[run12/scorer-prompt.txt](run12/scorer-prompt.txt); scores
-[run12/scores/](run12/scores/); key [run12/blind-key.json](run12/blind-key.json),
+[run12/surveys-raw/](../../experiments/desk-test-first-proposal/run12/surveys-raw/); blind batches
+[run12/surveys-blind/](../../experiments/desk-test-first-proposal/run12/surveys-blind/); scorer instructions
+[run12/scorer-prompt.txt](../../experiments/desk-test-first-proposal/run12/scorer-prompt.txt); scores
+[run12/scores/](../../experiments/desk-test-first-proposal/run12/scores/); key [run12/blind-key.json](../../experiments/desk-test-first-proposal/run12/blind-key.json),
 opened after the five reports. The second p10 launched late: its prompts had
 not been copied (the generating command exits with `2`, which cut the
 copy), so I restored them and ran it again. Nothing else changed. p11's
 prompt differs from p10's by the two pre-registered edits only
-([run12/prompts/](run12/prompts/)).
+([run12/prompts/](../../experiments/desk-test-first-proposal/run12/prompts/)).
 
 | Over 5 repositories | p9 | p10 | p10 bis | p11 |
 |---|---|---|---|---|
@@ -1155,12 +1156,12 @@ was A2 in one repository and A1 in another).
 ### Run 13, results
 
 Conditions and scoring as pre-registered above, on marked, postcss, gulp,
-zod and qs ([run13/repos-at.txt](run13/repos-at.txt)), none of them used in
-runs 4 to 12. 10 runs, $8.72, Sonnet 5.5. Raw: [run13/surveys-raw/](run13/surveys-raw/);
-blind batches [run13/surveys-blind/](run13/surveys-blind/); scores
-[run13/scores/](run13/scores/); scorer instructions
-[run13/scorer-prompt.txt](run13/scorer-prompt.txt); prompts
-[run13/prompts/](run13/prompts/) (they differ by the two pre-registered
+zod and qs ([run13/repos-at.txt](../../experiments/desk-test-first-proposal/run13/repos-at.txt)), none of them used in
+runs 4 to 12. 10 runs, $8.72, Sonnet 5.5. Raw: [run13/surveys-raw/](../../experiments/desk-test-first-proposal/run13/surveys-raw/);
+blind batches [run13/surveys-blind/](../../experiments/desk-test-first-proposal/run13/surveys-blind/); scores
+[run13/scores/](../../experiments/desk-test-first-proposal/run13/scores/); scorer instructions
+[run13/scorer-prompt.txt](../../experiments/desk-test-first-proposal/run13/scorer-prompt.txt); prompts
+[run13/prompts/](../../experiments/desk-test-first-proposal/run13/prompts/) (they differ by the two pre-registered
 edits, 4 lines). The key was opened after the five reports: **label A was
 p11 and label B was p10 in all five repositories**. The draw was random;
 five equal draws out of two have 1 chance in 16. No scorer saw more than one
@@ -1240,7 +1241,7 @@ at files only, while the history showed the thing at work (12
 it, on repositories none of runs 4 to 13 used.
 
 **Repositories** (fixed now): chokidar, nock, superagent, terser and grunt
-([run14/repos-at.txt](run14/repos-at.txt)). Bot-authored commits, counted
+([run14/repos-at.txt](../../experiments/desk-test-first-proposal/run14/repos-at.txt)). Bot-authored commits, counted
 with `git log --format=%an` before any survey so that the edit can fail: nock
 269, terser 30, chokidar 13, grunt 0, superagent 0. Track
 `@trivoallan/ontrack-engineering` 0.6.0; model pinned to Sonnet 5.5.
@@ -1284,15 +1285,15 @@ among these five.
 ### Run 14, results
 
 Conditions and scoring as pre-registered above, on chokidar, nock,
-superagent, terser and grunt ([run14/repos-at.txt](run14/repos-at.txt)). 10
-runs, $8.41, Sonnet 5.5. Raw: [run14/surveys-raw/](run14/surveys-raw/);
-blind batches [run14/surveys-blind/](run14/surveys-blind/); scores
-[run14/scores/](run14/scores/); scorer instructions
-[run14/scorer-prompt.txt](run14/scorer-prompt.txt); key
-[run14/blind-key.json](run14/blind-key.json), opened after the five reports.
+superagent, terser and grunt ([run14/repos-at.txt](../../experiments/desk-test-first-proposal/run14/repos-at.txt)). 10
+runs, $8.41, Sonnet 5.5. Raw: [run14/surveys-raw/](../../experiments/desk-test-first-proposal/run14/surveys-raw/);
+blind batches [run14/surveys-blind/](../../experiments/desk-test-first-proposal/run14/surveys-blind/); scores
+[run14/scores/](../../experiments/desk-test-first-proposal/run14/scores/); scorer instructions
+[run14/scorer-prompt.txt](../../experiments/desk-test-first-proposal/run14/scorer-prompt.txt); key
+[run14/blind-key.json](../../experiments/desk-test-first-proposal/run14/blind-key.json), opened after the five reports.
 The labels were balanced this time (A was p11 in three repositories and p12
 in two). The two prompts differ by one paragraph
-([run14/prompts/](run14/prompts/)).
+([run14/prompts/](../../experiments/desk-test-first-proposal/run14/prompts/)).
 
 **The edit was applied.** p12 ran `git log --format=%an` 3 to 5 times per
 repository (22 times in all); p11 ran it 0 or 1 times (4 in all). The scorers

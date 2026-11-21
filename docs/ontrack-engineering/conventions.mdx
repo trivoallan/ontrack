@@ -4,16 +4,18 @@ description: The conventions of the ontrack-engineering track, by domain, as a r
 ---
 
 import { CardGrid, LinkCard } from '@astrojs/starlight/components';
-import { domains, version } from '../../site/src/track.mjs';
+import { trackNamed } from '../../site/src/track.mjs';
 
-The conventions of ontrack-engineering {version}, the release ontrack depends
+export const track = trackNamed('ontrack-engineering');
+
+The conventions of ontrack-engineering {track.version}, the release ontrack depends
 on, as a repository receives them: `proposed`, their traits empty, the
 recommended values in each body. They are also in
 [the track's repository](https://github.com/trivoallan/ontrack-engineering/tree/main/adr).
 
-{domains.map((domain) => (
+{track.domains.map((domain) => (
   <>
-    <h2 id={domain.slug}><span class="domain-badge" style={`--domain: var(--sl-color-${domain.color}); --domain-low: var(--sl-color-${domain.color}-low)`}>{domain.name}</span></h2>
+    {domain.name && <h2 id={domain.slug}><span class="domain-badge" style={`--domain: var(--sl-color-${domain.color}); --domain-low: var(--sl-color-${domain.color}-low)`}>{domain.name}</span></h2>}
     <div class="convention-cards">
       <CardGrid>
         {domain.conventions.map((q) => (
