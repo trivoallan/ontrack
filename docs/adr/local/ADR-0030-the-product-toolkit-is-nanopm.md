@@ -24,7 +24,7 @@ same day: its templates give every artifact an `artifact:` key that a check
 can read. Every artifact under `research/` was written that way. None of
 them comes from a step that read the one before it. The strategy for a
 first outside adopter
-([solution brief](../../../.nanopm/wiki/research/solution-brief-first-adopter.md)) was
+([solution brief](https://github.com/trivoallan/ontrack/blob/main/.nanopm/wiki/research/solution-brief-first-adopter.md)) was
 assembled by hand from five separate skills, and each one had to be fed
 the previous artifact's path.
 

@@ -18,7 +18,7 @@ Proposed
 
 ontrack's next goal is a first adopter outside its maintainer's accounts
 and organisations
-([solution brief](../../../.nanopm/wiki/research/solution-brief-first-adopter.md)). A goal
+([solution brief](https://github.com/trivoallan/ontrack/blob/main/.nanopm/wiki/research/solution-brief-first-adopter.md)). A goal
 needs a count, and the two figures at hand count the wrong thing.
 
 - **npm downloads.** `@trivoallan/ontrack` had 969 from 2026-10-22 to
@@ -27,7 +27,7 @@ needs a count, and the two figures at hand count the wrong thing.
 - **`package.json` dependencies.** A track in `devDependencies` shows an
   install. It does not show that the repository ruled on anything. An
   import with 25 conventions still `proposed` is the failure the
-  [problem statement](../../../.nanopm/wiki/research/problem-statement-backlog-reveal.md)
+  [problem statement](https://github.com/trivoallan/ontrack/blob/main/.nanopm/wiki/research/problem-statement-backlog-reveal.md)
   describes, not an adoption.
 
 What does show a ruling is in a file ontrack already writes. `apply` writes
@@ -112,7 +112,7 @@ users at all is a different question, and this section does not answer it.
 ### Positive
 
 - Adopters are not asked to trust a network call; the security review in
-  the [stakeholder summary](../../../.nanopm/wiki/research/stakeholder-summary-first-adopter.md)
+  the [stakeholder summary](https://github.com/trivoallan/ontrack/blob/main/.nanopm/wiki/research/stakeholder-summary-first-adopter.md)
   has nothing to find.
 - The count measures a ruling, the thing ontrack exists for, and it excludes
   the maintainer by construction.
@@ -156,9 +156,9 @@ users at all is a different question, and this section does not answer it.
 
 ## References
 
-- [Solution brief: five conversations, then one pull request](../../../.nanopm/wiki/research/solution-brief-first-adopter.md).
-- [Opportunity tree: a first ruled convention outside our repositories](../../../.nanopm/wiki/research/opportunity-tree-first-adopter.md).
-- [Foundation Sprint readiness](../../../.nanopm/wiki/research/foundation-sprint-readiness-adoption.md):
+- [Solution brief: five conversations, then one pull request](https://github.com/trivoallan/ontrack/blob/main/.nanopm/wiki/research/solution-brief-first-adopter.md).
+- [Opportunity tree: a first ruled convention outside our repositories](https://github.com/trivoallan/ontrack/blob/main/.nanopm/wiki/research/opportunity-tree-first-adopter.md).
+- [Foundation Sprint readiness](https://github.com/trivoallan/ontrack/blob/main/.nanopm/wiki/research/foundation-sprint-readiness-adoption.md):
   the 2026-11-21 baseline (zero external adopters) and the inversion that
   proposed counting the block.
 - `formatInstructions` in `src/instructions.ts`: the block format the count
