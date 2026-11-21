@@ -6,7 +6,7 @@ Publishes the Markdown pages kept under `docs/` as a documentation site, so that
 ## Requirements
 
 ### Requirement: Pages come from docs/
-The documentation site SHALL build one page for every Markdown file under `docs/`, read in place, and one catalogue page for every Markdown file of `node_modules/engineering/adr/`, read in place. A file is never copied or moved to become a page, and building the site MUST NOT modify any file under `docs/`.
+The documentation site SHALL build one page for every Markdown file under `docs/`, read in place, and one catalogue page for every Markdown file of the ADR directory of each catalogued track, read in place where npm installed it. A file is never copied or moved to become a page, and building the site MUST NOT modify any file under `docs/`.
 
 #### Scenario: An ADR becomes a page
 - **WHEN** the site is built while `docs/adr/engineering/ADR-0008-documentation.md` exists
@@ -23,6 +23,10 @@ The documentation site SHALL build one page for every Markdown file under `docs/
 #### Scenario: A convention of the installed track becomes a page
 - **WHEN** the site is built while `node_modules/engineering/adr/ADR-0008-documentation.md` exists
 - **THEN** the built site holds a catalogue page with the title "Documentation" and the content of that file
+
+#### Scenario: A convention of a second installed track becomes a page
+- **WHEN** the site is built while `node_modules/product/adr/ADR-0004-evidence.md` exists
+- **THEN** the built site holds a catalogue page with the title of that file and its content
 
 ### Requirement: Page URLs mirror file paths
 Each page SHALL be served at the path of its file relative to `docs/`, in lower case and without its extension. An `index.md` file is served at the URL of its directory. A `slug:` key in a page's frontmatter MUST NOT change its URL.
@@ -236,13 +240,18 @@ outside `site/`. Its URL is that of a Markdown page with the same name.
 - **THEN** the site builds, and its page is served at `tutorial/`
 
 ### Requirement: llms.txt links the catalogue to the track
-`llms.txt` SHALL link each catalogue convention to its file in the track's
-repository, at the tag of the installed release, not to a path of
+`llms.txt` SHALL link each catalogue convention to its file in its track's
+repository, as the `repository` key of the track's installed `package.json`
+names it, at the tag `v<version>` of the installed release, not to a path of
 ontrack's repository.
 
 #### Scenario: Catalogue entry
 - **WHEN** the site is built with ontrack-engineering 0.6.0 installed
 - **THEN** `llms.txt` links ADR-0006 to `https://raw.githubusercontent.com/trivoallan/ontrack-engineering/v0.6.0/adr/ADR-0006-commits.md`
+
+#### Scenario: Catalogue entry of a second track
+- **WHEN** the site is built with ontrack-product 0.1.0 installed, whose `repository` is `git+https://github.com/trivoallan/ontrack-product.git`
+- **THEN** `llms.txt` links its ADR-0004 to `https://raw.githubusercontent.com/trivoallan/ontrack-product/v0.1.0/adr/ADR-0004-evidence.md`
 
 ### Requirement: The header shows the documented version
 The header of every page SHALL show, next to the site title, which version
