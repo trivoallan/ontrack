@@ -42,9 +42,9 @@ catalogued track has no page "The <site name> track", "Use it" or
 - **AND** it links to one catalogue page per file of `node_modules/engineering/adr/`
 
 #### Scenario: Two tracks
-- **WHEN** the repository depends on `engineering` (`@trivoallan/ontrack-engineering`) and `product` (`@trivoallan/ontrack-product` 0.1.0)
-- **THEN** the site has the pages `ontrack-engineering/`, `ontrack-engineering/use-it/`, `ontrack-engineering/conventions/`, `ontrack-product/`, `ontrack-product/use-it/` and `ontrack-product/conventions/`
-- **AND** the page "Conventions" of `ontrack-product` names "ontrack-product 0.1.0"
+- **WHEN** the repository depends on `engineering` (`@trivoallan/ontrack-engineering`) and `security` (`@example/ontrack-security` 1.0.0)
+- **THEN** the site has the pages `ontrack-engineering/`, `ontrack-engineering/use-it/`, `ontrack-engineering/conventions/`, `ontrack-security/`, `ontrack-security/use-it/` and `ontrack-security/conventions/`
+- **AND** the page "Conventions" of `ontrack-security` names "ontrack-security 1.0.0"
 
 #### Scenario: Grouped by domain
 - **WHEN** the README of `ontrack-engineering` places 0017, 0022 and 0026 under **Agents**
@@ -52,8 +52,8 @@ catalogued track has no page "The <site name> track", "Use it" or
 - **AND** the card "Agents" of its track page links to them
 
 #### Scenario: A track with no domain table
-- **WHEN** the README of `ontrack-product` has no row of the form `| **<Domain>** (<numbers>) | … |`
-- **THEN** its page "Conventions" lists ADR-0001 to ADR-0005 in number order, under no heading
+- **WHEN** the README of `ontrack-security` has no row of the form `| **<Domain>** (<numbers>) | … |`
+- **THEN** its page "Conventions" lists its conventions in number order, under no heading
 - **AND** no heading "Other" is shown
 
 #### Scenario: Install steps
@@ -62,9 +62,9 @@ catalogued track has no page "The <site name> track", "Use it" or
 - **AND** its track page links to it and holds no install steps
 
 #### Scenario: Alias rule
-- **WHEN** a reader follows the page "Use it" of `ontrack-product`
-- **THEN** the install command is `npm i -D product@npm:@trivoallan/ontrack-product`
-- **AND** the page says the alias is the package name without `@trivoallan/` and without `ontrack-`
+- **WHEN** a reader follows the page "Use it" of `ontrack-security`
+- **THEN** the install command is `npm i -D security@npm:@example/ontrack-security`
+- **AND** the page says the alias is the package name without `@example/` and without `ontrack-`
 
 #### Scenario: A track without its pages
 - **WHEN** the repository depends on a track whose site name is `ontrack-security` and `docs/ontrack-security.mdx` does not exist
@@ -83,8 +83,8 @@ name without its extension; a `slug:` key MUST NOT change its URL.
 - **AND** no page is served at `commits/`
 
 #### Scenario: A second track's catalogue
-- **WHEN** `node_modules/product/adr/ADR-0004-evidence.md` exists
-- **THEN** its catalogue page is served at `ontrack-product/adr-0004-evidence/`
+- **WHEN** `node_modules/security/adr/ADR-0004-secrets.md` exists
+- **THEN** its catalogue page is served at `ontrack-security/adr-0004-secrets/`
 
 #### Scenario: The track is bumped
 - **WHEN** an installed track moves to a release that adds a convention
@@ -105,9 +105,9 @@ that convention; it SHALL link to the page of ontrack's ruling, under
 - **AND** it links to `adr/engineering/adr-0006-commits/`
 
 #### Scenario: A convention of the second track
-- **WHEN** the catalogue page of `ontrack-product`'s ADR-0004 is built while ontrack's `docs/adr/product/ADR-0004-evidence.md` exists
-- **THEN** the page reads "A convention of ontrack-product 0.1.0"
-- **AND** it links to `adr/product/adr-0004-evidence/`
+- **WHEN** the catalogue page of `ontrack-security`'s ADR-0004 is built while the repository's `docs/adr/security/ADR-0004-secrets.md` exists
+- **THEN** the page reads "A convention of ontrack-security 1.0.0"
+- **AND** it links to `adr/security/adr-0004-secrets/`
 
 ### Requirement: The catalogue is in the navigation
 The navigation SHALL hold a top-level group "Tracks catalogue", right after
@@ -119,9 +119,9 @@ page, as "Overview", the page "Use it", then the page "Conventions", as
 SHALL call a catalogued track "the reference track".
 
 #### Scenario: Navigation
-- **WHEN** the site is built with `engineering` (0.6.0) and `product` (0.1.0) installed
-- **THEN** the second group of the navigation is "Tracks catalogue", holding "ontrack-engineering" then "ontrack-product"
-- **AND** "ontrack-product" holds "Overview", "Use it" and "Conventions (0.1.0)"
+- **WHEN** the site is built with `engineering` (0.6.0) and `security` (1.0.0) installed
+- **THEN** the second group of the navigation is "Tracks catalogue", holding "ontrack-engineering" then "ontrack-security"
+- **AND** "ontrack-security" holds "Overview", "Use it" and "Conventions (1.0.0)"
 - **AND** no catalogue page is listed in the navigation
 
 ### Requirement: ontrack's decisions are labelled as an example
@@ -131,6 +131,6 @@ collapsed. Its pages keep their URLs, except that the rulings on each track
 are served under `adr/<alias>/`.
 
 #### Scenario: Example group
-- **WHEN** the site is built with ontrack's rulings in `docs/adr/local/`, `docs/adr/engineering/` and `docs/adr/product/`
-- **THEN** the navigation holds a collapsed group "Example: how ontrack ruled" listing `local`, `engineering` and `product`
-- **AND** `adr/engineering/adr-0006-commits/` and `adr/product/adr-0004-evidence/` are served
+- **WHEN** the site is built with ontrack's rulings in `docs/adr/local/` and `docs/adr/engineering/`
+- **THEN** the navigation holds a collapsed group "Example: how ontrack ruled" listing `local` and `engineering`
+- **AND** `adr/engineering/adr-0006-commits/` is served

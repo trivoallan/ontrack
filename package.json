@@ -54,7 +54,6 @@
     "@types/node": "^22.20.5",
     "@types/yargs": "^17.0.35",
     "engineering": "npm:@trivoallan/ontrack-engineering@^0.6.0",
-    "product": "npm:@trivoallan/ontrack-product@^0.1.0",
     "typescript": "^7.0.2"
   },
   "files": [
