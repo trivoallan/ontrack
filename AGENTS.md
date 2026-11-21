@@ -221,6 +221,18 @@ product:
     root: .nanopm/wiki/
 ```
 
+### nanopm pages declare their evidence (local/ADR-0032-nanopm-pages-declare-their-evidence)
+
+```yaml
+product:
+  evidence:
+    from_provenance:
+      evidence-backed: observed
+      user-stated: hypothesis
+      nano-hypothesis: hypothesis
+    prd: capped-by-opportunity
+```
+
 ### Evidence (product/ADR-0004-evidence)
 
 ```yaml
