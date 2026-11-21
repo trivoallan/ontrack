@@ -2,9 +2,10 @@
 
 # ontrack
 
-ontrack imports shared architecture decision records (ADRs) into a repository
-from **tracks**. A track is an npm dependency whose `package.json` carries
-an `ontrack` key; its npm alias is its namespace.
+ontrack imports shared conventions into a repository from **tracks**. The
+repository rules on each one, and its ruling is kept as an architecture
+decision record (ADR). A track is an npm dependency whose `package.json`
+carries an `ontrack` key; its npm alias is its namespace.
 
 ## Why
 

@@ -19,6 +19,10 @@ one decision: what was decided, in which context, and what follows from it.
 One file, one decision. A team keeps its ADRs in the repository, next to the
 code they are about, so that a decision is reviewed and kept like code.
 
+The name says architecture. ontrack, like many teams, uses the format for
+any decision a team wants on record: how to commit, which license to ship
+under, where secrets live.
+
 The practice predates ontrack, and ontrack does not own it. A common layout,
 described by Michael Nygard, has four sections: the status, the context, the
 decision and its consequences. ontrack reads only the frontmatter of the

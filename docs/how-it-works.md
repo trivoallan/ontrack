@@ -34,9 +34,9 @@ not replace it.
 ontrack has no server and no database. It works on three kinds of files.
 [Concepts](concepts.md) defines each of them; this is how they fit together.
 
-- A **track**: an npm package of architecture decision records (ADRs). Each
-  one states a convention and recommends its values. Repositories install it as a
-  dependency.
+- A **track**: an npm package of conventions. Each one is written as an
+  architecture decision record (ADR) that states the convention and
+  recommends its values. Repositories install the track as a dependency.
 - The repository's **own copy of every ADR**, under `docs/adr/`. The
   repository rules there: a status, and the traits it fills.
 - The **instructions block** of the repository's `AGENTS.md`. ontrack writes the
