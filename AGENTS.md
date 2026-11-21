@@ -195,7 +195,7 @@ record-architecture-decisions:
   format: nygard
 ```
 
-### The tracks of this owner skip the cooldown (local/ADR-0028-the-tracks-of-this-owner-skip-the-cooldown)
+### The engineering track skips the cooldown under its new alias (local/ADR-0026-the-engineering-track-skips-the-cooldown-under-its-new-alias)
 
 ```yaml
 dependencies:
@@ -204,37 +204,6 @@ dependencies:
 admission:
   approver: person
   install_scripts: ignored
-```
-
-### Product toolkit (product/ADR-0002-toolkit)
-
-```yaml
-product:
-  toolkit: pm-skills
-```
-
-### Location (product/ADR-0003-location)
-
-```yaml
-product:
-  artifacts:
-    root: research/
-```
-
-### Evidence (product/ADR-0004-evidence)
-
-```yaml
-product:
-  evidence:
-    levels: [hypothesis, observed, validated]
-    required: observed
-```
-
-### Handoff (product/ADR-0005-handoff)
-
-```yaml
-product:
-  handoff: openspec
 ```
 
 <!-- ontrack:end -->

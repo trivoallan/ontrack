@@ -25,7 +25,7 @@ The documentation site SHALL build one page for every Markdown file under `docs/
 - **THEN** the built site holds a catalogue page with the title "Documentation" and the content of that file
 
 #### Scenario: A convention of a second installed track becomes a page
-- **WHEN** the site is built while `node_modules/product/adr/ADR-0004-evidence.md` exists
+- **WHEN** the site is built while `node_modules/security/adr/ADR-0004-secrets.md` exists
 - **THEN** the built site holds a catalogue page with the title of that file and its content
 
 ### Requirement: Page URLs mirror file paths
@@ -250,8 +250,8 @@ ontrack's repository.
 - **THEN** `llms.txt` links ADR-0006 to `https://raw.githubusercontent.com/trivoallan/ontrack-engineering/v0.6.0/adr/ADR-0006-commits.md`
 
 #### Scenario: Catalogue entry of a second track
-- **WHEN** the site is built with ontrack-product 0.1.0 installed, whose `repository` is `git+https://github.com/trivoallan/ontrack-product.git`
-- **THEN** `llms.txt` links its ADR-0004 to `https://raw.githubusercontent.com/trivoallan/ontrack-product/v0.1.0/adr/ADR-0004-evidence.md`
+- **WHEN** the site is built with ontrack-security 1.0.0 installed, whose `repository` is `git+https://github.com/example/ontrack-security.git`
+- **THEN** `llms.txt` links its ADR-0004 to `https://raw.githubusercontent.com/example/ontrack-security/v1.0.0/adr/ADR-0004-secrets.md`
 
 ### Requirement: The header shows the documented version
 The header of every page SHALL show, next to the site title, which version
