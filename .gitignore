@@ -1,8 +1,12 @@
 node_modules/
 dist/
 
-# Private context (PM notes, local tooling): never publish
-.nanopm/
+# Private context (PM notes, local tooling): never publish. The nanopm wiki
+# is the root of product artifacts (local/ADR-0031) and is tracked.
+.nanopm/*
+!.nanopm/wiki/
+.nanopm/wiki/.lock
+.nanopm/wiki/.last-lint
 CONTEXT.md
 .serena/
 

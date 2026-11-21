@@ -4,8 +4,8 @@ version: "1.0"
 created: 2026-11-15
 status: draft
 evidence: hypothesis
-source: research/journey-map-repo-adopter-onboarding.md (moment of truth "the first proposal", severity 5)
-related: research/problem-statement-backlog-reveal.md
+source: .nanopm/wiki/research/journey-map-repo-adopter-onboarding.md (moment of truth "the first proposal", severity 5)
+related: .nanopm/wiki/research/problem-statement-backlog-reveal.md
 ---
 
 # Hypothesis: The first proposal is where adopters recognise their own practice

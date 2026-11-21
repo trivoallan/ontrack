@@ -4,8 +4,8 @@ version: "1.1"
 created: 2026-11-15
 status: draft
 evidence: hypothesis
-source: research/solution-brief-backlog-reveal.md
-related: research/problem-statement-backlog-reveal.md, research/hypothesis-first-proposal.md
+source: .nanopm/wiki/research/solution-brief-backlog-reveal.md
+related: .nanopm/wiki/research/problem-statement-backlog-reveal.md, .nanopm/wiki/research/hypothesis-first-proposal.md
 ---
 
 # PRD: Rule what the history answers, stop when you choose
@@ -186,7 +186,7 @@ scored on its own; an end-to-end pass hides which one failed.
 
 ### Evaluation Set
 
-- **Where the cases live:** `research/desk-test-first-proposal/` (repositories
+- **Where the cases live:** `.nanopm/wiki/research/desk-test-first-proposal/` (repositories
   in `repos-at.txt`, `answer-key.md`, harness `run-one-v2.sh`), plus a new
   scripted-session script for AB-5.
 - **Slices that must be covered:** each AB-n row; absent values (AB-3) as
@@ -246,10 +246,10 @@ agent.
 
 | Source | Path or link | Definitive for |
 |--------|--------------|----------------|
-| This PRD | `research/prd-backlog-reveal.md` | What to build, scope, FR-n |
+| This PRD | `.nanopm/wiki/research/prd-backlog-reveal.md` | What to build, scope, FR-n |
 | Command reference | `docs/commands.md` | Output and exit contracts; wins over code comments |
 | Repository rules | `AGENTS.md` and `docs/adr/` | Commits, branching, tests (95% coverage), languages |
-| Desk test | `research/desk-test-first-proposal/` | Evaluation cases and answer key |
+| Desk test | `.nanopm/wiki/research/desk-test-first-proposal/` | Evaluation cases and answer key |
 
 When this PRD and `docs/commands.md` disagree on a contract, stop and escalate.
 
@@ -261,7 +261,7 @@ When this PRD and `docs/commands.md` disagree on a contract, stop and escalate.
 | stdout of `plan` and `apply` | Documented format; only the stderr hint changes |
 | `docs/adr/trivoallan/` | Track copies managed by `apply` |
 | Review steps 1–7 wording (`STEPS`) | Changed and measured in #205; edit only what FR-10 names |
-| `research/desk-test-first-proposal/proposals*` | Raw results of past runs |
+| `.nanopm/wiki/research/desk-test-first-proposal/proposals*` | Raw results of past runs |
 
 ### Requirement Verification Map
 

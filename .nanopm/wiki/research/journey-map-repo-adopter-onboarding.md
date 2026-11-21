@@ -110,7 +110,7 @@ All rows are hypotheses.
 
 ## Opportunities
 
-<!-- incongru-voix: debord — "7 of 24 ruled" measures progress through the image of governance — separates the adopter finishing a counter from the developers inheriting unchosen rules; see research/problem-statement-backlog-reveal.md, "Why ruling count is not the primary metric" -->
+<!-- incongru-voix: debord — "7 of 24 ruled" measures progress through the image of governance — separates the adopter finishing a counter from the developers inheriting unchosen rules; see .nanopm/wiki/research/problem-statement-backlog-reveal.md, "Why ruling count is not the primary metric" -->
 
 | Stage | Opportunity | Product change that addresses it | Effort (rough) |
 |---|---|---|---|

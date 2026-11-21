@@ -206,19 +206,19 @@ admission:
   install_scripts: ignored
 ```
 
-### Product toolkit (product/ADR-0002-toolkit)
+### The product toolkit is nanopm (local/ADR-0030-the-product-toolkit-is-nanopm)
 
 ```yaml
 product:
-  toolkit: pm-skills
+  toolkit: nanopm
 ```
 
-### Location (product/ADR-0003-location)
+### Product artifacts live in the nanopm wiki (local/ADR-0031-product-artifacts-live-in-the-nanopm-wiki)
 
 ```yaml
 product:
   artifacts:
-    root: research/
+    root: .nanopm/wiki/
 ```
 
 ### Evidence (product/ADR-0004-evidence)
@@ -236,5 +236,9 @@ product:
 product:
   handoff: openspec
 ```
+
+### Not yet decided
+
+- Adoption is counted in public repositories (local/ADR-0029-adoption-is-counted-in-public-repositories)
 
 <!-- ontrack:end -->

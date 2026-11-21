@@ -4,7 +4,7 @@ version: "1.0"
 created: 2026-11-15
 status: draft
 evidence: hypothesis
-source: research/journey-map-repo-adopter-onboarding.md (moment of truth "the backlog reveal", severity 5)
+source: .nanopm/wiki/research/journey-map-repo-adopter-onboarding.md (moment of truth "the backlog reveal", severity 5)
 ---
 
 # Problem Statement: The import ends on a wall of unanswered questions

@@ -4,8 +4,8 @@ version: "1.0"
 created: 2026-11-15
 status: draft
 evidence: hypothesis
-source: research/problem-statement-backlog-reveal.md
-related: research/hypothesis-first-proposal.md, research/journey-map-repo-adopter-onboarding.md
+source: .nanopm/wiki/research/problem-statement-backlog-reveal.md
+related: .nanopm/wiki/research/hypothesis-first-proposal.md, .nanopm/wiki/research/journey-map-repo-adopter-onboarding.md
 ---
 
 # Solution Brief: Rule what the history answers, stop when you choose
