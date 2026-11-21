@@ -1,10 +1,12 @@
 ---
 title: The ontrack-engineering track
-description: The reference track ontrack is built with, and what a repository gets from it.
+description: The engineering track ontrack is built with, and what a repository gets from it.
 ---
 
 import { Aside, Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
-import { domains, conventions, version } from '../site/src/track.mjs';
+import { trackNamed } from '../site/src/track.mjs';
+
+export const { domains, conventions, version } = trackNamed('ontrack-engineering');
 
 export const DomainLink = ({ name }) => {
   const domain = domains.find((d) => d.name === name);
@@ -12,7 +14,7 @@ export const DomainLink = ({ name }) => {
 };
 
 [`@trivoallan/ontrack-engineering`](https://www.npmjs.com/package/@trivoallan/ontrack-engineering)
-is the reference track: 26 conventions on how a Python or TypeScript
+is the engineering track: 26 conventions on how a Python or TypeScript
 repository on GitHub is engineered, each with the values it recommends.
 ontrack is built with it, and rules on every one of its conventions in
 [its own decisions](adr/engineering/ADR-0001-record-architecture-decisions.md).

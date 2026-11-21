@@ -65,7 +65,7 @@ To be told when the track moves, rather than remember to update it, see
 > If you accept the track's
 > [ADR-0018](https://github.com/trivoallan/ontrack-engineering/blob/main/adr/ADR-0018-dependencies.md), its cooldown also delays the track's
 > own releases. ontrack exempts the track from it in
-> [local/ADR-0024](../adr/local/ADR-0024-the-engineering-track-skips-the-cooldown.md).
+> [local/ADR-0028](../adr/local/ADR-0028-the-tracks-of-this-owner-skip-the-cooldown.md).
 
 ## Change the alias
 

@@ -6,15 +6,22 @@ import mermaid from 'astro-mermaid';
 import { LikeC4VitePlugin } from 'likec4/vite-plugin';
 import { readAdrs } from '../src/instructions.ts';
 import { statusTone } from './src/adr-status.mjs';
-import { version as trackVersion } from './src/track.mjs';
+import { tracks, trackOf } from './src/track.mjs';
 
 // docs.yml builds `main` under next/ once a release exists (ADR-0008).
 export const base = process.env.SITE_BASE ?? '/ontrack';
 
 const repository = new URL('..', import.meta.url).pathname;
 
-// The sidebar is narrow: its group says less than the heading of the page.
-const conventionsLabel = `Conventions (${trackVersion})`;
+// Each track has three pages under docs/, written by hand: without one, its
+// entry in the sidebar would lead nowhere.
+for (const track of tracks) {
+  for (const page of [track.name, `${track.name}/use-it`, `${track.name}/conventions`]) {
+    if (!['md', 'mdx'].some((ext) => existsSync(new URL(`../docs/${page}.${ext}`, import.meta.url)))) {
+      throw new Error(`track ${track.name} has no page docs/${page}.mdx`);
+    }
+  }
+}
 
 const escape = (text) => text.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
@@ -66,18 +73,19 @@ const pages = () => (tree, file) => {
   // A convention of the catalogue opens as a repository receives it, and with
   // none of this repository's rulings: its status, its blank traits, and a
   // link to how ontrack ruled on it.
-  if (file.path.includes('/node_modules/engineering/adr/')) {
+  const track = trackOf(file.path);
+  if (track) {
     const name = file.path.split('/').pop();
     const source = readFileSync(file.path, 'utf8');
     const status = source.match(/^status:\s*(\S+)/m)?.[1] ?? 'proposed';
-    const ruled = existsSync(new URL(`../docs/adr/engineering/${name}`, import.meta.url));
+    const ruled = existsSync(new URL(`../docs/adr/${track.alias}/${name}`, import.meta.url));
     const block = [{
       type: 'html',
       value:
         `<p><span class="adr-status ${statusTone(status)}">${status}</span> ` +
         (/^check:\s*\S/m.test(source) ? '<span class="adr-status tip">checked</span> ' : '') +
-        `A convention of ontrack-engineering ${trackVersion}.` +
-        (ruled ? ` <a href="../../adr/engineering/${name.replace(/\.md$/, '').toLowerCase()}/">How ontrack ruled on it</a>.` : '') +
+        `A convention of ${track.name} ${track.version}.` +
+        (ruled ? ` <a href="../../adr/${track.alias}/${name.replace(/\.md$/, '').toLowerCase()}/">How ontrack ruled on it</a>.` : '') +
         '</p>',
     }];
     const traits = source.match(/^traits:\n(?:[ \t].*\n?)*/m)?.[0];
@@ -174,18 +182,21 @@ export default defineConfig({
         // Why, then what ontrack does, come before the tutorial: they are read
         // to decide whether to follow it.
         { label: 'Start here', items: ['why-ontrack', 'features', 'tutorial', 'concepts', 'how-it-works'] },
-        // The reference track, next to the tutorial that installs it: what
-        // it is, how to use it, and its conventions as the installed release
-        // asks them. It is the only public track; a second one would need
-        // its own place decided, here or in its own repository.
+        // The tracks this repository depends on, next to the tutorial that
+        // installs one: for each, what it is, how to use it, and its
+        // conventions as the installed release asks them.
         {
-          label: 'The reference track',
-          items: [
-            { slug: 'ontrack-engineering', label: 'Overview' },
-            { slug: 'ontrack-engineering/use-it', label: 'Use it' },
-            // One page lists the conventions; the sidebar does not.
-            { slug: 'ontrack-engineering/conventions', label: conventionsLabel },
-          ],
+          label: 'Tracks catalogue',
+          items: tracks.map((track) => ({
+            label: track.name,
+            items: [
+              { slug: track.name, label: 'Overview' },
+              { slug: `${track.name}/use-it`, label: 'Use it' },
+              // One page lists the conventions; the sidebar does not. The
+              // sidebar is narrow: the label says less than the page heading.
+              { slug: `${track.name}/conventions`, label: `Conventions (${track.version})` },
+            ],
+          })),
         },
         // Any other track: find one, or write and revise your own.
         { label: 'Tracks', items: ['find-a-track', 'write-your-own-track', 'revise-a-convention'] },
