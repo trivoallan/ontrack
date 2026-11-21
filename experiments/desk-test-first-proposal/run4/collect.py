@@ -1,4 +1,4 @@
-# Copies run 4's raw results and scripts into research/desk-test-first-proposal/run4/.
+# Copies run 4's raw results and scripts into experiments/desk-test-first-proposal/run4/.
 import glob, os, shutil, subprocess, sys
 E = os.path.dirname(os.path.abspath(__file__))
 R = sys.argv[1]
