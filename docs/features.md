@@ -40,7 +40,7 @@ To see most of it at work in one repository, follow the
 | Say a convention does not apply here | `rejected`, a full ruling | [A ruling](concepts.md#a-ruling) |
 | Change a ruling you already made | A new ADR that supersedes the first | [`ontrack review`](commands.md#ontrack-review-adr) |
 
-## Load the instructions into the agent's harness
+## Brief your agents
 
 | You want to | ontrack gives you | Specified in |
 | --- | --- | --- |
