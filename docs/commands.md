@@ -3,12 +3,13 @@ title: Commands
 description: Every ontrack command, with its options, what it reads and writes, and its exit codes.
 ---
 
-ontrack has six commands. Only `apply` writes to the repository.
+ontrack has seven commands. Only `apply` writes to the repository.
 
 | Command | What it does | Writes |
 | --- | --- | --- |
 | [`apply`](#ontrack-apply) | Imports the ADRs and updates `AGENTS.md`, as `plan` reports | `docs/adr/`, `AGENTS.md` |
 | [`check`](#ontrack-check) | Runs the check command of each decided ADR | Nothing itself |
+| [`decide`](#ontrack-decide) | Prints a prompt asking a coding agent to record a new decision with you | Nothing |
 | [`instructions`](#ontrack-instructions) | Prints the decided traits as the instructions block of `AGENTS.md` | Nothing |
 | [`plan`](#ontrack-plan) | Shows what importing the tracks would change | Nothing |
 | [`review`](#ontrack-review-adr) | Prints a prompt asking a coding agent to import the new ADRs and rule on them | Nothing |
@@ -167,6 +168,14 @@ same way:
 | `prompt` | The prompt, as the text form prints it; `null` for `none` |
 
 ### `suggest --json`
+
+| Key | Value |
+| --- | --- |
+| `adrs` | The ADRs the repository holds |
+| `new` | `{ "path", "title" }` of each ADR its tracks would import |
+| `prompt` | The prompt, as the text form prints it |
+
+### `decide --json`
 
 | Key | Value |
 | --- | --- |
@@ -368,6 +377,70 @@ pass       Branching (trivoallan/ADR-0009-branching)
 
 Any change to this format goes through this page first.
 
+## `ontrack decide`
+
+Prints a prompt that asks a coding agent to record, with you, a new decision
+of this repository: the one your request states, such as "we use pnpm from
+now on". The agent checks that no ADR already decides it, proposes traits
+and a check, shows you the file it would write, and writes it only once you
+agree. The guide [Record a decision](record-a-decision.md) takes you through
+it. It never writes a file and makes no network call.
+
+```bash
+claude "$(npx ontrack decide)"
+```
+
+You do not have to run it yourself: the instructions block of `AGENTS.md`
+tells an agent you ask to record a decision to run it.
+
+| To | Run |
+| --- | --- |
+| Record a decision you take now | `decide` |
+| Find the decisions the repository took and never recorded, once, at adoption | [`suggest`](#ontrack-suggest) |
+| Change a decision already recorded | [`review <adr>`](#ontrack-review-adr) |
+
+`decide` takes no argument: the decision is in your request to the agent.
+
+**Exit code.** Always `2`, because there is always a prompt to follow, as
+for `suggest`.
+
+### `decide` prompt contract
+
+As for `suggest`, ontrack gives the agent only the ADRs here and those the
+tracks would import (see local/ADR-0029). The agent reads the repository,
+and its history to number the new file. With one ADR here and one to
+import, the prompt is:
+
+~~~
+Record, with the user, the decision their request states as a new architecture decision record of this repository. To change a decision already recorded, run `npx ontrack review <adr>` instead.
+
+The repository holds these ADRs:
+
+- `docs/adr/local/ADR-0001-release.md` (Release), accepted
+
+Its tracks would import these ADRs:
+
+- `docs/adr/platform/ADR-0006-commits.md` (Commits)
+
+A decision one of them covers is already recorded, or awaits a ruling: do not record it again.
+
+1. Read the rules of this repository on recording decisions, in AGENTS.md and in the ADR they come from. Write nothing yet.
+2. Establish the decision from the user's request; ask the user what is decided when the request does not say. Name the alternative it rules out. When no credible alternative exists, say that a fact with no alternative is not a decision, and stop.
+3. When an `accepted` ADR in force already decides it, stop: name that ADR, and propose `npx ontrack review <its reference>` to supersede it. When the ADR that decides it is `proposed`, or among the ADRs to import, stop and say that `npx ontrack review` rules it.
+4. Start from what this repository does today on the subject: its files, configuration, CI and history. Cite the evidence as a file and line, a commit, or a review comment. Where it does nothing, say so.
+5. Propose the traits that state the decision (keys under a top-level key that no ADR in force uses), or say that it has none: an ADR without traits does not reach AGENTS.md. Propose a check command when one can verify it.
+6. Present the proposal: a title, the decision in one sentence, the alternative it rules out, the traits, the check, the evidence, and the file name the new ADR would take, in `docs/adr/local/` and numbered after the highest number ever used in that directory, by a file there or one the git history shows deleted, and after the repository's own ADRs still placed directly in `docs/adr/`, from 0001 when there is none. Then stop and ask for the user's agreement, with a question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees.
+7. Once the user agrees: write the new ADR in `docs/adr/local/`, in the format the repository's rules prescribe, with `status: accepted`, `supersedes: []`, its traits under `traits:` and its check under `check:` when it has one, its context drawn from the evidence. Then run `npx ontrack apply` to update AGENTS.md: an ADR without traits does not reach it.
+~~~
+
+- The lists, and the line that follows them, are those of the [`suggest` prompt](#suggest-prompt-contract), with the same text.
+- Step 1 and what follows "Once the user agrees:" in step 7 are the text of steps 1 and 7 of the `suggest` prompt. The numbering in step 6 is the text of the supersession prompt of `review` and of the `suggest` prompt.
+- The prompt names no convention, tool or value of its own: it is fixed text, paths, titles and statuses.
+
+Any change to this prompt goes through this page first.
+
+See [Record a decision](record-a-decision.md) for the steps from your side.
+
 ## `ontrack instructions`
 
 Prints the traits decided in the repository's ADRs as the instructions block of
@@ -415,7 +488,7 @@ traits:
 <!-- ontrack:begin -->
 ## Project instructions (ontrack)
 
-When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output.
+When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output. When asked to record a new decision, run `npx ontrack decide` and follow its output.
 
 ### Commits (trivoallan/ADR-0006-commits)
 
@@ -435,7 +508,7 @@ commits:
 - The ADRs read are the repository's: `docs/adr/*.md`, named `local/<file name without .md>`, and `docs/adr/<namespace>/*.md`, named `<namespace>/<file name without .md>`. Tracks in `node_modules` are not read, because a shipped ADR holds a convention, not a ruling.
 - An ADR carries decided traits when it is `accepted`, is not superseded, and has an indented `traits:` block. The block is copied verbatim, dedented, and its values are never interpreted. `traits: {}` declares nothing, and any other inline value is an error.
 - An `accepted` ADR supersedes the ADRs named in its `supersedes:` key (`[A, B]` or `- A` lines). A plain name matches an ADR's `adr:` value, or its file name, in the same directory. `<namespace>/<name>` and `local/<name>` reach another directory.
-- The line under the heading names [`review`](#ontrack-review-adr), so an agent asked to review an ADR runs it instead of improvising a ruling.
+- The line under the heading names [`review`](#ontrack-review-adr) and [`decide`](#ontrack-decide), so an agent asked to review an ADR, or to record a decision, runs the command instead of improvising.
 - `proposed` ADRs are listed under "Not yet decided". Every other status is ignored.
 - Two decided ADRs sharing a top-level trait key are an error that names both. Superseding one of them settles it.
 - Sections are sorted by reference. With nothing decided and nothing pending, the block holds only its heading.

@@ -256,7 +256,7 @@ export function qualify(root: string, text: string): string {
 }
 
 /** Tells the agent which command prepares a ruling, so it does not improvise one. */
-export const REVIEW_HINT = 'When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output.';
+export const REVIEW_HINT = 'When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output. When asked to record a new decision, run `npx ontrack decide` and follow its output.';
 
 /** The contract output (see docs/commands.md). */
 export function formatInstructions({ decided, pending }: Instructions): string {

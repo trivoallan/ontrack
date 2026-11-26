@@ -22,7 +22,7 @@ of the output, and leave the ADR actions untouched. Specified in
 
 ## Read-only by default, check before write
 
-`plan`, `instructions`, `review`, `suggest` and `check` write no file. `apply` is the
+`plan`, `instructions`, `review`, `suggest`, `decide` and `check` write no file. `apply` is the
 only command that writes, and it separates deciding from doing: all actions
 are computed and checked first, then executed. No command opens a network
 connection. Specified in

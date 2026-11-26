@@ -241,7 +241,7 @@ test('without ontrack installed, the review hint names the package', async () =>
   const root = makeTree({ 'README.md': '' });
   rmSync(path.join(root, 'node_modules/.bin/ontrack'));
   const r = await instructions(root);
-  assert.ok(r.stdout.includes('\n\nWhen asked to review, rule on or supersede an ADR, run `npx -p @trivoallan/ontrack ontrack review [adr]` and follow its output.\n\n'));
+  assert.ok(r.stdout.includes('\n\nWhen asked to review, rule on or supersede an ADR, run `npx -p @trivoallan/ontrack ontrack review [adr]` and follow its output. When asked to record a new decision, run `npx -p @trivoallan/ontrack ontrack decide` and follow its output.\n\n'));
 });
 
 test('in the ontrack repository itself, the review hint stays short: npx runs its own bin', async () => {

@@ -106,6 +106,13 @@ agree to become ADRs of the repository in `docs/adr/local/`, and reach
 by the change that takes it. See
 [Record the decisions you never wrote down](record-the-decisions-you-never-wrote-down.md).
 
+A decision taken after that has its own prompt. `ontrack decide` has a
+coding agent record the one decision you state: it sends a decision an ADR
+already covers to `review`, proposes traits and a check, and writes the ADR
+in `docs/adr/local/` once you agree. The instructions block of `AGENTS.md`
+points an agent to it whenever it is asked to record a decision. See
+[Record a decision](record-a-decision.md).
+
 ## The cycle
 
 Governance is a cycle, not a one-off import. It turns again every time a

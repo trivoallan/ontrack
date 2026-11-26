@@ -2,6 +2,7 @@ import yargs from 'yargs';
 import type { Argv } from 'yargs';
 import * as apply from './commands/apply.ts';
 import * as check from './commands/check.ts';
+import * as decide from './commands/decide.ts';
 import * as instructions from './commands/instructions.ts';
 import * as plan from './commands/plan.ts';
 import * as review from './commands/review.ts';
@@ -28,7 +29,7 @@ export type Command = {
   handler: (args: never) => ExitCode | Promise<ExitCode>;
 };
 
-const defaultCommands: Command[] = [plan, apply, instructions, review, suggest, check];
+const defaultCommands: Command[] = [plan, apply, instructions, review, suggest, decide, check];
 
 /**
  * Testable entry point: parses `argv`, writes to `io`, returns the contract

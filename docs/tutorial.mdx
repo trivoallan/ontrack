@@ -113,7 +113,7 @@ it did, and you can discard it.
    <!-- ontrack:begin -->
    ## Project instructions (ontrack)
 
-   When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output.
+   When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output. When asked to record a new decision, run `npx ontrack decide` and follow its output.
 
    ### Record architecture decisions (engineering/ADR-0001-record-architecture-decisions)
 
@@ -191,9 +191,12 @@ already answers, and you can skip one or stop at any time.
 
 Then record the decisions your repository took on its own, which no track
 ships, with `claude "$(npx ontrack suggest)"`. The agent proposes at most
-five, with their evidence, and writes only those you agree to.
+five, with their evidence, and writes only those you agree to. A decision
+you take later goes through `npx ontrack decide`, which `AGENTS.md` points
+your agent to.
 
 <CardGrid>
+  <LinkCard title="Record a decision" href="../record-a-decision/" description="An agent records a decision you take now, with traits that reach AGENTS.md." />
   <LinkCard title="Record the decisions you never wrote down" href="../record-the-decisions-you-never-wrote-down/" description="An agent finds the decisions your repository took without a track, and records those you agree to." />
   <LinkCard title="Run ontrack in CI" href="../run-ontrack-in-ci/" description="plan exits with 2 when the track ships a new convention or changes one you ruled on." />
   <LinkCard title="Write your own track" href="../write-your-own-track/" description="A package.json with an ontrack key that points to a directory of ADRs." />
