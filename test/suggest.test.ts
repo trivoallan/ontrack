@@ -69,15 +69,17 @@ test('suggest: the prompt asks for agreement, at most five candidates with evide
   assert.match(stdout, /Write nothing until the user agrees/);
   assert.match(stdout, /`AskUserQuestion`/);
   assert.match(stdout, /at most five candidates/);
-  assert.match(stdout, /the alternative it rules out, and its evidence/);
+  assert.match(stdout, /the alternative it rules out, the traits that state it/);
   assert.match(stdout, /say that `npx ontrack review` rules it/);
-  assert.match(stdout, /`status: accepted` and `supersedes: \[\]`/);
+  assert.match(stdout, /`status: accepted`, `supersedes: \[\]`, its traits under `traits:`/);
   assert.match(stdout, /design notes and change proposals, archived ones included/);
   assert.match(stdout, /or holds no review comment, say so in one line/);
   assert.match(stdout, /An ADR that only mentions a fact in passing does not cover it/);
   assert.match(stdout, /Merge into one the candidates a single decision explains/);
   assert.match(stdout, /the highest number ever used in that directory, by a file there or one the git history shows deleted/);
-  assert.ok(stdout.endsWith('Then run `npx ontrack apply` to update AGENTS.md.\n'));
+  assert.match(stdout, /keys under a top-level key that no ADR in force uses/);
+  assert.match(stdout, /an ADR without traits does not reach it/);
+  assert.ok(stdout.endsWith('Then run `npx ontrack apply` to update AGENTS.md: an ADR without traits does not reach it.\n'));
 });
 
 test('suggest: the prompt matches the commands reference contract', () => {

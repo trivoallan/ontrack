@@ -29,9 +29,9 @@ The prompt SHALL ask a coding agent to audit the repository once, for the decisi
 2. Look for decisions in the repository, in this order of weight: review comments a maintainer repeats on pull requests, reversals in the git history (a dependency, tool or pattern replaced by another), rules written by hand in AGENTS.md or CLAUDE.md that no ADR backs, design notes and change proposals, archived ones included, where a choice was argued, then configuration and dependencies. When the forge cannot be read, or holds no review comment, say so in one line and go on with the other sources.
 3. Keep a candidate only when a credible alternative exists, one that an agent or a newcomer could take instead. A fact with no alternative is not a decision.
 4. Drop a candidate that an `accepted` ADR in force already covers. When the ADR that covers it is `proposed`, or among the ADRs to import, drop it and say that `npx ontrack review` rules it. An ADR that only mentions a fact in passing does not cover it.
-5. Merge into one the candidates a single decision explains. Propose at most five candidates, the weightiest first. For each: a title, the decision in one sentence, the alternative it rules out, and its evidence, each piece cited as a file and line, a commit, or a review comment. When none is left, say so and stop.
-6. Present the candidates, with the file name each new ADR would take, in `docs/adr/local/` and numbered after the highest number ever used in that directory, by a file there or one the git history shows deleted, and after the repository's own ADRs still placed directly in `docs/adr/`, from 0001 when there is none. Then stop and ask the user which ones to record, with a question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees.
-7. For each candidate the user agrees to: write the new ADR in `docs/adr/local/`, in the format the repository's rules prescribe, with `status: accepted` and `supersedes: []`, its context drawn from the evidence. Then run `npx ontrack apply` to update AGENTS.md.
+5. Merge into one the candidates a single decision explains. Propose at most five candidates, the weightiest first. For each: a title, the decision in one sentence, the alternative it rules out, the traits that state it (keys under a top-level key that no ADR in force uses), a check command when one can verify it, and its evidence, each piece cited as a file and line, a commit, or a review comment. When none is left, say so and stop.
+6. Present the candidates, with their traits and checks and the file name each new ADR would take, in `docs/adr/local/` and numbered after the highest number ever used in that directory, by a file there or one the git history shows deleted, and after the repository's own ADRs still placed directly in `docs/adr/`, from 0001 when there is none. Then stop and ask the user which ones to record, with a question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees.
+7. For each candidate the user agrees to: write the new ADR in `docs/adr/local/`, in the format the repository's rules prescribe, with `status: accepted`, `supersedes: []`, its traits under `traits:` and its check under `check:` when it has one, its context drawn from the evidence. Then run `npx ontrack apply` to update AGENTS.md: an ADR without traits does not reach it.
 
 The prompt MUST NOT name a convention, a tool or a value specific to a repository: it is fixed text plus paths, titles and statuses.
 
@@ -50,6 +50,10 @@ The prompt MUST NOT name a convention, a tool or a value specific to a repositor
 #### Scenario: Covered by a track
 - **WHEN** `ontrack suggest` prints its prompt
 - **THEN** the prompt tells the agent to drop a candidate an ADR already covers, and to point to `npx ontrack review` when that ADR is `proposed` or to import
+
+#### Scenario: Traits so the decision reaches AGENTS.md
+- **WHEN** `ontrack suggest` prints its prompt
+- **THEN** the prompt asks for traits under a top-level key that no ADR in force uses, and says that an ADR without traits does not reach AGENTS.md
 
 #### Scenario: Deleted numbers are not reused
 - **WHEN** `ontrack suggest` prints its prompt

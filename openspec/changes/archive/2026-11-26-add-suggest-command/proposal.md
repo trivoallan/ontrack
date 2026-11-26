@@ -25,7 +25,8 @@ AGENTS.md, so a coding agent can break them.
   - It drops a candidate that an ADR of the repository already covers. When
     the covering ADR is still `proposed`, it points to `npx ontrack review`.
   - It writes nothing before the user agrees. For each candidate the user
-    accepts, it writes an `accepted` ADR in `docs/adr/local/`, numbered and
+    accepts, it writes an `accepted` ADR in `docs/adr/local/`, with traits so
+    that it reaches AGENTS.md and a check when one can verify it, numbered and
     formatted as the supersession prompt of `review` does. Then it runs
     `npx ontrack apply`.
 - The prompt lists the ADRs the repository holds and the ADRs its tracks
