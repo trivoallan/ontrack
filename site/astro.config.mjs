@@ -198,6 +198,8 @@ export default defineConfig({
             ],
           })),
         },
+        // The decisions a repository took without a track, recorded once.
+        { label: 'Your repository', items: ['record-the-decisions-you-never-wrote-down'] },
         // Any other track: find one, or write and revise your own.
         { label: 'Tracks', items: ['find-a-track', 'write-your-own-track', 'revise-a-convention'] },
         { label: 'GitHub Actions', items: ['run-ontrack-in-ci', 'draft-a-change-from-an-issue', 'why-you-call-ontracks-workflows'] },

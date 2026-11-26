@@ -103,7 +103,8 @@ it reads the history, the reviews and the configuration, drops what an ADR
 already covers, and proposes at most five, each with its evidence. Those you
 agree to become ADRs of the repository in `docs/adr/local/`, and reach
 `AGENTS.md` like any other decision. From then on, a decision is recorded
-by the change that takes it.
+by the change that takes it. See
+[Record the decisions you never wrote down](record-the-decisions-you-never-wrote-down.md).
 
 ## The cycle
 
