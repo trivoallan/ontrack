@@ -93,6 +93,18 @@ ruling no longer holds, it writes a new ADR of its own that supersedes the
 first. The instructions block then carries the new decision, and the original text
 stays as the record of what was decided before.
 
+## The decisions no track ships
+
+A repository that adopts ontrack already holds decisions of its own that
+nobody wrote down: a test runner chosen over another, a rule a maintainer
+repeats in reviews. No track ships them, so `review` never asks about them.
+`ontrack suggest` prints a prompt that has a coding agent find them, once:
+it reads the history, the reviews and the configuration, drops what an ADR
+already covers, and proposes at most five, each with its evidence. Those you
+agree to become ADRs of the repository in `docs/adr/local/`, and reach
+`AGENTS.md` like any other decision. From then on, a decision is recorded
+by the change that takes it.
+
 ## The cycle
 
 Governance is a cycle, not a one-off import. It turns again every time a

@@ -12,7 +12,8 @@ standard error, and becomes exit code `1`.
 
 The two scenarios below are the ones that involve several modules. The
 other commands are one call each: `instructions` calls `buildInstructions`,
-`review` calls `selectAdr` or `pendingAdrs`, and `check` calls `runChecks`.
+`review` calls `selectAdr` or `pendingAdrs`, `suggest` calls
+`suggestInputs`, and `check` calls `runChecks`.
 What each command must print and return is in its specification, linked
 from [Introduction and Goals](01-introduction-and-goals.md).
 
