@@ -9,7 +9,8 @@ a maintainer repeats in every review. No track ships them, so `review`
 never asks about them, and a coding agent can break them without knowing.
 
 You do this once, when the repository adopts ontrack. From then on, a
-decision is recorded by the change that takes it.
+decision is recorded by the change that takes it, with
+[`ontrack decide`](record-a-decision.md).
 
 It needs a version of ontrack later than 0.6.0, and a coding agent that
 takes a prompt. The examples use Claude Code.
@@ -118,3 +119,4 @@ ones: the ADRs you just recorded now cover the first.
   these decisions fit in the life of a repository.
 - To change one of these decisions later, supersede it with
   `npx ontrack review <its reference>`.
+- To record a decision you take later, see [Record a decision](record-a-decision.md).

@@ -39,6 +39,7 @@ To see most of it at work in one repository, follow the
 | Depart from the recommendation | The ADR is yours to edit while it is `proposed`, and records why | [A ruling](concepts.md#a-ruling) |
 | Say a convention does not apply here | `rejected`, a full ruling | [A ruling](concepts.md#a-ruling) |
 | Change a ruling you already made | A new ADR that supersedes the first | [`ontrack review`](commands.md#ontrack-review-adr) |
+| Record a decision you take now | `ontrack decide` prints the prompt; the agent checks no ADR decides it already, proposes traits and a check, and writes only once you agree | [Record a decision](record-a-decision.md) |
 | Record the decisions the repository took without a track | `ontrack suggest` prints the prompt; the agent proposes at most five, with their evidence, and writes only those you agree to | [Record the decisions you never wrote down](record-the-decisions-you-never-wrote-down.md) |
 
 ## Brief your agents

@@ -26,7 +26,7 @@ command needs from the outside (current directory, standard output,
 standard error), so that tests call `main` without a process.
 
 **`src/commands/`** holds one module per subcommand: `plan`, `apply`,
-`instructions`, `review`, `suggest` and `check`. Each exports its name, its
+`instructions`, `review`, `suggest`, `decide` and `check`. Each exports its name, its
 description, its options and a handler. A handler calls domain modules,
 writes their formatted result to `Io` and returns the exit code. Only
 `commands/apply.ts` holds logic of its own: it orders the steps of an apply
@@ -81,6 +81,10 @@ holds, those its tracks would import, and the steps an agent follows to
 find the decisions never recorded. It reuses `review`'s listing of the ADRs
 to import and its numbering sentence.
 
+**`src/decide.ts`** formats the prompt that records one decision the user
+states. It reuses `suggest`'s lists of ADRs, its steps that read the rules
+and write the ADR, and `review`'s numbering sentence.
+
 **`src/check.ts`** runs, through the shell, the `check:` command of each
 ADR in force and formats the outcome.
 
@@ -92,18 +96,20 @@ and no domain module imports a command. The `commands` import `cli` for the
 
 | Module | Imports |
 | --- | --- |
-| `cli` | the six `commands`, `yargs`, and `package.json` for the version |
+| `cli` | the seven `commands`, `yargs`, and `package.json` for the version |
 | `commands/plan` | `plan`, `agents` |
 | `commands/apply` | `plan`, `apply`, `links`, `agents` |
 | `commands/instructions` | `instructions` |
 | `commands/review` | `review` |
 | `commands/suggest` | `suggest` |
+| `commands/decide` | `decide`, `suggest` |
 | `commands/check` | `check` |
 | `apply` | `plan`, `revision`, and the `Link` type of `links` |
 | `plan` | `tracks`, `revision` |
 | `agents` | `instructions` |
 | `review` | `instructions`, `plan` |
 | `suggest` | `instructions`, `review` |
+| `decide` | `suggest`, `review` |
 | `check` | `instructions` |
 | `instructions` | `plan` (its listing of Markdown files), `revision` |
 | `tracks` | `schemas`, which imports `zod` |
@@ -113,8 +119,8 @@ and no domain module imports a command. The `commands` import `cli` for the
 Two groups follow from the table. The modules that deal with *tracks*
 (`tracks`, `plan`, `apply`) are the only ones that read `node_modules`.
 The modules that deal with the repository's *own rulings* (`instructions`,
-`agents`, `check`) read the project's files only; `review` and `suggest`
-also read the tracks, through `plan`, to name the ADRs to import or revised. Both groups rest
+`agents`, `check`) read the project's files only; `review`, `suggest` and
+`decide` also read the tracks, through `plan`, to name the ADRs to import or revised. Both groups rest
 on `revision` for frontmatter.
 
 ## Diagram

@@ -24,6 +24,7 @@ model {
       instructions = module "commands/instructions"
       review = module "commands/review"
       suggest = module "commands/suggest"
+      decide = module "commands/decide"
       check = module "commands/check"
     }
 
@@ -57,6 +58,9 @@ model {
     suggest = module "suggest" {
       description "Formats the prompt that asks an agent to find the decisions never recorded"
     }
+    decide = module "decide" {
+      description "Formats the prompt that asks an agent to record a new decision"
+    }
     check = module "check" {
       description "Runs the check command of each ADR in force"
     }
@@ -67,12 +71,14 @@ model {
     cli -> commands.instructions "dispatches to"
     cli -> commands.review "dispatches to"
     cli -> commands.suggest "dispatches to"
+    cli -> commands.decide "dispatches to"
     cli -> commands.check "dispatches to"
     commands.plan -> cli "Io type"
     commands.apply -> cli "Io type"
     commands.instructions -> cli "Io type"
     commands.review -> cli "Io type"
     commands.suggest -> cli "Io type"
+    commands.decide -> cli "Io type"
     commands.check -> cli "Io type"
 
     // Imports: commands to domain modules
@@ -85,6 +91,8 @@ model {
     commands.instructions -> instructions "buildInstructions"
     commands.review -> review "selectAdr, pendingAdrs"
     commands.suggest -> suggest "suggestInputs, formatSuggest"
+    commands.decide -> suggest "suggestInputs"
+    commands.decide -> decide "formatDecide"
     commands.check -> check "runChecks"
 
     // Imports: between domain modules
@@ -100,6 +108,8 @@ model {
     review -> planner "buildPlan"
     suggest -> instructions "readAdrs"
     suggest -> review "newAdrs, NUMBERING"
+    decide -> suggest "adrLists, READ_RULES, WRITE_ADR"
+    decide -> review "NUMBERING"
     check -> instructions "adrsInForce"
     tracks -> schemas "validates with"
     revision -> schemas "validates with"
@@ -141,6 +151,7 @@ model {
   npm -> project.manifest "records dependencies in"
   ontrack.review -> agent "prints a prompt for"
   ontrack.suggest -> agent "prints the audit prompt for"
+  ontrack.decide -> agent "prints the decision prompt for"
   agent -> project.agentsFile "reads the instructions in"
   agent -> project.adrs "writes rulings in"
 

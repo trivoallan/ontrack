@@ -1,0 +1,79 @@
+{
+  "$id": "https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/decide.schema.json",
+  "title": "What `ontrack decide --json` prints",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/decide.schema.json",
+      "description": "The address of this schema."
+    },
+    "adrs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ref": {
+            "type": "string",
+            "description": "`<namespace>/<file name without .md>`."
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref",
+          "title",
+          "status",
+          "path"
+        ]
+      },
+      "description": "The ADRs the repository holds, in reference order."
+    },
+    "new": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "path",
+          "title"
+        ]
+      },
+      "description": "The ADRs its tracks would import."
+    },
+    "prompt": {
+      "type": "string",
+      "description": "The prompt, as the text form prints it."
+    }
+  },
+  "required": [
+    "$schema",
+    "adrs",
+    "new",
+    "prompt"
+  ]
+}
