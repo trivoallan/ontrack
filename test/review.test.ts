@@ -323,6 +323,10 @@ test('prompt: every form matches the commands reference contract', () => {
 
 // Supersession prompt
 
+test('supersession: numbers the new ADR after every number used, deleted files included', () => {
+  assert.match(formatSupersession(selectAdr(tree(), 'ADR-0001')), /the highest number ever used in that directory, by a file there or one the git history shows deleted/);
+});
+
 test('supersession: names one ADR by path, title and reference, and no other', () => {
   const out = formatSupersession(selectAdr(tree(), 'ADR-0001'));
   assert.ok(out.includes(`\`${RECORD}\` (Record architecture decisions).`));

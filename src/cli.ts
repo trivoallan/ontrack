@@ -5,6 +5,7 @@ import * as check from './commands/check.ts';
 import * as instructions from './commands/instructions.ts';
 import * as plan from './commands/plan.ts';
 import * as review from './commands/review.ts';
+import * as suggest from './commands/suggest.ts';
 // Imported, not read from disk: the build copies it next to the compiled
 // code, where a path relative to this file would no longer reach it.
 import manifest from '../package.json' with { type: 'json' };
@@ -27,7 +28,7 @@ export type Command = {
   handler: (args: never) => ExitCode | Promise<ExitCode>;
 };
 
-const defaultCommands: Command[] = [plan, apply, instructions, review, check];
+const defaultCommands: Command[] = [plan, apply, instructions, review, suggest, check];
 
 /**
  * Testable entry point: parses `argv`, writes to `io`, returns the contract

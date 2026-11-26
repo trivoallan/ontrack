@@ -103,6 +103,12 @@ export const reviewDocument = document('review', {
   prompt: text.describe('The prompt, as the text form prints it; null for `none`.'),
 });
 
+export const suggestDocument = document('suggest', {
+  adrs: z.array(adr).describe('The ADRs the repository holds, in reference order.'),
+  new: z.array(z.strictObject({ path: z.string(), title: text })).describe('The ADRs its tracks would import.'),
+  prompt: z.string().describe('The prompt, as the text form prints it.'),
+});
+
 export const errorDocument = document('error', {
   error: z.strictObject({
     code: text.describe('The code of the error; null for a failure ontrack did not foresee.'),
@@ -116,6 +122,7 @@ export type ApplyDocument = z.infer<typeof applyDocument>;
 export type CheckDocument = z.infer<typeof checkDocument>;
 export type InstructionsDocument = z.infer<typeof instructionsDocument>;
 export type ReviewDocument = z.infer<typeof reviewDocument>;
+export type SuggestDocument = z.infer<typeof suggestDocument>;
 export type ErrorDocument = z.infer<typeof errorDocument>;
 
 /** The documents, by the name of their schema file: `schema/<name>.schema.json`. */
@@ -125,6 +132,7 @@ export const documents = {
   check: { model: checkDocument, title: 'What `ontrack check --json` prints' },
   instructions: { model: instructionsDocument, title: 'What `ontrack instructions --json` prints' },
   review: { model: reviewDocument, title: 'What `ontrack review --json` prints' },
+  suggest: { model: suggestDocument, title: 'What `ontrack suggest --json` prints' },
   error: { model: errorDocument, title: 'What any ontrack command prints on standard error when it fails under `--json`' },
 };
 
