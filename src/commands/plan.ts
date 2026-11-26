@@ -1,6 +1,7 @@
 import type { Argv } from 'yargs';
 import { agentsPending, agentsReport, agentsStatus } from '../agents.ts';
-import { buildPlan, formatPlan, hasPendingChanges, OWN } from '../plan.ts';
+import { unresolvedSupersedes } from '../instructions.ts';
+import { buildPlan, formatPlan, formatUnresolved, hasPendingChanges, OWN } from '../plan.ts';
 import type { Io } from '../cli.ts';
 import { schemaOf } from '../documents.ts';
 import type { PlanDocument } from '../documents.ts';
@@ -15,14 +16,16 @@ export const builder = (y: Argv) =>
 export function handler({ io, all, json }: { io: Io; all: boolean; json: boolean }): number {
   const root = io.cwd();
   const plan = buildPlan(root);
+  const unresolved = unresolvedSupersedes(root);
   const agents = agentsStatus(root);
-  const pending = hasPendingChanges(plan) || agentsPending(agents);
+  const pending = hasPendingChanges(plan) || unresolved.length > 0 || agentsPending(agents);
   if (json) {
-    const document: PlanDocument = { $schema: schemaOf('plan'), tracks: planJson(plan), agents: agentsReport(agents), pending };
+    const document: PlanDocument = { $schema: schemaOf('plan'), tracks: planJson(plan), unresolved, agents: agentsReport(agents), pending };
     printJson(io.stdout, document);
     return pending ? 2 : 0;
   }
-  io.stdout.write(formatPlan(plan, { all }) + agentsReport(agents).map((l) => `${l}\n`).join(''));
+  const lines = [...formatUnresolved(unresolved), ...agentsReport(agents)];
+  io.stdout.write(formatPlan(plan, { all }) + lines.map((l) => `${l}\n`).join(''));
   // On stderr, so that stdout keeps its documented format (as apply's `next:`).
   if (plan.every((t) => t.namespace === OWN)) {
     io.stderr.write('next: install a track\n  npm i -D <alias>@npm:<track-package>\n');

@@ -483,3 +483,45 @@ test('one folder for two tracks: plan fails and names both', async () => {
   assert.equal(r.code, 1);
   assert.match(r.stderr, /docs\/adr\/old\/.*"one" and "two"/);
 });
+
+// supersedes: entries that designate no ADR
+
+const decision = (id: string, supersedes: string) =>
+  ['---', `adr: ${id}`, 'status: accepted', `supersedes: [${supersedes}]`, '---', '', 'Body.', ''].join('\n');
+
+test('a supersedes entry that designates no ADR is reported, and needs a human', async () => {
+  const root = makeTree({
+    'package.json': '{}',
+    'docs/adr/local/ADR-0001-old.md': decision('ADR-0001', ''),
+    'docs/adr/local/ADR-0002-new.md': decision('ADR-0002', 'ADR-0001-old, ADR-0001'),
+  });
+  const r = await plan(root);
+  assert.equal(
+    r.stdout,
+    'no track found\nsupersedes: 1 reference to no ADR\n  unresolved    local/ADR-0002-new supersedes ADR-0001-old\n',
+  );
+  assert.equal(r.code, 2);
+  const json = await plan(root, '--json');
+  assert.deepEqual(JSON.parse(json.stdout).unresolved, [{ ref: 'local/ADR-0002-new', name: 'ADR-0001-old' }]);
+  assert.equal(json.code, 2);
+});
+
+test('supersedes entries that all designate an ADR add nothing', async () => {
+  const root = makeTree({
+    'package.json': '{}',
+    'docs/adr/local/ADR-0001-old.md': decision('ADR-0001', ''),
+    'docs/adr/local/ADR-0002-new.md': decision('ADR-0002', 'ADR-0001, local/ADR-0001'),
+  });
+  const r = await plan(root);
+  assert.equal(r.stdout, 'no track found\n');
+  assert.equal(r.code, 0);
+});
+
+test('ADRs that cannot be read leave the report to AGENTS.md', async () => {
+  const root = makeTree({
+    'package.json': '{}',
+    'docs/adr/ADR-0002-new.md': decision('ADR-0002', 'ADR-0009'),
+    'docs/adr/local/ADR-0002-new.md': decision('ADR-0002', 'ADR-0009'),
+  });
+  assert.doesNotMatch((await plan(root)).stdout, /unresolved/);
+});

@@ -48,7 +48,11 @@ const agents = z.array(z.string()).describe('The lines about AGENTS.md, as the t
 const pending = z.boolean().describe('True when the exit code is 2.');
 const link = z.strictObject({ file: z.string(), line: z.number(), old: z.string(), new: z.string() });
 
-export const planDocument = document('plan', { tracks, agents, pending });
+const unresolved = z
+  .array(z.strictObject({ ref: z.string().describe('The ADR that holds the entry.'), name: z.string().describe('The entry, as written.') }))
+  .describe('The `supersedes:` entries of accepted ADRs that designate no ADR.');
+
+export const planDocument = document('plan', { tracks, unresolved, agents, pending });
 
 export const applyDocument = document('apply', {
   dryRun: z.boolean(),

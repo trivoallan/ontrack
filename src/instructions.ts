@@ -168,12 +168,36 @@ export function supersededBy(adrs: Adr[]): Map<Adr, Adr> {
   const superseded = new Map<Adr, Adr>();
   for (const adr of adrs) {
     for (const name of adr.supersedes) {
-      const slash = name.indexOf('/');
-      const [ns, id] = slash < 0 ? [adr.ns, name] : [name.slice(0, slash), name.slice(slash + 1)];
-      for (const other of adrs) if (other !== adr && other.ns === ns && other.id === id) superseded.set(other, adr);
+      for (const other of supersedable(adrs, adr, name)) superseded.set(other, adr);
     }
   }
   return superseded;
+}
+
+// The ADRs other than `adr` that `name`, one of its `supersedes:` entries, designates.
+function supersedable(adrs: Adr[], adr: Adr, name: string): Adr[] {
+  const slash = name.indexOf('/');
+  const [ns, id] = slash < 0 ? [adr.ns, name] : [name.slice(0, slash), name.slice(slash + 1)];
+  return adrs.filter((other) => other !== adr && other.ns === ns && other.id === id);
+}
+
+/** A `supersedes:` entry of an `accepted` ADR that designates no ADR. */
+export type Unresolved = { ref: string; name: string };
+
+/**
+ * The `supersedes:` entries that designate no ADR, sorted by reference. Empty
+ * when the ADRs cannot be read: `plan` reports that through AGENTS.md.
+ */
+export function unresolvedSupersedes(root: string): Unresolved[] {
+  let adrs: Adr[];
+  try {
+    adrs = readAdrs(root);
+  } catch {
+    return [];
+  }
+  return adrs
+    .flatMap((adr) => adr.supersedes.filter((name) => supersedable(adrs, adr, name).length === 0).map((name) => ({ ref: adr.ref, name })))
+    .sort((a, b) => a.ref.localeCompare(b.ref));
 }
 
 // Resolves supersession and trait conflicts once for instructions and check.
