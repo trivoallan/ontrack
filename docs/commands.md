@@ -3,7 +3,7 @@ title: Commands
 description: Every ontrack command, with its options, what it reads and writes, and its exit codes.
 ---
 
-ontrack has five commands. Only `apply` writes to the repository.
+ontrack has six commands. Only `apply` writes to the repository.
 
 | Command | What it does | Writes |
 | --- | --- | --- |
@@ -12,6 +12,7 @@ ontrack has five commands. Only `apply` writes to the repository.
 | [`instructions`](#ontrack-instructions) | Prints the decided traits as the instructions block of `AGENTS.md` | Nothing |
 | [`plan`](#ontrack-plan) | Shows what importing the tracks would change | Nothing |
 | [`review`](#ontrack-review-adr) | Prints a prompt asking a coding agent to import the new ADRs and rule on them | Nothing |
+| [`suggest`](#ontrack-suggest) | Prints a prompt asking a coding agent to find the decisions the repository never recorded | Nothing |
 
 The files these commands read and write are described in
 [File formats](file-formats.md).
@@ -78,6 +79,7 @@ the package under `schema/`:
 | `check --json` | [`schema/check.schema.json`](https://github.com/trivoallan/ontrack/blob/main/schema/check.schema.json) |
 | `instructions --json` | [`schema/instructions.schema.json`](https://github.com/trivoallan/ontrack/blob/main/schema/instructions.schema.json) |
 | `review --json` | [`schema/review.schema.json`](https://github.com/trivoallan/ontrack/blob/main/schema/review.schema.json) |
+| `suggest --json` | [`schema/suggest.schema.json`](https://github.com/trivoallan/ontrack/blob/main/schema/suggest.schema.json) |
 | An error | [`schema/error.schema.json`](https://github.com/trivoallan/ontrack/blob/main/schema/error.schema.json) |
 
 A validator reads one from
@@ -163,6 +165,14 @@ same way:
 | `kind` | `import`, `sequence`, `review`, `revision`, `revisions` or `supersession`: which prompt; `none` when there is nothing to review |
 | `adrs` | The ADRs the prompt names. For `import`, `{ "path", "title" }` of each new ADR; else the ADR of the repository, with `revision` (`{ "from", "to" }`) for `revision` and `revisions` |
 | `prompt` | The prompt, as the text form prints it; `null` for `none` |
+
+### `suggest --json`
+
+| Key | Value |
+| --- | --- |
+| `adrs` | The ADRs the repository holds |
+| `new` | `{ "path", "title" }` of each ADR its tracks would import |
+| `prompt` | The prompt, as the text form prints it |
 
 ### An error, with `--json`
 
@@ -656,7 +666,7 @@ It is `accepted`: a decision this repository has taken, whose text is frozen. Ch
 2. Establish what changes in the decision; ask the user when they have not said. Cite the file or command output that supports the change: what moved in this repository since the decision was taken, or what the decision never matched. If you find nothing, say so in one line.
 3. List every key under its `traits:`. For each one, propose the value it keeps or the value it takes, with the evidence for every change. Leave no key out: a key the new ADR omits is no longer decided.
 4. When it has a `check:` command, propose to keep it, change it or drop it, and say why.
-5. Present the proposal: the new ADR's file name, in `docs/adr/local/` and numbered after the ADRs of that directory and the repository's own ADRs still placed directly in `docs/adr/`, from 0001 when there is none; its title; one line per trait key with its value; the check; and the reason for the change. Then stop and ask for the user's agreement, with a question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees.
+5. Present the proposal: the new ADR's file name, in `docs/adr/local/` and numbered after the highest number ever used in that directory, by a file there or one the git history shows deleted, and after the repository's own ADRs still placed directly in `docs/adr/`, from 0001 when there is none; its title; one line per trait key with its value; the check; and the reason for the change. Then stop and ask for the user's agreement, with a question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees.
 6. Once the user agrees: write the new ADR in `docs/adr/local/`, in the format the repository's rules prescribe, with `status: accepted`, `supersedes: [trivoallan/ADR-0001]` and the traits; refer to the superseded ADR for context instead of restating it. Mark the superseded ADR only as the repository's rules spell out; when they do not say what to write in it, leave its file untouched. Then run `npx ontrack apply` to update AGENTS.md.
 
 Once the review ends, whether every ADR is ruled or the user stops, list the rulings this repository does not follow yet: a value its code, configuration or tooling does not match, or a tool the ruling names that is not set up. A ruling is identified by its ADR's reference without the slug, in brackets, and its trait key, as in `[trivoallan/ADR-0015] secrets.guard`. The tracker is the one named by the decided `tracking` trait in AGENTS.md. Before proposing, list the items in that tracker that carry the label `ontrack`, open and closed: propose nothing for a ruling whose identifier starts the title of one of those items, and say in one line which closed items name a ruling this repository still does not follow. When you cannot list the tracker's items, propose every ruling and say that duplicates were not checked. For each ruling left, propose a tracking item: its title starts with the ruling's identifier, as in `[trivoallan/ADR-0015] secrets.guard: install gitleaks`, and it names the ADR it serves. Create in the tracker (`tracking.tool`, in `tracking.project`) only the items the user agrees to, asked with a question tool such as `AskUserQuestion` when you have one, each with the label `ontrack`, creating the label first when the tracker requires it. When no `tracking` trait is decided, or `tracking.tool` is `none`, give the list in your reply and create nothing.
@@ -743,5 +753,56 @@ Import the architecture decision records this repository does not hold yet, then
 - To rule again, the agent replaces your copy with the track's, which carries the new `revision:`, and writes the ruling in it. `plan` then reports the ADR as unchanged.
 - `review` never writes a file and makes no network call. Two decided ADRs sharing a trait key do not stop it.
 - It exits with `2` when it prints a prompt, because a ruling is pending. With no new, no `proposed` and no revised ADR it exits with `0`, says so on standard error and prints nothing, so that no agent receives that sentence as a prompt. An unknown or ambiguous name, a `rejected` ADR, or one already superseded, is an error, with `1`, unless the ADR is revised.
+
+Any change to this prompt goes through this page first.
+
+## `ontrack suggest`
+
+Prints a prompt that asks a coding agent to find the decisions this
+repository made and never recorded, and to record the ones you agree to.
+Run it once, when the repository adopts ontrack. From then on, a change
+records its own decisions. The guide
+[Record the decisions you never wrote down](record-the-decisions-you-never-wrote-down.md)
+takes you through it. It never writes a file and makes no network call.
+
+```bash
+claude "$(npx ontrack suggest)"
+```
+
+**Exit code.** Always `2`, because there is always a prompt to follow.
+
+### `suggest` prompt contract
+
+ontrack does not read the repository itself: the agent does, and ontrack
+gives it what only ontrack holds, namely the ADRs here and those the tracks
+would import (see local/ADR-0029). With one ADR here and one to import, the
+prompt is:
+
+~~~
+Audit this repository for the decisions it holds and has not recorded as architecture decision records, then record the ones the user agrees to. This is done once, when the repository adopts ontrack: a decision taken from now on is recorded by the change that takes it.
+
+The repository holds these ADRs:
+
+- `docs/adr/local/ADR-0001-release.md` (Release), accepted
+
+Its tracks would import these ADRs:
+
+- `docs/adr/platform/ADR-0006-commits.md` (Commits)
+
+A decision one of them covers is already recorded, or awaits a ruling: do not record it again.
+
+1. Read the rules of this repository on recording decisions, in AGENTS.md and in the ADR they come from. Write nothing yet.
+2. Look for the decisions this repository made, in this order of weight: review comments a maintainer repeats on pull requests; reversals in the git history, where a dependency, a tool or a pattern was replaced by another; rules written by hand in AGENTS.md or CLAUDE.md that no ADR backs; design notes and change proposals, archived ones included, where a choice was argued; then configuration and dependencies, which show what is, not what was chosen. When the forge cannot be read, or holds no review comment, say so in one line and go on with the other sources.
+3. Keep a candidate only when a credible alternative exists, one an agent or a newcomer could take instead. A fact with no alternative is not a decision.
+4. Drop a candidate that an `accepted` ADR in force already covers. When the ADR that covers it is `proposed`, or among the ADRs to import, drop it and say that `npx ontrack review` rules it. An ADR that only mentions a fact in passing does not cover it.
+5. Merge into one the candidates a single decision explains. Keep at most five candidates, the weightiest first. For each: a title, the decision in one sentence, the alternative it rules out, the traits that state it (keys under a top-level key that no ADR in force uses), a check command when one can verify it, and its evidence, each piece cited as a file and line, a commit, or a review comment. When none is left, say so and stop.
+6. Present the candidates, with their traits and checks and the file name each new ADR would take, in `docs/adr/local/` and numbered after the highest number ever used in that directory, by a file there or one the git history shows deleted, and after the repository's own ADRs still placed directly in `docs/adr/`, from 0001 when there is none. Then stop and ask the user which ones to record, with a question tool such as `AskUserQuestion` when you have one. Write nothing until the user agrees.
+7. For each candidate the user agrees to: write the new ADR in `docs/adr/local/`, in the format the repository's rules prescribe, with `status: accepted`, `supersedes: []`, its traits under `traits:` and its check under `check:` when it has one, its context drawn from the evidence. Then run `npx ontrack apply` to update AGENTS.md: an ADR without traits does not reach it.
+~~~
+
+- The ADRs here are those of `instructions`, in reference order, each with its path, its title when it has one, and its status. The ADRs to import are those `plan` reports as `new`, by the path `apply` would give them. An empty list is one line: "The repository holds no ADR.", "Its tracks would import no ADR.".
+- When the tracks cannot be read (no `package.json`, a dependency not installed), there is no ADR to import, and no error.
+- At most five candidates: run `suggest` again for the next ones.
+- The prompt names no convention, tool or value of its own: it is fixed text, paths, titles and statuses.
 
 Any change to this prompt goes through this page first.

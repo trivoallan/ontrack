@@ -26,6 +26,7 @@ and does not repeat them.
 | `ontrack apply` | do what `plan` reports, and keep the instructions block of `AGENTS.md` current | [apply](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/apply/spec.md), [agents-file](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/agents-file/spec.md) |
 | `ontrack instructions` | print the decided traits as the instructions block | [instructions](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/instructions/spec.md) |
 | `ontrack review` | print a prompt asking a coding agent to rule proposed ADRs, or to supersede an accepted one | [review](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/review/spec.md) |
+| `ontrack suggest` | print a prompt asking a coding agent to find the decisions the repository never recorded, once, when it adopts ontrack | [suggest](https://github.com/trivoallan/ontrack/blob/main/openspec/specs/suggest/spec.md) |
 | `ontrack check` | run the check command each decided ADR declares | [output contract](../../commands.md#check-output-contract) |
 
 The entry point and the exit codes every command shares are specified in

@@ -23,6 +23,7 @@ model {
       apply = module "commands/apply"
       instructions = module "commands/instructions"
       review = module "commands/review"
+      suggest = module "commands/suggest"
       check = module "commands/check"
     }
 
@@ -53,6 +54,9 @@ model {
     review = module "review" {
       description "Formats the prompts that ask an agent to rule or supersede"
     }
+    suggest = module "suggest" {
+      description "Formats the prompt that asks an agent to find the decisions never recorded"
+    }
     check = module "check" {
       description "Runs the check command of each ADR in force"
     }
@@ -62,11 +66,13 @@ model {
     cli -> commands.apply "dispatches to"
     cli -> commands.instructions "dispatches to"
     cli -> commands.review "dispatches to"
+    cli -> commands.suggest "dispatches to"
     cli -> commands.check "dispatches to"
     commands.plan -> cli "Io type"
     commands.apply -> cli "Io type"
     commands.instructions -> cli "Io type"
     commands.review -> cli "Io type"
+    commands.suggest -> cli "Io type"
     commands.check -> cli "Io type"
 
     // Imports: commands to domain modules
@@ -78,6 +84,7 @@ model {
     commands.apply -> agents "agentsStatus, writeAgents"
     commands.instructions -> instructions "buildInstructions"
     commands.review -> review "selectAdr, pendingAdrs"
+    commands.suggest -> suggest "suggestInputs, formatSuggest"
     commands.check -> check "runChecks"
 
     // Imports: between domain modules
@@ -90,6 +97,9 @@ model {
     instructions -> revision "frontmatter, readTitle"
     agents -> instructions "buildInstructions"
     review -> instructions "readAdrs"
+    review -> planner "buildPlan"
+    suggest -> instructions "readAdrs"
+    suggest -> review "newAdrs, NUMBERING"
     check -> instructions "adrsInForce"
     tracks -> schemas "validates with"
     revision -> schemas "validates with"
@@ -130,6 +140,7 @@ model {
   npm -> installed "installs"
   npm -> project.manifest "records dependencies in"
   ontrack.review -> agent "prints a prompt for"
+  ontrack.suggest -> agent "prints the audit prompt for"
   agent -> project.agentsFile "reads the instructions in"
   agent -> project.adrs "writes rulings in"
 

@@ -22,7 +22,7 @@ of the output, and leave the ADR actions untouched. Specified in
 
 ## Read-only by default, check before write
 
-`plan`, `instructions`, `review` and `check` write no file. `apply` is the
+`plan`, `instructions`, `review`, `suggest` and `check` write no file. `apply` is the
 only command that writes, and it separates deciding from doing: all actions
 are computed and checked first, then executed. No command opens a network
 connection. Specified in
@@ -68,7 +68,7 @@ What each command prints is a format that CI jobs and agents rely on. It is
 documented in the [commands reference](../../commands.md)
 before it changes, and each module that formats output is a pure function
 from data to a string (`formatPlan`, `formatApply`, `formatInstructions`,
-`formatChecks`, and the three prompts of `review`), tested on that string.
+`formatChecks`, the prompts of `review`, and `formatSuggest`), tested on that string.
 
 ## Testing
 
