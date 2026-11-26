@@ -25,7 +25,7 @@
 - [x] 4.3 `docs/features.md`: a row for recording a decision; `docs/how-it-works.md`: a paragraph after the one on `suggest`; `docs/tutorial.mdx`: a `LinkCard` to the guide, and the quoted instructions block with the new sentence; `docs/record-the-decisions-you-never-wrote-down.md`: point to the guide for the decisions taken from now on
 - [x] 4.4 `README.md`: the `npx ontrack decide` usage line
 - [x] 4.5 Architecture: `decide` in the commands table of `docs/architecture/arc42/01-introduction-and-goals.md`, in the coding-agent row of `03-context-and-scope.mdx`, in `04-solution-strategy.md`, `05-building-block-view.mdx`, `06-runtime-view.md` and `08-cross-cutting-concepts.md` wherever `suggest` is named; and the `commands/decide` and `decide` modules with their relations in `docs/architecture/model/model.c4`
-- [ ] 4.6 Run `npm run build` in `site/`: the build and the link check pass
+- [x] 4.6 Run `npm run build` in `site/`: the build and the link check pass
 
 ## 5. Repository
 
@@ -35,4 +35,4 @@
 
 - [x] 6.1 `npm test` passes with coverage above the target, `npx tsc` passes
 - [x] 6.2 `node bin/ontrack.ts decide` on this repository prints the prompt with the ADR lists, and `plan` reports nothing after `apply`
-- [ ] 6.3 Archive the change in its pull request (`openspec archive add-decide-command`), as the ADR-0016 check requires
+- [x] 6.3 Archive the change in its pull request (`openspec archive add-decide-command`), as the ADR-0016 check requires
