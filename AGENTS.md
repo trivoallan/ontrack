@@ -87,6 +87,7 @@ architecture:
 forge:
   gate: blocking
   audit: zizmor
+  integration: up-to-date
 ```
 
 ### Delivery (engineering/ADR-0012-delivery)
@@ -205,5 +206,9 @@ admission:
   approver: person
   install_scripts: ignored
 ```
+
+### Not yet decided
+
+- Infrastructure (engineering/ADR-0027-infrastructure)
 
 <!-- ontrack:end -->
