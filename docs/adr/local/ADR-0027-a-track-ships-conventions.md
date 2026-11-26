@@ -5,7 +5,7 @@ title: A track ships conventions
 status: accepted
 date: 2026-11-16
 authors: [Tristan Rivoallan]
-supersedes: [ADR-0022-a-package-of-questions-is-called-a-track]
+supersedes: [ADR-0022]
 ---
 
 # A track ships conventions
