@@ -1,7 +1,7 @@
 <!-- ontrack:begin -->
 ## Project instructions (ontrack)
 
-When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output. When asked to record a new decision, run `npx ontrack decide` and follow its output.
+When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output.
 
 ### Localization (engineering/ADR-0002-localization)
 
@@ -87,6 +87,7 @@ architecture:
 forge:
   gate: blocking
   audit: zizmor
+  integration: up-to-date
 ```
 
 ### Delivery (engineering/ADR-0012-delivery)
@@ -205,5 +206,9 @@ admission:
   approver: person
   install_scripts: ignored
 ```
+
+### Not yet decided
+
+- Infrastructure (engineering/ADR-0027-infrastructure)
 
 <!-- ontrack:end -->
