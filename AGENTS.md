@@ -1,7 +1,7 @@
 <!-- ontrack:begin -->
 ## Project instructions (ontrack)
 
-When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output.
+When asked to review, rule on or supersede an ADR, run `npx ontrack review [adr]` and follow its output. When asked to record a new decision, run `npx ontrack decide` and follow its output.
 
 ### Localization (engineering/ADR-0002-localization)
 
