@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.7.0](https://github.com/trivoallan/ontrack/compare/v0.6.0...v0.7.0) (2026-11-26)
+
+
+### Features
+
+* **cli:** add ontrack decide, to record a new decision with the user ([#245](https://github.com/trivoallan/ontrack/issues/245)) ([92d806c](https://github.com/trivoallan/ontrack/commit/92d806cf81ba1947bffb11ac4ac4ffc6894f8d07))
+* **cli:** add ontrack suggest, an audit of the decisions never recorded ([#243](https://github.com/trivoallan/ontrack/issues/243)) ([278f26a](https://github.com/trivoallan/ontrack/commit/278f26a922292d95201f1b3b355d14a5c92789f4))
+* **plan:** report supersedes entries that designate no ADR ([#241](https://github.com/trivoallan/ontrack/issues/241)) ([f3ec014](https://github.com/trivoallan/ontrack/commit/f3ec014fddc937ee9d870258441a0ae01df88aab))
+
+
+### Bug Fixes
+
+* **governance:** make local/ADR-0027 supersede ADR-0022 ([#240](https://github.com/trivoallan/ontrack/issues/240)) ([a03568b](https://github.com/trivoallan/ontrack/commit/a03568b50e6e20932ee3806f846d8562bb01a269))
+
 ## [0.6.0](https://github.com/trivoallan/ontrack/compare/v0.5.0...v0.6.0) (2026-11-16)
 
 
