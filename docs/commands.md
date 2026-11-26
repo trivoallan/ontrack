@@ -120,6 +120,7 @@ same way:
 | Key | Value |
 | --- | --- |
 | `tracks` | One entry per track, then one for `local` when your own ADRs have to move: `namespace`, `adrs` (every ADR of the track, the unchanged ones too), `rename` (`{ "from", "to" }`, two folders, or `null`), `migration` (the files to move) |
+| `unresolved` | One entry per `supersedes:` entry that designates no ADR: `ref` (the ADR that holds it), `name` (the entry, as written) |
 | `agents` | The [lines about `AGENTS.md`](error-messages.md#lines-about-agentsmd), as the text prints them |
 | `pending` | `true` when the exit code is `2` |
 
@@ -453,11 +454,11 @@ Each ADR that is not up to date falls in one category:
 | `check` | Up to date, but the track's `check:` line differs from yours |
 
 `plan` also reports files to move from a flat `docs/adr/` layout: a track's
-ADRs to `docs/adr/<alias>/`, your own to `docs/adr/local/`. It reports the state of the instructions block in `AGENTS.md`
+ADRs to `docs/adr/<alias>/`, your own to `docs/adr/local/`. It reports the `supersedes:` entries that designate no ADR, and the state of the instructions block in `AGENTS.md`
 (`missing` or `out of date`).
 
 **Exit code.** `0` when every ADR is unchanged, or when there is no track at
-all. `2` for any other category, a migration, a rename, or a instructions block to write.
+all. `2` for any other category, a migration, a rename, a `supersedes:` entry that designates no ADR, or a instructions block to write.
 
 **Options.**
 
@@ -515,6 +516,13 @@ migration: 5 files docs/adr/ → docs/adr/platform/
 - Your own ADRs live in `docs/adr/local/`. Those still placed directly in `docs/adr/` (the root files no track ships) are shown the same way, after the last track: `migration: <n> file(s) docs/adr/ → docs/adr/local/`, then one `move` line per file.
 - With `--all`, the unchanged ADRs get a line too, so every ADR has one, sorted by name whatever its category. Each ADR line then carries a status between the category and the name: the category in its 12-character column, two spaces, the verdict in a 10-character column, two spaces, then the name and the rest of the line as above. The summary line, the `- ` and `+ ` lines, the migration lines and the exit code do not change.
 - The status is the `status:` of your copy, never the track's: the first `status:` line at column zero in its frontmatter, without a trailing `# comment`. It is `-` when you have no copy yet (a `new` ADR), when the copy has no recognizable frontmatter, or when it states no status.
+- After the last track, the `supersedes:` entries of your `accepted` ADRs that designate no ADR: `supersedes: <n> reference(s) to no ADR`, then one line per entry, sorted by reference: two spaces, `unresolved` in the 12-character column, two spaces, the reference of the ADR that holds it, ` supersedes `, and the entry as written. An entry designates an ADR by its `adr:` identifier, or else its file name without `.md`, prefixed by `<namespace>/` when it is not in the same folder: `ADR-0022` or `local/ADR-0022`, not `ADR-0022-a-package-of-questions-is-called-a-track`. Each one counts as a change to make: exit code `2`.
+
+  ```
+  supersedes: 1 reference to no ADR
+    unresolved    local/ADR-0027-a-track-ships-conventions supersedes ADR-0022-a-package-of-questions-is-called-a-track
+  ```
+
 - When there is nothing to do, one line per track (`platform: 14 unchanged`), and the exit code is `0`. Any other category, or a migration, gives `2`.
 - With no track at all, `plan` prints `no track found` and exits with `0`, or prints the migration of your own ADRs after that line and exits with `2`. It then names the next step on standard error, so that standard output keeps this format: `next: install a track`, then `  npm i -D <alias>@npm:<track-package>`.
 

@@ -195,3 +195,13 @@ export function formatPlan(plan: Plan, { all = false } = {}): string {
   }
   return `${lines.join('\n')}\n`;
 }
+
+/** The lines on the `supersedes:` entries that designate no ADR (see docs/commands.md); none when there is none. */
+export function formatUnresolved(unresolved: { ref: string; name: string }[]): string[] {
+  if (unresolved.length === 0) return [];
+  const n = unresolved.length;
+  return [
+    `supersedes: ${n} reference${n === 1 ? '' : 's'} to no ADR`,
+    ...unresolved.map(({ ref, name }) => row('unresolved', `${ref} supersedes ${name}`)),
+  ];
+}

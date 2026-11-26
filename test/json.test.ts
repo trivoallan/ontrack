@@ -45,7 +45,7 @@ test('plan --json: every ADR of every track, the unchanged ones too, and the exi
   assert.equal(r.code, 2);
   assert.equal(r.stderr, '');
   const doc = r.json();
-  assert.deepEqual(Object.keys(doc), ['$schema', 'tracks', 'agents', 'pending']);
+  assert.deepEqual(Object.keys(doc), ['$schema', 'tracks', 'unresolved', 'agents', 'pending']);
   assert.equal(doc.$schema, 'https://raw.githubusercontent.com/trivoallan/ontrack/main/schema/plan.schema.json');
   assert.deepEqual(doc.tracks, [
     {
@@ -65,7 +65,7 @@ test('plan --json: every ADR of every track, the unchanged ones too, and the exi
 
 test('plan --json with no track: no track, and no hint on standard error', async () => {
   const r = await run(makeTree({ 'package.json': '{}' }), ['plan', '--json']);
-  assert.deepEqual(r.json(), { $schema: schemaOf('plan'), tracks: [], agents: [], pending: false });
+  assert.deepEqual(r.json(), { $schema: schemaOf('plan'), tracks: [], unresolved: [], agents: [], pending: false });
   assert.equal(r.stderr, '');
   assert.equal(r.code, 0);
 });
@@ -236,10 +236,10 @@ test('schemas: each published file is the one derived from its model, and schema
 test('schemas: every key is required, and a key a later version adds is let through', async () => {
   const { documentJsonSchema } = await import('../src/documents.ts');
   const schema = documentJsonSchema('plan') as any;
-  assert.deepEqual(schema.required, ['$schema', 'tracks', 'agents', 'pending']);
+  assert.deepEqual(schema.required, ['$schema', 'tracks', 'unresolved', 'agents', 'pending']);
   assert.doesNotMatch(JSON.stringify(schema), /additionalProperties/);
   // The model itself refuses the unknown key: that is what the tests above rely on.
-  assert.equal(documents.plan.model.safeParse({ $schema: schemaOf('plan'), tracks: [], agents: [], pending: false, extra: 1 }).success, false);
+  assert.equal(documents.plan.model.safeParse({ $schema: schemaOf('plan'), tracks: [], unresolved: [], agents: [], pending: false, extra: 1 }).success, false);
 });
 
 test('$schema: a document names its own schema, whose $id is that address, and no other schema takes it', async () => {

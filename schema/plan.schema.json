@@ -159,6 +159,27 @@
         ]
       }
     },
+    "unresolved": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ref": {
+            "type": "string",
+            "description": "The ADR that holds the entry."
+          },
+          "name": {
+            "type": "string",
+            "description": "The entry, as written."
+          }
+        },
+        "required": [
+          "ref",
+          "name"
+        ]
+      },
+      "description": "The `supersedes:` entries of accepted ADRs that designate no ADR."
+    },
     "agents": {
       "type": "array",
       "items": {
@@ -174,6 +195,7 @@
   "required": [
     "$schema",
     "tracks",
+    "unresolved",
     "agents",
     "pending"
   ]

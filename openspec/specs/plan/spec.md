@@ -141,7 +141,7 @@ When the project has no track, `plan` SHALL print `no track found`, and SHALL wr
 - **THEN** the output is `engineering: 1 new, 26 unchanged`, the `new` line, then `rename: docs/adr/trivoallan/ → docs/adr/engineering/`
 
 ### Requirement: Exit code
-`plan` SHALL exit with `2` when any track has a `new`, `revised`, `removed`, `undetermined`, `unreadable` or `check` ADR, or a migration, or when the `AGENTS.md` instructions block is `missing`, `out of date` or `skipped` (see `agents-file`); with `0` otherwise; and with `1` when tracks cannot be discovered or a track's ADR directory cannot be read.
+`plan` SHALL exit with `2` when any track has a `new`, `revised`, `removed`, `undetermined`, `unreadable` or `check` ADR, or a migration, or when a `supersedes:` entry designates no ADR, or when the `AGENTS.md` instructions block is `missing`, `out of date` or `skipped` (see `agents-file`); with `0` otherwise; and with `1` when tracks cannot be discovered or a track's ADR directory cannot be read.
 
 #### Scenario: Undetermined only
 - **WHEN** the only finding is an imported ADR with `revision: 0`
@@ -158,6 +158,10 @@ When the project has no track, `plan` SHALL print `no track found`, and SHALL wr
 
 #### Scenario: Check only
 - **WHEN** the only finding is a `check` ADR
+- **THEN** the exit code is `2`
+
+#### Scenario: Unresolved supersedes only
+- **WHEN** the only finding is a `supersedes:` entry that designates no ADR
 - **THEN** the exit code is `2`
 
 ### Requirement: Full listing
@@ -268,3 +272,15 @@ When at least one `*.md` file directly under `docs/adr/` matches no track ADR, `
 - **WHEN** `docs/adr/old/` and `docs/adr/older/` are orphan folders that both hold `ADR-0001-record-architecture-decisions.md`, shipped by track `engineering`, which has no folder
 - **THEN** `plan` fails with a message naming `docs/adr/old/`, `docs/adr/older/` and `engineering`
 - **AND** the exit code is `1`
+
+### Requirement: Unresolved supersedes entries
+`plan` SHALL report every `supersedes:` entry of an `accepted` ADR under `docs/adr/` that designates no ADR. An entry designates the ADRs whose `adr:` identifier, or else file name without `.md`, equals it, in the folder of the ADR that holds it, or in the namespace it names before a `/`. After the last track, `plan` SHALL print `supersedes: <n> reference(s) to no ADR`, then one line per entry, sorted by reference: two spaces, `unresolved` in a 12-character column, two spaces, the reference of the ADR that holds it, ` supersedes `, and the entry as written. When the ADRs cannot be read, `plan` SHALL print no such line.
+
+#### Scenario: An entry with a slug
+- **WHEN** `docs/adr/local/ADR-0002-new.md` is accepted with `supersedes: [ADR-0001-old]` and `docs/adr/local/ADR-0001-old.md` holds `adr: ADR-0001`
+- **THEN** `plan` prints `supersedes: 1 reference to no ADR` and `  unresolved    local/ADR-0002-new supersedes ADR-0001-old`
+- **AND** the exit code is `2`
+
+#### Scenario: Every entry resolves
+- **WHEN** every `supersedes:` entry designates an ADR
+- **THEN** `plan` prints no `supersedes:` line
